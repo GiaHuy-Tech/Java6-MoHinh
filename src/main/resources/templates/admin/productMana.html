@@ -3,65 +3,229 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mom Physic - Quản lý sản phẩm</title>
+<title>MODEL WORLD - Quản lý sản phẩm</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+
 <style>
+/* --- CẤU HÌNH MÀU SẮC & BIẾN (ĐỒNG BỘ) --- */
+:root {
+    --bg-dark: #050b14;
+    --bg-card: #0c1525;
+    --text-light: #e1e7ff;
+    --accent-cyan: #00f2ff; /* Màu Neon Cyan chính */
+    --border-color: rgba(0, 242, 255, 0.2);
+    
+    /* Font Variables */
+    --font-main: "Be Vietnam Pro", sans-serif;
+    --font-display: "Orbitron", sans-serif;
+
+    /* ĐỊNH NGHĨA HIỆU ỨNG NEON GLOW */
+    --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+}
+
 body {
-  background: linear-gradient(135deg, #150035, #2d007a);
-  color: #fff;
-  min-height: 100vh;
+    /* Background neon city */
+    background: 
+        linear-gradient(135deg, var(--bg-dark), #1a0033),
+        url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
+    color: var(--text-light);
+    min-height: 100vh;
+    font-family: var(--font-main);
+    position: relative;
+    overflow-x: hidden;
 }
+
+/* TYPOGRAPHY FIX */
+h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
+.navbar-brand { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px; }
+.navbar-brand span { color: #fff; }
+
+
+/* 🌟 NAVBAR (ĐÃ ĐỒNG BỘ) */
 .navbar {
-  background: linear-gradient(90deg, #150035, #2d007a);
-  border-bottom: 1px solid #ffd700;
+    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); 
 }
+.navbar .nav-link { 
+    color: var(--accent-cyan) !important; 
+    transition: 0.3s;
+    font-weight: 500;
+}
+.navbar .nav-link:hover {
+    color: var(--text-light) !important;
+    text-shadow: 0 0 8px var(--accent-cyan);
+}
+
+
+/* CARD & BOX STYLE */
 .card {
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 15px;
-  backdrop-filter: blur(8px);
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: 0.3s ease;
 }
-.card h6, label, th {
-  color: #ffd700;
+.card:hover {
+    box-shadow: var(--neon-box-shadow);
 }
+.card-header {
+    background-color: var(--bg-dark) !important; /* Header tối hơn */
+    border-bottom: 1px solid var(--border-color);
+    color: var(--accent-cyan) !important;
+    font-weight: 700;
+}
+
+
+/* TEXT & LABEL */
+h2, .text-neon, label, th {
+  color: var(--accent-cyan) !important;
+}
+
+/* TABLE */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.table thead { background-color: var(--bg-dark); }
+.table th { 
+    color: var(--accent-cyan); 
+    font-weight: 600; 
+    border-bottom: 1px solid var(--border-color);
+}
+.table-dark tbody tr { 
+    background-color: transparent !important;
+    border-color: rgba(255,255,255,0.05);
+}
+.table td { color: var(--text-light); vertical-align: middle; }
+.table-hover tbody tr:hover { 
+    background-color: rgba(0,242,255,0.1) !important; 
+}
+
+
+/* FORM CONTROL */
 .form-control, .form-select {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 215, 0, 0.3);
-}
-.btn-gold {
-  background: linear-gradient(90deg, #ffd700, #ffae00);
-  color: #150035;
-  font-weight: 600;
-  border: none;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  color: var(--text-light) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   transition: 0.3s;
 }
-.btn-gold:hover {
-  background: linear-gradient(90deg, #ffae00, #ffd700);
-  transform: scale(1.05);
+/* Đảm bảo option trong select vẫn hiển thị đúng trên nền tối */
+.form-select option { 
+    background-color: var(--bg-card); 
+    color: var(--text-light); 
 }
-a { text-decoration: none; }
+.form-control:focus, .form-select:focus { 
+    border-color: var(--accent-cyan); 
+    box-shadow: 0 0 5px rgba(0, 242, 255, 0.5); 
+}
+
+/* BUTTONS (Sử dụng style Neon Cyan) */
+.btn-neon-action {
+  background: transparent;
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  font-weight: 600;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+.btn-neon-action:hover {
+  background: var(--accent-cyan);
+  color: var(--bg-dark);
+  box-shadow: 0 0 15px var(--accent-cyan);
+  transform: scale(1.02);
+}
+
+/* Secondary button (Hủy) */
+.btn-secondary {
+    background-color: transparent !important;
+    border: 1px solid #6c757d;
+    color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #6c757d !important;
+    color: var(--text-light);
+    border-color: #6c757d;
+}
+
+/* Product image */
+img.rounded-3 { 
+    border-radius: 8px !important; 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    object-fit: cover;
+}
+
+/* Footer */
+.footer {
+    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
+    border-top: 1px solid var(--border-color);
+    color: rgba(255,255,255,0.85);
+    padding: 20px 0;
+}
+
+/* Badge (trạng thái) */
+.badge.bg-success { background-color: #00ff7f !important; color: #000; } /* Neon Green */
+.badge.bg-danger { background-color: #ff007f !important; color: #000; } /* Neon Pink */
+
+/* Rain effect (ĐÃ GIẢM TẦN SUẤT) */
+.rain {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+}
+.drop {
+  position: absolute;
+  width: 2px;
+  height: 15px;
+  background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,255,255,0));
+  animation: fall linear infinite;
+  opacity: 0.7;
+}
+@keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(100vh); } }
 </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark px-4 py-3">
+<nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="/">
-      <img src="https://cdn-icons-png.flaticon.com/512/1040/1040230.png" alt="logo" width="45" class="me-2">
-      <span class="fw-bold text-warning fs-4">Mom Physic</span>
+    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/stats}"> 
+        <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
+        <span class="fw-bold fs-4">MODEL WORLD</span>
     </a>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav me-3">
+        <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+      </ul>
+    </div>
   </div>
 </nav>
 
 <div class="container py-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-warning mb-0"><i class="bi bi-box-seam"></i> Quản lý sản phẩm</h2>
+    <h2 class="text-neon mb-0"><i class="bi bi-box-seam"></i> Quản lý sản phẩm</h2>
+    <a th:href="@{/stats}" class="btn btn-neon-action">
+      <i class="bi bi-arrow-left-circle me-1"></i> Về menu Admin
+    </a>
   </div>
 
-  <!-- Danh sách sản phẩm -->
   <div class="card shadow mb-5">
     <div class="card-body p-0">
       <table class="table table-dark table-hover mb-0 text-center align-middle">
@@ -70,8 +234,8 @@ a { text-decoration: none; }
             <th>ID</th>
             <th>Hình ảnh</th>
             <th>Tên sản phẩm</th>
+            <th>Danh mục</th>
             <th>Giá</th>
-            <th>Ngày tạo</th>
             <th>Trạng thái</th>
             <th>Thao tác</th>
           </tr>
@@ -79,21 +243,17 @@ a { text-decoration: none; }
         <tbody>
           <tr th:each="p : ${list}">
             <td th:text="${p.id}"></td>
-            <td><img th:src="${p.image}" width="60" class="rounded-3"></td>
+            <td><img th:src="${p.image}" width="60" height="60" class="rounded-3"></td>
             <td th:text="${p.name}"></td>
-            <td th:text="${#numbers.formatInteger(p.price, 0, 'POINT')} + ' ₫'"></td>
-            <td th:text="${#dates.format(p.createdDate, 'dd/MM/yyyy')}"></td>
+            <td th:text="${p.category != null ? p.category.name : 'Chưa chọn'}"></td>
+            <td th:text="${#numbers.formatInteger(p.price,0,'POINT')} + ' ₫'"></td>
             <td>
               <span th:if="${p.available}" class="badge bg-success">Còn hàng</span>
               <span th:if="${!p.available}" class="badge bg-danger">Hết hàng</span>
             </td>
             <td>
-              <a th:href="@{'/product-mana/edit/' + ${p.id}}" class="btn btn-sm btn-primary me-1" title="Sửa">
+              <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" class="btn btn-sm btn-neon-action me-1">
                 <i class="bi bi-pencil-square"></i>
-              </a>
-              <a th:href="@{'/product-mana/delete/' + ${p.id}}" class="btn btn-sm btn-danger" 
-                 onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')" title="Xóa">
-                <i class="bi bi-trash"></i>
               </a>
             </td>
           </tr>
@@ -102,9 +262,8 @@ a { text-decoration: none; }
     </div>
   </div>
 
-  <!-- Form thêm / sửa sản phẩm -->
   <div class="card shadow-sm">
-    <div class="card-header bg-warning text-dark fw-bold">
+    <div class="card-header">
       <i class="bi bi-plus-circle"></i> 
       <span th:text="${product.id == null ? 'Thêm sản phẩm mới' : 'Cập nhật sản phẩm'}"></span>
     </div>
@@ -113,22 +272,35 @@ a { text-decoration: none; }
             th:object="${product}" method="post">
         <input type="hidden" th:field="*{id}">
         <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label">Tên sản phẩm</label>
+          <div class="col-md-4">
+            <label class="form-label text-neon">Tên sản phẩm</label>
             <input type="text" th:field="*{name}" class="form-control" placeholder="Nhập tên sản phẩm">
-            <div class="text-danger small" th:errors="*{name}"></div>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Giá (₫)</label>
+
+          <div class="col-md-2">
+            <label class="form-label text-neon">Giá (₫)</label>
             <input type="number" th:field="*{price}" class="form-control" placeholder=">= 50000">
-            <div class="text-danger small" th:errors="*{price}"></div>
           </div>
+
           <div class="col-md-3">
-            <label class="form-label">Hình ảnh (URL)</label>
+            <label class="form-label text-neon">Hình ảnh (URL)</label>
             <input type="text" th:field="*{image}" class="form-control" placeholder="Link hình ảnh">
           </div>
+
+          <div class="col-md-3">
+            <label class="form-label text-neon">Danh mục</label>
+            <select name="categoryId" class="form-select" required>
+              <option value="" class="text-light">-- Chọn danh mục --</option>
+              <option th:each="c : ${categories}" 
+                      th:value="${c.id}" 
+                      th:text="${c.name}"
+                      th:selected="${product.category != null and product.category.id == c.id}">
+              </option>
+            </select>
+          </div>
+
           <div class="col-md-4">
-            <label class="form-label">Trạng thái</label>
+            <label class="form-label text-neon">Trạng thái</label>
             <select th:field="*{available}" class="form-select">
               <option th:value="true">Còn hàng</option>
               <option th:value="false">Hết hàng</option>
@@ -136,11 +308,11 @@ a { text-decoration: none; }
           </div>
         </div>
 
-        <button type="submit" class="btn btn-gold mt-3">
-          <i class="bi bi-check-circle"></i> 
+        <button type="submit" class="btn btn-neon-action mt-3">
+          <i class="bi bi-check-circle"></i>
           <span th:text="${product.id == null ? 'Thêm sản phẩm' : 'Cập nhật'}"></span>
         </button>
-        <a th:if="${product.id != null}" href="/product-mana" class="btn btn-secondary mt-3 ms-2">
+        <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-secondary mt-3 ms-2">
           <i class="bi bi-arrow-repeat"></i> Hủy
         </a>
       </form>
@@ -148,10 +320,26 @@ a { text-decoration: none; }
   </div>
 </div>
 
+<div class="rain" id="rain"></div>
+
 <footer class="footer text-center py-4 mt-5">
-  <small>© 2025 <span class="text-warning">Mom Physic</span> | Product Management</small>
+  <small>© 2025 <span style="color: var(--accent-cyan);">MODEL WORLD</span> | Product Management</small>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Tạo mưa neon (ĐÃ GIẢM TẦN SUẤT)
+const rain = document.getElementById('rain');
+const drops = 50; // Giảm số lượng giọt
+for(let i=0;i<drops;i++){
+  const drop = document.createElement('div');
+  drop.className = 'drop';
+  drop.style.left = Math.random() * 100 + 'vw';
+  drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
+  drop.style.animationDelay = Math.random()*10 + 's'; // Tăng thời gian delay tối đa
+  rain.appendChild(drop);
+}
+</script>
+
 </body>
 </html>

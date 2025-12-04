@@ -1,213 +1,252 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Quên mật khẩu - Mom Physic</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quên mật khẩu - Model World</title>
 
-  <style>
-    body {
-      background-color: #0d0b20;
-      color: #f5f5f5;
-      font-family: "Segoe UI", Roboto, sans-serif;
-    }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
+        :root {
+            --bg-card: rgba(12, 21, 37, 0.95);
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
+            --border-color: rgba(0, 242, 255, 0.3);
+            
+            --font-main: "Be Vietnam Pro", sans-serif;
+            --font-display: "Orbitron", sans-serif;
+        }
 
-    .text-gold {
-      color: #e6c300 !important;
-    }
+        /* --- BODY CÓ HÌNH NỀN CŨ --- */
+        body {
+            background: 
+                linear-gradient(135deg, rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.7)),
+                url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
+            color: var(--text-light);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
 
-    .border-gold {
-      border-color: #e6c300 !important;
-    }
+        /* --- SỬA LỖI FONT: Chỉ dùng Orbitron cho Logo, còn lại dùng Be Vietnam Pro --- */
+        .navbar-brand {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Các tiêu đề khác dùng font chính để không lỗi dấu */
+        h1, h2, h3, h4, .auth-title {
+            font-family: var(--font-main); 
+            font-weight: 700; /* In đậm để vẫn mạnh mẽ */
+            text-transform: uppercase;
+        }
 
-    .btn-gold {
-      background-color: #e6c300;
-      color: #150035;
-      font-weight: 500;
-      transition: 0.3s;
-    }
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            z-index: 100;
+        }
+        /* Icon logo màu xanh theo yêu cầu */
+        .navbar-brand i { color: var(--accent-cyan) !important; }
+        .navbar-brand span { color: #fff !important; }
+        
+        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; }
+        .nav-link:hover { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
 
-    .btn-gold:hover {
-      background-color: #ffde59;
-      color: #150035;
-    }
+        /* --- CONTAINER --- */
+        .wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10;
+        }
 
-    .navbar .nav-link {
-      transition: 0.3s;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-    }
+        .auth-card {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2);
+            backdrop-filter: blur(5px);
+            min-height: 500px;
+        }
 
-    .navbar .nav-link:hover {
-      color: #ffde59 !important;
-    }
+        /* LEFT SIDE - IMAGE (ĐÃ SỬA LINK ẢNH) */
+        .auth-image {
+            flex: 1;
+            /* Link ảnh mới ổn định hơn */
+            background: url('https://beegaming.com.vn/wp-content/uploads/2023/04/mo-hinh-onepiece-gia-re-beegaming-1-scaled.jpg') center/cover no-repeat;
+            position: relative;
+            display: none; 
+        }
+        .auth-image::before {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(to right, rgba(5, 11, 20, 0.3), rgba(12, 21, 37, 1));
+        }
+        @media (min-width: 768px) { .auth-image { display: block; } }
 
-    /* CARD */
-    .card {
-      background-color: #1a1735;
-      border: 1px solid #3b3486;
-      box-shadow: 0 0 15px rgba(230, 195, 0, 0.1);
-      border-radius: 12px;
-    }
+        /* RIGHT SIDE - FORM */
+        .auth-form-container {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    .card-title, h4 {
-      color: #e6c300;
-      font-weight: 600;
-    }
+        .auth-title { font-size: 1.8rem; color: #fff; margin-bottom: 10px; }
+        .auth-subtitle { color: #aab8c5; font-size: 0.9rem; margin-bottom: 30px; }
 
-    .form-control, .form-select {
-      background-color: #120f27;
-      border: 1px solid #3b3486;
-      color: #fff;
-    }
+        /* FORM ELEMENTS */
+        .form-label {
+            color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+        }
 
-    .form-control::placeholder {
-      color: #fff;
-      opacity: 0.85;
-    }
+        .form-control-custom {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            transition: 0.3s;
+        }
+        .form-control-custom:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+            color: #fff;
+        }
+        .form-control-custom::placeholder { color: rgba(255, 255, 255, 0.3); }
 
-    .form-control:focus, .form-select:focus {
-      border-color: #e6c300;
-      box-shadow: 0 0 0 0.2rem rgba(230,195,0,0.2);
-      background-color: #181534;
-      color: #fff;
-    }
+        /* BUTTON (Đã sửa font nút) */
+        .btn-auth {
+            background: var(--accent-cyan); color: #050b14; border: none; font-weight: 700;
+            padding: 12px; border-radius: 8px; width: 100%; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s; margin-top: 20px; 
+            font-family: var(--font-main); /* Dùng font Be Vietnam Pro để nút không bị lỗi dấu nếu có tiếng Việt */
+        }
+        .btn-auth:hover { background: #fff; box-shadow: 0 0 20px var(--accent-cyan); transform: translateY(-2px); }
 
-    .btn-warning {
-      background-color: #e6c300;
-      color: #150035;
-      border: none;
-      transition: 0.3s;
-      font-weight: 500;
-    }
+        /* ALERTS */
+        .text-danger { color: #ff6b6b !important; font-weight: 500; font-size: 0.9rem; }
+        .text-success { color: #5cff5c !important; font-weight: 500; font-size: 0.9rem; }
+        
+        .link-back { color: #aab8c5; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .link-back:hover { color: var(--accent-cyan); }
 
-    .btn-warning:hover {
-      background-color: #ffde59;
-      color: #150035;
-    }
+        /* FOOTER */
+        footer {
+            background-color: rgba(2, 4, 8, 0.9); border-top: 1px solid var(--border-color);
+            padding: 30px 0; color: #6c757d; margin-top: auto; z-index: 100;
+        }
 
-    a {
-      color: #e6c300;
-      text-decoration: none;
-    }
-
-    a:hover {
-      color: #ffde59;
-    }
-
-    footer {
-      background-color: #120f27;
-      border-top: 1px solid #e6c300;
-      color: #ddd;
-    }
-
-    footer h6 {
-      color: #e6c300;
-    }
-
-    footer ul li {
-      color: #bbb;
-    }
-
-    .small, .card p.small {
-      color: #fff;
-    }
-    .search-bar input::placeholder {
-	color: #bbb;
-}
-  </style>
+        /* --- HIỆU ỨNG MƯA --- */
+        .rain {
+            pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+        }
+        .drop {
+            position: absolute; width: 2px; height: 15px;
+            background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,242,255,0));
+            animation: fall linear infinite; opacity: 0.7;
+        }
+        @keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(100vh); } }
+    </style>
 </head>
-
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark px-4 py-3"
-		style="background: linear-gradient(90deg, #150035, #2d007a); border-bottom: 1px solid #e6c300;">
-		<div class="container-fluid">
-			<!-- Logo -->
-			<a class="navbar-brand d-flex align-items-center" href="/"> <img
-				src="https://cdn-icons-png.flaticon.com/512/1040/1040230.png"
-				alt="logo" width="45" class="me-2"> <span
-				class="fw-bold text-gold fs-4">Mom Physic</span>
-			</a>
 
-			<!-- Toggle -->
-			<button class="navbar-toggler" type="button"
-				data-bs-toggle="collapse" data-bs-target="#navbarNav">
-				<span class="navbar-toggler-icon"></span>
-			</button>
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill fs-3 text-info"></i>
+            <span class="fw-bold fs-4">MODEL WORLD</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="bi bi-list text-white fs-2"></span>
+        </button>
 
-			<!-- Menu + Search -->
-			<div
-				class="collapse navbar-collapse justify-content-end align-items-center"
-				id="navbarNav">
-				<ul class="navbar-nav me-3">
-					
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/login">Đăng nhập</a></li>
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/cart">Giỏ hàng</a></li>
-						<li class="nav-item"><a class="nav-link text-gold"
-						href="/orders">Đơn hàng</a></li>
-
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/account">Tài khoản</a></li>
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/products">Sản phẩm</a></li>
-						<li class="nav-item"><a class="nav-link text-gold"
-						href="/wishlist">Yêu thích</a></li>
-				</ul>
-
-				<!-- Thanh tìm kiếm -->
-				<form class="d-flex align-items-center search-bar">
-					<div
-						class="d-flex align-items-center rounded-pill border border-gold px-3 py-1 bg-transparent">
-						<input type="text"
-							class="form-control bg-transparent text-light border-0 shadow-none"
-							placeholder="Tìm sản phẩm..."> <select
-							class="form-select bg-transparent text-light border-0 shadow-none w-auto">
-							<option selected>Danh mục</option>
-							<option>Gundam</option>
-							<option>Marvel</option>
-							<option>Ô tô</option>
-							<option>Collectibles</option>
-						</select>
-					</div>
-					<a href="#"
-						class="btn btn-gold rounded-pill ms-2 px-3 d-flex align-items-center gap-1">
-						<i class="bi bi-search"></i>
-					</a>
-				</form>
-			</div>
-			</div>
-		</nav>
-  <!-- Main content -->
-  <div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow w-100" style="max-width: 400px;">
-      <div class="card-body">
-        <h4 class="text-center mb-4">Quên mật khẩu</h4>
-        <form>
-          <div class="mb-3">
-            <label class="form-label text-light">Nhập email</label>
-            <input type="email" class="form-control" placeholder="Email đã đăng ký">
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-light">Nhập mật khẩu mới</label>
-            <input type="password" class="form-control" placeholder="Nhập mật khẩu mới">
-          </div>
-          <button type="submit" class="btn btn-warning w-100">Gửi yêu cầu</button>
-        </form>
-        <p class="text-center mt-3 small">
-          <a href="login">← Quay lại đăng nhập</a>
-        </p>
-      </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+            </ul>
+        </div>
     </div>
-  </div>
+</nav>
 
-  
-	<!-- Footer -->
-	<footer class="text-center py-4 border-top border-warning">
-		<p class="mb-0 text-gold">© 2025 Mom Physic. All Rights Reserved.</p>
-	</footer>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<section class="wrapper">
+    <div class="auth-card">
+        <div class="auth-image"></div>
+
+        <div class="auth-form-container">
+            
+            <h3 class="auth-title">QUÊN MẬT KHẨU?</h3>
+            <p class="auth-subtitle">Đừng lo lắng! Nhập email để lấy lại quyền truy cập.</p>
+            
+            <form th:action="@{/forgot}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Email đã đăng ký</label>
+                    <input type="email" class="form-control form-control-custom" name="email" placeholder="nhapemail@example.com" required>
+                </div>
+                
+                <div class="mt-3 text-center mb-3">
+                    <p th:if="${error}" class="text-danger" th:text="${error}"></p>
+                    <p th:if="${message}" class="text-success" th:text="${message}"></p>
+                </div>
+
+                <button type="submit" class="btn-auth">
+                    GỬI YÊU CẦU <i class="bi bi-send ms-1"></i>
+                </button>
+            </form>
+
+            <div class="text-center mt-4">
+                <a href="/login" class="link-back"><i class="bi bi-arrow-left me-1"></i> Quay lại đăng nhập</a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<div class="rain" id="rain"></div>
+
+<footer class="text-center">
+    <div class="container">
+        <p class="mb-0 small text-secondary">&copy; 2025 Model World — Luxury Boutique</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JS TẠO HIỆU ỨNG MƯA
+    const rain = document.getElementById('rain');
+    for(let i=0; i<100; i++){
+        const drop = document.createElement('div');
+        drop.className = 'drop';
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
+        drop.style.animationDelay = Math.random()*5 + 's';
+        rain.appendChild(drop);
+    }
+</script>
+
 </body>
 </html>

@@ -1,6 +1,6 @@
 package com.example.demo.model;
 
-import java.util.Date;
+import java.util.Date; 
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -32,6 +32,8 @@ public class Account {
     Integer id;
 
     @NotBlank(message = "Email không được để trống")
+    @Column(unique = true)
+
     @Email(message = "Email không hợp lệ")
     String email;
 

@@ -1,302 +1,350 @@
-<!doctype html>
-<html lang="vi">
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sản phẩm - Mom Physic</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sản phẩm - Model World</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <style>
-  /* Hiệu ứng hover cho sản phẩm */
-.card {
-  transition: all 0.35s ease;
-  overflow: hidden;
-}
+    <style>
+        /* --- CẤU HÌNH MÀU SẮC & BIẾN (ĐỒNG BỘ INDEX) --- */
+        :root {
+            --bg-dark: #050b14;
+            --bg-card: #0c1525;
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
+            --border-color: rgba(0, 242, 255, 0.2);
+            --font-main: "Be Vietnam Pro", sans-serif;
+            --font-display: "Orbitron", sans-serif;
+            --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
 
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 0 25px rgba(230, 195, 0, 0.25);
-  border-color: #e6c300;
-}
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-main);
+        }
 
-.card img {
-  transition: transform 0.4s ease;
-}
+        /* --- TYPOGRAPHY FIX --- */
+        /* 1. Logo (Navbar) dùng Orbitron */
+        .navbar-brand { 
+            font-family: var(--font-display); 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
 
-.card:hover img {
-  transform: scale(1.08);
-}
+        /* 2. Headers/Tiêu đề dùng Be Vietnam Pro (Fix lỗi dấu) */
+        h1, h2, h3 { 
+            font-family: var(--font-main); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+        
+        /* 3. Footer Logo (Model World) dùng Orbitron */
+        footer h4 { 
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.card .btn-gold, .card .btn-outline-gold, .card .btn-outline-danger {
-  transition: 0.3s ease;
-}
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; white-space: nowrap; }
+        .nav-link:hover { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
+        .navbar-brand span { color: #fff !important; }
 
-.card:hover .btn-gold {
-  background-color: #ffde59;
-  color: #150035;
-}
+        /* SEARCH BAR */
+        .search-bar-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 4px 15px;
+            transition: 0.3s;
+            min-width: 300px; 
+        }
+        .search-bar-wrapper:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+        .form-control-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan) !important; font-weight: 500; }
+        .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
+        
+        /* CẬP NHẬT SELECT: Đặt chiều rộng cố định để làm dropdown ngắn lại */
+        .form-select-custom { 
+            background: transparent; border: none; box-shadow: none; 
+            color: var(--accent-cyan); 
+            cursor: pointer;
+            width: 100px !important; /* Đặt chiều rộng cố định 100px */
+            padding-right: 25px; /* Đảm bảo mũi tên dropdown hiển thị đúng */
+            border-left: 1px solid rgba(255,255,255,0.2); 
+        }
+        .form-select-custom:focus { background: var(--bg-card); color: var(--accent-cyan); box-shadow: none; }
+        
+        .btn-search { color: var(--text-light); border: none; background: transparent;}
+        .btn-search:hover { color: var(--accent-cyan); }
 
-.card:hover .btn-outline-gold {
-  color: #150035;
-  background-color: #e6c300;
-  border-color: #e6c300;
-}
-  
-    /* === DARK THEME === */
-    body {
-      background-color: #0d0b20;
-      color: #f5f5f5;
-      font-family: "Segoe UI", Roboto, sans-serif;
-    }
+        /* --- SIDEBAR FILTER --- */
+        .filter-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        /* SỬA FONT CHO TIÊU ĐỀ BỘ LỌC */
+        .filter-title { 
+            font-family: var(--font-main); 
+            font-weight: 700; /* Thêm độ đậm cho dễ nhìn */
+            color: var(--accent-cyan); 
+            margin-bottom: 15px; 
+            font-size: 1.1rem; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 10px; 
+        }
+        
+        .form-control-dark, .form-select-dark {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: 0.3s;
+        }
+        .form-control-dark:focus, .form-select-dark:focus {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 5px rgba(0, 242, 255, 0.3);
+            color: var(--accent-cyan);
+        }
+        .form-control-dark::placeholder { color: rgba(170, 184, 197, 0.5); }
 
-    .text-gold { color: #e6c300 !important; }
-    .border-gold { border-color: #e6c300 !important; }
+        /* --- PRODUCT CARDS & EFFECTS --- */
+        .product-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 100%;
+            display: flex; flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        /* Hiệu ứng quét sáng (Shine) */
+        .product-card::before {
+            content: ""; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(0, 242, 255, 0.4), transparent);
+            transform: skewX(-25deg); transition: 0s; z-index: 2; pointer-events: none;
+        }
+        .product-card:hover::before { left: 150%; transition: 0.7s; }
+        
+        .product-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: var(--neon-box-shadow);
+            transform: translateY(-5px);
+            z-index: 10;
+        }
 
-    .btn-gold {
-      background-color: #e6c300;
-      color: #150035;
-      font-weight: 500;
-      transition: 0.3s;
-    }
+        .product-img-box { position: relative; height: 250px; overflow: hidden; }
+        .product-img-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .product-card:hover .product-img-box img { transform: scale(1.08); }
 
-    .btn-gold:hover {
-      background-color: #ffde59;
-      color: #150035;
-    }
+        .product-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .product-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-price { color: var(--accent-cyan); font-weight: 700; font-size: 1.2rem; text-shadow: 0 0 5px rgba(0, 242, 255, 0.3); }
 
-    .navbar .nav-link {
-      transition: 0.3s;
-      font-weight: 500;
-    }
+        .btn-add-cart {
+            background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
+            width: 100%; padding: 8px; border-radius: 6px; font-weight: 600; text-decoration: none; 
+            display: inline-block; margin-top: 15px; text-align: center; transition: 0.3s; position: relative; z-index: 5;
+            font-family: var(--font-main); /* Đảm bảo nút dùng font tiếng Việt */
+        }
+        .btn-add-cart:hover { background: var(--accent-cyan); color: #000; box-shadow: 0 0 15px var(--accent-cyan); }
+        
+        /* Unavailable State */
+        .product-unavailable { opacity: 0.6; pointer-events: none; filter: grayscale(100%); }
+        /* SỬA FONT CHO BADGE "HẾT HÀNG" */
+        .badge-sold-out { 
+            position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; padding: 5px 10px; 
+            border-radius: 4px; font-weight: 700; z-index: 5; font-family: var(--font-main); font-size: 0.8rem;
+        }
 
-    .navbar .nav-link:hover {
-      color: #ffde59 !important;
-    }
-
-    .card {
-      background-color: #1a1735;
-      border: 1px solid #3b3486;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(230, 195, 0, 0.1);
-    }
-
-    .card-title { color: #e6c300; font-weight: 600; }
-
-    .form-control, .form-select {
-      background-color: #120f27;
-      border: 1px solid #3b3486;
-      color: #fff;
-    }
-
-    .form-control::placeholder { color: #fff; opacity: 0.85; }
-
-    .form-control:focus, .form-select:focus {
-      border-color: #e6c300;
-      box-shadow: 0 0 0 0.2rem rgba(230,195,0,0.2);
-      background-color: #181534;
-    }
-
-    footer {
-      background-color: #120f27;
-      border-top: 1px solid #e6c300;
-      color: #ddd;
-    }
-
-    footer h6 { color: #e6c300; }
-
-    footer ul li { color: #bbb; }
-
-    a { color: #e6c300; text-decoration: none; }
-    a:hover { color: #ffde59; }
-
-    .sidebar {
-      background-color: #1a1735;
-      border: 1px solid #3b3486;
-      border-radius: 10px;
-      padding: 20px;
-    }
-
-    .sidebar h5 {
-      color: #e6c300;
-      margin-bottom: 15px;
-    }
-
-    .btn-outline-gold {
-      color: #e6c300;
-      border: 1px solid #e6c300;
-      transition: 0.3s;
-    }
-
-    .btn-outline-gold:hover {
-      background-color: #e6c300;
-      color: #150035;
-    }
-.search-bar input::placeholder {
-	color: #bbb;
-}
-  </style>
+        /* Footer & Dropdown */
+        footer { background-color: #020408; border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: 60px; color: #6c757d; }
+        .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .dropdown-item { color: #aab8c5; }
+        .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+    </style>
 </head>
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark px-4 py-3"
-		style="background: linear-gradient(90deg, #150035, #2d007a); border-bottom: 1px solid #e6c300;">
-		<div class="container-fluid">
-			<!-- Logo -->
-			<a class="navbar-brand d-flex align-items-center" href="/"> <img
-				src="https://cdn-icons-png.flaticon.com/512/1040/1040230.png"
-				alt="logo" width="45" class="me-2"> <span
-				class="fw-bold text-gold fs-4">Mom Physic</span>
-			</a>
 
-			<!-- Toggle -->
-			<button class="navbar-toggler" type="button"
-				data-bs-toggle="collapse" data-bs-target="#navbarNav">
-				<span class="navbar-toggler-icon"></span>
-			</button>
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill fs-3 text-info"></i>
+            <span class="fw-bold fs-4">MODEL WORLD</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="bi bi-list text-white fs-2"></span>
+        </button>
 
-			<!-- Menu + Search -->
-			<div
-				class="collapse navbar-collapse justify-content-end align-items-center"
-				id="navbarNav">
-				<ul class="navbar-nav me-3">
-					
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/login">Đăng nhập</a></li>
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/cart">Giỏ hàng</a></li>
-						<li class="nav-item"><a class="nav-link text-gold"
-						href="/orders">Đơn hàng</a></li>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link text-info" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                
+                <th:block th:if="${session.account == null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+                </th:block>
 
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/account">Tài khoản</a></li>
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/products">Sản phẩm</a></li>
-						<li class="nav-item"><a class="nav-link text-gold"
-						href="/wishlist">Yêu thích</a></li>
-				</ul>
+                <th:block th:if="${session.account != null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
+                    
+                    <li class="nav-item dropdown mx-2">
+                        <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" alt="avatar"
+                                class="rounded-circle border border-info" style="width: 38px; height: 38px; object-fit: cover;">
+                            <i th:if="${session.account.photo == null}" class="bi bi-person-circle fs-3 text-info"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </th:block>
+            </ul>
 
-				<!-- Thanh tìm kiếm -->
-				<form class="d-flex align-items-center search-bar">
-					<div
-						class="d-flex align-items-center rounded-pill border border-gold px-3 py-1 bg-transparent">
-						<input type="text"
-							class="form-control bg-transparent text-light border-0 shadow-none"
-							placeholder="Tìm sản phẩm..."> <select
-							class="form-select bg-transparent text-light border-0 shadow-none w-auto">
-							<option selected>Danh mục</option>
-							<option>Gundam</option>
-							<option>Marvel</option>
-							<option>Ô tô</option>
-							<option>Collectibles</option>
-						</select>
-					</div>
-					<a href="#"
-						class="btn btn-gold rounded-pill ms-2 px-3 d-flex align-items-center gap-1">
-						<i class="bi bi-search"></i>
-					</a>
-				</form>
-			</div>
-			</div>
-		</nav>
-
-<!-- Content -->
-<section class="py-5">
-  <div class="container">
-    <div class="row g-4">
-      <!-- Sidebar lọc -->
-      <div class="col-md-3">
-        <div class="sidebar">
-          <h5><i class="bi bi-funnel"></i> Lọc sản phẩm</h5>
-          <form>
-            <div class="mb-3">
-              <label class="form-label">Giá từ</label>
-              <input type="number" class="form-control" placeholder="VD: 100000">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Đến</label>
-              <input type="number" class="form-control" placeholder="VD: 1000000">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Sắp xếp theo</label>
-              <select class="form-select">
-                <option selected>Chọn thứ tự</option>
-                <option>Giá thấp đến cao</option>
-                <option>Giá cao đến thấp</option>
-              </select>
-            </div>
-            <button type="submit" class="btn btn-gold w-100">Áp dụng</button>
-          </form>
+            <form action="/products" method="get" class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
+                <div class="search-bar-wrapper d-flex align-items-center">
+                    <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
+                    <select class="form-select form-select-custom w-auto" name="categoryId">
+                        <option value="">Tất cả</option>
+                        <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" th:selected="${cate.id != null && cate.id.toString() == selectedCategory}"></option>
+                    </select>
+                    <button type="submit" class="btn-search ps-2"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
         </div>
-      </div>
-
-      <!-- Product List -->
-      <div class="col-md-9">
-        <h4 class="text-gold mb-3">Danh sách sản phẩm</h4>
-        <div class="row g-4">
-
-          <!-- Product -->
-          <div class="col-6 col-md-4">
-            <div class="card h-100">
-              <img src="https://picsum.photos/400/300?random=1" class="card-img-top rounded-top" alt="">
-              <div class="card-body">
-                <h6 class="card-title">Mô hình A</h6>
-                <p class="fw-bold text-warning mb-2">500.000₫</p>
-                <div class="d-flex justify-content-between">
-                  <a href="product-detail.html" class="btn btn-outline-gold btn-sm">Chi tiết</a>
-                  <a href="cart.html" class="btn btn-gold btn-sm">Thêm giỏ</a>
-                  <a href="#"
-								class="btn btn-outline-danger btn-sm"><i class="bi bi-heart"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Product -->
-          <div class="col-6 col-md-4">
-            <div class="card h-100">
-              <img src="https://picsum.photos/400/300?random=2" class="card-img-top rounded-top" alt="">
-              <div class="card-body">
-                <h6 class="card-title">Mô hình B</h6>
-                <p class="fw-bold text-warning mb-2">750.000₫</p>
-                <div class="d-flex justify-content-between">
-                  <a href="product-detail.html" class="btn btn-outline-gold btn-sm">Chi tiết</a>
-                  <a href="cart.html" class="btn btn-gold btn-sm">Thêm giỏ</a>
-                  <a href="#"
-								class="btn btn-outline-danger btn-sm"><i class="bi bi-heart"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Product -->
-          <div class="col-6 col-md-4">
-            <div class="card h-100">
-              <img src="https://picsum.photos/400/300?random=3" class="card-img-top rounded-top" alt="">
-              <div class="card-body">
-                <h6 class="card-title">Mô hình C</h6>
-                <p class="fw-bold text-warning mb-2">1.200.000₫</p>
-                <div class="d-flex justify-content-between">
-                  <a href="product-detail.html" class="btn btn-outline-gold btn-sm">Chi tiết</a>
-                  <a href="cart.html" class="btn btn-gold btn-sm">Thêm giỏ</a>
-                  <a href="#"
-								class="btn btn-outline-danger btn-sm"><i class="bi bi-heart"></i></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </div>
-  </div>
-</section>
+</nav>
 
-	<!-- Footer -->
-	<footer class="text-center py-4 border-top border-warning">
-		<p class="mb-0 text-gold">© 2025 Mom Physic. All Rights Reserved.</p>
-	</footer>
+<div class="container py-5">
+    
+    <div class="text-center mb-5">
+        <h2 class="text-white">DANH SÁCH <span class="text-info">SẢN PHẨM</span></h2>
+        <div style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="filter-box sticky-top" style="top: 100px; z-index: 1;">
+                <h5 class="filter-title"><i class="bi bi-funnel-fill me-2"></i>BỘ LỌC</h5>
+                <form method="get" action="/products">
+                    <input type="hidden" name="keyword" th:value="${keyword}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-light small">Danh mục</label>
+                        <select name="categoryId" class="form-select form-select-dark">
+                            <option value="">Tất cả danh mục</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:selected="${c.id != null && c.id.toString() == selectedCategory}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light small">Sắp xếp theo</label>
+                        <select name="sort" class="form-select form-select-dark">
+                            <option value="">Mặc định</option>
+                            <option value="asc" th:selected="${selectedSort == 'asc'}">Giá tăng dần</option>
+                            <option value="desc" th:selected="${selectedSort == 'desc'}">Giá giảm dần</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-light small">Khoảng giá</label>
+                        <input type="number" class="form-control form-control-dark mb-2" name="minPrice" placeholder="Giá từ..." th:value="${minPrice}">
+                        <input type="number" class="form-control form-control-dark" name="maxPrice" placeholder="Giá đến..." th:value="${maxPrice}">
+                    </div>
+
+                    <button type="submit" class="btn-add-cart mt-2 w-100">
+                        ÁP DỤNG
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="row g-4">
+                <div class="col-md-4 col-sm-6" th:each="p : ${products}">
+                    <div th:classappend="${!p.available} ? 'product-unavailable' : ''" class="product-card">
+                        
+                        <div th:if="${!p.available}" class="badge-sold-out">HẾT HÀNG</div>
+
+                        <div class="product-img-box">
+                            <a th:if="${p.available}" th:href="@{'/product-detail/' + ${p.id}}">
+                                <img th:src="${p.image != null ? p.image : '/images/no-image.jpg'}" alt="Product">
+                            </a>
+                            <img th:if="${!p.available}" th:src="${p.image != null ? p.image : '/images/no-image.jpg'}" alt="Product">
+                        </div>
+
+                        <div class="product-body">
+                            <div>
+                                <a th:href="@{'/product-detail/' + ${p.id}}" class="text-decoration-none">
+                                    <div class="product-name" th:text="${p.name}">Tên sản phẩm</div>
+                                </a>
+                                <div class="product-price" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0 ₫</div>
+                                <div class="small text-light mt-1" th:text="${p.category != null ? p.category.name : 'Chưa phân loại'}"></div> 
+                            </div>
+                            
+                            <div class="mt-2">
+                                <a th:if="${p.available}" th:href="@{'/product-detail/' + ${p.id}}" class="btn-add-cart">
+                                    <i class="bi bi-eye me-1"></i> Xem chi tiết
+                                </a>
+                                <button th:if="${!p.available}" class="btn-add-cart border-secondary text-secondary" disabled>
+                                    <i class="bi bi-x-circle me-1"></i> Hết hàng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(products)}" class="col-12 text-center py-5">
+                    <i class="bi bi-box2 text-secondary" style="font-size: 3rem;"></i>
+                    <p class="text-secondary mt-3">Không tìm thấy sản phẩm nào phù hợp.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h4 class="text-white mb-3">MODEL WORLD</h4>
+                <p class="small">Chuyên cung cấp mô hình tĩnh cao cấp. Nơi thỏa mãn đam mê sưu tầm của bạn.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4 mb-4">
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-youtube"></i></a>
+                </div>
+                <p class="mb-0 small text-secondary">&copy; 2025 Model World — Luxury Boutique</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>

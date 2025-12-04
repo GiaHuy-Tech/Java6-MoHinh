@@ -24,6 +24,8 @@ public class Comment {
     @JoinColumn(name = "product_id", nullable = false)
     private Products product; 
 
+    private LocalDateTime createdDate;
+    
     // Liên kết đến người dùng
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)

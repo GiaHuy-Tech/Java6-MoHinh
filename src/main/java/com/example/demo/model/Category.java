@@ -26,7 +26,7 @@ public class Category {
 	@NotBlank(message = "tên không đưuọc bỏ trống")
 	@Column(unique = true, columnDefinition = "nvarchar(255)")
 	String name;
-	@NotBlank(message = "Hình không đưuọc bỏ trống")
+    @NotBlank(message = "Hình không được bỏ trống")
 	@Column(columnDefinition = "nvarchar(255)")
 	String image;
 	@OneToMany(mappedBy = "category")

@@ -1,242 +1,371 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tài khoản - Mom Physic</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài khoản - Model World</title>
 
-<!-- Bootstrap -->
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<!-- Icons -->
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<style>
-body {
-	background-color: #0b021c;
-	color: #fff;
-	font-family: 'Segoe UI', sans-serif;
-}
+    <style>
+        /* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
+        :root {
+            --bg-dark: #050b14;
+            --bg-card: #0c1525;
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
+            --border-color: rgba(0, 242, 255, 0.2);
+            
+            --font-main: "Be Vietnam Pro", sans-serif;
+            --font-display: "Orbitron", sans-serif;
 
-.navbar, footer {
-	background-color: #150035;
-}
+            --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
 
-.text-gold {
-	color: #e6c300 !important;
-}
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-main);
+        }
 
-.btn-gold {
-	background-color: #e6c300;
-	color: #150035;
-	border: none;
-	transition: all 0.3s ease;
-}
+        /* --- TYPOGRAPHY FIX --- */
+        /* 1. Chỉ Logo dùng Orbitron */
+        .navbar-brand {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.btn-gold:hover {
-	background-color: #f1d500;
-	transform: translateY(-2px);
-}
+        /* 2. Các tiêu đề khác dùng Be Vietnam Pro đậm để không lỗi dấu */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-main);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-.border-gold {
-	border-color: #e6c300 !important;
-}
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        .nav-link {
+            color: #aab8c5 !important;
+            transition: 0.3s;
+            font-weight: 500;
+            white-space: nowrap; 
+        }
+        .nav-link:hover {
+            color: var(--accent-cyan) !important;
+            text-shadow: 0 0 8px var(--accent-cyan);
+        }
 
-.card {
-	background-color: #1c093a;
-	border: 1px solid #3d1a78;
-}
+        /* SEARCH BAR */
+        .search-bar-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 4px 15px;
+            transition: 0.3s;
+            min-width: 300px; 
+        }
+        @media (max-width: 991px) { .search-bar-wrapper { min-width: 100%; } }
+        
+        .search-bar-wrapper:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+        .form-control-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan) !important; font-weight: 500; }
+        .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
+        .form-control-custom:focus { background: transparent; color: var(--accent-cyan) !important; box-shadow: none; }
+        .form-select-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan); border-left: 1px solid rgba(255,255,255,0.2); }
+        .form-select-custom:focus { background: var(--bg-card); color: var(--accent-cyan); box-shadow: none; }
+        .btn-search { color: var(--text-light); border: none; background: transparent;}
+        .btn-search:hover { color: var(--accent-cyan); }
 
-.form-control, .form-select {
-	background-color: #0b021c;
-	color: #fff;
-	border: 1px solid #3d1a78;
-}
+        /* --- ACCOUNT SPECIFIC STYLES --- */
+        .account-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
 
-.form-control:focus, .form-select:focus {
-	border-color: #e6c300;
-	box-shadow: 0 0 5px #e6c300;
-}
-.search-bar input::placeholder {
-	color: #bbb;
-}
-</style>
+        /* Đã sửa font cho tiêu đề section */
+        .section-title {
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-family: var(--font-main); /* Be Vietnam Pro */
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* Style Input trong form Account */
+        .form-control-dark {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: 0.3s;
+        }
+        .form-control-dark:focus {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(0, 242, 255, 0.2);
+            color: var(--accent-cyan);
+        }
+        .form-label {
+            color: #aab8c5;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        /* Buttons */
+        .btn-cyan {
+            background: transparent;
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            transition: 0.3s;
+            font-weight: 600;
+            font-family: var(--font-main); /* Nút dùng font chính */
+        }
+        .btn-cyan:hover {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+        
+        .btn-outline-secondary-custom {
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #aab8c5;
+            font-family: var(--font-main);
+        }
+        .btn-outline-secondary-custom:hover {
+            border-color: #fff;
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Alert Styles */
+        .alert-custom-success {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        .alert-custom-danger {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff4d4d;
+        }
+
+        /* Dropdown Dark */
+        .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .dropdown-item { color: #aab8c5; }
+        .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+        
+        footer {
+            background-color: #020408; border-top: 1px solid var(--border-color);
+            padding: 40px 0; margin-top: 60px; color: #6c757d;
+        }
+    </style>
 </head>
 <body>
-	<nav class="navbar navbar-expand-lg navbar-dark px-4 py-3"
-		style="background: linear-gradient(90deg, #150035, #2d007a); border-bottom: 1px solid #e6c300;">
-		<div class="container-fluid">
-			<a class="navbar-brand d-flex align-items-center" href="/"> <img
-				src="https://cdn-icons-png.flaticon.com/512/1040/1040230.png"
-				alt="logo" width="45" class="me-2"> <span
-				class="fw-bold text-gold fs-4">Mom Physic</span>
-			</a>
-			<button class="navbar-toggler" type="button"
-				data-bs-toggle="collapse" data-bs-target="#navbarNav">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-			<div
-				class="collapse navbar-collapse justify-content-end align-items-center"
-				id="navbarNav">
-				<ul class="navbar-nav me-3">
-					<li class="nav-item"><a class="nav-link text-gold"
-						href="/products">Sản phẩm</a></li>
-					<th:block th:if="${session.account == null}">
-						<li class="nav-item"><a class="nav-link text-gold"
-							href="/login">Đăng nhập</a></li>
-					</th:block>
-					<th:block th:if="${session.account != null}">
-						<li class="nav-item"><a class="nav-link text-gold"
-							href="/cart">Giỏ hàng</a></li>
-						<li class="nav-item"><a class="nav-link text-gold"
-							href="/orders">Đơn hàng</a></li>
-						<li class="nav-item"><a class="nav-link text-gold"
-							href="/wishlist">Yêu thích</a></li>
-						<li class="nav-item dropdown"><a
-							class="nav-link dropdown-toggle text-warning" href="#"
-							id="navbarDropdown" role="button" data-bs-toggle="dropdown"
-							aria-expanded="false"> <i class="bi bi-person-circle me-1"></i>
-						</a>
-							<ul class="dropdown-menu dropdown-menu-dark"
-								aria-labelledby="navbarDropdown">
-								<li><a class="dropdown-item" href="/account">Thông tin
-										tài khoản <span th:text="${session.account.fullName}"></span>
-								</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item" href="/logout">Đăng xuất</a></li>
-							</ul></li>
-					</th:block>
-				</ul>
-				<form class="d-flex align-items-center search-bar">
-					<div
-						class="d-flex align-items-center rounded-pill border border-gold px-3 py-1 bg-transparent">
-						<input type="text"
-							class="form-control bg-transparent text-light border-0 shadow-none"
-							placeholder="Tìm sản phẩm..."> <select
-							class="form-select bg-transparent text-light border-0 shadow-none w-auto">
-							<option selected>Danh mục</option>
-							<option>Gundam</option>
-							<option>Marvel</option>
-							<option>Ô tô</option>
-							<option>Collectibles</option>
-						</select>
-					</div>
-					<a href="#"
-						class="btn btn-gold rounded-pill ms-2 px-3 d-flex align-items-center gap-1">
-						<i class="bi bi-search"></i>
-					</a>
-				</form>
-			</div>
-		</div>
-	</nav>
 
-	<!-- MAIN -->
-	<div class="container my-5">
-		<div class="row g-4">
-			<!-- SIDEBAR -->
-			<div class="col-md-3">
-				<div class="card text-center p-3 border-gold">
-					<img th:src="@{${session.account.photo}}" width="120"
-						class="rounded-circle mx-auto mb-3 border border-gold p-1"
-						alt="Avatar">
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill fs-3 text-info"></i>
+            <span class="fw-bold fs-4 text-light">MODEL WORLD</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="bi bi-list text-white fs-2"></span>
+        </button>
 
-					<form th:action="@{/account/upload-avatar}" method="post"
-						enctype="multipart/form-data" class="mt-3">
-						<div class="input-group">
-							<input type="file" name="avatar"
-								class="form-control form-control-sm bg-dark text-light border-gold"
-								accept="image/*" required>
-							<button type="submit" class="btn btn-gold btn-sm">
-								<i class="bi bi-upload"></i>
-							</button>
-						</div>
-					</form>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                
+                <th:block th:if="${session.account == null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+                </th:block>
 
-					<h6 class="text-gold mt-3 mb-1"
-						th:text="${session.account.fullName}"></h6>
-					<p class="text-gold small mb-2" th:text="${session.account.email}"></p>
-					<a href="/orders" class="btn btn-outline-light btn-sm mt-2"> <i
-						class="bi bi-bag-check"></i> Đơn hàng của tôi
-					</a>
-				</div>
-			</div>
+                <th:block th:if="${session.account != null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
+                    
+                    <li class="nav-item dropdown mx-2">
+                        <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" alt="avatar"
+                                class="rounded-circle border border-info" style="width: 38px; height: 38px; object-fit: cover;">
+                            <i th:if="${session.account.photo == null}" class="bi bi-person-circle fs-3 text-info"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </th:block>
+            </ul>
 
-			<!-- ACCOUNT INFO -->
-			<div class="col-md-9">
-				<div class="card border-gold">
-					<div class="card-header bg-transparent border-gold">
-						<h5 class="fw-bold text-gold mb-0">
-							<i class="bi bi-person-lines-fill"></i> CẬP NHẬT THÔNG TIN
-						</h5>
-					</div>
-					<div class="card-body">
+            <form action="/products" method="get" class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
+                <div class="search-bar-wrapper d-flex align-items-center">
+                    <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
+                    <select class="form-select form-select-custom w-auto" name="categoryId">
+                        <option value="">Tất cả</option>
+                        <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" th:selected="${cate.id != null && cate.id.toString() == selectedCategory}"></option>
+                    </select>
+                    <button type="submit" class="btn-search ps-2"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</nav>
 
-						<!-- HỌ TÊN -->
-						<form th:action="@{/account/update-fullname}" method="post"
-							class="mb-3">
-							<label class="form-label text-gold">Họ và tên</label>
-							<div class="input-group">
-								<input type="text" name="fullName"
-									th:value="${session.account.fullName}" class="form-control">
-								<button class="btn btn-gold" type="submit">Cập nhật</button>
-							</div>
-						</form>
+<div class="container py-5">
+    
+    <div class="text-center mb-5">
+        <h2 class="text-white">QUẢN LÝ <span class="text-info">TÀI KHOẢN</span></h2>
+        <div style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
+    </div>
 
-						<!-- EMAIL -->
-						<form th:action="@{/account/update-email}" method="post"
-							class="mb-3">
-							<label class="form-label text-gold">Email</label>
-							<div class="input-group">
-								<input type="email" name="email"
-									th:value="${session.account.email}" class="form-control">
-								<button class="btn btn-gold" type="submit">Cập nhật</button>
-							</div>
-						</form>
+    <div th:if="${success}" class="alert alert-custom-success text-center fw-bold d-flex align-items-center justify-content-center gap-2 mb-4" role="alert">
+        <i class="bi bi-check-circle-fill"></i> <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-custom-danger text-center fw-bold d-flex align-items-center justify-content-center gap-2 mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${error}"></span>
+    </div>
 
-						<!-- SỐ ĐIỆN THOẠI -->
-						<form th:action="@{/account/update-phone}" method="post"
-							class="mb-3">
-							<label class="form-label text-gold">Số điện thoại</label>
-							<div class="input-group">
-								<input type="text" name="phone"
-									th:value="${session.account.phone}" class="form-control">
-								<button class="btn btn-gold" type="submit">Cập nhật</button>
-							</div>
-						</form>
-						<!-- MẬT KHẨU -->
-						<form th:action="@{/account/update-password}" method="post"
-							class="mb-3">
-							<label class="form-label text-gold">Mật khẩu</label>
-							<div class="input-group">
-								<input type="password" name="password"
-									th:value="${session.account.password}" class="form-control">
-								<button class="btn btn-gold" type="submit">Cập nhật</button>
-							</div>
-						</form>
-						<!-- ĐỊA CHỈ -->
-						<form th:action="@{/account/update-address}" method="post">
-							<label class="form-label text-gold">Địa chỉ</label>
-							<div class="input-group">
-								<textarea name="address" class="form-control" rows="2"
-									th:text="${session.account.address}"></textarea>
-								<button class="btn btn-gold" type="submit">Cập nhật</button>
-							</div>
-						</form>
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="account-card text-center h-100">
+                <div class="position-relative d-inline-block mb-3">
+                    <img th:src="@{${session.account.photo}}" width="150" height="150"
+                        class="rounded-circle border border-2 border-info p-1"
+                        style="object-fit: cover;" alt="Avatar">
+                    <div class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1 border border-info">
+                        <i class="bi bi-camera-fill text-info"></i>
+                    </div>
+                </div>
 
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                <h5 class="text-white fw-bold mb-1" th:text="${session.account.fullName}">Người dùng</h5>
+                <p class="text-muted small mb-3" th:text="${session.account.email}">email@example.com</p>
 
-	<!-- FOOTER -->
-	<footer class="text-center py-4 border-top border-warning mt-5">
-		<p class="mb-0 text-gold">© 2025 Mom Physic. All Rights Reserved.</p>
-	</footer>
+                <form th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data" class="mb-4 px-3">
+                    <div class="input-group input-group-sm">
+                        <input type="file" name="avatar" class="form-control form-control-dark" accept="image/*" required>
+                        <button type="submit" class="btn btn-cyan">
+                            <i class="bi bi-upload"></i>
+                        </button>
+                    </div>
+                </form>
 
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                <hr class="border-secondary my-4">
+
+                <div class="d-grid gap-2">
+                    <a href="/orders" class="btn btn-outline-secondary-custom d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-receipt"></i> Lịch sử đơn hàng
+                    </a>
+                    <a href="/wishlist" class="btn btn-outline-secondary-custom d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-heart"></i> Sản phẩm yêu thích
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="account-card h-100">
+                <h4 class="section-title"><i class="bi bi-person-lines-fill me-2"></i>THÔNG TIN CÁ NHÂN</h4>
+                
+                <div class="card-body">
+                    <form th:action="@{/account/update-fullname}" method="post" class="mb-4">
+                        <label class="form-label">Họ và tên</label>
+                        <div class="input-group">
+                            <input type="text" name="fullName" th:value="${session.account.fullName}" class="form-control form-control-dark">
+                            <button class="btn btn-cyan" type="submit">Lưu</button>
+                        </div>
+                    </form>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <form th:action="@{/account/update-email}" method="post">
+                                <label class="form-label">Email</label>
+                                <div class="input-group">
+                                    <input type="email" name="email" th:value="${session.account.email}" class="form-control form-control-dark">
+                                    <button class="btn btn-cyan" type="submit"><i class="bi bi-check-lg"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <form th:action="@{/account/update-phone}" method="post">
+                                <label class="form-label">Số điện thoại</label>
+                                <div class="input-group">
+                                    <input type="text" name="phone" th:value="${session.account.phone}" class="form-control form-control-dark">
+                                    <button class="btn btn-cyan" type="submit"><i class="bi bi-check-lg"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/account/update-password}" method="post" class="mt-4">
+                        <label class="form-label">Mật khẩu</label>
+                        <div class="input-group">
+                            <input type="password" name="password" th:value="${session.account.password}" class="form-control form-control-dark">
+                            <button class="btn btn-cyan" type="submit">Đổi mật khẩu</button>
+                        </div>
+                    </form>
+
+                    <form th:action="@{/account/update-address}" method="post" class="mt-4">
+                        <label class="form-label">Địa chỉ giao hàng</label>
+                        <div class="input-group">
+                            <textarea name="address" class="form-control form-control-dark" rows="3" th:text="${session.account.address}"></textarea>
+                            <button class="btn btn-cyan" type="submit">Cập nhật địa chỉ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h4 class="text-white mb-3" style="font-family: 'Orbitron', sans-serif;">MODEL WORLD</h4>
+                <p class="small">Chuyên cung cấp mô hình tĩnh cao cấp. Nơi thỏa mãn đam mê sưu tầm của bạn.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4 mb-4">
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-youtube"></i></a>
+                </div>
+                <p class="mb-0 small text-secondary">&copy; 2025 Model World — Luxury Boutique</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Tự động ẩn thông báo sau 4 giây
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(el => {
+            el.style.transition = 'opacity 0.5s ease';
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 4000);
+</script>
+
 </body>
 </html>

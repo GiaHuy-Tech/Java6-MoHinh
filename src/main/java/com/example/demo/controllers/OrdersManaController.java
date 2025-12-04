@@ -1,20 +1,18 @@
 package com.example.demo.controllers;
 
 import java.util.Date;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
 import com.example.demo.repository.OrdersRepository;
+import com.example.demo.service.MailService;
 import com.example.demo.repository.AccountRepository;
 
 @Controller
-@RequestMapping("/oders-mana")
+@RequestMapping("/orders-mana")
 public class OrdersManaController {
 
     @Autowired
@@ -22,6 +20,9 @@ public class OrdersManaController {
 
     @Autowired
     AccountRepository accountRepo;
+    @Autowired
+    MailService mailService;
+
 
     // ✅ Danh sách đơn hàng
     @GetMapping
@@ -29,16 +30,7 @@ public class OrdersManaController {
         model.addAttribute("ordersList", ordersRepo.findAll());
         model.addAttribute("order", new Orders());
         model.addAttribute("accounts", accountRepo.findAll());
-        return "admin/oders-mana";
-    }
-
-    // ✅ Form thêm mới
-    @GetMapping("/new")
-    public String newForm(Model model) {
-        model.addAttribute("order", new Orders());
-        model.addAttribute("ordersList", ordersRepo.findAll());
-        model.addAttribute("accounts", accountRepo.findAll());
-        return "admin/oders-mana";
+        return "admin/orders-mana";
     }
 
     // ✅ Thêm mới đơn hàng
@@ -51,35 +43,55 @@ public class OrdersManaController {
         order.setAccountId(acc);
         order.setCreatedDate(new Date());
         ordersRepo.save(order);
-        return "redirect:/oders-mana";
+        return "redirect:/orders-mana";
     }
 
-    // ✅ Form sửa
+    // ✅ Form sửa chỉ để đổi trạng thái
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer id, Model model) {
-        Orders order = ordersRepo.findById(id).orElse(new Orders());
+        Orders order = ordersRepo.findById(id).orElse(null);
+        if (order == null) {
+            return "redirect:/orders-mana";
+        }
         model.addAttribute("order", order);
         model.addAttribute("ordersList", ordersRepo.findAll());
         model.addAttribute("accounts", accountRepo.findAll());
-        return "admin/oders-mana";
+        return "admin/order-edit"; // 👉 trang riêng chỉ để chỉnh trạng thái
     }
 
-    // ✅ Cập nhật đơn hàng
-    @PostMapping("/update")
-    public String update(
-            @RequestParam("accountId") Integer accountId,
-            @ModelAttribute("order") Orders order) {
 
-        Account acc = accountRepo.findById(accountId).orElse(null);
-        order.setAccountId(acc);
-        ordersRepo.save(order);
-        return "redirect:/oders-mana";
+    @PostMapping("/updateStatus")
+    public String updateStatus(@RequestParam("id") Integer id,
+                               @RequestParam("status") int status) {
+
+        Orders order = ordersRepo.findById(id).orElse(null);
+        if (order != null) {
+            order.setStatus(status);
+            ordersRepo.save(order);
+
+            Account acc = order.getAccountId();
+            if (acc != null && acc.getEmail() != null) {
+                String subject = "Cập nhật trạng thái đơn hàng #" + order.getId();
+                String body = "Xin chào " + acc.getFullName() + ",\n\n"
+                        + "Trạng thái đơn hàng của bạn vừa được cập nhật: "
+                        + getStatusText(status)
+                        + "\n\nCảm ơn bạn đã mua hàng tại Mom Physic High End Model!";
+                mailService.sendStatusMail(acc.getEmail(), subject, body);
+            }
+        }
+        return "redirect:/orders-mana";
+        
     }
 
-    // ✅ Xóa đơn hàng
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable("id") Integer id) {
-        ordersRepo.deleteById(id);
-        return "redirect:/oders-mana";
+    private String getStatusText(int status) {
+        switch (status) {
+            case 0: return "Chờ xử lý";
+            case 1: return "Đã xác nhận";
+            case 2: return "Đang giao hàng";
+            case 3: return "Hoàn tất";
+            case 4: return "Đã hủy";
+            default: return "Không xác định";
+        }
     }
+    
 }
