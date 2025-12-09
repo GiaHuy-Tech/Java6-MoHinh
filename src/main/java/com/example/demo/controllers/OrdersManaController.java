@@ -5,24 +5,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
+import com.example.demo.model.OrderDetail;
 import com.example.demo.repository.OrdersRepository;
-import com.example.demo.service.MailService;
 import com.example.demo.repository.AccountRepository;
+import com.example.demo.service.MailService;
 
 @Controller
 @RequestMapping("/orders-mana")
 public class OrdersManaController {
 
     @Autowired
-    OrdersRepository ordersRepo;
+    private OrdersRepository ordersRepo;
 
     @Autowired
-    AccountRepository accountRepo;
-    @Autowired
-    MailService mailService;
+    private AccountRepository accountRepo;
 
+    @Autowired
+    private MailService mailService;
 
     // ✅ Danh sách đơn hàng
     @GetMapping
@@ -46,7 +48,7 @@ public class OrdersManaController {
         return "redirect:/orders-mana";
     }
 
-    // ✅ Form sửa chỉ để đổi trạng thái
+    // ✅ Form sửa đơn hàng (chỉ đổi trạng thái)
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer id, Model model) {
         Orders order = ordersRepo.findById(id).orElse(null);
@@ -56,10 +58,10 @@ public class OrdersManaController {
         model.addAttribute("order", order);
         model.addAttribute("ordersList", ordersRepo.findAll());
         model.addAttribute("accounts", accountRepo.findAll());
-        return "admin/order-edit"; // 👉 trang riêng chỉ để chỉnh trạng thái
+        return "admin/order-edit"; // Trang riêng để chỉnh trạng thái
     }
 
-
+    // ✅ Cập nhật trạng thái đơn hàng và gửi mail
     @PostMapping("/updateStatus")
     public String updateStatus(@RequestParam("id") Integer id,
                                @RequestParam("status") int status) {
@@ -80,7 +82,6 @@ public class OrdersManaController {
             }
         }
         return "redirect:/orders-mana";
-        
     }
 
     private String getStatusText(int status) {
@@ -93,5 +94,30 @@ public class OrdersManaController {
             default: return "Không xác định";
         }
     }
-    
+
+    // ✅ Hiển thị chi tiết giỏ hàng của một đơn hàng
+    @GetMapping("/cart/{orderId}")
+    public String cartDetail(@PathVariable("orderId") Integer orderId, Model model) {
+        Orders order = ordersRepo.findById(orderId).orElse(null);
+        if (order == null) {
+            return "redirect:/orders-mana"; // nếu không có đơn hàng
+        }
+
+        // Gửi danh sách chi tiết đơn hàng sang view
+        model.addAttribute("order", order);
+        model.addAttribute("orderDetails", order.getOrderDetails()); // List<OrderDetail>
+
+        return "admin/order-detail"; // Trang hiển thị chi tiết giỏ hàng
+    }
+    @GetMapping("/detail/{id}")
+    public String orderDetail(@PathVariable("id") Integer id, Model model) {
+        Orders order = ordersRepo.findById(id).orElse(null);
+        if (order == null) {
+            return "redirect:/orders-mana"; // nếu không có đơn hàng
+        }
+
+        model.addAttribute("order", order);
+        model.addAttribute("orderDetails", order.getOrderDetails()); // List<OrderDetail>
+        return "admin/order-detail"; // trang Thymeleaf mới
+    }
 }
