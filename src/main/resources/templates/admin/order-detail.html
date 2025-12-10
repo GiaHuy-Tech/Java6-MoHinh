@@ -49,14 +49,13 @@ h2, h5, h6 { font-weight: 700; letter-spacing: 0.5px; color: #fff; }
 /* Logo giữ nguyên màu trắng */
 .navbar-brand { font-family: var(--font-display); color: #fff !important; }
 
-/* --- ĐÃ SỬA: Chỉnh màu link menu thành xanh dương --- */
+/* Menu Link */
 .navbar-nav .nav-link {
-    color: var(--accent-cyan) !important; /* Màu xanh neon */
+    color: var(--accent-cyan) !important; 
     font-weight: 500;
     transition: 0.3s;
 }
 
-/* Hiệu ứng khi di chuột vào link: Sáng lên màu trắng */
 .navbar-nav .nav-link:hover {
     color: #fff !important;
     text-shadow: 0 0 10px var(--accent-cyan);
@@ -179,10 +178,20 @@ h2, h5, h6 { font-weight: 700; letter-spacing: 0.5px; color: #fff; }
                 <div class="mb-0">
                     <div class="label-text">Trạng thái thanh toán</div>
                     <div class="mt-1">
-                        <span th:if="${order.paymentStatus}" class="text-success fw-bold"><i class="bi bi-check-circle-fill"></i> Đã thanh toán</span>
-                        <span th:unless="${order.paymentStatus}" class="text-danger fw-bold"><i class="bi bi-exclamation-circle-fill"></i> Chưa thanh toán</span>
+                        <span th:if="${((order.paymentMethod == 'VIETQR' or order.paymentMethod == 'MOMO') and order.status != 4) 
+                                    or (order.paymentMethod == 'COD' and order.status == 3)}" 
+                              class="text-success fw-bold">
+                            <i class="bi bi-check-circle-fill"></i> Đã thanh toán
+                        </span>
+
+                        <span th:unless="${((order.paymentMethod == 'VIETQR' or order.paymentMethod == 'MOMO') and order.status != 4) 
+                                        or (order.paymentMethod == 'COD' and order.status == 3)}" 
+                              class="text-danger fw-bold">
+                            <i class="bi bi-exclamation-circle-fill"></i> Chưa thanh toán
+                        </span>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -256,6 +265,7 @@ h2, h5, h6 { font-weight: 700; letter-spacing: 0.5px; color: #fff; }
         <div class="bg-dark bg-opacity-50 p-4">
             <div class="row justify-content-end">
                 <div class="col-md-5 col-lg-4">
+                    
                     <div class="summary-row">
                         <span class="text-muted">Tổng tiền hàng:</span>
                         <span class="fw-bold" th:text="${#numbers.formatDecimal(order.total - order.feeship, 0, 'POINT', 0, 'COMMA')} + '₫'">1.450.000₫</span>
@@ -263,8 +273,15 @@ h2, h5, h6 { font-weight: 700; letter-spacing: 0.5px; color: #fff; }
                     
                     <div class="summary-row">
                         <span class="text-muted">Phí vận chuyển:</span>
-                        <span class="text-success" th:if="${order.feeship == 0}">Miễn phí</span>
-                        <span class="fw-bold" th:unless="${order.feeship == 0}" th:text="${#numbers.formatDecimal(order.feeship, 0, 'POINT', 0, 'COMMA')} + '₫'">50.000₫</span>
+                        
+                        <span th:if="${order.feeship == 0}" class="text-success fw-bold">
+                            <i class="bi bi-check-circle-fill"></i> Miễn phí
+                        </span>
+
+                        <span th:unless="${order.feeship == 0}" class="fw-bold text-light">
+                            <span th:text="${#numbers.formatDecimal(order.feeship, 0, 'POINT', 0, 'COMMA')} + '₫'"></span>
+                            <small class="text-muted ms-1 fst-italic">(5%)</small>
+                        </span>
                     </div>
 
                     <div class="summary-row summary-total">
