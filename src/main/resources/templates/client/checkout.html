@@ -22,11 +22,8 @@
             --text-light: #e1e7ff;
             --accent-cyan: #00f2ff;
             --border-color: rgba(0, 242, 255, 0.2);
-            
-            /* Font Variables */
             --font-main: "Be Vietnam Pro", sans-serif;
             --font-logo: "Orbitron", sans-serif;
-
             --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
         }
 
@@ -42,8 +39,6 @@
         /* --- TYPOGRAPHY --- */
         .navbar-brand { font-family: var(--font-logo); text-transform: uppercase; letter-spacing: 1px; }
         h1, h2, h3, h4 { font-family: var(--font-main); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Số tiền dùng font Orbitron cho đẹp */
         .price-text { font-family: var(--font-logo); letter-spacing: 1px; }
 
         /* --- NAVBAR --- */
@@ -66,7 +61,7 @@
         }
         .navbar-brand i { color: var(--accent-cyan) !important; }
 
-        /* SEARCH BAR (Giữ nguyên layout) */
+        /* SEARCH BAR */
         .search-bar-wrapper {
             background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 50px;
             padding: 4px 15px; transition: 0.3s; min-width: 300px; 
@@ -119,7 +114,6 @@
         }
         .form-control-dark::placeholder { color: rgba(255, 255, 255, 0.3); }
         
-        /* Readonly input style */
         .form-control-dark[readonly] {
             background-color: rgba(255, 255, 255, 0.05);
             color: #888;
@@ -157,14 +151,6 @@
             background: #fff;
             box-shadow: 0 0 20px var(--accent-cyan);
             transform: translateY(-2px);
-        }
-
-        /* --- QR CODE --- */
-        .qr-code-image {
-            width: 100%; max-width: 250px; height: auto;
-            border-radius: 8px; margin: 15px auto; display: block;
-            border: 2px solid var(--accent-cyan);
-            box-shadow: var(--neon-box-shadow);
         }
 
         /* Footer */
@@ -276,10 +262,10 @@
                             
                             <div class="mb-4">
                                 <label class="form-label">Phương thức thanh toán</label>
-                                <select class="form-select form-select-dark" id="paymentMethodSelect" name="paymentMethod">
+                                <select class="form-select form-select-dark" name="paymentMethod">
                                     <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                    <option value="MOMO">Ví điện tử Momo</option>
-                                    <option value="VNPAY">Ví VNPAY / Ngân hàng</option>
+                                    <option value="VIETQR">Chuyển khoản Ngân hàng (VietQR)</option>
+                                    <option value="MOMO">Ví điện tử MoMo</option>
                                 </select>
                             </div>
                             
@@ -291,7 +277,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-5">
+            <div class="col-lg-5" th:with="shippingFee=${total < 1000000 ? total * 0.05 : 0}">
                 <div class="checkout-card mb-4">
                     <div class="card-header-custom">
                         <i class="bi bi-bag-check me-2"></i> Đơn hàng của bạn
@@ -308,28 +294,36 @@
                             </li>
                         </ul>
                         
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Tạm tính:</span>
+                                <span class="text-light" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-secondary">Phí vận chuyển:</span>
+                                <span th:if="${shippingFee == 0}" class="text-success fw-bold text-uppercase">Miễn phí</span>
+                                <span th:unless="${shippingFee == 0}" class="text-light" 
+                                      th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                </span>
+                            </div>
+                        </div>
+
                         <div class="border-top border-secondary pt-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-white fs-5 fw-bold">TỔNG CỘNG</span>
                                 <span class="price-text text-info fs-4 fw-bold"
-                                    th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    th:text="${#numbers.formatDecimal(total + shippingFee, 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     0₫
                                 </span>
                             </div>
+                            <div th:if="${shippingFee > 0}" class="text-end mt-1">
+                                <small class="text-light fst-italic">(Phí ship 5% cho đơn dưới 1 triệu)</small>
+                            </div>
+                            <div th:unless="${shippingFee > 0}" class="text-end mt-1">
+                                <small class="text-success fst-italic"><i class="bi bi-check-circle-fill"></i> Đã áp dụng Free Ship (Đơn > 1tr)</small>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="checkout-card" id="qrCodeCard" style="display: none;">
-                    <div class="card-header-custom text-center">
-                        <i class="bi bi-qr-code-scan me-2"></i> Quét mã thanh toán
-                    </div>
-                    <div class="card-body-custom text-center">
-                        <img id="momoQr" src="/images/momo.jpg" alt="Momo QR Code" class="qr-code-image" style="display: none;">
-                        <img id="vnpayQr" src="/images/vnpay.jpg" alt="VNPay QR Code" class="qr-code-image" style="display: none;">
-                        <p class="mt-3 mb-0 small text-secondary fst-italic">
-                            Vui lòng mở ứng dụng tương ứng để quét mã.
-                        </p>
                     </div>
                 </div>
             </div>
@@ -353,32 +347,6 @@
         </div>
     </div>
 </footer>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    const paymentSelect = document.getElementById('paymentMethodSelect');
-    const qrCard = document.getElementById('qrCodeCard');
-    const momoQr = document.getElementById('momoQr');
-    const vnpayQr = document.getElementById('vnpayQr');
-
-    paymentSelect.addEventListener('change', function() {
-      const selectedValue = this.value;
-      // Reset
-      qrCard.style.display = 'none';
-      momoQr.style.display = 'none';
-      vnpayQr.style.display = 'none';
-
-      // Check value
-      if (selectedValue === 'MOMO') {
-        qrCard.style.display = 'block';
-        momoQr.style.display = 'block';
-      } else if (selectedValue === 'VNPAY') {
-        qrCard.style.display = 'block';
-        vnpayQr.style.display = 'block';
-      }
-    });
-  });
-</script>
 
 </body>
 </html>
