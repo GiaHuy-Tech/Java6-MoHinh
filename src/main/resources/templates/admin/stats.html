@@ -210,41 +210,40 @@ canvas { max-height: 400px; }
     </div>
     <div class="col-md-6 col-lg-3">
       <div class="card p-3">
-        <h6>Doanh thu tháng</h6>
+        <h6>Đơn hàng tháng</h6>
         <i class="bi bi-bar-chart-line-fill fs-2" style="color: var(--accent-cyan);"></i>
-        <h5 class="mt-2 fw-bold" style="color: var(--accent-cyan);" th:text="${#numbers.formatDecimal(monthRevenue,0,'COMMA',0,'POINT')} + ' ₫'">0 ₫</h5>
+        <h5 class="mt-2 fw-bold" style="color: var(--accent-cyan);" th:text="${monthOrders}">0</h5>
       </div>
     </div>
     <div class="col-md-6 col-lg-3">
       <div class="card p-3">
-        <h6>Doanh thu năm</h6>
+        <h6>Đơn hàng năm</h6>
         <i class="bi bi-cash-stack fs-2" style="color: var(--accent-cyan);"></i>
-        <h5 class="mt-2 fw-bold" style="color: var(--accent-cyan);" th:text="${#numbers.formatDecimal(yearRevenue,0,'COMMA',0,'POINT')} + ' ₫'">0 ₫</h5>
+        <h5 class="mt-2 fw-bold" style="color: var(--accent-cyan);" th:text="${yearOrders}">0</h5>
       </div>
     </div>
   </div>
-
+  
   <div class="card p-4 mb-5">
-    <h5 style="color: var(--accent-cyan) !important;" class="text-center mb-3"><i class="bi bi-calendar-week me-2"></i> Doanh thu theo tháng</h5>
-    <div class="table-responsive">
-      <table class="table table-dark table-hover text-center align-middle mb-0">
-        <thead>
-          <tr>
-            <th>Tháng</th>
-            <th>Doanh thu</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="month, iStat : ${months}">
-            <td th:text="${month}">Tháng 1</td>
-            <td th:text="${#numbers.formatDecimal(revenues[iStat.index],0,'COMMA',0,'POINT')} + ' ₫'">0 ₫</td>
-          </tr>
-        </tbody>
-      </table>
+      <h5 class="text-center mb-3" style="color: var(--accent-cyan);"><i class="bi bi-calendar-week me-2"></i> Số đơn theo tháng</h5>
+      <div class="table-responsive">
+        <table class="table table-dark table-hover text-center align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Tháng</th>
+              <th>Số đơn</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="month, iStat : ${months}">
+              <td th:text="${month}">Tháng 1</td>
+              <td th:text="${orderCounts[iStat.index]}">0</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-
-</div>
 
 <footer class="footer text-center py-4">
   <small>© 2025 <span style="color: var(--accent-cyan);">MODEL WORLD</span> | Figure & Model Store</small>
