@@ -12,178 +12,95 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
-
 <style>
-/* --- CẤU HÌNH MÀU SẮC & BIẾN (ĐỒNG BỘ) --- */
 :root {
-    --bg-dark: #050b14;
-    --bg-card: #0c1525;
-    --text-light: #e1e7ff;
-    --accent-cyan: #00f2ff; /* Màu Neon Cyan chính */
-    --border-color: rgba(0, 242, 255, 0.2);
-    
-    /* Font Variables */
-    --font-main: "Be Vietnam Pro", sans-serif;
-    --font-display: "Orbitron", sans-serif;
-
-    /* ĐỊNH NGHĨA HIỆU ỨNG NEON GLOW */
-    --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+  --bg-dark:#050b14;
+  --bg-card:#0c1525;
+  --text-light:#e1e7ff;
+  --accent-cyan:#00f2ff;
+  --border-color:rgba(0,242,255,.2);
+  --neon-shadow:0 0 10px rgba(0,242,255,.35);
+  --font-main:"Be Vietnam Pro",sans-serif;
+  --font-display:"Orbitron",sans-serif;
 }
 
-body {
-    /* Background neon city */
-    background: 
-        linear-gradient(135deg, var(--bg-dark), #1a0033),
-        url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
-    color: var(--text-light);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-    font-family: var(--font-main);
+body{
+  background:
+    linear-gradient(135deg,var(--bg-dark),#1a0033),
+    url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg')
+    center/cover no-repeat fixed;
+  color:var(--text-light);
+  font-family:var(--font-main);
+  min-height:100vh;
 }
 
-/* TYPOGRAPHY FIX */
-h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
-.navbar-brand { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px; }
-.navbar-brand span { color: #fff; }
-
-
-/* 🌟 NAVBAR (ĐÃ ĐỒNG BỘ VỚI DASHBOARD) */
-.navbar {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); /* Neon glow */
+.navbar{
+  background:linear-gradient(90deg,var(--bg-dark),var(--bg-card));
+  border-bottom:1px solid var(--border-color);
+  box-shadow:0 0 15px rgba(0,242,255,.4);
 }
-.navbar .nav-link { 
-    color: var(--accent-cyan) !important; 
-    transition: 0.3s;
-    font-weight: 500;
+.navbar-brand{
+  font-family:var(--font-display);
+  letter-spacing:1px;
 }
-.navbar .nav-link:hover {
-    color: var(--text-light) !important;
-    text-shadow: 0 0 8px var(--accent-cyan);
+.nav-link{
+  color:var(--accent-cyan)!important;
+}
+.nav-link:hover{
+  color:#fff!important;
+  text-shadow:0 0 8px var(--accent-cyan);
 }
 
-
-/* CARD & BOX STYLE */
-.card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    transition: 0.3s ease;
+.card{
+  background:var(--bg-card);
+  border:1px solid var(--border-color);
+  border-radius:14px;
+  transition:.3s;
 }
-.card:hover {
-    box-shadow: var(--neon-box-shadow);
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:var(--neon-shadow);
 }
 
-.card h5, h2, label, th, .text-neon {
-  color: var(--accent-cyan) !important;
+.table{
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid var(--border-color);
+}
+.table th{
+  color:var(--accent-cyan);
+  border-bottom:1px solid var(--border-color);
+}
+.table-dark tbody tr{
+  background:transparent!important;
+}
+.table-hover tbody tr:hover{
+  background:rgba(0,242,255,.1)!important;
 }
 
-/* TABLE */
-.table {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
-.table thead { background-color: var(--bg-card); }
-.table th { 
-    color: var(--accent-cyan); 
-    font-weight: 600; 
-    border-bottom: 1px solid var(--border-color);
-}
-.table-dark tbody tr { 
-    background-color: transparent !important;
-    border-color: rgba(255,255,255,0.05);
-}
-.table td { color: var(--text-light); vertical-align: middle; }
-.table-hover tbody tr:hover { 
-    background-color: rgba(0,242,255,0.1) !important; 
+.category-img{
+  width:80px;
+  height:80px;
+  object-fit:cover;
+  border-radius:10px;
+  border:1px solid var(--accent-cyan);
 }
 
-
-/* BUTTONS (Sử dụng style Neon Cyan) */
-.btn-neon-action {
-  background: transparent;
-  border: 1px solid var(--accent-cyan);
-  color: var(--accent-cyan);
-  font-weight: 600;
-  border-radius: 8px;
-  transition: 0.3s;
+.btn-neon{
+  border:1px solid var(--accent-cyan);
+  color:var(--accent-cyan);
+  background:transparent;
+  transition:.3s;
 }
-.btn-neon-action:hover {
-  background: var(--accent-cyan);
-  color: var(--bg-dark);
-  box-shadow: 0 0 15px var(--accent-cyan);
-  transform: scale(1.02);
+.btn-neon:hover{
+  background:var(--accent-cyan);
+  color:#000;
+  box-shadow:var(--neon-shadow);
 }
 
-/* FORM CONTROL */
-.form-control, .form-select {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-    color: var(--text-light) !important;
-    border: 1px solid var(--border-color);
-    transition: 0.3s;
-}
-.form-control:focus, .form-select:focus {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
-}
-
-/* IMAGE PREVIEW */
-img.category-img {
-  border-radius: 8px;
-  border: 1px solid var(--accent-cyan);
-  transition: 0.3s;
-  object-fit: cover;
-}
-img.category-img:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 8px var(--accent-cyan);
-}
-
-/* FOOTER */
-footer {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-top: 1px solid var(--border-color);
-    color: rgba(255,255,255,0.85);
-    padding: 20px 0;
-}
-
-/* ALERT */
-.alert-custom {
-  border: 1px solid var(--accent-cyan);
-  background-color: rgba(0, 242, 255, 0.1);
-  color: var(--accent-cyan);
-}
-.alert-custom .btn-close-white {
-    filter: invert(1);
-}
-
-
-/* Rain effect */
-.rain {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-}
-.drop {
-  position: absolute;
-  width: 2px;
-  height: 15px;
-  background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,255,255,0));
-  animation: fall linear infinite;
-  opacity: 0.7;
-}
-@keyframes fall {
-  0% { transform: translateY(-20px); }
-  100% { transform: translateY(100vh); }
+.footer{
+  background:linear-gradient(90deg,var(--bg-dark),var(--bg-card));
+  border-top:1px solid var(--border-color);
 }
 </style>
 </head>
@@ -192,168 +109,124 @@ footer {
 
 <nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/stats}"> 
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/stats"> 
         <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
-        <span class="fw-bold fs-4">MODEL WORLD</span>
+        <span class="fw-bold fs-4 text-light">MODEL WORLD</span>
     </a>
     <div class="collapse navbar-collapse justify-content-end">
       <ul class="navbar-nav me-3">
-        <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+        <li class="nav-item"><a class="nav-link" href="/cata-mana"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
+        <li class="nav-item"><a class="nav-link" href="/product-mana"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/orders-mana"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+        <li class="nav-item"><a class="nav-link" href="/user-mana"><i class="bi bi-people me-1"></i> Người dùng</a></li>
+        <li class="nav-item"><a class="nav-link" href="/admin/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
+
 <div class="container py-5">
 
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0 text-neon">
-      <i class="bi bi-tags"></i> Quản lý danh mục
-    </h2>
-    <a th:href="@{/stats}" class="btn btn-neon-action">
-      <i class="bi bi-arrow-left-circle me-1"></i> Về menu Admin
-    </a>
-  </div>
+<h2 class="text-center mb-5" style="color:var(--accent-cyan)">
+<i class="bi bi-tags-fill me-2"></i>QUẢN LÝ DANH MỤC
+</h2>
 
-  <div th:if="${param.success}" class="alert alert-custom alert-dismissible fade show text-center mb-4">
-    <i class="bi bi-check-circle-fill me-2"></i> Cập nhật thành công!
-    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-  </div>
+<!-- TABLE -->
+<div class="card mb-5">
+<div class="card-body p-0">
+<table class="table table-dark table-hover text-center align-middle mb-0">
+<thead>
+<tr>
+<th>ID</th>
+<th>Tên danh mục</th>
+<th>Hình ảnh</th>
+<th>Hành động</th>
+</tr>
+</thead>
+<tbody>
 
-  <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show text-center mb-4">
-    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-    <span th:switch="${param.error}">
-      <span th:case="'emptyName'">Tên danh mục không được để trống!</span>
-      <span th:case="'notfound'">Không tìm thấy danh mục để cập nhật!</span>
-      <span th:case="*">Đã xảy ra lỗi, vui lòng thử lại!</span>
-    </span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  </div>
+<tr th:each="c : ${categories}">
+<td th:text="${c.id}"></td>
+<td th:text="${c.name}"></td>
+<td>
+  <img th:if="${c.image}" th:src="@{${c.image}}" class="category-img">
+  <span th:if="${c.image == null}" class="fst-italic text-muted">Chưa có ảnh</span>
+</td>
+<td>
+<button class="btn btn-sm btn-neon"
+        th:attr="data-bs-id=${c.id},data-bs-name=${c.name},data-bs-image=${c.image}"
+        data-bs-toggle="modal"
+        data-bs-target="#editCategoryModal">
+<i class="bi bi-pencil-square"></i> Sửa
+</button>
+</td>
+</tr>
 
-  <div class="card shadow mb-5">
-    <div class="card-body p-0">
-      <table class="table table-dark table-hover mb-0 text-center align-middle">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Tên danh mục</th>
-            <th>Hình ảnh</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="c : ${categories}">
-            <td th:text="${c.id}">1</td>
-            <td th:text="${c.name}">Figure</td>
-            <td>
-              <img th:src="@{${c.image}}" width="80" height="80" class="category-img" alt="Hình danh mục">
-            </td>
-            <td>
-              <button class="btn btn-sm btn-neon-action"
-                th:attr="data-bs-id=${c.id},data-bs-name=${c.name},data-bs-image=@{${c.image}}"
-                data-bs-toggle="modal" data-bs-target="#editCategoryModal">
-                <i class="bi bi-pencil-square"></i> Sửa
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card p-4 shadow-lg">
-    <h5 class="mb-3 text-neon">
-      <i class="bi bi-plus-circle"></i> Thêm danh mục mới
-    </h5>
-    <form th:action="@{/cata-mana/add}" method="post" enctype="multipart/form-data">
-      <div class="mb-3">
-        <label class="form-label text-neon">Tên danh mục</label>
-        <input type="text" name="name"
-          class="form-control"
-          placeholder="Nhập tên danh mục" required>
-      </div>
-      <div class="mb-3">
-        <label class="form-label text-neon">Hình ảnh (chọn tệp)</label>
-        <input type="file" name="image"
-          class="form-control"
-          accept="image/*" required>
-      </div>
-      <button type="submit" class="btn btn-neon-action w-100 py-2">
-        <i class="bi bi-save2"></i> Thêm danh mục
-      </button>
-    </form>
-  </div>
+</tbody>
+</table>
+</div>
 </div>
 
+<!-- ADD -->
+<div class="card p-4 mb-5">
+<h5 class="mb-3" style="color:var(--accent-cyan)">
+<i class="bi bi-plus-circle me-2"></i>Thêm danh mục
+</h5>
+<form th:action="@{/cata-mana/add}" method="post" enctype="multipart/form-data">
+<input class="form-control mb-3" name="name" placeholder="Tên danh mục" required>
+<input class="form-control mb-3" type="file" name="image" accept="image/*" required>
+<button class="btn btn-neon w-100">Thêm danh mục</button>
+</form>
+</div>
+
+</div>
+
+<!-- MODAL EDIT -->
 <div class="modal fade" id="editCategoryModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
-      <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-        <h5 class="modal-title text-neon">
-          <i class="bi bi-pencil-square"></i> Sửa danh mục
-        </h5>
-        <button type="button" class="btn-close" style="filter: invert(1) brightness(200%);" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form th:action="@{/cata-mana/update}" method="post"
-          enctype="multipart/form-data" id="editCategoryForm">
-          <input type="hidden" name="id" id="editId">
-          <div class="mb-3">
-            <label class="form-label text-neon">Tên danh mục</label>
-            <input type="text" name="name" id="editName"
-              class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-neon">Hình ảnh mới (tùy chọn)</label>
-            <input type="file" name="imageFile"
-              class="form-control"
-              accept="image/*">
-          </div>
-          <div class="text-center mb-3">
-            <img id="previewImage" src="" width="100" height="100" class="category-img" alt="Ảnh hiện tại">
-          </div>
-          <button type="submit" class="btn btn-neon-action w-100 py-2">
-            <i class="bi bi-save2"></i> Lưu thay đổi
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content bg-dark border border-info">
+<div class="modal-header">
+<h5 class="modal-title" style="color:var(--accent-cyan)">Sửa danh mục</h5>
+<button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+<form th:action="@{/cata-mana/update}" method="post" enctype="multipart/form-data">
+<input type="hidden" name="id" id="editId">
+<input class="form-control mb-3" id="editName" name="name" required>
+<input class="form-control mb-3" type="file" name="imageFile" accept="image/*">
+
+<div class="text-center mb-3">
+<img id="previewImage" class="category-img">
 </div>
 
-<footer class="text-center py-4">
-  <small>© 2025 <span style="color: var(--accent-cyan);">MODEL WORLD</span> | Category Management</small>
-</footer>
+<button class="btn btn-neon w-100">Lưu thay đổi</button>
+</form>
+</div>
+</div>
+</div>
+</div>
 
-<div class="rain" id="rain"></div>
+<footer class="footer text-center py-4 mt-5">
+<small>© 2025 <span style="color:var(--accent-cyan)">MODEL WORLD</span></small>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-// Rain effect
-const rain = document.getElementById('rain');
-// GIẢM SỐ LƯỢNG GIỌT MƯA VÀ TĂNG DELAY ĐỂ GIẢM TẦN SUẤT
-const drops = 50; // Giảm từ 100 xuống 50
-for(let i=0;i<drops;i++){
-  const drop = document.createElement('div');
-  drop.className = 'drop';
-  drop.style.left = Math.random() * 100 + 'vw';
-  drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
-  drop.style.animationDelay = Math.random()*10 + 's'; // Tăng thời gian delay tối đa (từ 5s lên 10s)
-  rain.appendChild(drop);
-}
+var modal = document.getElementById('editCategoryModal');
+modal.addEventListener('show.bs.modal', function (e) {
+  const btn = e.relatedTarget;
+  document.getElementById('editId').value = btn.dataset.bsId;
+  document.getElementById('editName').value = btn.dataset.bsName;
 
-// Modal edit category
-var editModal = document.getElementById('editCategoryModal');
-editModal.addEventListener('show.bs.modal', function(event) {
-  var button = event.relatedTarget;
-  document.getElementById('editId').value = button.getAttribute('data-bs-id');
-  document.getElementById('editName').value = button.getAttribute('data-bs-name');
-  document.getElementById('previewImage').src = button.getAttribute('data-bs-image');
+  const preview = document.getElementById('previewImage');
+  if(btn.dataset.bsImage){
+    preview.src = btn.dataset.bsImage;
+    preview.style.display = 'inline-block';
+  }else{
+    preview.style.display = 'none';
+  }
 });
 </script>
 

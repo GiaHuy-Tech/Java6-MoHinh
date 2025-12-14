@@ -1,4 +1,4 @@
-package com.example.demo.controllers;
+package com.example.demo.api;
 
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
