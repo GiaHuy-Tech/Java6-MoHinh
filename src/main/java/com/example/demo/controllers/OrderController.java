@@ -22,19 +22,56 @@ public class OrderController {
     private OrdersRepository orderRepo;
 
     /**
-     * Hiển thị trang "Đơn hàng của tôi"
+     * Hiển thị trang "Đơn hàng của tôi" có chức năng Sắp xếp
      */
     @GetMapping("/orders")
-    public String viewOrders(Model model) {
+    public String viewOrders(Model model, 
+                             @RequestParam(name = "sort", defaultValue = "newest") String sort) {
+        
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
             return "redirect:/login";
         }
 
-        List<Orders> orders = orderRepo.findByAccountId_IdOrderByCreatedDateDesc(account.getId());
-        model.addAttribute("orders", orders);
+        List<Orders> orders;
 
-        return "client/orders"; // Trỏ đến file orders.html
+        // Xử lý logic sắp xếp dựa trên tham số 'sort' từ URL
+        if ("oldest".equals(sort)) {
+            // Cũ nhất -> Mới nhất (Ascending)
+            // ⚠️ Lưu ý: Bạn cần khai báo hàm này trong OrdersRepository (xem bên dưới)
+            orders = orderRepo.findByAccountId_IdOrderByCreatedDateAsc(account.getId());
+        } else {
+            // Mới nhất -> Cũ nhất (Descending) - Mặc định
+            orders = orderRepo.findByAccountId_IdOrderByCreatedDateDesc(account.getId());
+        }
+
+        model.addAttribute("orders", orders);
+        model.addAttribute("sort", sort); // Gửi lại biến sort để giữ trạng thái select box
+
+        return "client/orders"; 
+    }
+
+    /**
+     * Xem chi tiết đơn hàng
+     */
+    @GetMapping("/orders/detail/{id}")
+    public String viewOrderDetail(@PathVariable("id") Integer orderId, Model model) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) return "redirect:/login";
+
+        Optional<Orders> orderOpt = orderRepo.findById(orderId);
+        
+        if (orderOpt.isPresent()) {
+            Orders order = orderOpt.get();
+            // Bảo mật: Chỉ xem được đơn của chính mình
+            if (order.getAccountId().getId().equals(account.getId())) {
+                model.addAttribute("order", order);
+                model.addAttribute("orderDetails", order.getOrderDetails()); 
+                return "client/order-detail"; 
+            }
+        }
+        
+        return "redirect:/orders";
     }
 
     /**
@@ -50,7 +87,7 @@ public class OrderController {
         Optional<Orders> optionalOrder = orderRepo.findById(orderId);
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();
-            // Chỉ cho phép hủy đơn của chính user và trạng thái 0 hoặc 1
+            // Chỉ cho phép hủy đơn của chính user và trạng thái 0 (Chờ xử lý) hoặc 1 (Đã xác nhận)
             if (order.getAccountId().getId().equals(account.getId()) &&
                 (order.getStatus() == 0 || order.getStatus() == 1)) {
 
