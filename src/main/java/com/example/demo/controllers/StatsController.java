@@ -1,6 +1,5 @@
 package com.example.demo.controllers;
 
-import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.demo.model.Products;
 import com.example.demo.repository.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class StatsController {
