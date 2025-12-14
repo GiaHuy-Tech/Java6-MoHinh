@@ -89,7 +89,7 @@
     </style>
 </head>
 
-<body th:classappend="${order.paymentMethod == 'MOMO'} ? 'momo-theme' : ''">
+<body th:classappend="${checkoutData.paymentMethod == 'MOMO'} ? 'momo-theme' : ''">
 
     <div class="container">
         <div class="row justify-content-center">
@@ -97,8 +97,8 @@
                 <div class="card p-4 text-center">
                     
                     <h3 class="text-neon mb-4">
-                        <span th:if="${order.paymentMethod == 'VIETQR'}">CHUYỂN KHOẢN BANK</span>
-                        <span th:if="${order.paymentMethod == 'MOMO'}">THANH TOÁN MOMO</span>
+                        <span th:if="${checkoutData.paymentMethod == 'VIETQR'}">CHUYỂN KHOẢN BANK</span>
+                        <span th:if="${checkoutData.paymentMethod == 'MOMO'}">THANH TOÁN MOMO</span>
                     </h3>
                     
                     <p class="mb-2 text-white-50">Vui lòng quét mã QR bên dưới để thanh toán</p>
@@ -124,22 +124,22 @@
                         <div class="d-flex justify-content-between info-row align-items-center">
                             <span class="text-secondary">Số tiền:</span>
                             <span class="fw-bold text-neon fs-4" 
-                                  th:text="${#numbers.formatDecimal(order.total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                                  th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                         </div>
                         <div class="d-flex justify-content-between info-row align-items-center">
                             <span class="text-secondary">Nội dung CK:</span>
                             <span class="fw-bold text-warning bg-black px-2 py-1 rounded" 
-                                  th:text="'DH' + ${order.id}"></span>
+                                  th:text="${content}"></span>
                         </div>
                     </div>
 
-                    <a href="/orders" class="btn btn-confirm rounded-pill mb-3">
+                    <a href="/checkout/confirm" class="btn btn-confirm rounded-pill mb-3">
                         <i class="bi bi-check-circle-fill me-2"></i> TÔI ĐÃ CHUYỂN TIỀN
                     </a>
                     
                     <div>
-                        <a href="/" class="text-secondary text-decoration-none small hover-link">
-                            <i class="bi bi-arrow-left"></i> Quay lại trang chủ
+                        <a href="/cart" class="text-secondary text-decoration-none small hover-link">
+                            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
                         </a>
                     </div>
                 </div>

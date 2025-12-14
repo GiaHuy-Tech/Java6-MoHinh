@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
+/* CSS giữ nguyên như cũ */
 :root {
     --bg-dark: #050b14;
     --bg-card: #0c1525;
@@ -57,7 +58,7 @@ h2,h4,h5,h6 { font-family: var(--font-main); font-weight: 700; }
 .card:hover { box-shadow: var(--neon-box-shadow); }
 .card h6, label, th, .text-neon { color: var(--accent-cyan) !important; }
 
-/* Table Styling Update */
+/* Table Styling */
 .table-responsive { overflow-x: auto; }
 .table { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); white-space: nowrap; }
 .table thead { background-color: var(--bg-dark); }
@@ -104,7 +105,6 @@ select.status-select option:disabled {
     font-style: italic;
 }
 
-/* Custom width for address column */
 .address-cell {
     max-width: 200px;
     overflow: hidden;
@@ -125,17 +125,17 @@ a { text-decoration: none; }
 
 <nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="/stats"> 
+    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/stats}"> 
         <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
         <span class="fw-bold fs-4">MODEL WORLD</span>
     </a>
     <div class="collapse navbar-collapse justify-content-end">
       <ul class="navbar-nav me-3">
-        <li class="nav-item"><a class="nav-link" href="/cata-mana"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
-        <li class="nav-item"><a class="nav-link" href="/product-mana"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" href="/orders-mana"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-        <li class="nav-item"><a class="nav-link" href="/user-mana"><i class="bi bi-people me-1"></i> Người dùng</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
       </ul>
     </div>
   </div>
@@ -157,7 +157,9 @@ a { text-decoration: none; }
               <tr>
                 <th>ID</th>
                 <th>Khách hàng</th>
-                <th>SĐT</th> <th>Địa chỉ</th> <th>Ngày tạo</th>
+                <th>SĐT</th> 
+                <th>Địa chỉ</th> 
+                <th>Ngày tạo</th>
                 <th>Tổng tiền</th>
                 <th>Phí Ship</th> 
                 <th>Thanh toán</th> 
@@ -169,32 +171,25 @@ a { text-decoration: none; }
               <tr th:each="o : ${ordersList}">
                 <td th:text="${o.id}">1</td>
                 <td th:text="${o.accountId.fullName}">Nguyễn Văn A</td>
-                
                 <td th:text="${o.phone}">0912345678</td>
-
-                <td class="address-cell" th:text="${o.address}" th:title="${o.address}">Hà Nội</td>
-
-                <td th:text="${#dates.format(o.createdDate, 'dd/MM/yyyy HH:mm')}">01/10/2025 10:00</td>
+                <td class="address-cell" th:text="${o.address}" th:title="${o.address}">Cần Thơ</td>
+                <td th:text="${#dates.format(o.createdDate, 'dd/MM/yyyy HH:mm')}"></td>
                 
                 <td th:text="${#numbers.formatDecimal(o.total, 0, 'POINT', 0, 'COMMA')} + '₫'">1.500.000₫</td>
 
                 <td>
-                    <span th:if="${o.total > 1000000}" class="badge border border-info text-info">Free Ship</span>
-                    <span th:unless="${o.total > 1000000}" 
-                          th:text="${#numbers.formatDecimal(o.total * 0.05, 0, 'POINT', 0, 'COMMA')} + '₫'">
+                    <span th:if="${o.feeship == 0}" class="badge border border-info text-info">Free Ship</span>
+                    <span th:unless="${o.feeship == 0}" 
+                          class="fw-bold"
+                          th:text="${#numbers.formatDecimal(o.feeship, 0, 'POINT', 0, 'COMMA')} + '₫'">
                     </span>
                 </td>
 
                 <td>
-                    <span th:if="${((o.paymentMethod == 'VIETQR' or o.paymentMethod == 'MOMO') and o.status != 4) 
-                                or (o.paymentMethod == 'COD' and o.status == 3)}" 
-                          class="badge bg-success bg-opacity-75">
+                    <span th:if="${o.paymentStatus}" class="badge bg-success bg-opacity-75">
                         <i class="bi bi-check-circle-fill"></i> Đã TT
                     </span>
-
-                    <span th:unless="${((o.paymentMethod == 'VIETQR' or o.paymentMethod == 'MOMO') and o.status != 4) 
-                                    or (o.paymentMethod == 'COD' and o.status == 3)}" 
-                          class="badge bg-danger bg-opacity-75">
+                    <span th:unless="${o.paymentStatus}" class="badge bg-danger bg-opacity-75">
                         <i class="bi bi-x-circle-fill"></i> Chưa TT
                     </span>
                 </td>
@@ -203,18 +198,15 @@ a { text-decoration: none; }
                   <form th:action="@{/orders-mana/updateStatus}" method="post" class="d-inline">
                     <input type="hidden" name="id" th:value="${o.id}">
                     <select name="status" class="status-select" onchange="this.form.submit()">
-                      
                       <option th:value="0" th:selected="${o.status == 0}">Chờ xử lý</option>
                       <option th:value="1" th:selected="${o.status == 1}">Đã xác nhận</option>
                       <option th:value="2" th:selected="${o.status == 2}">Đang giao</option>
                       <option th:value="3" th:selected="${o.status == 3}">Hoàn tất</option>
-                      
                       <option th:value="4" 
                               th:selected="${o.status == 4}"
                               th:disabled="${o.status > 1 and o.status != 4}">
                           Đã hủy
                       </option>
-
                     </select>
                   </form>
                 </td>

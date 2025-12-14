@@ -249,9 +249,13 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Địa chỉ nhận hàng</label>
+                                <label class="form-label">Địa chỉ nhận hàng (Ghi rõ Tỉnh/TP)</label>
                                 <input type="text" class="form-control form-control-dark" name="address"
-                                       th:value="${account.address}" placeholder="Nhập địa chỉ chi tiết" required>
+                                       th:value="${account.address}" 
+                                       placeholder="Số nhà, Đường, Quận/Huyện, Tỉnh/TP..." required>
+                                <small class="text-light fst-italic mt-1 d-block">
+                                    * Phí vận chuyển được tính tự động dựa trên địa chỉ (Kho tại Cần Thơ).
+                                </small>
                             </div>
                             
                             <div class="mb-3">
@@ -277,7 +281,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-5" th:with="shippingFee=${total < 1000000 ? total * 0.05 : 0}">
+            <div class="col-lg-5">
                 <div class="checkout-card mb-4">
                     <div class="card-header-custom">
                         <i class="bi bi-bag-check me-2"></i> Đơn hàng của bạn
@@ -318,7 +322,7 @@
                                 </span>
                             </div>
                             <div th:if="${shippingFee > 0}" class="text-end mt-1">
-                                <small class="text-light fst-italic">(Phí ship 5% cho đơn dưới 1 triệu)</small>
+                                <small class="text-light fst-italic">(Phí ship tính theo khu vực)</small>
                             </div>
                             <div th:unless="${shippingFee > 0}" class="text-end mt-1">
                                 <small class="text-success fst-italic"><i class="bi bi-check-circle-fill"></i> Đã áp dụng Free Ship (Đơn > 1tr)</small>
