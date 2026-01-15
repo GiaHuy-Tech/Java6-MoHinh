@@ -292,7 +292,7 @@
                                 th:each="item : ${cartDetails}">
                                 <div>
                                     <span class="fw-semibold" th:text="${item.product.name}">Tên SP</span>
-                                    <div class="small text-muted">x<span th:text="${item.quantity}">1</span></div>
+                                    <div class="small text-light">x<span th:text="${item.quantity}">1</span></div>
                                 </div>
                                 <span class="price-text text-info" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
                             </li>

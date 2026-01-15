@@ -3,148 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán - Model World</title>
+    <title>Thanh toán QR - Model World</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-
+    
     <style>
         :root {
             --bg-dark: #050b14;
             --bg-card: #0c1525;
-            /* Màu mặc định (VietQR) là Xanh Cyan */
-            --accent-color: #00f2ff; 
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
             --font-main: "Be Vietnam Pro", sans-serif;
             --font-logo: "Orbitron", sans-serif;
         }
-
-        /* Khi có class momo-theme thì đổi màu chủ đạo sang Hồng */
-        .momo-theme {
-            --accent-color: #d82d8b; /* Màu hồng Momo */
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        body { 
-            background-color: var(--bg-dark); 
-            color: #e1e7ff; 
-            font-family: var(--font-main); 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+        .payment-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            max-width: 900px;
+            width: 100%;
+            overflow: hidden;
         }
-
-        .card { 
-            background-color: var(--bg-card); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); 
-            border-radius: 15px; 
-            /* Viền card phát sáng theo màu chủ đạo */
-            border-color: rgba(var(--accent-color), 0.3);
+        .qr-section {
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
         }
-
-        .qr-img { 
-            width: 100%; 
-            max-width: 350px; 
-            border-radius: 10px; 
-            border: 3px solid var(--accent-color); 
-            box-shadow: 0 0 15px var(--accent-color); 
-            padding: 5px;
-            background: white;
+        .info-section {
+            padding: 40px;
         }
-
-        .text-neon { 
-            color: var(--accent-color); 
-            text-shadow: 0 0 8px var(--accent-color); 
-            font-family: var(--font-logo); 
+        .qr-img {
+            width: 100%;
+            max-width: 300px;
+            border: 2px dashed #333;
+            padding: 10px;
+            border-radius: 8px;
         }
-
-        .btn-confirm { 
-            background: var(--accent-color); 
-            color: #fff; 
-            font-weight: bold; 
-            width: 100%; 
-            padding: 12px; 
-            border: none; 
-            font-family: var(--font-main); 
-            letter-spacing: 1px; 
+        .price-text {
+            font-family: var(--font-logo);
+            color: var(--accent-cyan);
+            font-size: 1.8rem;
+            font-weight: 700;
         }
-
-        /* Chữ nút confirm màu đen nếu là cyan, màu trắng nếu là hồng cho dễ đọc */
-        body:not(.momo-theme) .btn-confirm { color: #000; }
-
-        .btn-confirm:hover { 
-            background: #fff; 
-            color: var(--accent-color);
-            box-shadow: 0 0 15px var(--accent-color); 
-            transform: translateY(-2px); 
-            transition: 0.3s; 
+        .copy-btn {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            transition: 0.3s;
+            cursor: pointer;
         }
-
-        .info-row { 
-            border-bottom: 1px solid rgba(255,255,255,0.1); 
-            padding: 12px 0; 
+        .copy-btn:hover {
+            background: var(--accent-cyan);
+            color: #000;
         }
-        .info-row:last-child { border-bottom: none; }
+        /* Style cho nút xác nhận mới */
+        .btn-confirm {
+            background: linear-gradient(45deg, #198754, #20c997);
+            border: none;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(32, 201, 151, 0.4);
+            color: white;
+        }
     </style>
 </head>
+<body>
 
-<body th:classappend="${checkoutData.paymentMethod == 'MOMO'} ? 'momo-theme' : ''">
+<div class="payment-card">
+    <div class="row g-0">
+        <div class="col-md-5 qr-section">
+            <h5 class="text-dark fw-bold mb-3 text-uppercase" th:text="${paymentMethod == 'MOMO'} ? 'Quét MoMo' : 'Quét VietQR'">QR CODE</h5>
+            
+            <img th:src="${qrUrl}" alt="QR Code" class="qr-img mb-3">
+            
+            <p class="text-secondary small text-center mb-0">
+                <i class="bi bi-phone-vibrate"></i> Mở ứng dụng ngân hàng/MoMo<br>để quét mã thanh toán
+            </p>
+        </div>
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-5">
-                <div class="card p-4 text-center">
+        <div class="col-md-7 info-section">
+            <h3 class="mb-4" style="font-family: var(--font-logo)">THANH TOÁN</h3>
+            
+            <div class="mb-4">
+                <label class="text-secondary small">Số tiền cần thanh toán:</label>
+                <div class="price-text" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VND'"></div>
+            </div>
+
+            <div class="mb-3">
+                <label class="text-secondary small d-block">Nội dung chuyển khoản (Bắt buộc):</label>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fs-5 fw-bold text-white bg-danger px-2 rounded" th:text="${content}">DH123456</span>
                     
-                    <h3 class="text-neon mb-4">
-                        <span th:if="${checkoutData.paymentMethod == 'VIETQR'}">CHUYỂN KHOẢN BANK</span>
-                        <span th:if="${checkoutData.paymentMethod == 'MOMO'}">THANH TOÁN MOMO</span>
-                    </h3>
-                    
-                    <p class="mb-2 text-white-50">Vui lòng quét mã QR bên dưới để thanh toán</p>
-                    <p class="text-warning fst-italic mb-3 small">(Hệ thống tự động nhập số tiền và nội dung)</p>
+                    <button class="copy-btn" 
+                            th:data-copy="${content}" 
+                            onclick="copyText(this.getAttribute('data-copy'))">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+                <small class="text-warning fst-italic">* Vui lòng nhập đúng nội dung để hệ thống xử lý nhanh nhất.</small>
+            </div>
 
-                    <div class="mb-4">
-                        <img th:src="${qrUrl}" class="qr-img" alt="QR Code Thanh Toan">
+            <div class="mb-4 border-top border-secondary pt-3">
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-secondary">Ngân hàng:</small>
+                        <div class="fw-bold text-light" th:text="${bankName}">VietinBank</div>
                     </div>
-
-                    <div class="text-start px-2 mb-4">
-                        <div class="d-flex justify-content-between info-row">
-                            <span class="text-secondary">Ngân hàng/Ví:</span>
-                            <span class="fw-bold text-white" th:text="${bankName}">VietinBank</span>
-                        </div>
-                        <div class="d-flex justify-content-between info-row">
-                            <span class="text-secondary">Chủ tài khoản:</span>
-                            <span class="fw-bold text-white" th:text="${accountName}">NGUYEN GIA HUY</span>
-                        </div>
-                        <div class="d-flex justify-content-between info-row">
-                            <span class="text-secondary">Số TK / SĐT:</span>
-                            <span class="fw-bold text-white" th:text="${accountNo}">103878028110</span>
-                        </div>
-                        <div class="d-flex justify-content-between info-row align-items-center">
-                            <span class="text-secondary">Số tiền:</span>
-                            <span class="fw-bold text-neon fs-4" 
-                                  th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-                        </div>
-                        <div class="d-flex justify-content-between info-row align-items-center">
-                            <span class="text-secondary">Nội dung CK:</span>
-                            <span class="fw-bold text-warning bg-black px-2 py-1 rounded" 
-                                  th:text="${content}"></span>
-                        </div>
+                    <div class="col-6">
+                        <small class="text-secondary">Chủ tài khoản:</small>
+                        <div class="fw-bold text-light" th:text="${accountName}">NGUYEN GIA HUY</div>
                     </div>
-
-                    <a href="/checkout/confirm" class="btn btn-confirm rounded-pill mb-3">
-                        <i class="bi bi-check-circle-fill me-2"></i> TÔI ĐÃ CHUYỂN TIỀN
-                    </a>
-                    
-                    <div>
-                        <a href="/cart" class="text-secondary text-decoration-none small hover-link">
-                            <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
-                        </a>
+                    <div class="col-12 mt-2">
+                        <small class="text-secondary">Số tài khoản:</small>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold text-light fs-5" th:text="${accountNo}">103878028110</span>
+                            
+                            <button class="copy-btn" 
+                                    th:data-copy="${accountNo}" 
+                                    onclick="copyText(this.getAttribute('data-copy'))">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <div class="d-flex flex-column gap-3">
+                
+                <form th:action="@{/checkout/confirm-payment}" method="post" class="w-100">
+                    <button type="submit" class="btn btn-confirm w-100 py-3">
+                        <i class="bi bi-check-circle-fill me-2"></i> Xác nhận đã chuyển khoản
+                    </button>
+                </form>
+
+                <div class="text-center text-secondary small d-flex align-items-center justify-content-center gap-2">
+                    <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+                    <span>Hệ thống đang chờ giao dịch...</span>
+                </div>
+            </div>
+            
+            <div class="mt-4 border-top border-secondary pt-3 text-center">
+                <a href="/orders" class="text-secondary small text-decoration-none hover-white">
+                    <i class="bi bi-arrow-left"></i> Quay lại danh sách đơn hàng
+                </a>
+            </div>
         </div>
     </div>
+</div>
+
+<script>
+    // Hàm copy tổng quát
+    function copyText(textToCopy) {
+        if (!textToCopy) return;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert("Đã sao chép: " + textToCopy);
+        }).catch(err => {
+            console.error('Lỗi khi sao chép:', err);
+            alert("Vui lòng bôi đen và copy thủ công: " + textToCopy);
+        });
+    }
+
+    // Polling kiểm tra trạng thái thanh toán (Giữ lại nếu sau này dùng Webhook)
+    setInterval(() => {
+        fetch('/checkout/check-status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.paid === true) {
+                    alert("Thanh toán thành công! Đang chuyển hướng...");
+                    window.location.href = "/orders";
+                }
+            })
+            .catch(error => console.error('Checking status...', error));
+    }, 3000);
+</script>
+
 </body>
 </html>

@@ -253,7 +253,7 @@
                             <td class="text-start">
                                 <div th:each="detail, iterStat : ${order.orderDetails}" class="mb-1">
                                     <span class="text-light" th:text="${detail.productId.name}"></span>
-                                    <small class="text-muted ms-1">x<span th:text="${detail.quantity}"></span></small>
+                                    <small class="text-light ms-1">x<span th:text="${detail.quantity}"></span></small>
                                 </div>
                             </td>
                             <td class="text-info fw-bold" th:text="${#numbers.formatDecimal(order.total,0,'COMMA',0,'POINT')} + '₫'"></td>

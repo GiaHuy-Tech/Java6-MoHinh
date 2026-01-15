@@ -40,4 +40,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     //Sản phẩm bán chạy nhất
     @Query("SELECT od.productId FROM OrderDetail od GROUP BY od.productId ORDER BY SUM(od.quantity) DESC LIMIT 1")
     Optional<Products> findTopSellingProduct();
+    Optional<Orders> findByNote(String note);
 }

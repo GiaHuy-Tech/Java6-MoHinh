@@ -23,52 +23,33 @@ public class CheckoutController {
     @Autowired private OrdersRepository orderRepo;
     @Autowired private OrdersDetailRepository orderDetailRepo;
 
-    // --- CẤU HÌNH TỈNH THÀNH (Kho Cần Thơ) ---
+    // --- CẤU HÌNH TỈNH THÀNH ---
     private static final List<String> SOUTH_PROVINCES = Arrays.asList(
-        "binh phuoc", "binh duong", "dong nai", "tay ninh", "ba ria", "vung tau",
-        "ho chi minh", "sai gon", "hcm", "long an", "dong thap", "tien giang",
-        "an giang", "ben tre", "vinh long", "tra vinh", "hau giang", "kien giang",
-        "soc trang", "bac lieu", "ca mau"
+        "ho chi minh", "hcm", "sai gon", "can tho", "binh duong", "dong nai", "long an", 
+        "tien giang", "ben tre", "tra vinh", "vinh long", "dong thap", "an giang", 
+        "kien giang", "hau giang", "soc trang", "bac lieu", "ca mau", "ba ria", 
+        "vung tau", "tay ninh", "binh phuoc"
     );
-    private static final List<String> CENTRAL_PROVINCES = Arrays.asList(
-        "thanh hoa", "nghe an", "ha tinh", "quang binh", "quang tri", "thua thien hue",
-        "da nang", "quang nam", "quang ngai", "binh dinh", "phu yen", "khanh hoa",
-        "ninh thuan", "binh thuan", "kon tum", "gia lai", "dak lak", "dak nong", "lam dong"
-    );
-    private static final List<String> NORTH_PROVINCES = Arrays.asList(
-        "lao cai", "yen bai", "dien bien", "hoa binh", "lai chau", "son la", "ha giang",
-        "cao bang", "bac kan", "lang son", "tuyen quang", "thai nguyen", "phu tho",
-        "bac giang", "quang ninh", "bac ninh", "ha nam", "hai duong", "hai phong",
-        "hung yen", "nam dinh", "ninh binh", "thai binh", "vinh phuc", "ha noi", "hn"
-    );
-
-    // --- DTO LƯU SESSION ---
-    public static class CheckoutData {
-        public String address;
-        public String phone;
-        public String paymentMethod;
-        public int totalAmount;
-        public int shippingFee;
-        public int finalTotal;
-        public String tempOrderCode;
-    }
 
     // --- HELPER METHODS ---
-    private int calculateShippingFee(String address, int subTotal) {
-        if (subTotal >= 1000000) return 0;
-        if (address == null || address.isEmpty()) return 50000;
-        String normAddress = unAccent(address.toLowerCase());
-        if (normAddress.contains("can tho")) return 20000;
-        for (String p : SOUTH_PROVINCES) if (normAddress.contains(p)) return 30000;
-        for (String p : CENTRAL_PROVINCES) if (normAddress.contains(p)) return 40000;
-        for (String p : NORTH_PROVINCES) if (normAddress.contains(p)) return 50000;
-        return 45000; 
-    }
-
     public static String unAccent(String s) {
+        if (s == null) return "";
         String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(temp).replaceAll("").replaceAll("đ", "d");
+    }
+
+    private int calculateShippingFee(String address, int subTotal) {
+        if (subTotal >= 1000000) return 0; 
+        if (address == null || address.trim().isEmpty()) return 50000;
+
+        String normAddress = unAccent(address.toLowerCase());
+        
+        if (normAddress.contains("can tho")) return 0; // Cần Thơ Free Ship
+        for (String p : SOUTH_PROVINCES) {
+            if (normAddress.contains(p)) return 30000;
+        }
+        return 45000; 
     }
 
     // --- CONTROLLER METHODS ---
@@ -88,6 +69,8 @@ public class CheckoutController {
         model.addAttribute("total", subTotal);
         model.addAttribute("shippingFee", shippingFee);
         model.addAttribute("account", account);
+        model.addAttribute("keyword", ""); 
+        model.addAttribute("selectedCategory", "");
 
         return "client/checkout";
     }
@@ -109,101 +92,25 @@ public class CheckoutController {
         int shippingFee = calculateShippingFee(address, subTotal);
         int finalTotal = subTotal + shippingFee;
 
-        // Lưu thông tin vào Session (Chưa lưu DB)
-        CheckoutData data = new CheckoutData();
-        data.address = address;
-        data.phone = phone;
-        data.paymentMethod = paymentMethod;
-        data.totalAmount = subTotal;
-        data.shippingFee = shippingFee;
-        data.finalTotal = finalTotal;
-        data.tempOrderCode = "DH" + System.currentTimeMillis() / 1000;
-
-        session.setAttribute("checkoutData", data);
-
-        if ("VIETQR".equals(paymentMethod) || "MOMO".equals(paymentMethod)) {
-            return "redirect:/checkout/payment";
-        }
-        return "redirect:/checkout/confirm"; // COD thì xác nhận luôn
-    }
-    
-    @GetMapping("/payment")
-    public String viewPaymentQR(Model model) {
-        // Lấy dữ liệu từ Session
-        CheckoutData data = (CheckoutData) session.getAttribute("checkoutData");
-        
-        // 🚨 SỬA LỖI QUAN TRỌNG: Kiểm tra null
-        // Nếu không có dữ liệu trong session (do truy cập trực tiếp link), đá về giỏ hàng
-        if (data == null) {
-            return "redirect:/cart";
-        }
-
-        String qrUrl = "";
-        String bankName = "";
-        String accountNo = "";
-        String accountName = "";
-        String content = data.tempOrderCode; 
-
-        if ("VIETQR".equals(data.paymentMethod)) {
-            String BANK_ID = "ICB";
-            accountNo = "103878028110";
-            accountName = "NGUYEN GIA HUY";
-            bankName = "VietinBank";
-            qrUrl = String.format("https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s",
-                BANK_ID, accountNo, data.finalTotal, content, URLEncoder.encode(accountName, StandardCharsets.UTF_8));
-        } else if ("MOMO".equals(data.paymentMethod)) {
-            String MOMO_PHONE = "0914211221";
-            accountNo = MOMO_PHONE;
-            accountName = "NGUYEN GIA HUY";
-            bankName = "Ví điện tử MoMo";
-            String momoLink = String.format("https://me.momo.vn/%s?amount=%d&message=%s",
-                MOMO_PHONE, data.finalTotal, URLEncoder.encode(content, StandardCharsets.UTF_8));
-            qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" + URLEncoder.encode(momoLink, StandardCharsets.UTF_8);
-        }
-
-        model.addAttribute("qrUrl", qrUrl);
-        model.addAttribute("total", data.finalTotal);
-        model.addAttribute("bankName", bankName);
-        model.addAttribute("accountNo", accountNo);
-        model.addAttribute("accountName", accountName);
-        model.addAttribute("content", content);
-        
-        // 🚨 SỬA LỖI QUAN TRỌNG: Truyền object checkoutData sang View
-        model.addAttribute("checkoutData", data); 
-        
-        return "client/payment-qr"; 
-    }
-
-    @GetMapping("/confirm")
-    public String confirmOrder() {
-        Account account = (Account) session.getAttribute("account");
-        CheckoutData data = (CheckoutData) session.getAttribute("checkoutData");
-
-        if (account == null || data == null) return "redirect:/cart";
-
-        List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
-        if (cartDetails.isEmpty()) return "redirect:/cart";
-
-        // Lưu đơn hàng chính thức
+        // Lưu đơn hàng
         Orders order = new Orders();
         order.setAccountId(account);
         order.setCreatedDate(new Date());
-        order.setAddress(data.address);
-        order.setPhone(data.phone);
-        order.setPaymentMethod(data.paymentMethod);
-        order.setFeeship(data.shippingFee);
-        order.setTotal(data.finalTotal);
+        order.setAddress(address);
+        order.setPhone(phone);
+        order.setPaymentMethod(paymentMethod);
+        order.setFeeship(shippingFee);
+        order.setTotal(finalTotal);
         
-        if ("COD".equals(data.paymentMethod)) {
-            order.setPaymentStatus(false);
-            order.setStatus(0); 
-        } else {
-            order.setPaymentStatus(true); // Đã chuyển khoản
-            order.setStatus(1); 
-        }
+        String uniqueOrderCode = "DH" + System.currentTimeMillis(); 
+        order.setNote(uniqueOrderCode); 
+
+        order.setPaymentStatus(false);
+        order.setStatus(0); 
 
         Orders savedOrder = orderRepo.save(order);
 
+        // Lưu chi tiết
         List<OrderDetail> orderDetails = cartDetails.stream().map(item -> {
             OrderDetail detail = new OrderDetail();
             detail.setOrders(savedOrder);
@@ -212,11 +119,96 @@ public class CheckoutController {
             detail.setPrice(item.getPrice());
             return detail;
         }).toList();
-
         orderDetailRepo.saveAll(orderDetails);
-        cartDetailRepo.deleteAll(cartDetails);
-        session.removeAttribute("checkoutData"); // Xóa session
 
+        cartDetailRepo.deleteAll(cartDetails);
+
+        if ("COD".equals(paymentMethod)) {
+            return "redirect:/orders"; 
+        } else {
+            session.setAttribute("pendingOrderId", savedOrder.getId());
+            return "redirect:/checkout/payment";
+        }
+    }
+
+    @GetMapping("/payment")
+    public String viewPaymentQR(Model model) {
+        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
+        if (orderId == null) return "redirect:/cart";
+
+        Orders order = orderRepo.findById(orderId).orElse(null);
+        if(order == null) return "redirect:/cart";
+
+        if (Boolean.TRUE.equals(order.getPaymentStatus())) {
+             return "redirect:/orders"; 
+        }
+
+        String content = order.getNote(); 
+        String qrUrl = "";
+        
+        // --- SỬA LẠI INFO BANK CỦA BẠN Ở ĐÂY ---
+        String bankId = "ICB"; 
+        String accountNo = "103878028110";
+        String accountName = "NGUYEN GIA HUY";
+
+        if ("VIETQR".equals(order.getPaymentMethod())) {
+             qrUrl = String.format("https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s",
+                bankId, accountNo, order.getTotal(), content, URLEncoder.encode(accountName, StandardCharsets.UTF_8));
+        } 
+        else if ("MOMO".equals(order.getPaymentMethod())) {
+            String MOMO_PHONE = "0914211221";
+            String momoLink = String.format("https://me.momo.vn/%s?amount=%d&message=%s",
+                 MOMO_PHONE, order.getTotal(), URLEncoder.encode(content, StandardCharsets.UTF_8));
+            qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" + URLEncoder.encode(momoLink, StandardCharsets.UTF_8);
+        }
+
+        model.addAttribute("qrUrl", qrUrl);
+        model.addAttribute("total", order.getTotal());
+        model.addAttribute("content", content);
+        model.addAttribute("bankName", "VietinBank");
+        model.addAttribute("accountNo", accountNo);
+        model.addAttribute("accountName", accountName);
+        model.addAttribute("paymentMethod", order.getPaymentMethod()); 
+        
+        return "client/payment-qr"; 
+    }
+    
+    // API Ajax check status (Vẫn giữ để ai dùng Webhook thì dùng)
+    @GetMapping("/check-status")
+    @ResponseBody
+    public Map<String, Boolean> checkOrderStatus() {
+        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
+        Map<String, Boolean> response = new HashMap<>();
+        
+        if (orderId != null) {
+            Orders order = orderRepo.findById(orderId).orElse(null);
+            if (order != null && Boolean.TRUE.equals(order.getPaymentStatus())) {
+                response.put("paid", true);
+                return response;
+            }
+        }
+        response.put("paid", false);
+        return response;
+    }
+
+    // --- MỚI THÊM: XỬ LÝ NÚT "TÔI ĐÃ CHUYỂN TIỀN" ---
+    @PostMapping("/confirm-payment")
+    public String confirmPaymentManual() {
+        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
+        
+        if (orderId != null) {
+            Orders order = orderRepo.findById(orderId).orElse(null);
+            if (order != null) {
+                // Cập nhật trạng thái thành Đã thanh toán
+                order.setPaymentStatus(false);
+                // Cập nhật trạng thái đơn thành Đang xử lý
+                order.setStatus(0); 
+                orderRepo.save(order);
+            }
+            // Xóa session để hoàn tất
+            session.removeAttribute("pendingOrderId");
+        }
+        
         return "redirect:/orders";
     }
 }
