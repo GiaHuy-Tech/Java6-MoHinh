@@ -56,7 +56,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
             // --- ĐOẠN SỬA LỖI ---
             // Thay vì dùng Calendar, dùng LocalDate.of
-            account.setBirthday(LocalDate.of(2000, 1, 1)); 
+            account.setBirthDay(LocalDate.of(2000, 1, 1)); 
             // --------------------
 
             // Lấy avatar từ Google

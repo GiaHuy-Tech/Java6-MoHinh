@@ -16,7 +16,7 @@ public class Voucher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = false)
     String code;
 
     @Column(name = "discount_percent")

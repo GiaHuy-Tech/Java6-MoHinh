@@ -21,7 +21,7 @@
             --bg-card: #0c1525;
             --text-light: #e1e7ff;
             --accent-cyan: #00f2ff;
-            --accent-pink: #ff3864; /* Thêm màu hồng cho nút Like */
+            --accent-pink: #ff3864; 
             --border-color: rgba(0, 242, 255, 0.2);
             
             /* Font Variables */
@@ -261,6 +261,71 @@
         .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
         .dropdown-item { color: #aab8c5; }
         .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+
+        /* =========================================
+           --- MỚI: CSS CHO BANNER SĂN VOUCHER --- 
+           ========================================= */
+        .voucher-banner {
+            background: linear-gradient(135deg, rgba(11, 20, 38, 0.95), rgba(5, 11, 20, 0.95)), 
+                        url('https://cdn.pixabay.com/photo/2016/06/02/02/33/triangles-1430105_1280.png');
+            background-size: cover;
+            background-blend-mode: overlay;
+            border: 1px solid var(--accent-cyan);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .voucher-banner:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.25);
+        }
+        /* Hiệu ứng vệt sáng chạy qua */
+        .voucher-banner::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: skewX(-20deg);
+            animation: shine 3s infinite;
+        }
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+        .voucher-icon-group {
+            font-size: 3rem;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 15px var(--accent-cyan);
+        }
+        .btn-voucher {
+        background: var(--accent-cyan);
+        color: #050b14;
+        
+        /* --- THAY ĐỔI Ở ĐÂY --- */
+        font-family: var(--font-main); /* Đổi từ var(--font-display) thành font chính */
+        font-weight: 700;              /* Giảm độ đậm xuống một chút cho thanh thoát */
+        letter-spacing: 0.5px;         /* Thêm khoảng cách chữ cho thoáng */
+        /* --------------------- */
+
+        padding: 10px 30px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        border: none;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+        transition: 0.3s;
+        text-decoration: none;
+        display: inline-block;
+    }
+        .btn-voucher:hover {
+            background: #fff;
+            color: var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.8);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -319,7 +384,6 @@
     </div>
 </nav>
 
-
 <div class="container py-4">
     <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
         <div class="carousel-inner">
@@ -361,6 +425,38 @@
     </div>
 </section>
 
+<section class="container py-4">
+    <div class="voucher-banner p-4 p-lg-5">
+        <div class="row align-items-center position-relative" style="z-index: 2;">
+            <div class="col-md-8 mb-3 mb-md-0">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <span class="badge bg-danger rounded-pill px-3 py-2">HOT DEAL</span>
+                    <span class="text-secondary small fw-bold text-uppercase ls-1">Dành riêng cho thành viên</span>
+                </div>
+                <h2 class="text-white fw-bold mb-2" style="font-family: var(--font-display); letter-spacing: 1px;">
+                    KHO VOUCHER <span style="color: var(--accent-cyan);">ĐỘC QUYỀN</span>
+                </h2>
+                <p class="text-light mb-4" style="max-width: 600px; opacity: 0.8;">
+                    Sưu tầm ngay mã giảm giá lên đến <strong class="text-warning">50%</strong>. 
+                    Nhận mã freeship và quà tặng sinh nhật giới hạn chỉ dành riêng cho bạn.
+                </p>
+                <a href="/voucher" class="btn-voucher">
+                    <i class="bi bi-ticket-perforated-fill me-2"></i> SĂN MÃ NGAY
+                </a>
+            </div>
+
+            <div class="col-md-4 text-center text-md-end">
+                <div class="voucher-icon-group d-inline-block position-relative">
+                    <i class="bi bi-gift-fill" style="font-size: 5rem;"></i>
+                    <i class="bi bi-ticket-detailed-fill position-absolute top-50 start-0 translate-middle text-warning" 
+                       style="font-size: 3rem; transform: rotate(-15deg); text-shadow: none;"></i>
+                    <i class="bi bi-star-fill position-absolute top-0 end-0 text-white" 
+                       style="font-size: 1.5rem; animation: pulse 2s infinite;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 <section class="container py-4">
     <div class="d-flex justify-content-between align-items-end mb-4 border-bottom border-secondary pb-2">
         <h3 class="text-white mb-0">SẢN PHẨM <span class="text-info">NỔI BẬT</span></h3>

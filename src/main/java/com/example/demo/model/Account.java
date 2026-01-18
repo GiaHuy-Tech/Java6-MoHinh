@@ -46,13 +46,12 @@ public class Account {
     @NotNull(message = "Giới tính không được để trống")
     Boolean gender;
 
-    // --- ĐÃ SỬA LẠI ĐOẠN NÀY ---
+    // --- SỬA CHỖ NÀY: birthday -> birthDay (chữ D hoa) ---
     @NotNull(message = "Ngày sinh không được để trống")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Ngày sinh phải là trong quá khứ")
-    // Ánh xạ tên biến 'birthday' vào cột 'BirthDay' trong Database để tránh lỗi không tìm thấy cột
     @Column(name = "BirthDay") 
-    LocalDate birthday; 
+    LocalDate birthDay; // <--- Đổi tên biến ở đây để khớp với th:field="*{birthDay}"
 
     // --- CÁC TRƯỜNG MỚI ---
     @Column(columnDefinition = "bigint default 0")

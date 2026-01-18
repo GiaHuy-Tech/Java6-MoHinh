@@ -119,7 +119,7 @@ public class AccountController {
 
         try {
             // SỬA LỖI Ở ĐÂY: Dùng LocalDate.parse thay vì java.sql.Date.valueOf
-            acc.setBirthday(LocalDate.parse(birthday));
+            acc.setBirthDay(LocalDate.parse(birthday));
             
             accountRepo.save(acc);
             session.setAttribute("account", acc);

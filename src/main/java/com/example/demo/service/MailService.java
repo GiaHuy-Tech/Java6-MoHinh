@@ -15,13 +15,29 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    // ... giữ nguyên các hàm send và sendStatusMail cũ ...
+    // ✅ 1. Hàm gửi mail cơ bản (Dùng cho Quên mật khẩu, v.v...)
+    public void send(String to, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+        mailSender.send(message);
+    }
 
-    // ✅ CẬP NHẬT: Thêm tham số int age
+    // ✅ 2. Hàm gửi mail trạng thái (nếu bạn có dùng ở chỗ khác)
+    public void sendStatusMail(String toEmail, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        // message.setFrom("..."); // Có thể bỏ qua nếu đã cấu hình trong application.properties
+        message.setTo(toEmail);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
+
+    // ✅ 3. Hàm gửi mail sinh nhật (HTML đẹp + tính tuổi)
     public void sendBirthdayEmail(String toEmail, String fullName, int age) {
         String subject = "🎉 CHÚC MỪNG SINH NHẬT TỪ MODEL WORLD! 🎉";
         
-        // Nội dung HTML có thêm tuổi
         String content = "<h3>Xin chào " + fullName + ",</h3>"
                 + "<p>Chúc mừng bạn đã chính thức bước sang tuổi <strong>" + age + "</strong> rực rỡ!</p>"
                 + "<p>Model World chúc bạn tuổi mới thật nhiều niềm vui, sức khỏe dồi dào và gặt hái được nhiều thành công hơn nữa.</p>"

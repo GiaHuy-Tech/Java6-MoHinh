@@ -41,7 +41,7 @@ public class BirthdayScheduler {
                     // ✅ TÍNH TUỔI: Năm nay - Năm sinh
                     // Lưu ý: Đảm bảo acc.getBirthday() trả về LocalDate. 
                     // Nếu nó là sql.Date thì dùng: acc.getBirthday().toLocalDate().getYear()
-                    int birthYear = acc.getBirthday().getYear(); 
+                    int birthYear = acc.getBirthDay().getYear(); 
                     int age = currentYear - birthYear;
 
                     // Gọi hàm gửi mail mới với số tuổi

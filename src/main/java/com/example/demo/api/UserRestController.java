@@ -51,7 +51,6 @@ public class UserRestController {
             acc.setGender(gender);
             
             // 3. Dòng này sẽ hết lỗi vì cả 2 đều là LocalDate
-            acc.setBirthday(birthDay); 
             
             acc.setRole(false);
             acc.setActived(true);
