@@ -42,12 +42,14 @@ public class CartController {
         }
 
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
+        
         double total = cartDetails.stream()
                 .mapToDouble(cd -> cd.getPrice() * cd.getQuantity())
                 .sum();
 
         model.addAttribute("cartDetails", cartDetails);
         model.addAttribute("total", total);
+        
         return "client/cart";
     }
 
@@ -58,22 +60,24 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // ✅ Thêm sản phẩm vào giỏ hàng và chuyển sang trang giỏ hàng
+    // ✅ Thêm sản phẩm vào giỏ hàng
     @GetMapping("/add/{productId}")
     public String addToCart(@PathVariable Integer productId,
-                            @RequestParam(name = "quantity", defaultValue = "1") Integer quantity) {
+                            @RequestParam(name = "quantity", defaultValue = "1") Integer quantity,
+                            @RequestParam(name = "customPrice", required = false) Double customPrice) {
+        
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
             return "redirect:/login";
         }
 
-        // Lấy sản phẩm
+        // Lấy sản phẩm từ DB
         Products product = productRepo.findById(productId).orElse(null);
         if (product == null) {
             return "redirect:/";
         }
 
-        // Tìm hoặc tạo mới giỏ hàng
+        // Tìm hoặc tạo mới giỏ hàng (Cart) cho user
         Cart cart = cartRepo.findByAccount(account).orElse(null);
         if (cart == null) {
             cart = new Cart();
@@ -81,24 +85,34 @@ public class CartController {
             cartRepo.save(cart);
         }
 
-        // Kiểm tra sản phẩm đã có chưa
+        // QUAN TRỌNG: Quyết định giá bán
+        // Nếu trang Detail gửi giá Custom (đã check logic bên đó) thì lấy, không thì lấy giá gốc
+        double priceToSave = (customPrice != null) ? customPrice : product.getPrice();
+
+        // Kiểm tra sản phẩm đã có trong giỏ chưa
         CartDetail existing = cartDetailRepo.findByCartAndProduct(cart, product).orElse(null);
 
         if (existing != null) {
-            existing.setQuantity(existing.getQuantity() + quantity); // ✅ cộng dồn đúng số lượng
+            // Nếu đã có: Cộng dồn số lượng
+            existing.setQuantity(existing.getQuantity() + quantity);
+            
+            // Cập nhật giá mới nhất (ép kiểu int)
+            existing.setPrice((int) priceToSave); 
+            
             cartDetailRepo.save(existing);
         } else {
+            // Nếu chưa có: Tạo mới chi tiết giỏ hàng
             CartDetail cd = new CartDetail();
             cd.setCart(cart);
             cd.setProduct(product);
-            cd.setPrice(product.getPrice());
-            cd.setQuantity(quantity); // ✅ lưu số lượng người nhập
+            
+            // Lưu giá (ép kiểu int)
+            cd.setPrice((int) priceToSave); 
+            
+            cd.setQuantity(quantity);
             cartDetailRepo.save(cd);
         }
 
         return "redirect:/cart";
-    
-
-
     }
 }
