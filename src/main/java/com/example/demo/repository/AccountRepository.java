@@ -4,6 +4,9 @@ import java.util.List; // Cần import Optional
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import com.example.demo.model.Account;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
@@ -15,5 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
 	    boolean existsByEmail(String email);
 	    boolean existsByPhone(String phone);
-	    
+	 // Tìm user theo ngày và tháng sinh (bất kể năm nào)
+	    @Query("SELECT a FROM Account a WHERE MONTH(a.birthday) = :month AND DAY(a.birthday) = :day")
+	    List<Account> findByBirthday(@Param("month") int month, @Param("day") int day);
 }

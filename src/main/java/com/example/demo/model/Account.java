@@ -1,26 +1,11 @@
 package com.example.demo.model;
 
-import java.time.LocalDate;
-import java.util.Date; 
+import java.time.LocalDate; 
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -34,7 +19,6 @@ public class Account {
 
     @NotBlank(message = "Email không được để trống")
     @Column(unique = true)
-
     @Email(message = "Email không hợp lệ")
     String email;
 
@@ -62,12 +46,21 @@ public class Account {
     @NotNull(message = "Giới tính không được để trống")
     Boolean gender;
 
+    // --- ĐÃ SỬA LẠI ĐOẠN NÀY ---
     @NotNull(message = "Ngày sinh không được để trống")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Ngày sinh phải là trong quá khứ")
-    Date birthDay;
+    // Ánh xạ tên biến 'birthday' vào cột 'BirthDay' trong Database để tránh lỗi không tìm thấy cột
+    @Column(name = "BirthDay") 
+    LocalDate birthday; 
 
+    // --- CÁC TRƯỜNG MỚI ---
+    @Column(columnDefinition = "bigint default 0")
+    Long totalSpending = 0L;
+
+    @Column(columnDefinition = "nvarchar(50) default 'Đồng'")
+    String membershipLevel = "Đồng";
+    
     Boolean actived;
-
     Boolean role;
 }

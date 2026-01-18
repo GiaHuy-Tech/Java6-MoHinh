@@ -2,6 +2,8 @@ package com.example.demo.controllers;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
+import com.example.demo.service.MembershipService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,6 +24,8 @@ public class CheckoutController {
     @Autowired private CartDetailRepository cartDetailRepo;
     @Autowired private OrdersRepository orderRepo;
     @Autowired private OrdersDetailRepository orderDetailRepo;
+    @Autowired private AccountRepository accountRepo; // ✅ Cần repo để update user
+    @Autowired private MembershipService membershipService; // ✅ Inject Service xử lý hạng
 
     // --- CẤU HÌNH TỈNH THÀNH ---
     private static final List<String> SOUTH_PROVINCES = Arrays.asList(
@@ -45,7 +49,7 @@ public class CheckoutController {
 
         String normAddress = unAccent(address.toLowerCase());
         
-        if (normAddress.contains("can tho")) return 0; // Cần Thơ Free Ship
+        if (normAddress.contains("can tho")) return 0;
         for (String p : SOUTH_PROVINCES) {
             if (normAddress.contains(p)) return 30000;
         }
@@ -62,12 +66,26 @@ public class CheckoutController {
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
         if (cartDetails.isEmpty()) return "redirect:/cart";
 
+        // 1. Tính tổng tiền hàng
         int subTotal = cartDetails.stream().mapToInt(cd -> cd.getPrice() * cd.getQuantity()).sum();
+        
+        // 2. Tính phí ship
         int shippingFee = calculateShippingFee(account.getAddress(), subTotal);
 
+        // 3. ✅ Tính giảm giá thành viên
+        int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());
+        int discountAmount = (int) (subTotal * discountPercent / 100.0);
+
+        // 4. Tổng cuối cùng
+        int finalTotal = subTotal - discountAmount + shippingFee;
+
         model.addAttribute("cartDetails", cartDetails);
-        model.addAttribute("total", subTotal);
+        model.addAttribute("subTotal", subTotal); // Tổng tiền hàng chưa giảm
         model.addAttribute("shippingFee", shippingFee);
+        model.addAttribute("discountPercent", discountPercent); // % Giảm
+        model.addAttribute("discountAmount", discountAmount);   // Số tiền giảm
+        model.addAttribute("total", finalTotal); // Tổng thanh toán
+        
         model.addAttribute("account", account);
         model.addAttribute("keyword", ""); 
         model.addAttribute("selectedCategory", "");
@@ -85,12 +103,20 @@ public class CheckoutController {
         Account account = (Account) session.getAttribute("account");
         if (account == null) return "redirect:/login";
 
+        // Reload account từ DB để đảm bảo dữ liệu mới nhất
+        account = accountRepo.findById(account.getId()).orElse(account);
+
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
         if (cartDetails.isEmpty()) return "redirect:/cart";
 
+        // Tính toán lại Server-side (Bảo mật)
         int subTotal = cartDetails.stream().mapToInt(cd -> cd.getPrice() * cd.getQuantity()).sum();
         int shippingFee = calculateShippingFee(address, subTotal);
-        int finalTotal = subTotal + shippingFee;
+        
+        // ✅ Áp dụng giảm giá
+        int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());
+        int discountAmount = (int) (subTotal * discountPercent / 100.0);
+        int finalTotal = subTotal - discountAmount + shippingFee;
 
         // Lưu đơn hàng
         Orders order = new Orders();
@@ -100,7 +126,7 @@ public class CheckoutController {
         order.setPhone(phone);
         order.setPaymentMethod(paymentMethod);
         order.setFeeship(shippingFee);
-        order.setTotal(finalTotal);
+        order.setTotal(finalTotal); // Lưu số tiền sau khi đã giảm giá
         
         String uniqueOrderCode = "DH" + System.currentTimeMillis(); 
         order.setNote(uniqueOrderCode); 
@@ -123,9 +149,14 @@ public class CheckoutController {
 
         cartDetailRepo.deleteAll(cartDetails);
 
+        // ✅ XỬ LÝ CỘNG TIỀN TÍCH LŨY
         if ("COD".equals(paymentMethod)) {
+            // Đối với COD, giả định đơn thành công thì cộng điểm luôn (hoặc chờ admin duyệt)
+            // Ở đây demo mình cộng luôn để thấy kết quả
+            updateMembershipSpending(account, finalTotal);
             return "redirect:/orders"; 
         } else {
+            // Chuyển khoản thì chưa cộng tiền vội, chờ xác nhận ở trang payment
             session.setAttribute("pendingOrderId", savedOrder.getId());
             return "redirect:/checkout/payment";
         }
@@ -146,7 +177,7 @@ public class CheckoutController {
         String content = order.getNote(); 
         String qrUrl = "";
         
-        // --- SỬA LẠI INFO BANK CỦA BẠN Ở ĐÂY ---
+        // --- INFO BANK ---
         String bankId = "ICB"; 
         String accountNo = "103878028110";
         String accountName = "NGUYEN GIA HUY";
@@ -173,7 +204,7 @@ public class CheckoutController {
         return "client/payment-qr"; 
     }
     
-    // API Ajax check status (Vẫn giữ để ai dùng Webhook thì dùng)
+    // API Ajax check status
     @GetMapping("/check-status")
     @ResponseBody
     public Map<String, Boolean> checkOrderStatus() {
@@ -191,7 +222,7 @@ public class CheckoutController {
         return response;
     }
 
-    // --- MỚI THÊM: XỬ LÝ NÚT "TÔI ĐÃ CHUYỂN TIỀN" ---
+    // --- XỬ LÝ XÁC NHẬN THANH TOÁN (ONLINE) ---
     @PostMapping("/confirm-payment")
     public String confirmPaymentManual() {
         Integer orderId = (Integer) session.getAttribute("pendingOrderId");
@@ -199,16 +230,37 @@ public class CheckoutController {
         if (orderId != null) {
             Orders order = orderRepo.findById(orderId).orElse(null);
             if (order != null) {
-                // Cập nhật trạng thái thành Đã thanh toán
-                order.setPaymentStatus(false);
-                // Cập nhật trạng thái đơn thành Đang xử lý
-                order.setStatus(0); 
+                // 1. Cập nhật trạng thái đơn hàng
+                order.setPaymentStatus(true); // Đã thanh toán
+                order.setStatus(1); // Đã xác nhận (Ví dụ)
                 orderRepo.save(order);
+
+                // 2. ✅ CỘNG TIỀN VÀO TÀI KHOẢN & UPDATE HẠNG
+                Account account = order.getAccountId();
+                if (account != null) {
+                    updateMembershipSpending(account, order.getTotal());
+                }
             }
-            // Xóa session để hoàn tất
+            // Xóa session
             session.removeAttribute("pendingOrderId");
         }
         
         return "redirect:/orders";
+    }
+
+    // --- ✅ HÀM PRIVATE HỖ TRỢ CỘNG TIỀN ---
+    private void updateMembershipSpending(Account account, int amountToAdd) {
+        // Cộng tiền
+        long currentSpending = account.getTotalSpending() == null ? 0 : account.getTotalSpending();
+        account.setTotalSpending(currentSpending + amountToAdd);
+
+        // Tính lại hạng
+        membershipService.updateMembershipLevel(account);
+        
+        // Lưu vào DB
+        accountRepo.save(account);
+        
+        // Cập nhật lại session để hiển thị ngay trên Header
+        session.setAttribute("account", account);
     }
 }

@@ -15,7 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Date;
+import java.time.LocalDate; // 1. Thay java.util.Date bằng cái này
 
 @RestController
 @RequestMapping("/api/users")
@@ -25,7 +25,6 @@ public class UserRestController {
     @Autowired
     private AccountRepository repo;
 
-    // ✅ SỬA LỖI: Phải dùng @PostMapping cho chức năng thêm mới + upload file
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> create(
             @RequestParam("password") String password,
@@ -34,7 +33,8 @@ public class UserRestController {
             @RequestParam("phone") String phone,
             @RequestParam("address") String address,
             @RequestParam("gender") Boolean gender,
-            @RequestParam("birthDay") @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthDay,
+            // 2. Sửa 'Date' thành 'LocalDate' ở dòng dưới đây
+            @RequestParam("birthDay") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthDay, 
             @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
             // 1. Kiểm tra trùng Email
@@ -49,7 +49,9 @@ public class UserRestController {
             acc.setPhone(phone);
             acc.setAddress(address);
             acc.setGender(gender);
-            acc.setBirthDay(birthDay);
+            
+            // 3. Dòng này sẽ hết lỗi vì cả 2 đều là LocalDate
+            acc.setBirthday(birthDay); 
             
             acc.setRole(false);
             acc.setActived(true);
@@ -57,6 +59,7 @@ public class UserRestController {
             // 2. Xử lý file ảnh
             if (file != null && !file.isEmpty()) {
                 String fileName = file.getOriginalFilename();
+                // Lưu ý: Đường dẫn này có thể cần chỉnh lại tùy vào môi trường chạy (Window/Linux)
                 String uploadDir = new File("src/main/resources/static/images/").getAbsolutePath();
                 File dir = new File(uploadDir);
                 if (!dir.exists()) dir.mkdirs();
