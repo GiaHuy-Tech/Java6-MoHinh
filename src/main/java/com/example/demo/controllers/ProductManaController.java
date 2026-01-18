@@ -2,7 +2,6 @@ package com.example.demo.controllers;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,10 +9,10 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.model.Products;
 import com.example.demo.model.Category;
-import com.example.demo.repository.ProductRepository;
+import com.example.demo.model.Products;
 import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.ProductRepository;
 
 import jakarta.validation.Valid;
 
@@ -27,11 +26,11 @@ public class ProductManaController {
     @Autowired
     CategoryRepository categoryRepo;
 
-    // ✅ Trang quản lý sản phẩm
+    // ✅ Hiển thị danh sách
     @GetMapping
     public String list(Model model) {
         model.addAttribute("list", productRepo.findAll());
-        model.addAttribute("product", new Products());
+        model.addAttribute("product", new Products()); // Object rỗng cho form thêm mới
         model.addAttribute("categories", categoryRepo.findAll());
         return "admin/productMana";
     }
@@ -40,47 +39,55 @@ public class ProductManaController {
     @PostMapping("/add")
     public String add(@Valid @ModelAttribute("product") Products product,
                       BindingResult result,
-                      @RequestParam("categoryId") Integer categoryId,
                       Model model) {
+        
+        // Nếu có lỗi validate (tên trống, giá sai, chưa chọn danh mục...)
         if (result.hasErrors()) {
+            // Load lại dữ liệu cần thiết cho trang để hiển thị lỗi
             model.addAttribute("list", productRepo.findAll());
             model.addAttribute("categories", categoryRepo.findAll());
             return "admin/productMana";
         }
 
-        Category category = categoryRepo.findById(categoryId).orElse(null);
-        product.setCategory(category);
+        // Gán ngày tạo hiện tại
         product.setCreatedDate(new Date());
         productRepo.save(product);
+        
         return "redirect:/product-mana";
     }
 
+    // ✅ Load dữ liệu lên form để sửa
     @GetMapping("/edit/{id}")
     public String editProduct(@PathVariable("id") Integer id, Model model) {
         Products product = productRepo.findById(id).orElse(null);
-        List<Category> categories = categoryRepo.findAll();
-
+        
         model.addAttribute("product", product);
-        model.addAttribute("categories", categories);
-        model.addAttribute("list", productRepo.findAll()); // để hiển thị lại danh sách
+        model.addAttribute("categories", categoryRepo.findAll());
+        model.addAttribute("list", productRepo.findAll());
+        
         return "admin/productMana";
     }
-
 
     // ✅ Cập nhật sản phẩm
     @PostMapping("/update")
     public String update(@Valid @ModelAttribute("product") Products product,
                          BindingResult result,
-                         @RequestParam("categoryId") Integer categoryId,
                          Model model) {
+        
         if (result.hasErrors()) {
             model.addAttribute("list", productRepo.findAll());
             model.addAttribute("categories", categoryRepo.findAll());
             return "admin/productMana";
         }
 
-        Category category = categoryRepo.findById(categoryId).orElse(null);
-        product.setCategory(category);
+        // Lấy sản phẩm cũ để giữ lại ngày tạo (CreatedDate)
+        Products existingProduct = productRepo.findById(product.getId()).orElse(null);
+        if (existingProduct != null) {
+            product.setCreatedDate(existingProduct.getCreatedDate());
+        } else {
+            product.setCreatedDate(new Date());
+        }
+
         productRepo.save(product);
         return "redirect:/product-mana";
     }

@@ -30,7 +30,6 @@
 }
 
 body {
-    /* Background neon city */
     background: 
         linear-gradient(135deg, var(--bg-dark), #1a0033),
         url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
@@ -47,7 +46,7 @@ h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
 .navbar-brand span { color: #fff; }
 
 
-/* 🌟 NAVBAR (ĐÃ ĐỒNG BỘ) */
+/* NAVBAR */
 .navbar {
     background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
     border-bottom: 1px solid var(--border-color);
@@ -77,7 +76,7 @@ h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
     box-shadow: var(--neon-box-shadow);
 }
 .card-header {
-    background-color: var(--bg-dark) !important; /* Header tối hơn */
+    background-color: var(--bg-dark) !important;
     border-bottom: 1px solid var(--border-color);
     color: var(--accent-cyan) !important;
     font-weight: 700;
@@ -119,7 +118,6 @@ h2, .text-neon, label, th {
   border-radius: 8px;
   transition: 0.3s;
 }
-/* Đảm bảo option trong select vẫn hiển thị đúng trên nền tối */
 .form-select option { 
     background-color: var(--bg-card); 
     color: var(--text-light); 
@@ -129,7 +127,7 @@ h2, .text-neon, label, th {
     box-shadow: 0 0 5px rgba(0, 242, 255, 0.5); 
 }
 
-/* BUTTONS (Sử dụng style Neon Cyan) */
+/* BUTTONS */
 .btn-neon-action {
   background: transparent;
   border: 1px solid var(--accent-cyan);
@@ -145,7 +143,6 @@ h2, .text-neon, label, th {
   transform: scale(1.02);
 }
 
-/* Secondary button (Hủy) */
 .btn-secondary {
     background-color: transparent !important;
     border: 1px solid #6c757d;
@@ -157,14 +154,21 @@ h2, .text-neon, label, th {
     border-color: #6c757d;
 }
 
-/* Product image */
+/* Error text */
+.text-danger {
+    color: #ff3864 !important;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 5px;
+    display: block;
+}
+
 img.rounded-3 { 
     border-radius: 8px !important; 
     border: 1px solid rgba(255, 255, 255, 0.1); 
     object-fit: cover;
 }
 
-/* Footer */
 .footer {
     background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
     border-top: 1px solid var(--border-color);
@@ -172,27 +176,16 @@ img.rounded-3 {
     padding: 20px 0;
 }
 
-/* Badge (trạng thái) */
-.badge.bg-success { background-color: #00ff7f !important; color: #000; } /* Neon Green */
-.badge.bg-danger { background-color: #ff007f !important; color: #000; } /* Neon Pink */
+.badge.bg-success { background-color: #00ff7f !important; color: #000; }
+.badge.bg-danger { background-color: #ff007f !important; color: #000; }
 
-/* Rain effect (ĐÃ GIẢM TẦN SUẤT) */
 .rain {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
+  pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
 }
 .drop {
-  position: absolute;
-  width: 2px;
-  height: 15px;
+  position: absolute; width: 2px; height: 15px;
   background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,255,255,0));
-  animation: fall linear infinite;
-  opacity: 0.7;
+  animation: fall linear infinite; opacity: 0.7;
 }
 @keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(100vh); } }
 </style>
@@ -255,6 +248,10 @@ img.rounded-3 {
               <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" class="btn btn-sm btn-neon-action me-1">
                 <i class="bi bi-pencil-square"></i>
               </a>
+              <a th:href="@{/product-mana/delete/{id}(id=${p.id})}" class="btn btn-sm btn-outline-danger" 
+                 onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                <i class="bi bi-trash"></i>
+              </a>
             </td>
           </tr>
         </tbody>
@@ -268,35 +265,41 @@ img.rounded-3 {
       <span th:text="${product.id == null ? 'Thêm sản phẩm mới' : 'Cập nhật sản phẩm'}"></span>
     </div>
     <div class="card-body">
+      
       <form th:action="${product.id == null} ? @{/product-mana/add} : @{/product-mana/update}" 
             th:object="${product}" method="post">
+        
         <input type="hidden" th:field="*{id}">
+        
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label text-neon">Tên sản phẩm</label>
             <input type="text" th:field="*{name}" class="form-control" placeholder="Nhập tên sản phẩm">
+            <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></small>
           </div>
 
           <div class="col-md-2">
             <label class="form-label text-neon">Giá (₫)</label>
             <input type="number" th:field="*{price}" class="form-control" placeholder=">= 50000">
+            <small th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="text-danger"></small>
           </div>
 
           <div class="col-md-3">
             <label class="form-label text-neon">Hình ảnh (URL)</label>
             <input type="text" th:field="*{image}" class="form-control" placeholder="Link hình ảnh">
+            <small th:if="${#fields.hasErrors('image')}" th:errors="*{image}" class="text-danger"></small>
           </div>
 
           <div class="col-md-3">
             <label class="form-label text-neon">Danh mục</label>
-            <select name="categoryId" class="form-select" required>
+            <select th:field="*{category}" class="form-select">
               <option value="" class="text-light">-- Chọn danh mục --</option>
               <option th:each="c : ${categories}" 
                       th:value="${c.id}" 
-                      th:text="${c.name}"
-                      th:selected="${product.category != null and product.category.id == c.id}">
+                      th:text="${c.name}">
               </option>
             </select>
+            <small th:if="${#fields.hasErrors('category')}" th:errors="*{category}" class="text-danger"></small>
           </div>
 
           <div class="col-md-4">
@@ -312,8 +315,9 @@ img.rounded-3 {
           <i class="bi bi-check-circle"></i>
           <span th:text="${product.id == null ? 'Thêm sản phẩm' : 'Cập nhật'}"></span>
         </button>
+        
         <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-secondary mt-3 ms-2">
-          <i class="bi bi-arrow-repeat"></i> Hủy
+          <i class="bi bi-arrow-repeat"></i> Hủy / Làm mới
         </a>
       </form>
     </div>
@@ -328,15 +332,14 @@ img.rounded-3 {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Tạo mưa neon (ĐÃ GIẢM TẦN SUẤT)
 const rain = document.getElementById('rain');
-const drops = 50; // Giảm số lượng giọt
+const drops = 50; 
 for(let i=0;i<drops;i++){
   const drop = document.createElement('div');
   drop.className = 'drop';
   drop.style.left = Math.random() * 100 + 'vw';
   drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
-  drop.style.animationDelay = Math.random()*10 + 's'; // Tăng thời gian delay tối đa
+  drop.style.animationDelay = Math.random()*10 + 's';
   rain.appendChild(drop);
 }
 </script>

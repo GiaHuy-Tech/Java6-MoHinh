@@ -21,6 +21,7 @@
             --bg-card: #0c1525;
             --text-light: #e1e7ff;
             --accent-cyan: #00f2ff;
+            --accent-pink: #ff3864; /* Thêm màu hồng cho nút Like */
             --border-color: rgba(0, 242, 255, 0.2);
             
             /* Font Variables */
@@ -40,10 +41,7 @@
         }
 
         /* --- FONT CHỮ --- */
-        /* Logo dùng Orbitron */
         .navbar-brand { font-family: var(--font-display); }
-
-        /* Các tiêu đề khác dùng Be Vietnam Pro đậm */
         h1, h2, h3, h4 {
             font-family: var(--font-main); 
             font-weight: 700; 
@@ -75,12 +73,11 @@
             text-shadow: 0 0 8px var(--accent-cyan);
         }
 
-        /* --- SEARCH BAR (ĐÃ CHỈNH SỬA LẠI ĐỂ GỌN GÀNG HƠN) --- */
+        /* --- SEARCH BAR --- */
         .search-bar-wrapper {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-color);
             border-radius: 50px;
-            /* ĐÃ GIẢM PADDING NGANG */
             padding: 4px 10px; 
             transition: 0.3s;
             width: auto;
@@ -93,19 +90,17 @@
             box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
         }
         
-        /* Input: Giảm kích thước cố định để không bị tràn */
         .form-control-custom {
             background: transparent; 
             border: none; 
             box-shadow: none;
             color: var(--accent-cyan) !important; 
             font-weight: 500;
-            width: 120px; /* ĐÃ GIẢM TỪ 150PX XUỐNG 120PX */
+            width: 120px;
         }
         .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
         .form-control-custom:focus { background: transparent; color: var(--accent-cyan) !important; box-shadow: none; }
         
-        /* Select: Ngắn gọn */
         .form-select-custom { 
             background: transparent; border: none; box-shadow: none;
             color: var(--accent-cyan); 
@@ -118,7 +113,7 @@
         .btn-search { color: var(--text-light); border: none; background: transparent; transition: 0.3s;}
         .btn-search:hover { color: var(--accent-cyan); transform: scale(1.1); }
 
-        /* --- CAROUSEL (BANNER) --- */
+        /* --- CAROUSEL --- */
         #heroCarousel {
             border-radius: 16px;
             overflow: hidden;
@@ -138,7 +133,7 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* --- HIỆU ỨNG QUÉT SÁNG XÉO (SHINE EFFECT) --- */
+        /* --- EFFECTS --- */
         .category-card::before, .product-card::before {
             content: "";
             position: absolute;
@@ -218,12 +213,14 @@
         .product-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; color: #fff; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .product-price { color: var(--accent-cyan); font-weight: 700; font-size: 1.2rem; text-shadow: 0 0 5px rgba(0, 242, 255, 0.3); }
 
+        /* Nút giỏ hàng */
         .btn-add-cart {
             background: transparent;
             border: 1px solid var(--accent-cyan);
             color: var(--accent-cyan);
-            width: 100%; padding: 8px; border-radius: 6px;
-            font-weight: 600; text-decoration: none; display: inline-block; margin-top: 15px; text-align: center;
+            padding: 8px; border-radius: 6px;
+            font-weight: 600; text-decoration: none; 
+            text-align: center;
             transition: 0.3s;
             position: relative;
             z-index: 5; 
@@ -231,6 +228,29 @@
         .btn-add-cart:hover {
             background: var(--accent-cyan); color: #000;
             box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* Nút Like (Trái tim) */
+        .btn-like {
+            background: transparent;
+            border: 1px solid var(--accent-pink);
+            color: var(--accent-pink);
+            min-width: 42px; /* Vuông */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: 0.3s;
+            text-decoration: none;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 5;
+        }
+        .btn-like:hover {
+            background: var(--accent-pink);
+            color: #fff;
+            box-shadow: 0 0 15px var(--accent-pink);
+            transform: scale(1.05);
         }
 
         /* FOOTER */
@@ -364,11 +384,16 @@
                         <div th:if="${prod.price == null}" class="text-muted fst-italic">Liên hệ</div>
                     </div>
                     
-                    <div class="mt-2">
-                        <a th:href="@{'/cart/add/' + ${prod.id}}" class="btn-add-cart">
+                    <div class="mt-2 d-flex gap-2">
+                        <a th:href="@{'/cart/add/' + ${prod.id}}" class="btn-add-cart flex-grow-1">
                             <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
                         </a>
+                        
+                        <a th:href="@{'/wishlist/add/' + ${prod.id}}" class="btn-like" title="Yêu thích">
+                            <i class="bi bi-heart-fill"></i>
+                        </a>
                     </div>
+
                 </div>
             </div>
         </div>

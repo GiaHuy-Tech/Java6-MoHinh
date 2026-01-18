@@ -16,7 +16,7 @@ public class CartAdminController {
     @Autowired
     private CartRepository cartRepo;
 
-    // 📄 Trang danh sách giỏ hàng
+    
     @GetMapping
     public String list(Model model) {
         model.addAttribute("carts", cartRepo.findAll());

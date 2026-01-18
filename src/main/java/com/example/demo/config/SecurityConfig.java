@@ -12,7 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
+import com.example.demo.filter.JwtFilter;
 import com.example.demo.service.AccountService;
+import com.example.demo.service.CustomOAuth2UserService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,13 +28,16 @@ public class SecurityConfig {
     private final AccountService userService;
     private final CustomSuccessHandler successHandler;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomOAuth2UserService oAuth2UserService;
 
     public SecurityConfig(AccountService userService,
                           CustomSuccessHandler successHandler,
-                          CustomAccessDeniedHandler accessDeniedHandler) {
+                          CustomAccessDeniedHandler accessDeniedHandler,
+                          CustomOAuth2UserService oAuth2UserService) {
         this.userService = userService;
         this.successHandler = successHandler;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.oAuth2UserService = oAuth2UserService;
     }
 
     @Bean
@@ -68,7 +73,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
@@ -89,7 +94,10 @@ public class SecurityConfig {
                         // Other pages require login
                         .anyRequest().authenticated()
                 )
-
+                // Thêm JwtFilter trước UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+                
+                // Form login
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
@@ -98,6 +106,16 @@ public class SecurityConfig {
                         .failureHandler(authFailureHandler())
                         .permitAll()
                 )
+                
+                // Google OAuth2 login
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login") // trang login chung
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oAuth2UserService) // xử lý user Google
+                        )
+                        .defaultSuccessUrl("/") // redirect sau login Google thành công
+                )
+                
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")

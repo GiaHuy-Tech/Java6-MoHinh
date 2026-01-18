@@ -12,24 +12,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
-/* --- CẤU HÌNH MÀU SẮC & BIẾN (ĐỒNG BỘ) --- */
+/* CSS giữ nguyên như cũ */
 :root {
     --bg-dark: #050b14;
     --bg-card: #0c1525;
     --text-light: #e1e7ff;
-    --accent-cyan: #00f2ff; /* Màu Neon Cyan chính */
+    --accent-cyan: #00f2ff;
     --border-color: rgba(0, 242, 255, 0.2);
-    
-    /* Font Variables */
     --font-main: "Be Vietnam Pro", sans-serif;
     --font-display: "Orbitron", sans-serif;
-
-    /* ĐỊNH NGHĨA HIỆU ỨNG NEON GLOW */
     --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
 }
 
 body {
-    /* Background neon city */
     background: 
         linear-gradient(135deg, var(--bg-dark), #1a0033),
         url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
@@ -40,28 +35,18 @@ body {
     overflow-x: hidden;
 }
 
-/* TYPOGRAPHY FIX */
-h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
+h2,h4,h5,h6 { font-family: var(--font-main); font-weight: 700; }
 .navbar-brand { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px; }
 .navbar-brand span { color: #fff; }
 
-/* 🌟 NAVBAR (ĐÃ ĐỒNG BỘ) */
 .navbar {
     background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
     border-bottom: 1px solid var(--border-color);
     box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); 
 }
-.navbar .nav-link { 
-    color: var(--accent-cyan) !important; 
-    transition: 0.3s;
-    font-weight: 500;
-}
-.navbar .nav-link:hover {
-    color: var(--text-light) !important;
-    text-shadow: 0 0 8px var(--accent-cyan);
-}
+.navbar .nav-link { color: var(--accent-cyan) !important; transition: 0.3s; font-weight: 500; }
+.navbar .nav-link:hover { color: var(--text-light) !important; text-shadow: 0 0 8px var(--accent-cyan); }
 
-/* CARD & BOX STYLE */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -70,98 +55,68 @@ h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     transition: 0.3s ease;
 }
-.card:hover {
-    box-shadow: var(--neon-box-shadow);
-}
-.card h6, label, th, .text-neon {
-  color: var(--accent-cyan) !important;
-}
+.card:hover { box-shadow: var(--neon-box-shadow); }
+.card h6, label, th, .text-neon { color: var(--accent-cyan) !important; }
 
-/* TABLE */
-.table {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
+/* Table Styling */
+.table-responsive { overflow-x: auto; }
+.table { border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); white-space: nowrap; }
 .table thead { background-color: var(--bg-dark); }
-.table th { 
-    color: var(--accent-cyan); 
-    font-weight: 600; 
-    border-bottom: 1px solid var(--border-color);
-}
-.table-dark tbody tr { 
-    background-color: transparent !important;
-    border-color: rgba(255,255,255,0.05);
-}
+.table th { color: var(--accent-cyan); font-weight: 600; border-bottom: 1px solid var(--border-color); }
+.table-dark tbody tr { background-color: transparent !important; border-color: rgba(255,255,255,0.05); }
 .table td { color: var(--text-light); vertical-align: middle; }
-.table-hover tbody tr:hover { 
-    background-color: rgba(0,242,255,0.1) !important; 
-}
+.table-hover tbody tr:hover { background-color: rgba(0,242,255,0.1) !important; }
 
-/* BUTTONS (ĐÃ ĐỒNG BỘ) */
 .btn-neon-action {
-  background: transparent;
-  border: 1px solid var(--accent-cyan);
-  color: var(--accent-cyan);
-  font-weight: 600;
-  border-radius: 8px;
-  transition: 0.3s;
+    background: transparent;
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-weight: 600;
+    border-radius: 8px;
+    transition: 0.3s;
 }
 .btn-neon-action:hover {
-  background: var(--accent-cyan);
-  color: var(--bg-dark);
-  box-shadow: 0 0 15px var(--accent-cyan);
-  transform: scale(1.02);
+    background: var(--accent-cyan);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--accent-cyan);
+    transform: scale(1.02);
 }
 
-/* Select trạng thái (ĐÃ STYLE LẠI CHO VIBE NEON) */
-/* Không thay đổi logic HTML, chỉ thay đổi CSS class này */
 select.status-select {
-  background-color: rgba(0, 0, 0, 0.3);
-  color: var(--text-light);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 6px 12px;
-  transition: 0.3s;
-  cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: 0.3s;
+    cursor: pointer;
 }
 select.status-select:focus {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
-  outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 5px rgba(0, 242, 255, 0.5);
+    outline: none;
 }
 select.status-select option {
     background-color: var(--bg-card);
     color: var(--text-light);
 }
-
-/* Footer */
-.footer {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-top: 1px solid var(--border-color);
-    color: rgba(255,255,255,0.85);
-    padding: 20px 0;
+select.status-select option:disabled {
+    color: #6c757d;
+    font-style: italic;
 }
+
+.address-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.footer { background: linear-gradient(90deg, var(--bg-dark), var(--bg-card)); border-top: 1px solid var(--border-color); color: rgba(255,255,255,0.85); padding: 20px 0; }
 a { text-decoration: none; }
 
-/* Rain effect (ĐÃ ĐỒNG BỘ) */
-.rain {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-}
-.drop {
-  position: absolute;
-  width: 2px;
-  height: 15px;
-  background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,242,255,0));
-  animation: fall linear infinite;
-  opacity: 0.7;
-}
+.rain { pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; }
+.drop { position: absolute; width: 2px; height: 15px; background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,242,255,0)); animation: fall linear infinite; opacity: 0.7; }
 @keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(100vh); } }
 </style>
 </head>
@@ -186,7 +141,7 @@ a { text-decoration: none; }
   </div>
 </nav>
 
-<div class="container py-5">
+<div class="container-fluid py-5 px-4"> 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-neon mb-0"><i class="bi bi-bag-check"></i> Quản lý đơn hàng</h2>
     <a th:href="@{/stats}" class="btn btn-neon-action">
@@ -196,37 +151,75 @@ a { text-decoration: none; }
 
   <div class="card shadow mb-5">
     <div class="card-body p-0">
-      <table class="table table-dark table-hover mb-0 text-center align-middle">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Khách hàng</th>
-            <th>Ngày tạo</th>
-            <th>Tổng tiền</th>
-            <th>Trạng thái</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="o : ${ordersList}">
-            <td th:text="${o.id}">1</td>
-            <td th:text="${o.accountId.fullName}">Nguyễn Văn A</td>
-            <td th:text="${#dates.format(o.createdDate, 'dd/MM/yyyy')}">01/10/2025</td>
-            <td th:text="${#numbers.formatDecimal(o.total, 0, 'POINT', 0, 'COMMA')} + '₫'">1500000</td>
-            <td>
-              <form th:action="@{/orders-mana/updateStatus}" method="post" class="d-inline">
-                <input type="hidden" name="id" th:value="${o.id}">
-                <select name="status" class="status-select" onchange="this.form.submit()">
-                  <option th:value="0" th:selected="${o.status == 0}">Chờ xử lý</option>
-                  <option th:value="1" th:selected="${o.status == 1}">Đã xác nhận</option>
-                  <option th:value="2" th:selected="${o.status == 2}">Đang giao</option>
-                  <option th:value="3" th:selected="${o.status == 3}">Hoàn tất</option>
-                  <option th:value="4" th:selected="${o.status == 4}">Đã hủy</option>
-                </select>
-              </form>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive"> 
+          <table class="table table-dark table-hover mb-0 text-center align-middle">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Khách hàng</th>
+                <th>SĐT</th> 
+                <th>Địa chỉ</th> 
+                <th>Ngày tạo</th>
+                <th>Tổng tiền</th>
+                <th>Phí Ship</th> 
+                <th>Thanh toán</th> 
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="o : ${ordersList}">
+                <td th:text="${o.id}">1</td>
+                <td th:text="${o.accountId.fullName}">Nguyễn Văn A</td>
+                <td th:text="${o.phone}">0912345678</td>
+                <td class="address-cell" th:text="${o.address}" th:title="${o.address}">Cần Thơ</td>
+                <td th:text="${#dates.format(o.createdDate, 'dd/MM/yyyy HH:mm')}"></td>
+                
+                <td th:text="${#numbers.formatDecimal(o.total, 0, 'POINT', 0, 'COMMA')} + '₫'">1.500.000₫</td>
+
+                <td>
+                    <span th:if="${o.feeship == 0}" class="badge border border-info text-info">Free Ship</span>
+                    <span th:unless="${o.feeship == 0}" 
+                          class="fw-bold"
+                          th:text="${#numbers.formatDecimal(o.feeship, 0, 'POINT', 0, 'COMMA')} + '₫'">
+                    </span>
+                </td>
+
+                <td>
+                    <span th:if="${o.paymentStatus}" class="badge bg-success bg-opacity-75">
+                        <i class="bi bi-check-circle-fill"></i> Đã TT
+                    </span>
+                    <span th:unless="${o.paymentStatus}" class="badge bg-danger bg-opacity-75">
+                        <i class="bi bi-x-circle-fill"></i> Chưa TT
+                    </span>
+                </td>
+
+                <td>
+                  <form th:action="@{/orders-mana/updateStatus}" method="post" class="d-inline">
+                    <input type="hidden" name="id" th:value="${o.id}">
+                    <select name="status" class="status-select" onchange="this.form.submit()">
+                      <option th:value="0" th:selected="${o.status == 0}">Chờ xử lý</option>
+                      <option th:value="1" th:selected="${o.status == 1}">Đã xác nhận</option>
+                      <option th:value="2" th:selected="${o.status == 2}">Đang giao</option>
+                      <option th:value="3" th:selected="${o.status == 3}">Hoàn tất</option>
+                      <option th:value="4" 
+                              th:selected="${o.status == 4}"
+                              th:disabled="${o.status > 1 and o.status != 4}">
+                          Đã hủy
+                      </option>
+                    </select>
+                  </form>
+                </td>
+                
+                <td>
+                  <a th:href="@{'/orders-mana/detail/' + ${o.id}}" class="btn btn-sm btn-neon-action">
+                    <i class="bi bi-eye-fill"></i>
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
     </div>
   </div>
 </div>
@@ -239,15 +232,14 @@ a { text-decoration: none; }
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Tạo mưa neon (Đã giảm tần suất)
 const rain = document.getElementById('rain');
-const drops = 50; // Giảm số lượng giọt
+const drops = 50;
 for(let i=0;i<drops;i++){
   const drop = document.createElement('div');
   drop.className = 'drop';
   drop.style.left = Math.random() * 100 + 'vw';
   drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
-  drop.style.animationDelay = Math.random()*10 + 's'; // Tăng delay
+  drop.style.animationDelay = Math.random()*10 + 's';
   rain.appendChild(drop);
 }
 </script>

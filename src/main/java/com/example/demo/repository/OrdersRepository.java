@@ -29,26 +29,29 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     @Query("SELECT MONTH(o.createdDate), SUM(o.total) FROM Orders o WHERE o.createdDate >= :fromDate GROUP BY MONTH(o.createdDate)")
     List<Object[]> getRevenueLastMonths(Date fromDate);
 
-    // Danh sách đơn hàng theo tài khoản (mới nhất trước)
+    // Danh sách đơn hàng theo tài khoản (Mới nhất trước - Descending)
     List<Orders> findByAccountId_IdOrderByCreatedDateDesc(Integer accountId);
+
+    // ✅ BỔ SUNG: Danh sách đơn hàng theo tài khoản (Cũ nhất trước - Ascending)
+    List<Orders> findByAccountId_IdOrderByCreatedDateAsc(Integer accountId);
 
     // Tổng doanh thu theo từng tháng (toàn bộ dữ liệu)
     @Query("SELECT MONTH(o.createdDate), SUM(o.total) FROM Orders o GROUP BY MONTH(o.createdDate)")
     List<Object[]> revenuePerMonth();
 
-    // ✅ Doanh thu theo tháng (sửa field)
+    // Doanh thu theo tháng
     @Query("SELECT SUM(o.total) FROM Orders o WHERE MONTH(o.createdDate) = ?1")
     Double getRevenueByMonth(int month);
 
-    // ✅ Doanh thu theo năm (sửa field)
+    // Doanh thu theo năm
     @Query("SELECT SUM(o.total) FROM Orders o WHERE YEAR(o.createdDate) = ?1")
     Double getRevenueByYear(int year);
 
-    // ✅ Sản phẩm bán chạy nhất
+    // Sản phẩm bán chạy nhất
     @Query("SELECT od.productId FROM OrderDetail od GROUP BY od.productId ORDER BY SUM(od.quantity) DESC LIMIT 1")
     Optional<Products> findTopSellingProduct();
 
-    // ✅ Doanh thu theo nhãn tháng (ví dụ 'Tháng 5')
+    // Doanh thu theo nhãn tháng
     @Query("SELECT SUM(o.total) FROM Orders o WHERE CONCAT('Tháng ', MONTH(o.createdDate)) = ?1")
     Double getRevenueByMonthLabel(String label);
 }
