@@ -1,6 +1,9 @@
 package com.example.demo.model;
 
 import java.time.LocalDateTime;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.*; // Nhập hết các annotation
 import lombok.*;
 
@@ -29,6 +32,7 @@ public class Voucher {
     Double minOrderValue;
 
     @Column(name = "expired_at")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") 
     LocalDateTime expiredAt;
 
     Boolean active;
