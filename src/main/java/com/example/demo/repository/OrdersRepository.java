@@ -1,9 +1,11 @@
 package com.example.demo.repository;
+
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Orders;
@@ -12,33 +14,37 @@ import com.example.demo.model.Products;
 @Repository
 public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
-    //Lấy 5 đơn hàng mới nhất
     List<Orders> findTop5ByOrderByCreatedDateDesc();
-
-    //Danh sách đơn hàng theo tài khoản (Mới nhất trước)
+    
+    // Lưu ý: Trong Entity Orders biến tên là "accountId" (chữ d viết thường)
     List<Orders> findByAccountId_IdOrderByCreatedDateDesc(Integer accountId);
-
-    //Danh sách đơn hàng theo tài khoản (Cũ nhất trước)
     List<Orders> findByAccountId_IdOrderByCreatedDateAsc(Integer accountId);
 
-    //Số đơn theo từng tháng (cho bảng)
     @Query("SELECT MONTH(o.createdDate), COUNT(o) FROM Orders o GROUP BY MONTH(o.createdDate)")
     List<Object[]> countOrdersPerMonth();
 
-    //Số đơn theo tháng (cho biểu đồ)
     @Query("SELECT COUNT(o) FROM Orders o WHERE MONTH(o.createdDate) = :month")
-    Long countOrdersByMonth(int month);
+    Long countOrdersByMonth(@Param("month") int month);
 
-    //Số đơn trong tháng hiện tại
     @Query("SELECT COUNT(o) FROM Orders o WHERE MONTH(o.createdDate) = :month")
-    Long countOrdersInMonth(int month);
+    Long countOrdersInMonth(@Param("month") int month);
 
-    //Số đơn trong năm hiện tại
     @Query("SELECT COUNT(o) FROM Orders o WHERE YEAR(o.createdDate) = :year")
-    Long countOrdersInYear(int year);
+    Long countOrdersInYear(@Param("year") int year);
 
-    //Sản phẩm bán chạy nhất
     @Query("SELECT od.productId FROM OrderDetail od GROUP BY od.productId ORDER BY SUM(od.quantity) DESC LIMIT 1")
     Optional<Products> findTopSellingProduct();
+    
     Optional<Orders> findByNote(String note);
+
+    // --- 🔥 CÁC HÀM ĐÃ SỬA LẠI CHO KHỚP ENTITY CỦA BẠN 🔥 ---
+
+    // 1. Tính tổng tiền: Cột trong DB là "total" (dựa theo biến int total;)
+    //    Cột khóa ngoại là "accountId" (dựa theo @JoinColumn(name = "accountId"))
+    //    Tham số đầu vào là Integer cho khớp với ID của Account
+    @Query(value = "SELECT COALESCE(SUM(CAST(total AS BIGINT)), 0) FROM orders WHERE account_id = :accountId", nativeQuery = true)
+    Long sumTotalSpentByAccountId(@Param("accountId") Integer accountId);
+    // 2. Đếm số đơn (Sửa WHERE accountId -> WHERE account_id)
+    @Query(value = "SELECT COUNT(*) FROM orders WHERE account_id = :accountId", nativeQuery = true)
+    Long countByAccountId(@Param("accountId") Integer accountId);
 }
