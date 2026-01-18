@@ -23,11 +23,8 @@
             --accent-cyan: #00f2ff;
             --accent-red: #ff4d4d;
             --border-color: rgba(0, 242, 255, 0.2);
-            
-            /* Font Variables */
-            --font-main: "Be Vietnam Pro", sans-serif; /* Dùng cho TẤT CẢ tiếng Việt */
-            --font-logo: "Orbitron", sans-serif;      /* Chỉ dùng cho Logo */
-
+            --font-main: "Be Vietnam Pro", sans-serif;
+            --font-logo: "Orbitron", sans-serif;
             --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
         }
 
@@ -40,15 +37,13 @@
             min-height: 100vh;
         }
 
-        /* --- TYPOGRAPHY FIX --- */
-        /* Chỉ logo dùng font Orbitron */
+        /* --- TYPOGRAPHY --- */
         .navbar-brand {
             font-family: var(--font-logo);
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        /* Tất cả tiêu đề khác dùng font tiếng Việt đậm */
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-main);
             font-weight: 700; 
@@ -113,7 +108,7 @@
         .table-custom thead th {
             background-color: rgba(0, 242, 255, 0.1);
             color: var(--accent-cyan);
-            font-family: var(--font-main); /* Sửa lại font tiếng Việt */
+            font-family: var(--font-main);
             font-weight: 700;
             padding: 15px;
             border-bottom: 1px solid var(--border-color);
@@ -125,7 +120,7 @@
             padding: 15px;
             vertical-align: middle;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            color: #fff; /* Đảm bảo màu chữ sáng */
+            color: #fff;
         }
 
         .table-custom tbody tr:last-child td { border-bottom: none; }
@@ -150,7 +145,7 @@
         .price-text { 
             color: var(--accent-cyan); 
             font-weight: 700; 
-            font-family: var(--font-main); /* Sửa lại font giá tiền */
+            font-family: var(--font-main);
         }
 
         /* --- BUTTONS --- */
@@ -180,7 +175,7 @@
             padding: 10px 30px;
             border-radius: 6px;
             font-weight: 700;
-            font-family: var(--font-main); /* Sửa lại font nút */
+            font-family: var(--font-main);
             text-transform: uppercase;
             text-decoration: none;
             transition: 0.3s;
@@ -239,8 +234,6 @@
                 <th:block th:if="${session.account != null}">
                     <li class="nav-item mx-1"><a class="nav-link active text-info" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
                     <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-                    <li class="nav-item mx-1"><a class="nav-link" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
-                    
                     <li class="nav-item dropdown mx-2">
                         <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" alt="avatar"
@@ -260,10 +253,6 @@
                 <div class="search-bar-wrapper d-flex align-items-center">
                     <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
                     <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
-                    <select class="form-select form-select-custom w-auto" name="categoryId">
-                        <option value="">Tất cả</option>
-                        <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" th:selected="${cate.id != null && cate.id.toString() == selectedCategory}"></option>
-                    </select>
                     <button type="submit" class="btn-search ps-2"><i class="bi bi-search"></i></button>
                 </div>
             </form>
@@ -295,13 +284,16 @@
                         <tr th:each="item : ${cartDetails}">
                             <td style="text-align: left; padding-left: 30px;">
                                 <div class="d-flex align-items-center gap-3">
-                                    <img th:src="@{${item.product.image}}" alt="product" class="product-img-thumb">
+                                    <img th:src="@{${item.product.image != null ? item.product.image : '/images/no-image.jpg'}}" alt="product" class="product-img-thumb">
                                     <a th:href="@{'/product-detail/' + ${item.product.id}}" class="product-name-link" th:text="${item.product.name}">Tên sản phẩm</a>
                                 </div>
                             </td>
                             <td class="price-text" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+                            
                             <td class="text-white" th:text="${item.quantity}">1</td>
+                            
                             <td class="price-text" th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+                            
                             <td>
                                 <a th:href="@{'/cart/delete/' + ${item.id}}" class="btn-remove">
                                     <i class="bi bi-trash me-1"></i> Xóa
@@ -325,7 +317,7 @@
             <h4 class="text-white mb-2">
                 Tổng cộng: <span class="text-info ms-2" style="font-size: 1.5rem;" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
             </h4>
-            <p class="small  text-light mb-4">Phí vận chuyển sẽ được tính khi thanh toán.</p>
+            <p class="small text-light mb-4">Phí vận chuyển sẽ được tính khi thanh toán.</p>
             
             <div class="d-flex justify-content-end gap-3">
                 <a href="/products" class="btn btn-outline-secondary text-white border-secondary" style="padding: 10px 20px; border-radius: 6px; text-decoration: none;">
