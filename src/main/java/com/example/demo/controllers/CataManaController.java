@@ -17,7 +17,7 @@ import com.example.demo.service.CategoryService;
 @Controller
 @RequestMapping("/cata-mana")
 public class CataManaController {
-
+	//Mẹ xuân huy rất ngon
     @Autowired
     private CategoryService categoryService;
 

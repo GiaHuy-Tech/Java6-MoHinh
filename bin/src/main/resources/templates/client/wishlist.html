@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yêu thích - Model World</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
+        :root {
+            --bg-dark: #050b14;
+            --bg-card: #0c1525;
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
+            --accent-red: #ff4d4d;
+            --border-color: rgba(0, 242, 255, 0.2);
+            
+            --font-main: "Be Vietnam Pro", sans-serif;
+            --font-logo: "Orbitron", sans-serif;
+
+            --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .navbar-brand { font-family: var(--font-logo); text-transform: uppercase; letter-spacing: 1px; }
+        h1, h2, h3, h4 { font-family: var(--font-main); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        .navbar-brand span { color: #fff !important; }
+        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; white-space: nowrap; }
+        .nav-link:hover { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
+        .navbar-brand i { color: var(--accent-cyan) !important; }
+
+        /* SEARCH BAR */
+        .search-bar-wrapper {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 50px;
+            padding: 4px 15px; transition: 0.3s; min-width: 300px; 
+        }
+        .search-bar-wrapper:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+        .form-control-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan) !important; font-weight: 500; }
+        .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
+        .form-select-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan); border-left: 1px solid rgba(255,255,255,0.2); }
+        .form-select-custom:focus { background: var(--bg-card); color: var(--accent-cyan); box-shadow: none; }
+        .btn-search { color: var(--text-light); border: none; background: transparent;}
+        .btn-search:hover { color: var(--accent-cyan); }
+
+        /* --- TABLE STYLES (WISHLIST) --- */
+        .table-custom-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .table-custom {
+            width: 100%;
+            margin-bottom: 0;
+            color: var(--text-light);
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .table-custom thead th {
+            background-color: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            font-family: var(--font-main);
+            font-weight: 700;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .table-custom tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #fff;
+        }
+
+        .table-custom tbody tr:last-child td { border-bottom: none; }
+        .table-custom tbody tr:hover { background-color: rgba(255,255,255,0.02); }
+
+        /* Product Thumb & Link */
+        .product-thumb {
+            width: 60px; height: 60px; object-fit: cover;
+            border-radius: 8px; border: 1px solid var(--border-color);
+        }
+        .product-name-link {
+            color: #fff; text-decoration: none; font-weight: 600; transition: 0.3s; display: block;
+        }
+        .product-name-link:hover { color: var(--accent-cyan); }
+        
+        .price-text { color: var(--accent-cyan); font-weight: 700; }
+        
+        .date-added { font-size: 0.85rem; color: #aab8c5; }
+
+        /* Action Buttons */
+        .btn-action-icon {
+            width: 36px; height: 36px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 8px; text-decoration: none; transition: 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .btn-cart {
+            color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(0, 242, 255, 0.05);
+        }
+        .btn-cart:hover { background: var(--accent-cyan); color: #000; box-shadow: 0 0 10px var(--accent-cyan); }
+
+        .btn-remove {
+            color: var(--accent-red); border-color: var(--accent-red); background: rgba(255, 77, 77, 0.05);
+        }
+        .btn-remove:hover { background: var(--accent-red); color: #fff; box-shadow: 0 0 10px var(--accent-red); }
+
+        /* Empty State */
+        .empty-state-icon { font-size: 3rem; color: #6c757d; margin-bottom: 15px; }
+
+        /* Footer */
+        footer {
+            background-color: #020408; border-top: 1px solid var(--border-color);
+            padding: 40px 0; margin-top: 60px; color: #6c757d;
+        }
+        footer h4 { font-family: var(--font-logo); letter-spacing: 1px; text-transform: uppercase; }
+        .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .dropdown-item { color: #aab8c5; }
+        .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill fs-3 text-info"></i>
+            <span class="fw-bold fs-4">MODEL WORLD</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="bi bi-list text-white fs-2"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                
+                <th:block th:if="${session.account == null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+                </th:block>
+
+                <th:block th:if="${session.account != null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link active text-info" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
+                    
+                    <li class="nav-item dropdown mx-2">
+                        <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" alt="avatar"
+                                class="rounded-circle border border-info" style="width: 38px; height: 38px; object-fit: cover;">
+                            <i th:if="${session.account.photo == null}" class="bi bi-person-circle fs-3 text-info"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </th:block>
+            </ul>
+
+            <form action="/products" method="get" class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
+                <div class="search-bar-wrapper d-flex align-items-center">
+                    <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
+                    <select class="form-select form-select-custom w-auto" name="categoryId">
+                        <option value="">Tất cả</option>
+                        <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" th:selected="${cate.id != null && cate.id.toString() == selectedCategory}"></option>
+                    </select>
+                    <button type="submit" class="btn-search ps-2"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div th:if="${message != null and !#strings.isEmpty(message)}" class="container mt-4">
+    <div class="alert alert-info alert-dismissible fade show text-center bg-transparent border-info text-info" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i> <strong th:text="${message}"></strong>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<section class="py-5">
+    <div class="container">
+        
+        <div class="text-center mb-5">
+            <h2 class="text-white">DANH SÁCH <span class="text-info">YÊU THÍCH</span></h2>
+            <div style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
+        </div>
+
+        <div class="table-custom-container" th:if="${!#lists.isEmpty(likes)}">
+            <div class="table-responsive">
+                <table class="table-custom text-center">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%; text-align: left; padding-left: 30px;">Sản phẩm</th>
+                            <th>Đơn giá</th>
+                            <th>Ngày thêm</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="like : ${likes}">
+                            <td style="text-align: left; padding-left: 30px;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img th:src="${like.product != null ? like.product.image : '/images/no-image.png'}" 
+                                         th:alt="${like.product != null ? like.product.name : 'Product'}" 
+                                         class="product-thumb">
+                                    <div>
+                                        <a th:href="@{'/product-detail/' + ${like.product.id}}" class="product-name-link" 
+                                           th:text="${like.product != null ? like.product.name : 'Sản phẩm không tồn tại'}">
+                                           Tên sản phẩm
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="price-text" 
+                                th:text="${like.product != null && like.product.price != null ? #numbers.formatDecimal(like.product.price, 0, 0) + '₫' : 'Liên hệ'}">
+                                0₫
+                            </td>
+                            <td class="date-added" 
+                                th:text="${like.likedAt != null ? #dates.format(like.likedAt, 'dd/MM/yyyy') : '-'}">
+                                -
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a th:if="${like.product != null}" th:href="@{'/wishlist/add-to-cart/' + ${like.product.id}}" 
+                                       class="btn-action-icon btn-cart" title="Thêm vào giỏ">
+                                        <i class="bi bi-cart-plus"></i>
+                                    </a>
+                                    
+                                    <a th:href="@{'/wishlist/remove/' + ${like.id}}" 
+                                       class="btn-action-icon btn-remove" title="Xóa khỏi yêu thích">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(likes)}" class="text-center py-5">
+            <i class="bi bi-heartbreak empty-state-icon"></i>
+            <p class="text-secondary mt-3 fs-5">Danh sách yêu thích của bạn đang trống.</p>
+            <a href="/products" class="btn btn-outline-info mt-3 rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i> Khám phá sản phẩm
+            </a>
+        </div>
+
+    </div>
+</section>
+
+<footer class="text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h4 class="text-white mb-3">MODEL WORLD</h4>
+                <p class="small">Chuyên cung cấp mô hình tĩnh cao cấp. Nơi thỏa mãn đam mê sưu tầm của bạn.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4 mb-4">
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-youtube"></i></a>
+                </div>
+                <p class="mb-0 small text-secondary">&copy; 2025 Model World — Luxury Boutique</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
