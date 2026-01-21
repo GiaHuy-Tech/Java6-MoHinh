@@ -7,5 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.demo.model.Comment;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    List<Comment> findByProduct_IdOrderByCreatedDateDesc(Integer productId);
-}
+	List<Comment> findByProduct_IdOrderByCreatedAtDesc(Integer productId);}

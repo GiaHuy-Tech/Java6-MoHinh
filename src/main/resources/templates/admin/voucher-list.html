@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MODEL WORLD - Quản lý Voucher</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ====== BIẾN MÀU & FONT (ĐỒNG BỘ USER-MANA) ====== */
+:root {
+    --bg-dark: #050b14;
+    --bg-card: #0c1525;
+    --text-light: #e1e7ff;
+    --accent-cyan: #00f2ff;
+    --border-color: rgba(0, 242, 255, 0.25);
+
+    --font-main: "Be Vietnam Pro", sans-serif;
+    --font-display: "Orbitron", sans-serif;
+
+    --neon-glow: 0 0 8px rgba(0,242,255,.6);
+    --neon-text: 0 0 6px rgba(0,242,255,.8);
+}
+
+/* ====== BODY ====== */
+body {
+    background:
+        linear-gradient(135deg, var(--bg-dark), #1a0033),
+        url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg')
+        center/cover no-repeat fixed;
+    color: var(--text-light);
+    font-family: var(--font-main);
+    min-height: 100vh;
+}
+
+/* ====== NAVBAR ====== */
+.navbar {
+    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 0 15px rgba(0,242,255,.5);
+}
+.navbar-brand {
+    font-family: var(--font-display);
+    letter-spacing: 1px;
+}
+.navbar .nav-link {
+    color: var(--accent-cyan) !important;
+    font-weight: 500;
+    text-shadow: var(--neon-text);
+}
+.navbar .nav-link:hover {
+    color: #fff !important;
+}
+
+/* ====== HEADING ====== */
+h2, h4, h5 {
+    font-weight: 700;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px rgba(0,242,255,.8);
+}
+
+/* ====== CARD ====== */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 12px rgba(0,0,0,.6);
+    transition: .3s;
+}
+.card:hover {
+    box-shadow: var(--neon-glow);
+}
+.card-header {
+    background: var(--bg-dark);
+    color: var(--accent-cyan);
+    font-weight: 700;
+    text-shadow: var(--neon-text);
+}
+
+/* ====== TABLE ====== */
+.table {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.table thead {
+    background: var(--bg-dark);
+}
+.table th {
+    color: var(--accent-cyan);
+    font-weight: 600;
+    text-shadow: var(--neon-text);
+}
+.table td {
+    color: var(--text-light);
+    font-weight: 500;
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(0,242,255,.12) !important;
+}
+
+/* ====== FORM ====== */
+.form-label {
+    color: var(--accent-cyan);
+    font-weight: 600;
+    text-shadow: var(--neon-text);
+}
+.form-control, .form-select {
+    background: rgba(0,0,0,.35) !important;
+    color: var(--text-light) !important;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 6px rgba(0,242,255,.7);
+}
+
+/* ====== BUTTONS ====== */
+.btn-neon-action {
+    background: transparent;
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-weight: 600;
+    text-shadow: var(--neon-text);
+    transition: .3s;
+}
+.btn-neon-action:hover {
+    background: var(--accent-cyan);
+    color: #000;
+    box-shadow: 0 0 18px var(--accent-cyan);
+    transform: scale(1.05);
+}
+
+.btn-warning {
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(255,193,7,.6);
+}
+
+/* ====== BADGE ====== */
+.badge {
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+.badge.bg-success {
+    background: #00ff7f !important;
+    color: #000;
+    box-shadow: 0 0 8px rgba(0,255,127,.7);
+}
+.badge.bg-warning {
+    background: #ffcc00 !important;
+    color: #000;
+    box-shadow: 0 0 8px rgba(255,204,0,.7);
+}
+
+/* ====== ICON ====== */
+.bi {
+    filter: drop-shadow(0 0 6px rgba(0,242,255,.6));
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container py-5">
+
+    <!-- ====== DANH SÁCH ====== -->
+    <div class="card mb-5">
+        <div class="card-header">
+            <i class="bi bi-ticket-perforated"></i> DANH SÁCH VOUCHER
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-dark table-hover text-center mb-0">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Code</th>
+                    <th>Giảm</th>
+                    <th>Đơn tối thiểu</th>
+                    <th>Hết hạn</th>
+                    <th>TT</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="v : ${vouchers}">
+                    <td th:text="${v.id}"></td>
+                    <td th:text="${v.code}" class="fw-bold"></td>
+                    <td>
+                        <span th:if="${v.discountPercent != null}"
+                              class="badge bg-warning"
+                              th:text="${v.discountPercent + '%'}"></span>
+
+                        <span th:if="${v.discountAmount != null}"
+                              class="badge bg-success"
+                              th:text="${#numbers.formatDecimal(v.discountAmount,0,'POINT',0,'NONE') + 'đ'}"></span>
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(v.minOrderValue,0,'POINT',0,'NONE') + 'đ'}"></td>
+                    <td th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy HH:mm')}"></td>
+                    <td>
+                        <i th:if="${v.active}" class="bi bi-check-circle-fill text-success"></i>
+                        <i th:unless="${v.active}" class="bi bi-x-circle-fill text-secondary"></i>
+                    </td>
+                    <td>
+                        <a th:href="@{/admin/vouchers/edit/{id}(id=${v.id})}"
+                           class="btn btn-sm btn-neon me-1">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                   <!-- NẾU ĐANG ACTIVE → HIỆN NÚT ẨN -->
+<a th:if="${v.active}"
+   th:href="@{/admin/vouchers/hide/{id}(id=${v.id})}"
+   class="btn btn-sm btn-outline-warning"
+   onclick="return confirm('Ẩn voucher này?')">
+    <i class="bi bi-eye-slash"></i>
+</a>
+
+<!-- NẾU ĐANG BỊ ẨN → HIỆN NÚT MỞ LẠI -->
+<a th:unless="${v.active}"
+   th:href="@{/admin/vouchers/show/{id}(id=${v.id})}"
+   class="btn btn-sm btn-outline-success"
+   onclick="return confirm('Hiện lại voucher này?')">
+    <i class="bi bi-eye"></i>
+</a>
+
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ====== FORM ====== -->
+    <div class="card">
+        <div class="card-header">
+            <span th:if="*{id} == null">➕ THÊM VOUCHER</span>
+            <span th:if="*{id} != null">✏️ SỬA VOUCHER</span>
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/admin/vouchers/save}"
+                  th:object="${voucher}"
+                  method="post">
+
+                <input type="hidden" th:field="*{id}">
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label>Mã Code</label>
+                        <input type="text" th:field="*{code}" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Giảm %</label>
+                        <input type="number" th:field="*{discountPercent}" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Giảm tiền</label>
+                        <input type="number" th:field="*{discountAmount}" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Đơn tối thiểu</label>
+                        <input type="number" th:field="*{minOrderValue}" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Hết hạn</label>
+                        <input type="datetime-local" th:field="*{expiredAt}" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>Trạng thái</label>
+                        <select th:field="*{active}" class="form-select">
+                            <option th:value="true">Kích hoạt</option>
+                            <option th:value="false">Khóa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <!-- THÊM -->
+                    <button th:if="*{id} == null"
+                            type="submit"
+                            class="btn btn-neon">
+                        ➕ THÊM MỚI
+                    </button>
+
+                    <!-- SỬA -->
+                    <div th:if="*{id} != null" class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning fw-bold">
+                            💾 LƯU
+                        </button>
+                        <a th:href="@{/admin/vouchers}" class="btn btn-secondary">
+                            ❌ HỦY
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

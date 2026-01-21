@@ -31,4 +31,4 @@ public class Category {
 	String image;
 	@OneToMany(mappedBy = "category")
 	List<Products> products;
-}
+}	

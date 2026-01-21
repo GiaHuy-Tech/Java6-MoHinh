@@ -41,4 +41,6 @@ public class Products {
 	boolean available;
 	@ManyToOne @JoinColumn(name = "categoryId")
 	Category category;
+	@Column(columnDefinition = "nvarchar(MAX)") 
+    private String description;
 }

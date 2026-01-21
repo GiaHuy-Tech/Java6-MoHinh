@@ -9,7 +9,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wgh…00;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
 
 <style>
@@ -96,8 +96,8 @@ h2, .text-neon, label, th {
 }
 .table thead { background-color: var(--bg-dark); }
 .table th { 
-    color: var(--accent-cyan); 
-    font-weight: 600; 
+    color: var(--accent-cyan);
+font-weight: 600; 
     border-bottom: 1px solid var(--border-color);
 }
 .table-dark tbody tr { 
@@ -202,7 +202,7 @@ img.rounded-3 {
     <div class="collapse navbar-collapse justify-content-end">
       <ul class="navbar-nav me-3">
         <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
+<li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
         <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
         <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
         <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
@@ -266,60 +266,67 @@ img.rounded-3 {
     </div>
     <div class="card-body">
       
-      <form th:action="${product.id == null} ? @{/product-mana/add} : @{/product-mana/update}" 
-            th:object="${product}" method="post">
-        
-        <input type="hidden" th:field="*{id}">
-        
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label text-neon">Tên sản phẩm</label>
-            <input type="text" th:field="*{name}" class="form-control" placeholder="Nhập tên sản phẩm">
-            <small th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="text-danger"></small>
-          </div>
+      <form th:action="${product.id == null} ? @{/product-mana/add} : @{/product-mana/update}"
+      th:object="${product}"
+      method="post"
+      enctype="multipart/form-data">
 
-          <div class="col-md-2">
-            <label class="form-label text-neon">Giá (₫)</label>
-            <input type="number" th:field="*{price}" class="form-control" placeholder=">= 50000">
-            <small th:if="${#fields.hasErrors('price')}" th:errors="*{price}" class="text-danger"></small>
-          </div>
+  <input type="hidden" th:field="*{id}">
 
-          <div class="col-md-3">
-            <label class="form-label text-neon">Hình ảnh (URL)</label>
-            <input type="text" th:field="*{image}" class="form-control" placeholder="Link hình ảnh">
-            <small th:if="${#fields.hasErrors('image')}" th:errors="*{image}" class="text-danger"></small>
-          </div>
+  <div class="row g-3">
 
-          <div class="col-md-3">
-            <label class="form-label text-neon">Danh mục</label>
-            <select th:field="*{category}" class="form-select">
-              <option value="" class="text-light">-- Chọn danh mục --</option>
-              <option th:each="c : ${categories}" 
-                      th:value="${c.id}" 
-                      th:text="${c.name}">
-              </option>
-            </select>
-            <small th:if="${#fields.hasErrors('category')}" th:errors="*{category}" class="text-danger"></small>
-          </div>
+    <div class="col-md-4">
+<label class="form-label">Tên sản phẩm</label>
+      <input th:field="*{name}" class="form-control">
+      <small th:errors="*{name}" class="text-danger"></small>
+    </div>
 
-          <div class="col-md-4">
-            <label class="form-label text-neon">Trạng thái</label>
-            <select th:field="*{available}" class="form-select">
-              <option th:value="true">Còn hàng</option>
-              <option th:value="false">Hết hàng</option>
-            </select>
-          </div>
-        </div>
+    <div class="col-md-2">
+      <label class="form-label">Giá</label>
+      <input type="number" th:field="*{price}" class="form-control">
+      <small th:errors="*{price}" class="text-danger"></small>
+    </div>
 
-        <button type="submit" class="btn btn-neon-action mt-3">
-          <i class="bi bi-check-circle"></i>
-          <span th:text="${product.id == null ? 'Thêm sản phẩm' : 'Cập nhật'}"></span>
-        </button>
-        
-        <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-secondary mt-3 ms-2">
-          <i class="bi bi-arrow-repeat"></i> Hủy / Làm mới
-        </a>
-      </form>
+    <div class="col-md-3">
+      <label class="form-label">Hình ảnh</label>
+      <input type="file" name="imageFile" class="form-control">
+      <div th:if="${product.image != null}" class="mt-2">
+        <img th:src="${product.image}" width="80">
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Danh mục</label>
+      <select th:field="*{category}" class="form-select">
+        <option value="">-- Chọn --</option>
+        <option th:each="c : ${categories}"
+                th:value="${c.id}"
+                th:text="${c.name}">
+        </option>
+      </select>
+      <small th:errors="*{category}" class="text-danger"></small>
+    </div>
+
+    <div class="col-md-3">
+      <label class="form-label">Trạng thái</label>
+      <select th:field="*{available}" class="form-select">
+        <option th:value="true">Còn hàng</option>
+        <option th:value="false">Hết hàng</option>
+      </select>
+    </div>
+
+  </div>
+
+  <button class="btn btn-neon-action mt-3">
+    <span th:text="${product.id == null ? 'Thêm' : 'Cập nhật'}"></span>
+  </button>
+
+  <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-secondary mt-3 ms-2">
+    Hủy
+  </a>
+
+</form>
+
     </div>
   </div>
 </div>
