@@ -21,12 +21,9 @@ public class CataManaController {
     @Autowired
     private CategoryService categoryService;
 
-    // ✅ ĐÚNG THEO StaticResourceConfig
+    // Thư mục lưu trữ
     private static final String UPLOAD_DIR = "uploads/categories/";
 
-    // =======================
-    // 📋 Danh sách danh mục
-    // =======================
     @GetMapping
     public String showCategories(Model model) {
         List<Category> categories = categoryService.findAll();
@@ -34,13 +31,9 @@ public class CataManaController {
         return "admin/catagoriesMana";
     }
 
-    // =======================
-    // ➕ Thêm danh mục
-    // =======================
     @PostMapping("/add")
     public String addCategory(@RequestParam("name") String name,
                               @RequestParam("image") MultipartFile imageFile) {
-
         if (name == null || name.trim().isEmpty()) {
             return "redirect:/cata-mana?error=emptyName";
         }
@@ -50,72 +43,69 @@ public class CataManaController {
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String imagePath = uploadImage(imageFile);
-            category.setImage(imagePath);
+            if (imagePath != null) {
+                category.setImage(imagePath);
+            }
         }
 
         categoryService.save(category);
-        return "redirect:/cata-mana";
+        return "redirect:/cata-mana?success=add";
     }
 
-    // =======================
-    // ✏️ Cập nhật danh mục
-    // =======================
     @PostMapping("/update")
     public String updateCategory(@RequestParam("id") Integer id,
                                  @RequestParam("name") String name,
-                                 @RequestParam(value = "imageFile", required = false)
-                                 MultipartFile imageFile) {
+                                 @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
 
         Category category = categoryService.findById(id);
-        if (category == null) {
-            return "redirect:/cata-mana?error=notfound";
-        }
+        if (category == null) return "redirect:/cata-mana?error=notfound";
 
         category.setName(name);
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String imagePath = uploadImage(imageFile);
-            category.setImage(imagePath);
+            if (imagePath != null) {
+                category.setImage(imagePath);
+            }
         }
 
         categoryService.save(category);
-        return "redirect:/cata-mana";
+        return "redirect:/cata-mana?success=update";
     }
 
-    // =======================
-    // 🗑️ Xóa danh mục
-    // =======================
     @PostMapping("/delete")
     public String deleteCategory(@RequestParam("id") Integer id) {
         categoryService.delete(id);
-        return "redirect:/cata-mana";
+        return "redirect:/cata-mana?success=delete";
     }
 
-    // =======================
-    // 🔧 Upload ảnh (CHUẨN)
-    // =======================
     private String uploadImage(MultipartFile file) {
         try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-
-            // Tạo thư mục nếu chưa có
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
+            // 1. Tạo đường dẫn tuyệt đối để tránh lỗi lạc trôi file
+            Path root = Paths.get(UPLOAD_DIR).toAbsolutePath().normalize();
+            if (!Files.exists(root)) {
+                Files.createDirectories(root);
             }
 
-            String original = file.getOriginalFilename();
-            String ext = original.substring(original.lastIndexOf("."));
-            String fileName = UUID.randomUUID() + ext;
+            // 2. Xử lý tên file và đuôi file
+String originalName = file.getOriginalFilename();
+            String extension = ".jpg"; // Mặc định
+            if (originalName != null && originalName.contains(".")) {
+                extension = originalName.substring(originalName.lastIndexOf("."));
+            }
+            
+            String fileName = UUID.randomUUID().toString() + extension;
+            Path targetPath = root.resolve(fileName);
 
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath,
-                    StandardCopyOption.REPLACE_EXISTING);
+            // 3. Copy file vào thư mục
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            // ✅ ĐƯỜNG TRẢ VỀ DÙNG CHO IMG SRC
+            // 4. Trả về đường dẫn ảo để hiển thị trên web
             return "/images/categories/" + fileName;
 
         } catch (IOException e) {
-            throw new RuntimeException("Upload image failed", e);
+            System.err.println("Lỗi Upload: " + e.getMessage());
+            return null;
         }
     }
 }
