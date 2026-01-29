@@ -7,31 +7,27 @@
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
-/* ====== BIẾN MÀU & FONT (ĐỒNG BỘ USER-MANA) ====== */
+/* ====== CẤU HÌNH GIAO DIỆN DARK/NEON ====== */
 :root {
     --bg-dark: #050b14;
     --bg-card: #0c1525;
     --text-light: #e1e7ff;
+    --text-dim: #aab8c5;
     --accent-cyan: #00f2ff;
     --border-color: rgba(0, 242, 255, 0.25);
-
     --font-main: "Be Vietnam Pro", sans-serif;
     --font-display: "Orbitron", sans-serif;
-
     --neon-glow: 0 0 8px rgba(0,242,255,.6);
     --neon-text: 0 0 6px rgba(0,242,255,.8);
 }
 
-/* ====== BODY ====== */
 body {
-    background:
-        linear-gradient(135deg, var(--bg-dark), #1a0033),
-        url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg')
-        center/cover no-repeat fixed;
+    background: linear-gradient(135deg, var(--bg-dark), #1a0033),
+                url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg')
+                center/cover no-repeat fixed;
     color: var(--text-light);
     font-family: var(--font-main);
     min-height: 100vh;
@@ -39,276 +35,319 @@ body {
 
 /* ====== NAVBAR ====== */
 .navbar {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
+    background: rgba(5, 11, 20, 0.95);
+    backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px rgba(0,242,255,.5);
+    box-shadow: 0 4px 20px rgba(0, 242, 255, 0.15);
 }
-.navbar-brand {
-    font-family: var(--font-display);
-    letter-spacing: 1px;
-}
-.navbar .nav-link {
-    color: var(--accent-cyan) !important;
+.nav-link {
+    color: var(--text-dim) !important;
+    transition: 0.3s;
     font-weight: 500;
-    text-shadow: var(--neon-text);
 }
-.navbar .nav-link:hover {
-    color: #fff !important;
-}
-
-/* ====== HEADING ====== */
-h2, h4, h5 {
-    font-weight: 700;
-    color: var(--accent-cyan);
-    text-shadow: 0 0 10px rgba(0,242,255,.8);
+.nav-link:hover, .nav-link.active {
+    color: var(--accent-cyan) !important;
+    text-shadow: 0 0 8px var(--accent-cyan);
 }
 
-/* ====== CARD ====== */
+/* ====== CARD STYLES ====== */
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 12px rgba(0,0,0,.6);
-    transition: .3s;
-}
-.card:hover {
-    box-shadow: var(--neon-glow);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
 .card-header {
-    background: var(--bg-dark);
+    background: rgba(0, 242, 255, 0.05);
+    border-bottom: 1px solid var(--border-color);
     color: var(--accent-cyan);
+    font-family: var(--font-display);
     font-weight: 700;
-    text-shadow: var(--neon-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 15px 20px;
 }
 
 /* ====== TABLE ====== */
 .table {
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    overflow: hidden;
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-light);
+    border-color: var(--border-color);
+    margin-bottom: 0;
 }
-.table thead {
-    background: var(--bg-dark);
-}
-.table th {
+.table thead th {
+    background-color: rgba(0, 242, 255, 0.1);
     color: var(--accent-cyan);
-    font-weight: 600;
-    text-shadow: var(--neon-text);
+    font-weight: 700;
+    text-shadow: 0 0 5px rgba(0, 242, 255, 0.4);
+    border-bottom: 2px solid var(--border-color);
+    vertical-align: middle;
 }
-.table td {
-    color: var(--text-light);
-    font-weight: 500;
+.table tbody td {
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 .table-hover tbody tr:hover {
-    background-color: rgba(0,242,255,.12) !important;
+    background-color: rgba(0, 242, 255, 0.05);
 }
 
-/* ====== FORM ====== */
+/* ====== FORM ELEMENTS ====== */
 .form-label {
     color: var(--accent-cyan);
     font-weight: 600;
-    text-shadow: var(--neon-text);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
 }
 .form-control, .form-select {
-    background: rgba(0,0,0,.35) !important;
-    color: var(--text-light) !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    color: #fff !important;
 }
 .form-control:focus, .form-select:focus {
+    background-color: rgba(0, 0, 0, 0.5) !important;
     border-color: var(--accent-cyan);
-    box-shadow: 0 0 6px rgba(0,242,255,.7);
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
 }
 
 /* ====== BUTTONS ====== */
-.btn-neon-action {
+.btn-neon {
     background: transparent;
     border: 1px solid var(--accent-cyan);
     color: var(--accent-cyan);
     font-weight: 600;
-    text-shadow: var(--neon-text);
-    transition: .3s;
+    transition: all 0.3s ease;
 }
-.btn-neon-action:hover {
+.btn-neon:hover {
     background: var(--accent-cyan);
     color: #000;
-    box-shadow: 0 0 18px var(--accent-cyan);
-    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--accent-cyan);
 }
 
-.btn-warning {
-    font-weight: 700;
-    box-shadow: 0 0 10px rgba(255,193,7,.6);
+.btn-action-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: 0.3s;
 }
 
-/* ====== BADGE ====== */
-.badge {
-    font-weight: 700;
-    letter-spacing: .5px;
+/* Badges */
+.badge-neon-green {
+    background: rgba(0, 255, 127, 0.15);
+    border: 1px solid #00ff7f;
+    color: #00ff7f;
 }
-.badge.bg-success {
-    background: #00ff7f !important;
-    color: #000;
-    box-shadow: 0 0 8px rgba(0,255,127,.7);
-}
-.badge.bg-warning {
-    background: #ffcc00 !important;
-    color: #000;
-    box-shadow: 0 0 8px rgba(255,204,0,.7);
-}
-
-/* ====== ICON ====== */
-.bi {
-    filter: drop-shadow(0 0 6px rgba(0,242,255,.6));
+.badge-neon-yellow {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid #ffd700;
+    color: #ffd700;
 }
 </style>
-
 </head>
 
 <body>
 
+<nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/stats}"> 
+        <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
+        <span class="fw-bold fs-4 text-white" style="font-family: var(--font-display);">MODEL WORLD</span>
+    </a>
+    <button class="navbar-toggler bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav me-3 align-items-center">
+        <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
+        <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+        <li class="nav-item"><a class="nav-link active" th:href="@{/admin/vouchers}"><i class="bi bi-ticket-perforated me-1"></i> Voucher</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
 <div class="container py-5">
-
-    <!-- ====== DANH SÁCH ====== -->
-    <div class="card mb-5">
-        <div class="card-header">
-            <i class="bi bi-ticket-perforated"></i> DANH SÁCH VOUCHER
-        </div>
-        <div class="card-body p-0">
-            <table class="table table-dark table-hover text-center mb-0">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Code</th>
-                    <th>Giảm</th>
-                    <th>Đơn tối thiểu</th>
-                    <th>Hết hạn</th>
-                    <th>TT</th>
-                    <th>Thao tác</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="v : ${vouchers}">
-                    <td th:text="${v.id}"></td>
-                    <td th:text="${v.code}" class="fw-bold"></td>
-                    <td>
-                        <span th:if="${v.discountPercent != null}"
-                              class="badge bg-warning"
-                              th:text="${v.discountPercent + '%'}"></span>
-
-                        <span th:if="${v.discountAmount != null}"
-                              class="badge bg-success"
-                              th:text="${#numbers.formatDecimal(v.discountAmount,0,'POINT',0,'NONE') + 'đ'}"></span>
-                    </td>
-                    <td th:text="${#numbers.formatDecimal(v.minOrderValue,0,'POINT',0,'NONE') + 'đ'}"></td>
-                    <td th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy HH:mm')}"></td>
-                    <td>
-                        <i th:if="${v.active}" class="bi bi-check-circle-fill text-success"></i>
-                        <i th:unless="${v.active}" class="bi bi-x-circle-fill text-secondary"></i>
-                    </td>
-                    <td>
-                        <a th:href="@{/admin/vouchers/edit/{id}(id=${v.id})}"
-                           class="btn btn-sm btn-neon me-1">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                   <!-- NẾU ĐANG ACTIVE → HIỆN NÚT ẨN -->
-<a th:if="${v.active}"
-   th:href="@{/admin/vouchers/hide/{id}(id=${v.id})}"
-   class="btn btn-sm btn-outline-warning"
-   onclick="return confirm('Ẩn voucher này?')">
-    <i class="bi bi-eye-slash"></i>
-</a>
-
-<!-- NẾU ĐANG BỊ ẨN → HIỆN NÚT MỞ LẠI -->
-<a th:unless="${v.active}"
-   th:href="@{/admin/vouchers/show/{id}(id=${v.id})}"
-   class="btn btn-sm btn-outline-success"
-   onclick="return confirm('Hiện lại voucher này?')">
-    <i class="bi bi-eye"></i>
-</a>
-
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="text-white fw-bold mb-0" style="text-shadow: 0 0 10px rgba(0,242,255,0.5);">
+            <i class="bi bi-ticket-detailed text-info me-2"></i> QUẢN LÝ VOUCHER
+        </h3>
     </div>
     
 
-    <!-- ====== FORM ====== -->
-    <div class="card">
-        <div class="card-header">
-            <span th:if="*{id} == null">➕ THÊM VOUCHER</span>
-            <span th:if="*{id} != null">✏️ SỬA VOUCHER</span>
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-list-ul me-2"></i>DANH SÁCH MÃ GIẢM GIÁ</span>
+                    <span class="badge bg-secondary" th:text="${vouchers.size()} + ' mã'"></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover text-center align-middle">
+                        <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Giảm giá</th>
+                            <th>Đơn tối thiểu</th>
+                            <th>Áp dụng cho</th>
+                            <th>Hết hạn</th>
+                            <th>Trạng thái</th>
+                            <th>Hành động</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="v : ${vouchers}">
+                            <td>
+                                <span class="fw-bold text-white font-monospace border border-secondary px-2 py-1 rounded" 
+                                      th:text="${v.code}">CODE123</span>
+                            </td>
+
+                            <td>
+                                <span th:if="${v.discountPercent != null}"
+                                      class="badge badge-neon-yellow rounded-pill"
+                                      th:text="${'-' + v.discountPercent + '%'}"></span>
+
+                                <span th:if="${v.discountAmount != null}"
+                                      class="badge badge-neon-green rounded-pill"
+                                      th:text="${'-' + #numbers.formatDecimal(v.discountAmount,0,'POINT',0,'NONE') + 'đ'}"></span>
+                            </td>
+
+                            <td class="small" th:text="${#numbers.formatDecimal(v.minOrderValue,0,'POINT',0,'NONE') + 'đ'}"></td>
+
+                            <td>
+                                <div th:if="${v.account == null}" class="text-info small">
+                                    <i class="bi bi-globe me-1"></i>Tất cả
+                                </div>
+                                <div th:if="${v.account != null}" class="text-warning small" th:title="${v.account.fullName}">
+                                    <i class="bi bi-person-fill me-1"></i>
+                                    <span th:text="${v.account.email}">User@gmail.com</span>
+                                </div>
+                            </td>
+
+                            <td class="small text-light" th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy HH:mm')}"></td>
+
+                            <td>
+                                <span th:if="${v.active}" class="text-success"><i class="bi bi-check-circle-fill"></i></span>
+                                <span th:unless="${v.active}" class="text-secondary"><i class="bi bi-dash-circle-fill"></i></span>
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a th:href="@{/admin/vouchers/edit/{id}(id=${v.id})}"
+                                       class="btn btn-outline-info btn-action-icon" title="Sửa">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+
+                                    <a th:if="${v.active}"
+                                       th:href="@{/admin/vouchers/hide/{id}(id=${v.id})}"
+                                       class="btn btn-outline-warning btn-action-icon"
+                                       onclick="return confirm('Bạn có chắc muốn ẩn voucher này không?')" title="Ẩn">
+                                        <i class="bi bi-eye-slash"></i>
+                                    </a>
+
+                                    <a th:unless="${v.active}"
+                                       th:href="@{/admin/vouchers/show/{id}(id=${v.id})}"
+                                       class="btn btn-outline-success btn-action-icon"
+                                       onclick="return confirm('Kích hoạt lại voucher này?')" title="Hiện">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(vouchers)}">
+                            <td colspan="7" class="py-4 text-center text-dim">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                Chưa có voucher nào được tạo
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-        <div class="card-body">
-            <form th:action="@{/admin/vouchers/save}"
-                  th:object="${voucher}"
-                  method="post">
-
-                <input type="hidden" th:field="*{id}">
-
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label>Mã Code</label>
-                        <input type="text" th:field="*{code}" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Giảm %</label>
-                        <input type="number" th:field="*{discountPercent}" class="form-control">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Giảm tiền</label>
-                        <input type="number" th:field="*{discountAmount}" class="form-control">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Đơn tối thiểu</label>
-                        <input type="number" th:field="*{minOrderValue}" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Hết hạn</label>
-                        <input type="datetime-local" th:field="*{expiredAt}" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label>Trạng thái</label>
-                        <select th:field="*{active}" class="form-select">
-                            <option th:value="true">Kích hoạt</option>
-                            <option th:value="false">Khóa</option>
-                        </select>
-                    </div>
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 90px; z-index: 1;">
+                <div class="card-header">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    <span th:text="${voucher.id == null ? 'TẠO VOUCHER MỚI' : 'CẬP NHẬT VOUCHER'}">FORM</span>
                 </div>
 
-                <div class="mt-4">
-                    <!-- THÊM -->
-                    <button th:if="*{id} == null"
-                            type="submit"
-                            class="btn btn-neon">
-                        ➕ THÊM MỚI
-                    </button>
+                <div class="card-body">
+                    <form th:action="@{/admin/vouchers/save}" th:object="${voucher}" method="post">
+                        
+                        <input type="hidden" th:field="*{id}">
 
-                    <!-- SỬA -->
-                    <div th:if="*{id} != null" class="d-flex gap-2">
-                        <button type="submit" class="btn btn-warning fw-bold">
-                            💾 LƯU
-                        </button>
-                        <a th:href="@{/admin/vouchers}" class="btn btn-secondary">
-                            ❌ HỦY
-                        </a>
-                    </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mã Voucher <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-upc-scan"></i></span>
+                                <input type="text" th:field="*{code}" class="form-control text-uppercase" placeholder="VD: SALE50" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label">Giảm %</label>
+                                <input type="number" th:field="*{discountPercent}" class="form-control" placeholder="0-100" min="0" max="100">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Giảm tiền (VNĐ)</label>
+                                <input type="number" th:field="*{discountAmount}" class="form-control" placeholder="VNĐ" step="1000">
+                            </div>
+                            <small class="text-dim fst-italic mt-1">* Chỉ nhập 1 trong 2 loại</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Đơn tối thiểu <span class="text-danger">*</span></label>
+                            <input type="number" th:field="*{minOrderValue}" class="form-control" value="0" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Áp dụng cho</label>
+                            <select name="accountId" class="form-select">
+                                <option value="">-- Tất cả người dùng (Công khai) --</option>
+                                <option th:each="acc : ${accounts}" 
+                                        th:value="${acc.id}" 
+                                        th:text="${acc.email} + ' (' + ${acc.fullName} + ')'"
+                                        th:selected="${voucher.account != null && voucher.account.id == acc.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
+                            <input type="datetime-local" th:field="*{expiredAt}" class="form-control" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-neon py-2">
+                                <i class="bi bi-save me-2"></i>
+                                <span th:text="${voucher.id == null ? 'THÊM MỚI NGAY' : 'LƯU THAY ĐỔI'}">LƯU</span>
+                            </button>
+                            
+                            <a th:if="${voucher.id != null}" th:href="@{/admin/vouchers}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-2"></i>Hủy bỏ / Làm mới
+                            </a>
+                        </div>
+
+                    </form>
                 </div>
-
-            </form>
+            </div>
         </div>
     </div>
-
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
