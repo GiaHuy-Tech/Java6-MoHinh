@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - Model World</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        /* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
+        :root {
+            --bg-dark: #050b14;
+            --bg-card: #0c1525;
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
+            --border-color: rgba(0, 242, 255, 0.2);
+            --font-main: "Be Vietnam Pro", sans-serif;
+            --font-logo: "Orbitron", sans-serif;
+            --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        .navbar-brand { font-family: var(--font-logo); text-transform: uppercase; letter-spacing: 1px; }
+        h1, h2, h3, h4 { font-family: var(--font-main); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .price-text { font-family: var(--font-logo); letter-spacing: 1px; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+        }
+        .navbar-brand span { color: #fff !important; }
+        .nav-link {
+            color: #aab8c5 !important;
+            transition: 0.3s;
+            font-weight: 500;
+            white-space: nowrap; 
+        }
+        .nav-link:hover {
+            color: var(--accent-cyan) !important;
+            text-shadow: 0 0 8px var(--accent-cyan);
+        }
+        .navbar-brand i { color: var(--accent-cyan) !important; }
+
+        /* SEARCH BAR */
+        .search-bar-wrapper {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 50px;
+            padding: 4px 15px; transition: 0.3s; min-width: 300px; 
+        }
+        .search-bar-wrapper:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+        .form-control-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan) !important; font-weight: 500; }
+        .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
+        .form-select-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan); border-left: 1px solid rgba(255,255,255,0.2); }
+        .form-select-custom:focus { background: var(--bg-card); color: var(--accent-cyan); box-shadow: none; }
+        .btn-search { color: var(--text-light); border: none; background: transparent;}
+        .btn-search:hover { color: var(--accent-cyan); }
+
+        /* --- CHECKOUT CARD --- */
+        .checkout-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            height: 100%;
+        }
+
+        .card-header-custom {
+            background: rgba(0, 242, 255, 0.1);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-family: var(--font-main);
+            text-transform: uppercase;
+        }
+
+        .card-body-custom { padding: 25px; }
+
+        /* --- FORM ELEMENTS --- */
+        .form-label { color: #aab8c5; font-size: 0.9rem; margin-bottom: 6px; }
+        
+        .form-control-dark, .form-select-dark {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            transition: 0.3s;
+            padding: 10px 15px;
+        }
+        .form-control-dark:focus, .form-select-dark:focus {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(0, 242, 255, 0.2);
+            color: #fff;
+        }
+        .form-control-dark::placeholder { color: rgba(255, 255, 255, 0.3); }
+        
+        .form-control-dark[readonly] {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #888;
+            border-color: transparent;
+        }
+
+        .form-select-dark option { background-color: #050b14; color: #fff; }
+
+        /* --- ORDER LIST --- */
+        .list-group-item-custom {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-light);
+            padding: 15px 0;
+        }
+        .list-group-item-custom:last-child { border-bottom: none; }
+
+        /* --- BUTTONS --- */
+        .btn-checkout-confirm {
+            background: var(--accent-cyan);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            font-family: var(--font-main);
+            margin-top: 10px;
+        }
+        .btn-checkout-confirm:hover {
+            background: #fff;
+            box-shadow: 0 0 20px var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background-color: #020408; border-top: 1px solid var(--border-color);
+            padding: 40px 0; margin-top: auto; color: #6c757d;
+        }
+        footer h4 { font-family: var(--font-logo); letter-spacing: 1px; text-transform: uppercase; }
+        .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .dropdown-item { color: #aab8c5; }
+        .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill fs-3 text-info"></i>
+            <span class="fw-bold fs-4">MODEL WORLD</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="bi bi-list text-white fs-2"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                
+                <th:block th:if="${session.account == null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+                </th:block>
+
+                <th:block th:if="${session.account != null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
+                    
+                    <li class="nav-item dropdown mx-2">
+                        <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" alt="avatar"
+                                class="rounded-circle border border-info" style="width: 38px; height: 38px; object-fit: cover;">
+                            <i th:if="${session.account.photo == null}" class="bi bi-person-circle fs-3 text-info"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </th:block>
+            </ul>
+
+            <form action="/products" method="get" class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
+                <div class="search-bar-wrapper d-flex align-items-center">
+                    <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
+                    <select class="form-select form-select-custom w-auto" name="categoryId">
+                        <option value="">Tất cả</option>
+                        <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" th:selected="${cate.id != null && cate.id.toString() == selectedCategory}"></option>
+                    </select>
+                    <button type="submit" class="btn-search ps-2"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<section class="py-5">
+    <div class="container">
+        
+        <div class="text-center mb-5">
+            <h2 class="text-white">THANH TOÁN <span class="text-info">ĐƠN HÀNG</span></h2>
+            <div style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="checkout-card">
+                    <div class="card-header-custom">
+                        <i class="bi bi-truck me-2"></i> Thông tin giao hàng
+                    </div>
+                    <div class="card-body-custom">
+                        <form th:action="@{/checkout}" method="post">
+                            <div class="mb-3">
+                                <label class="form-label">Họ tên người nhận</label>
+                                <input type="text" class="form-control form-control-dark" name="fullName"
+                                       th:value="${account.fullName}" placeholder="Nhập họ tên" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control form-control-dark"
+                                       th:value="${account.email}" readonly>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Địa chỉ nhận hàng (Ghi rõ Tỉnh/TP)</label>
+                                <input type="text" class="form-control form-control-dark" name="address"
+                                       th:value="${account.address}" 
+                                       placeholder="Số nhà, Đường, Quận/Huyện, Tỉnh/TP..." required>
+                                <small class="text-light fst-italic mt-1 d-block">
+                                    * Phí vận chuyển được tính tự động dựa trên địa chỉ (Kho tại Cần Thơ).
+                                </small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" class="form-control form-control-dark" name="phone"
+                                       th:value="${account.phone}" placeholder="Nhập số điện thoại" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Phương thức thanh toán</label>
+                                <select class="form-select form-select-dark" name="paymentMethod">
+                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+                                    <option value="VIETQR">Chuyển khoản Ngân hàng (VietQR)</option>
+                                    <option value="MOMO">Ví điện tử MoMo</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn-checkout-confirm">
+                                XÁC NHẬN ĐẶT HÀNG <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="checkout-card mb-4">
+                    <div class="card-header-custom">
+                        <i class="bi bi-bag-check me-2"></i> Đơn hàng của bạn
+                    </div>
+                    <div class="card-body-custom">
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item-custom d-flex justify-content-between align-items-center"
+                                th:each="item : ${cartDetails}">
+                                <div>
+                                    <span class="fw-semibold" th:text="${item.product.name}">Tên SP</span>
+                                    <div class="small text-light">x<span th:text="${item.quantity}">1</span></div>
+                                </div>
+                                <span class="price-text text-info" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary">Tạm tính:</span>
+                                <span class="text-light" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-secondary">Phí vận chuyển:</span>
+                                <span th:if="${shippingFee == 0}" class="text-success fw-bold text-uppercase">Miễn phí</span>
+                                <span th:unless="${shippingFee == 0}" class="text-light" 
+                                      th:text="${#numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="border-top border-secondary pt-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-white fs-5 fw-bold">TỔNG CỘNG</span>
+                                <span class="price-text text-info fs-4 fw-bold"
+                                    th:text="${#numbers.formatDecimal(total + shippingFee, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    0₫
+                                </span>
+                            </div>
+                            <div th:if="${shippingFee > 0}" class="text-end mt-1">
+                                <small class="text-light fst-italic">(Phí ship tính theo khu vực)</small>
+                            </div>
+                            <div th:unless="${shippingFee > 0}" class="text-end mt-1">
+                                <small class="text-success fst-italic"><i class="bi bi-check-circle-fill"></i> Đã áp dụng Free Ship (Đơn > 1tr)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="text-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h4 class="text-white mb-3">MODEL WORLD</h4>
+                <p class="small">Chuyên cung cấp mô hình tĩnh cao cấp. Nơi thỏa mãn đam mê sưu tầm của bạn.</p>
+                <div class="d-flex justify-content-center gap-3 mt-4 mb-4">
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-secondary fs-5"><i class="bi bi-youtube"></i></a>
+                </div>
+                <p class="mb-0 small text-secondary">&copy; 2025 Model World — Luxury Boutique</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Model World</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
+        :root {
+            --bg-card: rgba(12, 21, 37, 0.95); /* Màu nền form bán trong suốt */
+            --text-light: #e1e7ff;
+            --accent-cyan: #00f2ff;
+            --border-color: rgba(0, 242, 255, 0.3);
+            
+            --font-main: "Be Vietnam Pro", sans-serif; /* Dùng cho tiếng Việt */
+            --font-logo: "Orbitron", sans-serif;      /* Chỉ dùng cho Logo */
+        }
+
+        /* --- BODY CÓ HÌNH NỀN CŨ --- */
+        body {
+            background: 
+                linear-gradient(135deg, rgba(5, 11, 20, 0.85), rgba(5, 11, 20, 0.7)),
+                url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
+            color: var(--text-light);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* --- TYPOGRAPHY FIX (QUAN TRỌNG) --- */
+        /* 1. Chỉ Logo dùng Orbitron */
+        .navbar-brand {
+            font-family: var(--font-logo);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 2. Các tiêu đề khác dùng Be Vietnam Pro đậm để không lỗi dấu */
+        h1, h2, h3, h4, .login-title {
+            font-family: var(--font-main);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            z-index: 100;
+        }
+        .navbar-brand span { color: #fff !important; }
+        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; }
+        .nav-link:hover { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
+
+        /* --- LOGIN CONTAINER --- */
+        .login-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 10; /* Nổi lên trên mưa */
+        }
+
+        .login-card {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            background: var(--bg-card); /* Nền tối giống form cũ */
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.2); /* Glow xanh nhẹ */
+            min-height: 550px;
+            backdrop-filter: blur(5px);
+        }
+
+        /* LEFT SIDE - IMAGE */
+        .login-image {
+            flex: 1;
+            background: url('https://beegaming.com.vn/wp-content/uploads/2023/04/mo-hinh-onepiece-gia-re-beegaming-1-scaled.jpg') center/cover no-repeat;
+            position: relative;
+            display: none; 
+        }
+        @media (min-width: 768px) { .login-image { display: block; } }
+
+        /* RIGHT SIDE - FORM */
+        .login-form-container {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-title { font-size: 1.8rem; color: #fff; margin-bottom: 10px; }
+        .login-subtitle { color: #aab8c5; font-size: 0.9rem; margin-bottom: 30px; }
+
+        /* FORM ELEMENTS */
+        .form-label {
+            color: var(--accent-cyan); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+
+        .form-control-custom {
+            background: rgba(0, 0, 0, 0.3); /* Nền input tối */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            transition: 0.3s;
+        }
+        .form-control-custom:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+            color: #fff;
+        }
+        .form-control-custom::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+        /* BUTTON */
+        .btn-login {
+            background: var(--accent-cyan); color: #050b14; border: none; font-weight: 700;
+            padding: 12px; border-radius: 8px; width: 100%; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s; margin-top: 20px; 
+            font-family: var(--font-main); /* Sửa font nút thành Be Vietnam Pro */
+        }
+        .btn-login:hover { background: #fff; box-shadow: 0 0 20px var(--accent-cyan); transform: translateY(-2px); }
+
+        /* CHECKBOX & LINKS */
+        .form-check-input { background-color: transparent; border-color: rgba(255,255,255,0.3); }
+        .form-check-input:checked { background-color: var(--accent-cyan); border-color: var(--accent-cyan); }
+        
+        .link-custom { color: #aab8c5; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .link-custom:hover { color: var(--accent-cyan); }
+
+        /* ALERTS */
+        .alert-custom-danger { background: rgba(255, 50, 50, 0.1); border: 1px solid rgba(255, 50, 50, 0.3); color: #ff6b6b; font-size: 0.9rem; }
+        .alert-custom-success { background: rgba(0, 255, 0, 0.1); border: 1px solid rgba(0, 255, 0, 0.3); color: #5cff5c; font-size: 0.9rem; }
+
+        /* FOOTER */
+        footer {
+            background-color: rgba(2, 4, 8, 0.9); border-top: 1px solid var(--border-color);
+            padding: 30px 0; color: #6c757d; margin-top: auto; z-index: 100;
+        }
+
+        /* --- HIỆU ỨNG MƯA (RAIN EFFECT) --- */
+        .rain {
+            pointer-events: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+        }
+        .drop {
+            position: absolute; width: 2px; height: 15px;
+            background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,242,255,0));
+            animation: fall linear infinite; opacity: 0.7;
+        }
+        @keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(100vh); } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+            <i class="bi bi-box-seam-fill fs-3 text-info"></i>
+            <span class="fw-bold fs-4">MODEL WORLD</span>
+        </a>
+        
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="bi bi-list text-white fs-2"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                <li class="nav-item mx-1"><a class="nav-link active text-info" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="login-wrapper">
+    <div class="login-card">
+        <div class="login-image"></div>
+
+        <div class="login-form-container">
+            <div class="d-flex justify-content-end mb-4">
+                <span class="text-light small me-2 align-self-center">Chưa có tài khoản?</span>
+                <a href="/register" class="btn btn-sm btn-outline-light rounded-pill px-3" style="border-color: var(--border-color); color: var(--accent-cyan);">Đăng ký</a>
+            </div>
+
+            <h3 class="login-title">CHÀO MỪNG TRỞ LẠI</h3>
+            <p class="login-subtitle">Đăng nhập để tiếp tục khám phá thế giới mô hình.</p>
+            
+            <div th:if="${param.email_error}" class="alert alert-custom-danger rounded-2" th:text="${param.email_error}"></div>
+            <div th:if="${param.pass_error}" class="alert alert-custom-danger rounded-2" th:text="${param.pass_error}"></div>
+            <div th:if="${param.error}" class="alert alert-custom-danger rounded-2" th:text="${param.error}"></div>
+            <div th:if="${param.notfound}" class="alert alert-custom-danger rounded-2" th:text="${param.notfound}"></div>
+            <div th:if="${param.locked}" class="alert alert-custom-danger rounded-2" th:text="${param.locked}"></div>
+
+            <div th:if="${param.success != null}" class="alert alert-custom-success rounded-2">
+                <i class="bi bi-check-circle me-1"></i> Đăng ký thành công! Vui lòng đăng nhập.
+            </div>
+            <div th:if="${param.logout}" class="alert alert-custom-success rounded-2">
+                <i class="bi bi-box-arrow-right me-1"></i> Bạn đã đăng xuất thành công.
+            </div>
+
+        <form th:action="@{/login}" method="post">
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-control form-control-custom" name="email" placeholder="nhapemail@example.com" th:value="${param.email}" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Mật khẩu</label>
+        <input type="password" class="form-control form-control-custom" name="password" placeholder="••••••••" required>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="remember" id="remember">
+            <label class="form-check-label small text-light" for="remember">Ghi nhớ đăng nhập</label>
+        </div>
+        <a href="/forgot" class="link-custom">Quên mật khẩu?</a>
+    </div>
+    
+    <button type="submit" class="btn-login">
+        ĐĂNG NHẬP <i class="bi bi-arrow-right ms-1"></i>
+    </button>
+
+    <!-- Nút Google login -->
+    <a href="/oauth2/authorization/google" 
+       class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center mt-3" 
+       style="gap: 10px; border-color: var(--border-color); color: var(--accent-cyan); padding: 10px; font-weight: 600;">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" 
+             alt="Google logo" style="width:20px;height:20px;">
+        Đăng nhập bằng Google
+    </a>
+</form>
+
+        </div>
+    </div>
+</section>
+
+<div class="rain" id="rain"></div>
+
+<footer class="text-center">
+    <div class="container">
+        <p class="mb-0 small text-secondary">&copy; 2025 Model World — Luxury Boutique</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // JS TẠO HIỆU ỨNG MƯA
+    const rain = document.getElementById('rain');
+    for(let i=0; i<100; i++){
+        const drop = document.createElement('div');
+        drop.className = 'drop';
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
+        drop.style.animationDelay = Math.random()*5 + 's';
+        rain.appendChild(drop);
+    }
+</script>
+
+</body>
+</html>
