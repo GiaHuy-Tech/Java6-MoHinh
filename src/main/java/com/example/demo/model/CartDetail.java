@@ -16,7 +16,7 @@ public class CartDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
-
+//
     @ManyToOne
     @JoinColumn(name = "cartId")
     @NotNull(message = "Chi tiết giỏ hàng phải thuộc về một giỏ hàng")
