@@ -22,7 +22,8 @@ public class ProductManaController {
 
     @Autowired ProductRepository productRepo;
     @Autowired CategoryRepository categoryRepo;
-    @Autowired ProductImageRepository imageRepo;
+
+    private final String UPLOAD_DIR = "uploads/images/";
 
     // ================= LIST =================
     @GetMapping
@@ -42,16 +43,15 @@ public class ProductManaController {
     ) throws IOException {
 
         product.setCreatedDate(new Date());
-        productRepo.save(product);
 
-        String uploadDir = "src/main/resources/static/images/";
-        Files.createDirectories(Paths.get(uploadDir));
+        Files.createDirectories(Paths.get(UPLOAD_DIR));
 
         for (int i = 0; i < files.length; i++) {
             MultipartFile f = files[i];
             if (!f.isEmpty()) {
+
                 String fileName = System.currentTimeMillis() + "_" + f.getOriginalFilename();
-                Path path = Paths.get(uploadDir, fileName);
+                Path path = Paths.get(UPLOAD_DIR, fileName);
                 Files.copy(f.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
                 ProductImage img = new ProductImage();
@@ -60,8 +60,9 @@ public class ProductManaController {
 
                 product.addImage(img);
 
+                // ✅ SET ẢNH CHÍNH DUY NHẤT
                 if (i == thumbnailIndex) {
-                    product.setImage("/images/" + fileName);
+                    product.setImage(img.getImage());
                 }
             }
         }
@@ -73,42 +74,44 @@ public class ProductManaController {
     // ================= EDIT =================
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Integer id, Model model) {
-        Products p = productRepo.findById(id).orElse(new Products());
+        Products p = productRepo.findById(id).orElse(null);
         model.addAttribute("product", p);
         model.addAttribute("list", productRepo.findAll());
         model.addAttribute("categories", categoryRepo.findAll());
         return "admin/productMana";
     }
 
-    // ================= UPDATE (KHÔNG LỖI ORPHAN) =================
+    // ================= UPDATE =================
     @PostMapping("/update")
     public String update(
             @ModelAttribute Products product,
             @RequestParam("imageFiles") MultipartFile[] files,
-            @RequestParam(defaultValue = "0") int thumbnailIndex
+            @RequestParam(defaultValue = "-1") int thumbnailIndex
     ) throws IOException {
 
         Products old = productRepo.findById(product.getId()).orElse(null);
         if (old == null) return "redirect:/product-mana";
 
-        // update thông tin cơ bản
+        // update info
         old.setName(product.getName());
         old.setPrice(product.getPrice());
         old.setAvailable(product.isAvailable());
         old.setCategory(product.getCategory());
         old.setDescription(product.getDescription());
 
-        String uploadDir = "src/main/resources/static/images/";
-        Files.createDirectories(Paths.get(uploadDir));
+        Files.createDirectories(Paths.get(UPLOAD_DIR));
 
-        // Nếu có upload ảnh mới thì thêm ảnh (KHÔNG XÓA ẢNH CŨ)
+        // ❌ reset toàn bộ thumbnail cũ
+        old.getImages().forEach(i -> i.setThumbnail(false));
+
         if (files != null && files.length > 0 && !files[0].isEmpty()) {
 
             for (int i = 0; i < files.length; i++) {
                 MultipartFile f = files[i];
                 if (!f.isEmpty()) {
+
                     String fileName = System.currentTimeMillis() + "_" + f.getOriginalFilename();
-                    Path path = Paths.get(uploadDir, fileName);
+                    Path path = Paths.get(UPLOAD_DIR, fileName);
                     Files.copy(f.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
                     ProductImage img = new ProductImage();
@@ -118,7 +121,7 @@ public class ProductManaController {
                     old.addImage(img);
 
                     if (i == thumbnailIndex) {
-                        old.setImage("/images/" + fileName);
+                        old.setImage(img.getImage());
                     }
                 }
             }
