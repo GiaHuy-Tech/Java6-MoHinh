@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
@@ -46,17 +46,35 @@ public class DetailController {
 
         Account currentAccount = (Account) session.getAttribute("account");
         Products product = productRepo.findById(id).orElse(null);
+
         if (product == null) {
             return "redirect:/products";
         }
 
-        // ===== GIÁ SAU KHI ÁP VOUCHER =====
+        // ===== GIÁ GỐC =====
         double finalPrice = product.getPrice();
 
-        // ===== LẤY DANH SÁCH VOUCHER CÒN HẠN =====
-        List<Voucher> vouchers =
-                voucherRepo.findByExpiredAtAfterAndActiveTrue(LocalDateTime.now());
+        // ===== LẤY VOUCHER ĐÚNG NGỮ CẢNH =====
+        List<Voucher> vouchers = new ArrayList<>();
 
+        // voucher CHUNG
+        vouchers.addAll(
+                voucherRepo.findByAccountIsNullAndActiveTrueAndExpiredAtAfter(
+                        LocalDateTime.now()
+                )
+        );
+
+        // voucher RIÊNG cho account
+        if (currentAccount != null) {
+            vouchers.addAll(
+                    voucherRepo.findByAccount_IdAndActiveTrueAndExpiredAtAfter(
+                            currentAccount.getId(),
+                            LocalDateTime.now()
+                    )
+            );
+        }
+
+        // ===== ÁP DỤNG VOUCHER (NẾU CÓ) =====
         Voucher selectedVoucher = null;
 
         if (voucherId != null) {
@@ -64,23 +82,35 @@ public class DetailController {
 
             if (selectedVoucher != null) {
 
-                // kiểm tra đơn tối thiểu
-                if (selectedVoucher.getMinOrderValue() == null
-                        || product.getPrice() >= selectedVoucher.getMinOrderValue()) {
-
-                    if (selectedVoucher.getDiscountPercent() != null) {
-                        finalPrice = product.getPrice()
-                                * (100 - selectedVoucher.getDiscountPercent()) / 100.0;
+                // ❌ Không cho dùng voucher của người khác
+                if (selectedVoucher.getAccount() != null) {
+                    if (currentAccount == null ||
+                            !selectedVoucher.getAccount().getId()
+                                    .equals(currentAccount.getId())) {
+                        selectedVoucher = null;
                     }
+                }
 
-                    if (selectedVoucher.getDiscountAmount() != null) {
-                        finalPrice = product.getPrice()
-                                - selectedVoucher.getDiscountAmount();
+                if (selectedVoucher != null) {
+
+                    // kiểm tra đơn tối thiểu
+                    if (selectedVoucher.getMinOrderValue() == null
+                            || product.getPrice() >= selectedVoucher.getMinOrderValue()) {
+
+                        if (selectedVoucher.getDiscountPercent() != null) {
+                            finalPrice = product.getPrice()
+                                    * (100 - selectedVoucher.getDiscountPercent()) / 100.0;
+                        }
+
+                        if (selectedVoucher.getDiscountAmount() != null) {
+                            finalPrice = product.getPrice()
+                                    - selectedVoucher.getDiscountAmount();
+                        }
+
+                        if (finalPrice < 0) finalPrice = 0;
+                    } else {
+                        selectedVoucher = null;
                     }
-
-                    if (finalPrice < 0) finalPrice = 0;
-                } else {
-                    selectedVoucher = null;
                 }
             }
         }
@@ -112,8 +142,7 @@ public class DetailController {
             @PathVariable Integer productId,
             @RequestParam("content") String content,
             @RequestParam("rating") Integer rating,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
-            RedirectAttributes redirectAttributes) {
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
 
         Account currentAccount = (Account) session.getAttribute("account");
         if (currentAccount == null) {
