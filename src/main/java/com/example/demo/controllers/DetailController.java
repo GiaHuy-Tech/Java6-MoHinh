@@ -3,9 +3,6 @@ package com.example.demo.controllers;
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,85 +23,96 @@ public class DetailController {
     private ProductRepository productRepo;
 
     @Autowired
-    private VoucherRepository voucherRepo;
+    private CommentRepository commentRepo;
 
     @Autowired
-    private CommentRepository commentRepo;
-    
-    @Autowired
-    private OrdersDetailRepository orderDetailRepo; 
-    
+    private OrdersDetailRepository orderDetailRepo;
+
     @Autowired
     private HttpSession session;
 
+    // ================== GET PRODUCT DETAIL ==================
     @GetMapping("/product-detail/{id}")
     public String productDetail(
             @PathVariable Integer id,
-            @RequestParam(required = false) Integer voucherId,
             Model model) {
 
-        Account currentAccount = (Account) session.getAttribute("account");
+        Account account = (Account) session.getAttribute("account");
         Products product = productRepo.findById(id).orElse(null);
         if (product == null) return "redirect:/products";
 
-        // ... (Logic xử lý Voucher giữ nguyên như cũ) ...
-        double finalPrice = product.getPrice();
-        // (Copy lại phần logic Voucher từ câu trả lời trước của mình nếu cần)
-
-        // --- KIỂM TRA QUYỀN COMMENT ---
         boolean canComment = false;
-        if (currentAccount != null) {
-            canComment = orderDetailRepo.existsByAccountAndProduct(currentAccount.getId(), id);
+
+        if (account != null) {
+            boolean purchased = orderDetailRepo.hasPurchased(account.getId(), id);
+            boolean completed = orderDetailRepo.hasCompletedOrder(account.getId(), id);
+            boolean commented = commentRepo.existsByAccount_IdAndProduct_Id(account.getId(), id);
+
+            // ✅ Mua OR hoàn tất && chưa comment
+            canComment = (purchased || completed) && !commented;
         }
 
         model.addAttribute("product", product);
-        model.addAttribute("finalPrice", finalPrice);
+        model.addAttribute("finalPrice", product.getPrice());
         model.addAttribute("canComment", canComment);
-        
-        // --- 🔥 SỬA DÒNG NÀY ĐỂ KHỚP VỚI REPOSITORY MỚI 🔥 ---
-        // Đổi từ ...CreatedDate... thành ...CreatedAt...
-        model.addAttribute("comments", commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
+        model.addAttribute("comments",
+                commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
 
         return "client/product-detail";
     }
 
+    // ================== POST COMMENT ==================
     @PostMapping("/product-detail/comment/{productId}")
     public String postComment(
             @PathVariable Integer productId,
-            @RequestParam("content") String content,
-            @RequestParam("rating") Integer rating,
-            @RequestParam("imageFile") MultipartFile imageFile,
-            RedirectAttributes redirectAttributes) {
-        
-        // ... (Giữ nguyên logic post comment như cũ) ...
-        Account currentAccount = (Account) session.getAttribute("account");
-        if (currentAccount == null) return "redirect:/login";
+            @RequestParam String content,
+            @RequestParam Integer rating,
+            @RequestParam MultipartFile imageFile,
+            RedirectAttributes redirect) {
+
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) return "redirect:/login";
+
+        // ❌ Đã comment
+        if (commentRepo.existsByAccount_IdAndProduct_Id(account.getId(), productId)) {
+            redirect.addFlashAttribute("error", "Bạn đã đánh giá sản phẩm này rồi.");
+            return "redirect:/product-detail/" + productId;
+        }
+
+        boolean purchased = orderDetailRepo.hasPurchased(account.getId(), productId);
+        boolean completed = orderDetailRepo.hasCompletedOrder(account.getId(), productId);
+
+        // ❌ Chưa mua
+        if (!purchased && !completed) {
+            redirect.addFlashAttribute("error", "Bạn cần mua sản phẩm để đánh giá.");
+            return "redirect:/product-detail/" + productId;
+        }
 
         Products product = productRepo.findById(productId).orElse(null);
-        if (product != null) {
-            Comment comment = new Comment();
-            comment.setAccount(currentAccount);
-            comment.setProduct(product);
-            comment.setContent(content);
-            comment.setRating(rating);
-            
-            // Model của bạn dùng createdAt
-            comment.setCreatedAt(LocalDateTime.now()); 
-            
-            // Xử lý ảnh...
-            if (imageFile != null && !imageFile.isEmpty()) {
-                try {
-                    String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-                    Path path = Paths.get("uploads/comments/");
-                    if (!Files.exists(path)) Files.createDirectories(path);
-                    Files.write(path.resolve(fileName), imageFile.getBytes());
-                    comment.setImage(fileName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        if (product == null) return "redirect:/products";
+
+        Comment cmt = new Comment();
+        cmt.setAccount(account);
+        cmt.setProduct(product);
+        cmt.setContent(content);
+        cmt.setRating(rating);
+        cmt.setCreatedAt(LocalDateTime.now());
+
+        // Upload ảnh
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+                Path path = Paths.get("uploads/comments");
+                if (!Files.exists(path)) Files.createDirectories(path);
+                Files.write(path.resolve(fileName), imageFile.getBytes());
+                cmt.setImage(fileName);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            commentRepo.save(comment);
         }
+
+        commentRepo.save(cmt);
+        redirect.addFlashAttribute("success", "Đánh giá đã được gửi!");
         return "redirect:/product-detail/" + productId;
     }
 }
