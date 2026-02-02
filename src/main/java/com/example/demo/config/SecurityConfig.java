@@ -1,5 +1,7 @@
 package com.example.demo.config;
 
+import java.io.IOException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -19,7 +21,6 @@ import com.example.demo.service.CustomOAuth2UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -96,7 +97,7 @@ public class SecurityConfig {
                 )
                 // Thêm JwtFilter trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                
+
                 // Form login
                 .formLogin(form -> form
                         .loginPage("/login")
@@ -106,7 +107,7 @@ public class SecurityConfig {
                         .failureHandler(authFailureHandler())
                         .permitAll()
                 )
-                
+
                 // Google OAuth2 login
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login") // trang login chung
@@ -115,7 +116,7 @@ public class SecurityConfig {
                         )
                         .defaultSuccessUrl("/") // redirect sau login Google thành công
                 )
-                
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")

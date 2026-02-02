@@ -1,21 +1,26 @@
 package com.example.demo.api;
 
-import com.example.demo.model.Account;
-import com.example.demo.repository.AccountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate; // 1. Thay java.util.Date bằng cái này
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.demo.model.Account;
+import com.example.demo.repository.AccountRepository;
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,7 +39,7 @@ public class UserRestController {
             @RequestParam("address") String address,
             @RequestParam("gender") Boolean gender,
             // 2. Sửa 'Date' thành 'LocalDate' ở dòng dưới đây
-            @RequestParam("birthDay") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthDay, 
+            @RequestParam("birthDay") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthDay,
             @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
             // 1. Kiểm tra trùng Email
@@ -43,15 +48,15 @@ public class UserRestController {
             }
 
             Account acc = new Account();
-            acc.setEmail(email); 
+            acc.setEmail(email);
             acc.setPassword(password);
             acc.setFullName(fullName);
             acc.setPhone(phone);
             acc.setAddress(address);
             acc.setGender(gender);
-            
+
             // 3. Dòng này sẽ hết lỗi vì cả 2 đều là LocalDate
-            
+
             acc.setRole(false);
             acc.setActived(true);
 
@@ -61,7 +66,9 @@ public class UserRestController {
                 // Lưu ý: Đường dẫn này có thể cần chỉnh lại tùy vào môi trường chạy (Window/Linux)
                 String uploadDir = new File("src/main/resources/static/images/").getAbsolutePath();
                 File dir = new File(uploadDir);
-                if (!dir.exists()) dir.mkdirs();
+                if (!dir.exists()) {
+					dir.mkdirs();
+				}
 
                 Path filePath = Paths.get(uploadDir, fileName);
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);

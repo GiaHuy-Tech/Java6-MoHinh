@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Cart;
@@ -42,14 +45,14 @@ public class CartController {
         }
 
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
-        
+
         double total = cartDetails.stream()
                 .mapToDouble(cd -> cd.getPrice() * cd.getQuantity())
                 .sum();
 
         model.addAttribute("cartDetails", cartDetails);
         model.addAttribute("total", total);
-        
+
         return "client/cart";
     }
 
@@ -65,7 +68,7 @@ public class CartController {
     public String addToCart(@PathVariable Integer productId,
                             @RequestParam(name = "quantity", defaultValue = "1") Integer quantity,
                             @RequestParam(name = "customPrice", required = false) Double customPrice) {
-        
+
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
             return "redirect:/login";
@@ -95,20 +98,20 @@ public class CartController {
         if (existing != null) {
             // Nếu đã có: Cộng dồn số lượng
             existing.setQuantity(existing.getQuantity() + quantity);
-            
+
             // Cập nhật giá mới nhất (ép kiểu int)
-            existing.setPrice((int) priceToSave); 
-            
+            existing.setPrice((int) priceToSave);
+
             cartDetailRepo.save(existing);
         } else {
             // Nếu chưa có: Tạo mới chi tiết giỏ hàng
             CartDetail cd = new CartDetail();
             cd.setCart(cart);
             cd.setProduct(product);
-            
+
             // Lưu giá (ép kiểu int)
-            cd.setPrice((int) priceToSave); 
-            
+            cd.setPrice((int) priceToSave);
+
             cd.setQuantity(quantity);
             cartDetailRepo.save(cd);
         }

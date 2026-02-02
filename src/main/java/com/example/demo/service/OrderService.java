@@ -54,7 +54,9 @@ public class OrderService {
     @Transactional
     public Orders updateOrder(Integer id, Orders updatedOrder) {
         Orders existing = orderRepository.findById(id).orElse(null);
-        if (existing == null) return null;
+        if (existing == null) {
+			return null;
+		}
 
         existing.setAddress(updatedOrder.getAddress());
         existing.setTotal(updatedOrder.getTotal());
@@ -71,7 +73,9 @@ public class OrderService {
     // ✅ Xóa đơn hàng
     @Transactional
     public boolean deleteOrder(Integer id) {
-        if (!orderRepository.existsById(id)) return false;
+        if (!orderRepository.existsById(id)) {
+			return false;
+		}
         orderRepository.deleteById(id);
         return true;
     }
@@ -80,7 +84,9 @@ public class OrderService {
     @Transactional
     public boolean updateStatus(Integer id, int newStatus) {
         Orders order = orderRepository.findById(id).orElse(null);
-        if (order == null) return false;
+        if (order == null) {
+			return false;
+		}
         order.setStatus(newStatus);
         orderRepository.save(order);
         return true;

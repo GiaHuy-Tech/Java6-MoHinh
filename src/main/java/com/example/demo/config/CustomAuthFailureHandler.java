@@ -1,17 +1,18 @@
 package com.example.demo.config;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHandler {
@@ -36,7 +37,9 @@ public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHand
                 sb.append("email_error=").append(URLEncoder.encode("Email không được để trống", StandardCharsets.UTF_8));
             }
             if (password == null || password.isBlank()) {
-                if (sb.toString().contains("=")) sb.append("&");
+                if (sb.toString().contains("=")) {
+					sb.append("&");
+				}
                 sb.append("pass_error=").append(URLEncoder.encode("Mật khẩu không được để trống", StandardCharsets.UTF_8));
             }
             targetUrl = sb.toString();

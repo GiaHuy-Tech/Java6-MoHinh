@@ -3,6 +3,7 @@ package com.example.demo.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.example.demo.model.Products;
 
 public interface ProductRepository extends JpaRepository<Products, Integer> {
@@ -21,9 +22,9 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
 	List<Products> findAllByOrderByPriceDesc();
 
 	List<Products> findAllByOrderByIdDesc();
-	
+
 	List<Products> findByNameContainingIgnoreCase(String name);
-	
+
     List<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name);
 
 }

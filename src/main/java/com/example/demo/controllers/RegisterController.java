@@ -83,7 +83,7 @@ public class RegisterController {
         // 6. Thông báo thành công và chuyển hướng đăng nhập
         // Dùng redirectAttributes để tin nhắn tồn tại sau khi chuyển trang
         redirectAttributes.addFlashAttribute("message", "Đăng ký thành công! Vui lòng đăng nhập.");
-        
-        return "redirect:/login"; 
+
+        return "redirect:/login";
     }
 }

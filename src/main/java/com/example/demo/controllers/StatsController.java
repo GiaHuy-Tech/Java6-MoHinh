@@ -1,7 +1,7 @@
 package com.example.demo.controllers;
 
 import java.time.YearMonth;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.demo.model.Products;
-import com.example.demo.repository.*;
+import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.LikeRepository;
+import com.example.demo.repository.OrdersRepository;
+import com.example.demo.repository.ProductRepository;
 
 @Controller
 public class StatsController {

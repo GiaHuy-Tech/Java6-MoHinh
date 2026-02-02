@@ -1,13 +1,17 @@
 package com.example.demo.api;
 
-import java.io.File;
-import java.nio.file.*;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Category;
 import com.example.demo.repository.CategoryRepository;
@@ -34,8 +38,9 @@ public class CategoryApiController {
                                     @ModelAttribute Category data) {
 
         Category c = repo.findById(id).orElse(null);
-        if (c == null)
-            return ResponseEntity.notFound().build();
+        if (c == null) {
+			return ResponseEntity.notFound().build();
+		}
 
         c.setName(data.getName());
         c.setImage(data.getImage());

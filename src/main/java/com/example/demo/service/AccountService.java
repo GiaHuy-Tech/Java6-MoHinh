@@ -63,7 +63,9 @@ public class AccountService implements UserDetailsService {
 
     @Transactional
     public boolean deleteById(Integer id) {
-        if (!accountRepo.existsById(id)) return false;
+        if (!accountRepo.existsById(id)) {
+			return false;
+		}
         accountRepo.deleteById(id);
         return true;
     }
@@ -73,7 +75,9 @@ public class AccountService implements UserDetailsService {
     @Transactional
     public boolean toggleActive(Integer id) {
         Optional<Account> optional = accountRepo.findById(id);
-        if (optional.isEmpty()) return false;
+        if (optional.isEmpty()) {
+			return false;
+		}
         Account acc = optional.get();
         acc.setActived(!acc.getActived());
         accountRepo.save(acc);

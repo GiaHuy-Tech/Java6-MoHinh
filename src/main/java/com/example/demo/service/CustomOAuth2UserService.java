@@ -45,18 +45,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             account.setPassword("google-login"); // mật khẩu tạm thời
             account.setRole(false); // user thường
             account.setActived(true);
-            
+
             // Lấy tên từ Google, nếu không có thì dùng email
             String name = oAuth2User.getAttribute("name");
             account.setFullName(name != null ? name : email);
-            
+
             account.setAddress("Chưa cập nhật");
             account.setPhone("0000000000");
             account.setGender(false); // false = nữ
 
             // --- ĐOẠN SỬA LỖI ---
             // Thay vì dùng Calendar, dùng LocalDate.of
-            account.setBirthDay(LocalDate.of(2000, 1, 1)); 
+            account.setBirthDay(LocalDate.of(2000, 1, 1));
             // --------------------
 
             // Lấy avatar từ Google

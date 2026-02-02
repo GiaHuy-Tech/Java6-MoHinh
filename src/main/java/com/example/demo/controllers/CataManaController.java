@@ -1,14 +1,20 @@
 package com.example.demo.controllers;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.model.Category;
@@ -58,7 +64,9 @@ public class CataManaController {
                                  @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
 
         Category category = categoryService.findById(id);
-        if (category == null) return "redirect:/cata-mana?error=notfound";
+        if (category == null) {
+			return "redirect:/cata-mana?error=notfound";
+		}
 
         category.setName(name);
 
@@ -93,7 +101,7 @@ String originalName = file.getOriginalFilename();
             if (originalName != null && originalName.contains(".")) {
                 extension = originalName.substring(originalName.lastIndexOf("."));
             }
-            
+
             String fileName = UUID.randomUUID().toString() + extension;
             Path targetPath = root.resolve(fileName);
 

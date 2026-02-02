@@ -1,16 +1,21 @@
 package com.example.demo.controllers;
 
-import com.example.demo.model.Account;
-import com.example.demo.model.Orders;
-import com.example.demo.repository.OrdersRepository;
-import jakarta.servlet.http.HttpSession;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.demo.model.Account;
+import com.example.demo.model.Orders;
+import com.example.demo.repository.OrdersRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class OrderController {
@@ -25,9 +30,9 @@ public class OrderController {
      * Hiển thị trang "Đơn hàng của tôi" có chức năng Sắp xếp
      */
     @GetMapping("/orders")
-    public String viewOrders(Model model, 
+    public String viewOrders(Model model,
                              @RequestParam(name = "sort", defaultValue = "newest") String sort) {
-        
+
         Account account = (Account) session.getAttribute("account");
         if (account == null) {
             return "redirect:/login";
@@ -48,7 +53,7 @@ public class OrderController {
         model.addAttribute("orders", orders);
         model.addAttribute("sort", sort); // Gửi lại biến sort để giữ trạng thái select box
 
-        return "client/orders"; 
+        return "client/orders";
     }
 
     /**
@@ -57,20 +62,22 @@ public class OrderController {
     @GetMapping("/orders/detail/{id}")
     public String viewOrderDetail(@PathVariable("id") Integer orderId, Model model) {
         Account account = (Account) session.getAttribute("account");
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         Optional<Orders> orderOpt = orderRepo.findById(orderId);
-        
+
         if (orderOpt.isPresent()) {
             Orders order = orderOpt.get();
             // Bảo mật: Chỉ xem được đơn của chính mình
             if (order.getAccountId().getId().equals(account.getId())) {
                 model.addAttribute("order", order);
-                model.addAttribute("orderDetails", order.getOrderDetails()); 
-                return "client/order-detail"; 
+                model.addAttribute("orderDetails", order.getOrderDetails());
+                return "client/order-detail";
             }
         }
-        
+
         return "redirect:/orders";
     }
 

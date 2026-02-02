@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.Like;
@@ -47,7 +50,7 @@ public class LikeController {
         if (product != null) {
             // Kiểm tra sản phẩm đã tồn tại trong wishlist chưa
             boolean exists = likeRepo.findAll().stream()
-                    .anyMatch(like -> like.getProduct() != null 
+                    .anyMatch(like -> like.getProduct() != null
                             && like.getProduct().getId().equals(product.getId()));
 
             if (exists) {

@@ -10,190 +10,320 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
+/* --- CẤU HÌNH GIAO DIỆN --- */
 :root {
-    --bg-dark:#050b14; --bg-card:#0c1525; --text-light:#e1e7ff;
-    --accent-cyan:#00f2ff; --border-color:rgba(0,242,255,.2);
+    --bg-dark: #050b14; 
+    --bg-card: #0c1525; 
+    --text-light: #e1e7ff;
+    --accent-cyan: #00f2ff; 
+    --border-color: rgba(0,242,255,.3);
 }
-body{background:linear-gradient(135deg,var(--bg-dark),#1a0033);color:var(--text-light);font-family:"Be Vietnam Pro";}
-.navbar{background:linear-gradient(90deg,var(--bg-dark),var(--bg-card));border-bottom:1px solid var(--border-color);}
-.navbar .nav-link{color:var(--accent-cyan)!important;}
-.card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:12px;}
-.card-header{background:var(--bg-dark);color:var(--accent-cyan);}
-.form-control,.form-select{background:rgba(0,0,0,.3);color:white;border:1px solid var(--border-color);}
-.btn-neon{border:1px solid var(--accent-cyan);color:var(--accent-cyan);background:transparent;}
-.btn-neon:hover{background:var(--accent-cyan);color:black;}
+
+body {
+    background: linear-gradient(135deg, var(--bg-dark), #1a0033);
+    color: var(--text-light);
+    font-family: "Be Vietnam Pro", sans-serif;
+    min-height: 100vh;
+}
+
+/* NAVBAR */
+.navbar {
+    background: rgba(5, 11, 20, 0.95);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.1);
+}
+.navbar .nav-link {
+    color: #b0c4de !important; /* Màu xám xanh sáng cho link thường */
+    transition: 0.3s;
+}
+.navbar .nav-link:hover, .navbar .nav-link.active {
+    color: var(--accent-cyan) !important;
+    text-shadow: 0 0 8px var(--accent-cyan);
+}
+
+/* CARD & TABLE */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+.card-header {
+    background: rgba(0, 242, 255, 0.1);
+    color: var(--accent-cyan);
+    font-family: "Orbitron", sans-serif;
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* INPUT FORM */
+.form-control, .form-select {
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: #fff !important;
+    border: 1px solid var(--border-color);
+}
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+    border-color: var(--accent-cyan);
+}
+.form-label {
+    color: var(--accent-cyan); /* Màu nhãn sáng rõ */
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* BUTTONS */
+.btn-neon {
+    border: 1px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    background: transparent;
+    transition: all 0.3s;
+}
+.btn-neon:hover {
+    background: var(--accent-cyan);
+    color: #000;
+    box-shadow: 0 0 15px var(--accent-cyan);
+}
+
+/* TABLE CUSTOM */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-light);
+    border-color: var(--border-color);
+}
+.table thead th {
+    color: var(--accent-cyan);
+    font-weight: 700;
+    border-bottom-width: 2px;
+}
 </style>
 </head>
 
 <body>
 
 <nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
-<div class="container-fluid">
-<a class="navbar-brand fw-bold text-light" th:href="@{/stats}">MODEL WORLD ADMIN</a>
-<ul class="navbar-nav ms-auto">
-<li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}">Danh mục</a></li>
-<li class="nav-item"><a class="nav-link" th:href="@{/product-mana}">Sản phẩm</a></li>
-<li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}">Đơn hàng</a></li>
-<li class="nav-item"><a class="nav-link" th:href="@{/user-mana}">Người dùng</a></li>
-</ul>
-</div>
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-white fs-4" style="font-family: 'Orbitron';" th:href="@{/stats}">
+            <i class="bi bi-box-seam-fill text-info me-2"></i>MODEL ADMIN
+        </a>
+        <button class="navbar-toggler bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}">Danh mục</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/product-mana}">Sản phẩm</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}">Đơn hàng</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}">Người dùng</a></li>
+            </ul>
+        </div>
+    </div>
 </nav>
 
 <div class="container py-5">
 
-<h2>📦 Quản lý sản phẩm</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0 text-white"><i class="bi bi-box2 text-info me-2"></i>QUẢN LÝ SẢN PHẨM</h3>
+    </div>
 
-<!-- ================= LIST ================= -->
-<div class="card mb-4">
-<div class="card-body p-0">
-<table class="table table-dark table-hover text-center align-middle mb-0">
-<thead>
-<tr>
-<th>ID</th><th>Ảnh</th><th>Tên</th><th>Danh mục</th><th>Giá</th><th>Trạng thái</th><th>Action</th>
-</tr>
-</thead>
-<tbody>
+    <div class="card mb-5">
+        <div class="card-header">
+            <i class="bi bi-list-ul me-2"></i>Danh sách sản phẩm hiện có
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover text-center align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá bán</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${list}">
+                        <td th:text="${p.id}" class="fw-bold text-white"></td>
 
-<tr th:each="p : ${list}">
-<td th:text="${p.id}"></td>
+                        <td>
+                            <div class="ratio ratio-1x1 mx-auto" style="width: 60px;">
+                                <img th:src="@{${p.image != null ? p.image : '/images/no-image.png'}}"
+                                     class="rounded border border-secondary object-fit-cover">
+                            </div>
+                        </td>
 
-<!-- ✅ FIX ẢNH -->
-<td>
-    <img th:src="@{${p.image != null ? p.image : '/images/no-image.png'}}"
-         width="60" height="60" class="rounded border">
-</td>
+                        <td th:text="${p.name}" class="fw-semibold text-white text-start ps-4"></td>
+                        
+                        <td>
+                            <span th:if="${p.category != null}" th:text="${p.category.name}" class="badge border border-info text-info bg-transparent"></span>
+                            <span th:unless="${p.category != null}" class="text-secondary fst-italic">Chưa phân loại</span>
+                        </td>
 
-<td th:text="${p.name}"></td>
-<td th:text="${p.category != null ? p.category.name : '---'}"></td>
-<td th:text="${#numbers.formatInteger(p.price,0,'POINT')} + ' ₫'"></td>
-<td>
-    <span th:text="${p.available ? 'Còn' : 'Hết'}"
-          th:class="${p.available ? 'badge bg-success' : 'badge bg-danger'}"></span>
-</td>
+                        <td class="text-warning fw-bold" th:text="${#numbers.formatInteger(p.price,0,'POINT')} + ' ₫'"></td>
+                        
+                        <td>
+                            <span th:if="${p.available}" class="badge bg-success bg-opacity-75 text-white">
+                                <i class="bi bi-check-circle me-1"></i>Còn hàng
+                            </span>
+                            <span th:unless="${p.available}" class="badge bg-danger bg-opacity-75 text-white">
+                                <i class="bi bi-x-circle me-1"></i>Hết hàng
+                            </span>
+                        </td>
 
-<td>
-<a th:href="@{/product-mana/edit/{id}(id=${p.id})}" class="btn btn-sm btn-neon">Sửa</a>
-<a th:href="@{/product-mana/delete/{id}(id=${p.id})}" class="btn btn-sm btn-danger"
-   onclick="return confirm('Xóa sản phẩm này?')">Xóa</a>
-</td>
-</tr>
+                        <td>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" class="btn btn-sm btn-neon" title="Chỉnh sửa">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a th:href="@{/product-mana/delete/{id}(id=${p.id})}" class="btn btn-sm btn-outline-danger text-danger border-danger bg-transparent"
+                                   onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(list)}">
+                        <td colspan="7" class="py-4 text-center text-white">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                            Không có dữ liệu sản phẩm
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-</tbody>
-</table>
+    <form th:if="${product.id==null}" th:action="@{/product-mana/add}" th:object="${product}"
+          method="post" enctype="multipart/form-data">
+
+        <div class="card shadow-lg">
+            <div class="card-header py-3">
+                <i class="bi bi-plus-circle-dotted me-2"></i>THÊM SẢN PHẨM MỚI
+            </div>
+            <div class="card-body p-4">
+
+                <input type="hidden" th:field="*{id}">
+
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <label class="form-label">Tên sản phẩm</label>
+                        <input th:field="*{name}" class="form-control" placeholder="Nhập tên sản phẩm..." required>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Giá bán (VNĐ)</label>
+                        <input type="number" th:field="*{price}" class="form-control" placeholder="0" min="0" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Danh mục</label>
+                        <select th:field="*{category.id}" class="form-select">
+                            <option value="">-- Chọn danh mục --</option>
+                            <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Tải ảnh lên (Chọn nhiều)</label>
+                        <input type="file" name="imageFiles" multiple class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label" title="Số thứ tự của ảnh muốn làm ảnh đại diện">Index Ảnh chính</label>
+                        <input type="number" name="thumbnailIndex" value="0" min="0" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái kho</label>
+                        <select th:field="*{available}" class="form-select">
+                            <option th:value="true">✅ Đang kinh doanh</option>
+                            <option th:value="false">⛔ Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button class="btn btn-neon px-5 py-2 fw-bold">
+                        <i class="bi bi-save me-2"></i>LƯU SẢN PHẨM
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <form th:if="${product.id!=null}" th:action="@{/product-mana/update}" th:object="${product}"
+          method="post" enctype="multipart/form-data">
+
+        <div class="card mt-4 border-warning">
+            <div class="card-header text-warning border-bottom border-warning bg-transparent">
+                <i class="bi bi-pencil-square me-2"></i>CẬP NHẬT SẢN PHẨM: <span th:text="*{name}" class="text-white"></span>
+            </div>
+            <div class="card-body p-4">
+
+                <input type="hidden" th:field="*{id}">
+
+                <div class="row g-4">
+
+                    <div class="col-md-5">
+                        <label class="form-label">Tên sản phẩm</label>
+                        <input th:field="*{name}" class="form-control fw-bold text-warning">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Giá bán</label>
+                        <input type="number" th:field="*{price}" class="form-control">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Danh mục</label>
+                        <select th:field="*{category.id}" class="form-select">
+                            <option value="">-- Chọn --</option>
+                            <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-warning">Thay đổi ảnh (Chọn mới để ghi đè)</label>
+                        <input type="file" name="imageFiles" multiple class="form-control border-warning">
+                        <small class="text-white fst-italic opacity-75">* Để trống nếu giữ nguyên ảnh cũ</small>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Index Ảnh chính mới</label>
+                        <input type="number" name="thumbnailIndex" value="0" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select th:field="*{available}" class="form-select">
+                            <option th:value="true">✅ Còn hàng</option>
+                            <option th:value="false">⛔ Hết hàng</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-3 mt-4 justify-content-end">
+                    <a th:href="@{/product-mana}" class="btn btn-outline-light px-4">
+                        <i class="bi bi-arrow-return-left me-2"></i>Quay lại
+                    </a>
+                    <button class="btn btn-warning px-4 fw-bold text-dark">
+                        <i class="bi bi-check-lg me-2"></i>Cập nhật
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
 </div>
-</div>
 
-<!-- ================= ADD ================= -->
-<form th:if="${product.id==null}" th:action="@{/product-mana/add}" th:object="${product}"
-method="post" enctype="multipart/form-data">
-
-<div class="card">
-<div class="card-header">➕ Thêm sản phẩm</div>
-<div class="card-body">
-
-<input type="hidden" th:field="*{id}">
-
-<div class="row g-3">
-<div class="col-md-4">
-<label>Tên</label>
-<input th:field="*{name}" class="form-control">
-</div>
-
-<div class="col-md-2">
-<label>Giá</label>
-<input type="number" th:field="*{price}" class="form-control">
-</div>
-
-<div class="col-md-6">
-<label>Ảnh sản phẩm</label>
-<input type="file" name="imageFiles" multiple class="form-control">
-</div>
-
-<div class="col-md-3">
-<label>Ảnh đại diện (index)</label>
-<input type="number" name="thumbnailIndex" value="0" class="form-control">
-</div>
-
-<div class="col-md-3">
-<label>Danh mục</label>
-<select th:field="*{category.id}" class="form-select">
-<option value="">-- Chọn --</option>
-<option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-</select>
-</div>
-
-<div class="col-md-2">
-<label>Trạng thái</label>
-<select th:field="*{available}" class="form-select">
-<option th:value="true">Còn</option>
-<option th:value="false">Hết</option>
-</select>
-</div>
-</div>
-
-<button class="btn btn-neon mt-3">Thêm</button>
-
-</div>
-</div>
-</form>
-
-<!-- ================= UPDATE ================= -->
-<form th:if="${product.id!=null}" th:action="@{/product-mana/update}" th:object="${product}"
-method="post" enctype="multipart/form-data">
-
-<div class="card mt-4">
-<div class="card-header">✏ Cập nhật sản phẩm</div>
-<div class="card-body">
-
-<input type="hidden" th:field="*{id}">
-
-<div class="row g-3">
-
-<div class="col-md-4">
-<label>Tên</label>
-<input th:field="*{name}" class="form-control">
-</div>
-
-<div class="col-md-2">
-<label>Giá</label>
-<input type="number" th:field="*{price}" class="form-control">
-</div>
-
-<div class="col-md-6">
-<label>Thêm ảnh mới</label>
-<input type="file" name="imageFiles" multiple class="form-control">
-</div>
-
-<div class="col-md-3">
-<label>Ảnh đại diện (index)</label>
-<input type="number" name="thumbnailIndex" value="0" class="form-control">
-</div>
-
-<div class="col-md-3">
-<label>Danh mục</label>
-<select th:field="*{category.id}" class="form-select">
-<option value="">-- Chọn --</option>
-<option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-</select>
-</div>
-
-<div class="col-md-2">
-<label>Trạng thái</label>
-<select th:field="*{available}" class="form-select">
-<option th:value="true">Còn</option>
-<option th:value="false">Hết</option>
-</select>
-</div>
-
-</div>
-
-<button class="btn btn-neon mt-3">Cập nhật</button>
-<a th:href="@{/product-mana}" class="btn btn-secondary mt-3">Hủy</a>
-
-</div>
-</div>
-</form>
-
-</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

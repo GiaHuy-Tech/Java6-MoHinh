@@ -1,12 +1,19 @@
 package com.example.demo.controllers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.demo.model.Category;
+import com.example.demo.model.Products;
+import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.ProductRepository;
 
 @Controller
 public class ProductsController {
@@ -31,13 +38,13 @@ public class ProductsController {
         // ✅ 1. TÌM THEO KEYWORD + DANH MỤC
         if (keyword != null && !keyword.isBlank() && categoryId != null) {
             products = productRepo.findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword);
-        } 
+        }
         else if (keyword != null && !keyword.isBlank()) {
             products = productRepo.findByNameContainingIgnoreCase(keyword);
-        } 
+        }
         else if (categoryId != null) {
             products = productRepo.findByCategoryId(categoryId);
-        } 
+        }
         else {
             products = productRepo.findByAvailableTrue();
         }

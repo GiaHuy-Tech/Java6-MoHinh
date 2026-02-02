@@ -21,7 +21,7 @@ public class BirthdayScheduler {
     private MailService emailService;
 
     // Chạy lúc 12:15 mỗi ngày
-    @Scheduled(cron = "0 0 7 * * *") 
+    @Scheduled(cron = "0 0 7 * * *")
     public void scanAndSendBirthdayEmails() {
         LocalDate today = LocalDate.now();
         int day = today.getDayOfMonth();
@@ -37,11 +37,11 @@ public class BirthdayScheduler {
         } else {
             for (Account acc : birthdayAccounts) {
                 if (acc.getEmail() != null && !acc.getEmail().isEmpty()) {
-                    
+
                     // ✅ TÍNH TUỔI: Năm nay - Năm sinh
-                    // Lưu ý: Đảm bảo acc.getBirthday() trả về LocalDate. 
+                    // Lưu ý: Đảm bảo acc.getBirthday() trả về LocalDate.
                     // Nếu nó là sql.Date thì dùng: acc.getBirthday().toLocalDate().getYear()
-                    int birthYear = acc.getBirthDay().getYear(); 
+                    int birthYear = acc.getBirthDay().getYear();
                     int age = currentYear - birthYear;
 
                     // Gọi hàm gửi mail mới với số tuổi

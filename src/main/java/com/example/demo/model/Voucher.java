@@ -4,8 +4,19 @@ import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import jakarta.persistence.*; // Nhập hết các annotation
-import lombok.*;
+// Nhập hết các annotation
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,7 +25,7 @@ import lombok.*;
 @Entity
 @Table(name = "vouchers")
 public class Voucher {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
@@ -26,13 +37,13 @@ public class Voucher {
     Integer discountPercent;
 
     @Column(name = "discount_amount")
-    Double discountAmount; 
+    Double discountAmount;
 
     @Column(name = "min_order_value")
     Double minOrderValue;
 
     @Column(name = "expired_at")
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") 
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime expiredAt;
 
     Boolean active;
@@ -42,5 +53,5 @@ public class Voucher {
     // Nếu account có dữ liệu -> Chỉ người này được dùng
     @ManyToOne
     @JoinColumn(name = "account_id")
-    Account account; 
+    Account account;
 }

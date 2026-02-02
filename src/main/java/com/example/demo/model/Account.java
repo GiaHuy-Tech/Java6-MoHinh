@@ -1,11 +1,24 @@
 package com.example.demo.model;
 
-import java.time.LocalDate; 
+import java.time.LocalDate;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -50,7 +63,7 @@ public class Account {
     @NotNull(message = "Ngày sinh không được để trống")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Ngày sinh phải là trong quá khứ")
-    @Column(name = "BirthDay") 
+    @Column(name = "BirthDay")
     LocalDate birthDay; // <--- Đổi tên biến ở đây để khớp với th:field="*{birthDay}"
 
     // --- CÁC TRƯỜNG MỚI ---
@@ -59,7 +72,7 @@ public class Account {
 
     @Column(columnDefinition = "nvarchar(50) default 'Đồng'")
     String membershipLevel = "Đồng";
-    
+
     Boolean actived;
     Boolean role;
 }

@@ -7,9 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.example.demo.model.Account;
 import com.example.demo.model.Like;
 import com.example.demo.model.Products;
-import com.example.demo.model.Account;
 
 public interface LikeRepository extends JpaRepository<Like, Integer> {
 
@@ -21,6 +21,6 @@ public interface LikeRepository extends JpaRepository<Like, Integer> {
     // Mặc định sắp xếp giảm dần theo ID (mới nhất nằm đầu)
     default List<Like> findAllOrderByNewest() {
         return findAll(Sort.by(Sort.Direction.DESC, "id"));
-        
+
     }
 }

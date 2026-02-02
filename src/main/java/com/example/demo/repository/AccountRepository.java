@@ -10,12 +10,12 @@ import org.springframework.data.repository.query.Param;
 import com.example.demo.model.Account;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
-    
+
     // Tìm một tài khoản dựa vào email.
     Optional<Account> findByEmail(String email);
 
     boolean existsByEmail(String email);
-    
+
     boolean existsByPhone(String phone);
 
     // --- ĐÃ SỬA LỖI TẠI ĐÂY ---

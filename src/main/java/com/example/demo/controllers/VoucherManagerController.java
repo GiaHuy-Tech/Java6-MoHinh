@@ -1,17 +1,23 @@
 package com.example.demo.controllers;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.example.demo.model.Account;
 import com.example.demo.model.Voucher;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.VoucherRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/vouchers")
@@ -45,7 +51,7 @@ public class VoucherManagerController {
         model.addAttribute("vouchers", list);
         model.addAttribute("accounts", accounts);
         model.addAttribute("voucher", voucher);
-        
+
         return "admin/voucher-list"; // Trả về file HTML
     }
 
@@ -68,7 +74,7 @@ public class VoucherManagerController {
         if (voucher.getId() == null) {
             voucher.setActive(true); // Mặc định voucher mới tạo sẽ active
         }
-        
+
         // 3. (Tùy chọn) Kiểm tra ngày hết hạn logic
         if (voucher.getExpiredAt() == null) {
             // Ví dụ: Mặc định hết hạn sau 1 tháng nếu không nhập
@@ -102,7 +108,7 @@ public class VoucherManagerController {
         }
         return "redirect:/admin/vouchers";
     }
-    
+
     // 6. (MỞ RỘNG) XÓA CỨNG - Nếu muốn xóa hẳn khỏi database
     @GetMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable("id") Integer id) {

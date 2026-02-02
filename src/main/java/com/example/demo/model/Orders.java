@@ -2,10 +2,23 @@ package com.example.demo.model;
 
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.format.annotation.DateTimeFormat;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -25,14 +38,14 @@ public class Orders {
     String address;
 
     int total;
-    int status; 
+    int status;
     int feeship;
     String paymentMethod;
     Boolean paymentStatus;
     String phone;
 
     // --- THÊM TRƯỜNG NÀY ĐỂ CHẠY SEPAY ---
-    @Column(name = "note") 
+    @Column(name = "note")
     private String note; // Chứa mã đơn hàng (VD: DH17150022...)
     // --------------------------------------
 

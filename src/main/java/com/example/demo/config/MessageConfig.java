@@ -22,7 +22,7 @@ public class MessageConfig implements WebMvcConfigurer{
 		mSource.setDefaultEncoding("utf-8");
 		return mSource;
 	}
-	
+
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		// TODO Auto-generated method stub

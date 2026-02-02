@@ -1,8 +1,5 @@
 package com.example.demo.controllers;
 
-import com.example.demo.model.Account;
-import com.example.demo.repository.AccountRepository;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,8 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.example.demo.model.Account;
+import com.example.demo.repository.AccountRepository;
 
 @Controller
 @RequestMapping("/user-mana")
@@ -32,40 +37,40 @@ public class UserManaController {
     public String index(Model model) {
         model.addAttribute("accounts", repo.findAll());
         // Thêm object rỗng để bind vào form modal thêm mới/sửa (nếu có dùng chung)
-        model.addAttribute("account", new Account()); 
+        model.addAttribute("account", new Account());
         return "admin/usermana";
     }
 
     // ✅ Cập nhật thông tin User
     @PostMapping("/update/{id}")
     public String update(
-            @PathVariable("id") Integer id, 
+            @PathVariable("id") Integer id,
             @ModelAttribute("account") Account formAcc, // formAcc hứng dữ liệu từ form HTML
             BindingResult result, // Để bắt lỗi validate nếu cần
             @RequestParam("file") MultipartFile file) {
-        
+
         try {
             // 1. Tìm account cũ trong DB
             Optional<Account> optionalAcc = repo.findById(id);
             if (!optionalAcc.isPresent()) {
                 return "redirect:/user-mana?error=NotFound";
             }
-            
+
             Account acc = optionalAcc.get();
 
             // 2. Xử lý upload ảnh (Nếu người dùng có chọn ảnh mới)
             if (!file.isEmpty()) {
                 String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename(); // Thêm timestamp để tránh trùng tên
                 Path uploadPath = Paths.get(UPLOAD_DIR);
-                
+
                 // Tạo thư mục nếu chưa tồn tại
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
-                
+
                 Path filePath = uploadPath.resolve(fileName);
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                
+
                 // Lưu đường dẫn vào DB
                 acc.setPhoto("/images/" + fileName);
             }
@@ -82,9 +87,9 @@ public class UserManaController {
 
             // 4. Lưu xuống DB
             repo.save(acc);
-            
+
             return "redirect:/user-mana?success=Updated";
-            
+
         } catch (IOException e) {
             e.printStackTrace();
             return "redirect:/user-mana?error=UploadFailed";
@@ -99,7 +104,7 @@ public class UserManaController {
     public String lock(@PathVariable("id") Integer id) {
         Account acc = repo.findById(id).orElse(null);
         // Kiểm tra null và đảm bảo không khóa chính Admin (nếu Role = true là Admin)
-        if (acc != null && (acc.getRole() == null || !acc.getRole())) { 
+        if (acc != null && (acc.getRole() == null || !acc.getRole())) {
             acc.setActived(false);
             repo.save(acc);
         }
@@ -116,7 +121,7 @@ public class UserManaController {
         }
         return "redirect:/user-mana";
     }
-    
+
     // ✅ (Tùy chọn) Xóa user - Cần cẩn thận vì liên quan khóa ngoại bảng Address/Order
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable("id") Integer id) {

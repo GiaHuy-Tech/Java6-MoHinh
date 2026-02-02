@@ -1,7 +1,7 @@
 package com.example.demo.controllers;
 
-import java.util.Optional;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,8 +16,8 @@ import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
@@ -45,26 +45,26 @@ public class LoginController {
 
 		// Nếu có cả email và password trong cookie thì coi như đã chọn "remember"
 		boolean remember = (email != null && password != null);
-		
+
 		// Gán vào model để Thymeleaf bind form
 		model.addAttribute("account", acc);
 		model.addAttribute("remember", remember);
 
 		return "client/login";
 	}
-	
+
 	// Xử lý login
 	@PostMapping("/login")
 	public String processLogin(
 			 @Valid @ModelAttribute("account") Account account, BindingResult result,
 			@RequestParam(value = "remember", required = false) String remember, Model model,
 			HttpServletResponse response) {
-		
-		// Nếu có lỗi validate từ entity (email trống, mật khẩu ngắn...) 
-		if (result.hasErrors()) { 
+
+		// Nếu có lỗi validate từ entity (email trống, mật khẩu ngắn...)
+		if (result.hasErrors()) {
 			return "client/login";
 		}
-		
+
 		Optional<Account> optionalAccount = accountRepo.findByEmail(account.getEmail());
 
 		if (optionalAccount.isEmpty()) {
@@ -74,9 +74,9 @@ public class LoginController {
 
 		Account dbAccount = optionalAccount.get();
 
-		if (!account.getPassword().equals(dbAccount.getPassword())) { 
-			model.addAttribute("errorMessage", "Mật khẩu không đúng!"); 
-			return "client/login"; 
+		if (!account.getPassword().equals(dbAccount.getPassword())) {
+			model.addAttribute("errorMessage", "Mật khẩu không đúng!");
+			return "client/login";
 		}
 
 		// Đăng nhập thành công
@@ -119,8 +119,9 @@ clearCookie(response, "password");
 	}
 
 	private String getCookieValue(HttpServletRequest request, String name) {
-		if (request.getCookies() == null)
+		if (request.getCookies() == null) {
 			return null;
+		}
 		return Arrays.stream(request.getCookies()).filter(c -> c.getName().equals(name)).map(Cookie::getValue)
 				.findFirst().orElse(null);
 	}

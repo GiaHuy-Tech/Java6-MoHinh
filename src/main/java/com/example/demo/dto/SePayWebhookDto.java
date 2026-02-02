@@ -1,6 +1,5 @@
 package com.example.demo.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data; // Nếu không dùng Lombok thì tự viết Getter/Setter nhé
 
 @Data

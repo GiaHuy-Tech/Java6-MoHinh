@@ -15,7 +15,7 @@ import com.example.demo.model.Products;
 public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
     List<Orders> findTop5ByOrderByCreatedDateDesc();
-    
+
     // Lưu ý: Trong Entity Orders biến tên là "accountId" (chữ d viết thường)
     List<Orders> findByAccountId_IdOrderByCreatedDateDesc(Integer accountId);
     List<Orders> findByAccountId_IdOrderByCreatedDateAsc(Integer accountId);
@@ -34,7 +34,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
     @Query("SELECT od.productId FROM OrderDetail od GROUP BY od.productId ORDER BY SUM(od.quantity) DESC LIMIT 1")
     Optional<Products> findTopSellingProduct();
-    
+
     Optional<Orders> findByNote(String note);
 
     // --- 🔥 CÁC HÀM ĐÃ SỬA LẠI CHO KHỚP ENTITY CỦA BẠN 🔥 ---

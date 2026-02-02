@@ -9,10 +9,14 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
-import com.example.demo.model.OrderDetail;
 import com.example.demo.model.Orders;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.OrdersRepository;
@@ -54,18 +58,36 @@ public class OrdersManaController {
 
     // --- HÀM TÍNH SHIP (Tái sử dụng logic) ---
     private int calculateShippingFee(String address, int subTotal) {
-        if (subTotal >= 1000000) return 0;
-        if (address == null || address.isEmpty()) return 50000;
+        if (subTotal >= 1000000) {
+			return 0;
+		}
+        if (address == null || address.isEmpty()) {
+			return 50000;
+		}
 
         String normAddress = unAccent(address.toLowerCase());
 
-        if (normAddress.contains("can tho")) return 20000; // Nội thành
+        if (normAddress.contains("can tho")) {
+			return 20000; // Nội thành
+		}
 
-        for (String p : SOUTH_PROVINCES) if (normAddress.contains(p)) return 30000;
-        for (String p : CENTRAL_PROVINCES) if (normAddress.contains(p)) return 40000;
-        for (String p : NORTH_PROVINCES) if (normAddress.contains(p)) return 50000;
+        for (String p : SOUTH_PROVINCES) {
+			if (normAddress.contains(p)) {
+				return 30000;
+			}
+		}
+        for (String p : CENTRAL_PROVINCES) {
+			if (normAddress.contains(p)) {
+				return 40000;
+			}
+		}
+        for (String p : NORTH_PROVINCES) {
+			if (normAddress.contains(p)) {
+				return 50000;
+			}
+		}
 
-        return 45000; 
+        return 45000;
     }
 
     public static String unAccent(String s) {
@@ -94,13 +116,13 @@ public class OrdersManaController {
         Account acc = accountRepo.findById(accountId).orElse(null);
         order.setAccountId(acc);
         order.setCreatedDate(new Date());
-        
+
         // TÍNH PHÍ SHIP CHO ĐƠN MỚI
-        int currentTotal = order.getTotal(); 
+        int currentTotal = order.getTotal();
         int fee = calculateShippingFee(order.getAddress(), currentTotal);
-        
+
         order.setFeeship(fee);
-        order.setTotal(currentTotal + fee); 
+        order.setTotal(currentTotal + fee);
 
         ordersRepo.save(order);
         return "redirect:/orders-mana";
@@ -110,12 +132,14 @@ public class OrdersManaController {
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Integer id, Model model) {
         Orders order = ordersRepo.findById(id).orElse(null);
-        if (order == null) return "redirect:/orders-mana";
-        
+        if (order == null) {
+			return "redirect:/orders-mana";
+		}
+
         model.addAttribute("order", order);
         model.addAttribute("ordersList", ordersRepo.findAll());
         model.addAttribute("accounts", accountRepo.findAll());
-        return "admin/order-edit"; 
+        return "admin/order-edit";
     }
 
     // ✅ Cập nhật TRẠNG THÁI ĐƠN HÀNG (Status)
@@ -126,14 +150,14 @@ public class OrdersManaController {
         Orders order = ordersRepo.findById(id).orElse(null);
         if (order != null) {
             order.setStatus(status);
-            
+
             // Tính lại phí ship nếu cần (khi cập nhật trạng thái có thể do admin sửa địa chỉ trước đó)
             int subTotal = order.getOrderDetails().stream()
                     .mapToInt(d -> d.getPrice() * d.getQuantity())
                     .sum();
-            
+
             int newFee = calculateShippingFee(order.getAddress(), subTotal);
-            
+
             if (newFee != order.getFeeship()) {
                 order.setFeeship(newFee);
                 order.setTotal(subTotal + newFee);
@@ -159,7 +183,7 @@ public class OrdersManaController {
     @PostMapping("/updatePaymentStatus")
     public String updatePaymentStatus(@RequestParam("id") Integer id,
                                       @RequestParam("paymentStatus") boolean paymentStatus) {
-        
+
         Orders order = ordersRepo.findById(id).orElse(null);
         if (order != null) {
             order.setPaymentStatus(paymentStatus);
@@ -184,13 +208,15 @@ public class OrdersManaController {
     @GetMapping("/detail/{id}")
     public String orderDetail(@PathVariable("id") Integer id, Model model) {
         Orders order = ordersRepo.findById(id).orElse(null);
-        if (order == null) return "redirect:/orders-mana";
+        if (order == null) {
+			return "redirect:/orders-mana";
+		}
 
         model.addAttribute("order", order);
-        model.addAttribute("orderDetails", order.getOrderDetails()); 
-        return "admin/order-detail"; 
+        model.addAttribute("orderDetails", order.getOrderDetails());
+        return "admin/order-detail";
     }
-    
+
     // Route cũ (giữ để tương thích ngược nếu cần)
     @GetMapping("/cart/{orderId}")
     public String cartDetail(@PathVariable("orderId") Integer orderId, Model model) {

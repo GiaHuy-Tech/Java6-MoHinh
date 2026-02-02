@@ -1,16 +1,18 @@
 package com.example.demo.controllers;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.service.MailService;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Controller
 public class ForgotController {
@@ -39,7 +41,7 @@ public class ForgotController {
 
         // ✅ Tạo mật khẩu tạm thời (8 ký tự)
         String tempPass = UUID.randomUUID().toString().substring(0, 8);
-        acc.setPassword(tempPass); 
+        acc.setPassword(tempPass);
         accountRepo.save(acc);
 
         // ✅ Gửi email thông báo

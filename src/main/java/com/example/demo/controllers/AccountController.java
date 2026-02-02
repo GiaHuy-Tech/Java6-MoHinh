@@ -1,9 +1,14 @@
 package com.example.demo.controllers;
 
-import com.example.demo.model.Account;
-import com.example.demo.repository.AccountRepository;
-import com.example.demo.repository.OrdersRepository; // Đảm bảo bạn đã có repo này
-import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,14 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Optional;
+import com.example.demo.model.Account;
+import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.OrdersRepository; // Đảm bảo bạn đã có repo này
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/account") // Prefix chung cho tất cả các đường dẫn
@@ -49,7 +51,9 @@ public class AccountController {
 
         // 1. Load lại Account từ DB để có dữ liệu mới nhất (tránh session bị cũ)
         Optional<Account> opt = accountRepo.findById(sessionAccount.getId());
-        if (opt.isEmpty()) return "redirect:/login";
+        if (opt.isEmpty()) {
+			return "redirect:/login";
+		}
         Account acc = opt.get();
 
         // 2. Tính toán thống kê từ OrderRepository
@@ -60,7 +64,7 @@ public class AccountController {
         long totalSpent = (totalSpentRaw != null) ? totalSpentRaw : 0L;
         long orderCount = (totalOrdersRaw != null) ? totalOrdersRaw : 0L;
         // Giả sử logic tiết kiệm là 10% tổng chi tiêu (hoặc lấy từ DB nếu có)
-        long savedAmount = totalSpent / 10; 
+        long savedAmount = totalSpent / 10;
 
         // 3. Cập nhật lại TotalSpending vào bảng Account nếu cần thiết
         if (!acc.getTotalSpending().equals(totalSpent)) {
@@ -106,7 +110,7 @@ public class AccountController {
             long amountToNextLevel = nextLevelThreshold - totalSpent;
             // Tính phần trăm: (Tiêu hiện tại / Mốc kế tiếp) * 100
             int progressPercent = (int) ((totalSpent * 100) / nextLevelThreshold);
-            
+
             model.addAttribute("nextLevelName", nextLevelName);
             model.addAttribute("amountToNextLevel", amountToNextLevel);
             model.addAttribute("progressPercent", progressPercent);
@@ -150,7 +154,9 @@ public class AccountController {
     public String updateBirthday(@RequestParam("birthday") String birthdayStr, RedirectAttributes redirect) {
         // Model dùng LocalDate, View gửi String "yyyy-MM-dd"
         Account acc = getSessionAccount();
-        if (acc == null) return "redirect:/login";
+        if (acc == null) {
+			return "redirect:/login";
+		}
 
         try {
             LocalDate birthDay = LocalDate.parse(birthdayStr);
@@ -173,7 +179,9 @@ public class AccountController {
     @PostMapping("/upload-avatar")
     public String uploadAvatar(@RequestParam("avatar") MultipartFile file, RedirectAttributes redirect) {
         Account acc = getSessionAccount();
-        if (acc == null) return "redirect:/login";
+        if (acc == null) {
+			return "redirect:/login";
+		}
 
         if (file.isEmpty()) {
             redirect.addFlashAttribute("error", "Vui lòng chọn ảnh!");
@@ -190,7 +198,7 @@ public class AccountController {
             // Tạo tên file unique
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
-            
+
             // Lưu file
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
@@ -224,7 +232,9 @@ public class AccountController {
     // Hàm update chung để tránh lặp code
     private String updateAccountField(AccountUpdater updater, RedirectAttributes redirect, String fieldName) {
         Account sessionAcc = getSessionAccount();
-        if (sessionAcc == null) return "redirect:/login";
+        if (sessionAcc == null) {
+			return "redirect:/login";
+		}
 
         // Lấy object từ DB để đảm bảo session không đè dữ liệu cũ
         Optional<Account> opt = accountRepo.findById(sessionAcc.getId());

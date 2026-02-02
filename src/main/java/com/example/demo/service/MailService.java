@@ -37,7 +37,7 @@ public class MailService {
     // ✅ 3. Hàm gửi mail sinh nhật (HTML đẹp + tính tuổi)
     public void sendBirthdayEmail(String toEmail, String fullName, int age) {
         String subject = "🎉 CHÚC MỪNG SINH NHẬT TỪ MODEL WORLD! 🎉";
-        
+
         String content = "<h3>Xin chào " + fullName + ",</h3>"
                 + "<p>Chúc mừng bạn đã chính thức bước sang tuổi <strong>" + age + "</strong> rực rỡ!</p>"
                 + "<p>Model World chúc bạn tuổi mới thật nhiều niềm vui, sức khỏe dồi dào và gặt hái được nhiều thành công hơn nữa.</p>"
@@ -50,8 +50,8 @@ public class MailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(toEmail);
             helper.setSubject(subject);
-            helper.setText(content, true); 
-            
+            helper.setText(content, true);
+
             mailSender.send(message);
             System.out.println("✅ Đã gửi mail chúc mừng sinh nhật " + age + " tuổi cho: " + toEmail);
         } catch (MessagingException e) {
