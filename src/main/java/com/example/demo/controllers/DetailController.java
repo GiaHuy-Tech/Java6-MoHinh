@@ -5,14 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
@@ -26,9 +25,6 @@ public class DetailController {
     private ProductRepository productRepo;
 
     @Autowired
-    private VoucherRepository voucherRepo;
-
-    @Autowired
     private CommentRepository commentRepo;
 
     @Autowired
@@ -39,94 +35,28 @@ public class DetailController {
 
     // ================== PRODUCT DETAIL ==================
     @GetMapping("/product-detail/{id}")
-    public String productDetail(
-            @PathVariable Integer id,
-            @RequestParam(required = false) Integer voucherId,
-            Model model) {
+    public String productDetail(@PathVariable Integer id, Model model) {
 
-        Account currentAccount = (Account) session.getAttribute("account");
+        Account account = (Account) session.getAttribute("account");
         Products product = productRepo.findById(id).orElse(null);
 
         if (product == null) {
             return "redirect:/products";
         }
 
-        // ===== GIÁ GỐC =====
-        double finalPrice = product.getPrice();
-
-        // ===== LẤY VOUCHER ĐÚNG NGỮ CẢNH =====
-        List<Voucher> vouchers = new ArrayList<>();
-
-        // voucher CHUNG
-        vouchers.addAll(
-                voucherRepo.findByAccountIsNullAndActiveTrueAndExpiredAtAfter(
-                        LocalDateTime.now()
-                )
-        );
-
-        // voucher RIÊNG cho account
-        if (currentAccount != null) {
-            vouchers.addAll(
-                    voucherRepo.findByAccount_IdAndActiveTrueAndExpiredAtAfter(
-                            currentAccount.getId(),
-                            LocalDateTime.now()
-                    )
-            );
-        }
-
-        // ===== ÁP DỤNG VOUCHER (NẾU CÓ) =====
-        Voucher selectedVoucher = null;
-
-        if (voucherId != null) {
-            selectedVoucher = voucherRepo.findById(voucherId).orElse(null);
-
-            if (selectedVoucher != null) {
-
-                // ❌ Không cho dùng voucher của người khác
-                if (selectedVoucher.getAccount() != null) {
-                    if (currentAccount == null ||
-                            !selectedVoucher.getAccount().getId()
-                                    .equals(currentAccount.getId())) {
-                        selectedVoucher = null;
-                    }
-                }
-
-                if (selectedVoucher != null) {
-
-                    // kiểm tra đơn tối thiểu
-                    if (selectedVoucher.getMinOrderValue() == null
-                            || product.getPrice() >= selectedVoucher.getMinOrderValue()) {
-
-                        if (selectedVoucher.getDiscountPercent() != null) {
-                            finalPrice = product.getPrice()
-                                    * (100 - selectedVoucher.getDiscountPercent()) / 100.0;
-                        }
-
-                        if (selectedVoucher.getDiscountAmount() != null) {
-                            finalPrice = product.getPrice()
-                                    - selectedVoucher.getDiscountAmount();
-                        }
-
-                        if (finalPrice < 0) finalPrice = 0;
-                    } else {
-                        selectedVoucher = null;
-                    }
-                }
-            }
-        }
-
-        // ===== KIỂM TRA QUYỀN COMMENT =====
         boolean canComment = false;
-        if (currentAccount != null) {
-            canComment = orderDetailRepo
-                    .existsByAccountAndProduct(currentAccount.getId(), id);
+
+        if (account != null) {
+            boolean purchased = orderDetailRepo.hasPurchased(account.getId(), id);
+            boolean completed = orderDetailRepo.hasCompletedOrder(account.getId(), id);
+            boolean commented = commentRepo
+                    .existsByAccount_IdAndProduct_Id(account.getId(), id);
+
+            // Đã mua / hoàn tất và chưa comment
+            canComment = (purchased || completed) && !commented;
         }
 
-        // ===== ĐẨY DATA SANG VIEW =====
         model.addAttribute("product", product);
-        model.addAttribute("finalPrice", finalPrice);
-        model.addAttribute("vouchers", vouchers);
-        model.addAttribute("selectedVoucher", selectedVoucher);
         model.addAttribute("canComment", canComment);
         model.addAttribute(
                 "comments",
@@ -140,13 +70,28 @@ public class DetailController {
     @PostMapping("/product-detail/comment/{productId}")
     public String postComment(
             @PathVariable Integer productId,
-            @RequestParam("content") String content,
-            @RequestParam("rating") Integer rating,
-            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
+            @RequestParam String content,
+            @RequestParam Integer rating,
+            @RequestParam(required = false) MultipartFile imageFile,
+            RedirectAttributes redirect) {
 
-        Account currentAccount = (Account) session.getAttribute("account");
-        if (currentAccount == null) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) {
             return "redirect:/login";
+        }
+
+        // Đã comment rồi
+        if (commentRepo.existsByAccount_IdAndProduct_Id(account.getId(), productId)) {
+            redirect.addFlashAttribute("error", "Bạn đã đánh giá sản phẩm này rồi.");
+            return "redirect:/product-detail/" + productId;
+        }
+
+        boolean purchased = orderDetailRepo.hasPurchased(account.getId(), productId);
+        boolean completed = orderDetailRepo.hasCompletedOrder(account.getId(), productId);
+
+        if (!purchased && !completed) {
+            redirect.addFlashAttribute("error", "Bạn cần mua sản phẩm để đánh giá.");
+            return "redirect:/product-detail/" + productId;
         }
 
         Products product = productRepo.findById(productId).orElse(null);
@@ -155,19 +100,19 @@ public class DetailController {
         }
 
         Comment comment = new Comment();
-        comment.setAccount(currentAccount);
+        comment.setAccount(account);
         comment.setProduct(product);
         comment.setContent(content);
         comment.setRating(rating);
         comment.setCreatedAt(LocalDateTime.now());
 
-        // ===== UPLOAD ẢNH COMMENT =====
+        // Upload ảnh comment
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
-                String fileName =
-                        System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-                Path uploadPath = Paths.get("uploads/comments");
+                String fileName = System.currentTimeMillis()
+                        + "_" + imageFile.getOriginalFilename();
 
+                Path uploadPath = Paths.get("uploads/comments");
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
                 }
@@ -181,6 +126,7 @@ public class DetailController {
         }
 
         commentRepo.save(comment);
+        redirect.addFlashAttribute("success", "Đánh giá đã được gửi!");
 
         return "redirect:/product-detail/" + productId;
     }
