@@ -2,11 +2,11 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${product.name} + ' - Model World'">Chi tiết sản phẩm</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="|${product.name} - Model World|">Chi tiết sản phẩm</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,319 +15,383 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-        /* --- THEME COLORS --- */
+        /* =========================================
+           1. CORE THEME (COPY TỪ INDEX)
+           ========================================= */
         :root {
             --bg-dark: #050b14;
             --bg-card: #0c1525;
             --text-light: #e1e7ff;
             --accent-cyan: #00f2ff;
-            --accent-red: #ff4d4d;
+            --accent-pink: #ff3864; 
             --border-color: rgba(0, 242, 255, 0.2);
+            
             --font-main: "Be Vietnam Pro", sans-serif;
-            --font-logo: "Orbitron", sans-serif;
+            --font-display: "Orbitron", sans-serif;
+
+            --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 
+                               0 0 20px rgba(0, 242, 255, 0.3), 
+                               0 0 40px rgba(0, 242, 255, 0.1);
         }
 
-        body { 
-            background-color: var(--bg-dark); 
-            color: var(--text-light); 
-            font-family: var(--font-main);
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: var(--font-main); 
         }
 
-        /* Navbar & General (Giữ nguyên style của bạn) */
-        .navbar { background-color: rgba(12, 21, 37, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
-        .navbar-brand { font-family: var(--font-logo); }
-        .card-dark { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; }
+        /* TYPOGRAPHY */
+        .navbar-brand { font-family: var(--font-display); }
+        h1, h2, h3, h4 { font-family: var(--font-main); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* Product Specific */
-        .price-original { text-decoration: line-through; color: #6c757d; font-size: 1.1rem; }
-        .price-final { color: var(--accent-cyan); font-size: 2rem; font-weight: 700; text-shadow: 0 0 10px rgba(0, 242, 255, 0.3); }
-        
-        .form-control-dark, .form-select-dark {
-            background: rgba(0,0,0,0.3); color: #fff; border: 1px solid rgba(255,255,255,0.15);
+        /* NAVBAR STYLE (COPY TỪ INDEX) */
+        .navbar {
+            background-color: rgba(12, 21, 37, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 0; /* Chỉnh nhẹ padding cho gọn */
         }
-        .form-control-dark:focus, .form-select-dark:focus {
-            background: rgba(0,0,0,0.5); color: #fff; border-color: var(--accent-cyan); box-shadow: 0 0 0 0.25rem rgba(0, 242, 255, 0.25);
-        }
-        
-        .btn-main { 
-            background: linear-gradient(45deg, var(--accent-cyan), #00a8ff); 
-            color: #000; font-weight: 700; border: none; 
-        }
-        .btn-main:hover { background: #fff; color: #000; box-shadow: 0 0 15px var(--accent-cyan); }
+        .navbar-brand span { color: #fff; letter-spacing: 1px; }
+        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; white-space: nowrap; }
+        .nav-link:hover { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
 
-        /* Comment Section */
-        .comment-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1rem; }
-        .comment-item:last-child { border-bottom: none; }
-        .star-filled { color: #ffd700; }
-        .star-empty { color: #444; }
+        /* SEARCH BAR (COPY TỪ INDEX) */
+        .search-bar-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 4px 10px; 
+            transition: 0.3s;
+            width: auto;
+            display: flex;
+            align-items: center;
+        }
+        .search-bar-wrapper:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
+        .form-control-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan) !important; font-weight: 500; width: 120px; }
+        .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
+        .form-control-custom:focus { background: transparent; color: var(--accent-cyan) !important; box-shadow: none; }
+        .form-select-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan); cursor: pointer; width: auto; padding-right: 25px; }
+        .form-select-custom option { background: var(--bg-card); color: #fff; } /* Fix dropdown bg */
+        .btn-search { color: var(--text-light); border: none; background: transparent; transition: 0.3s;}
+        .btn-search:hover { color: var(--accent-cyan); transform: scale(1.1); }
+
+        /* DROPDOWN USER (COPY TỪ INDEX) */
+        .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
+        .dropdown-item { color: #aab8c5; }
+        .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+
+
+        /* =========================================
+           2. PRODUCT DETAIL SPECIFIC STYLES
+           ========================================= */
         
-        /* Alert */
-        .alert-custom { background: rgba(0, 242, 255, 0.1); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); }
-        .alert-error { background: rgba(255, 77, 77, 0.1); border: 1px solid var(--accent-red); color: var(--accent-red); }
+        /* Layout Container */
+        .detail-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* Image Area */
+        .product-gallery {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: radial-gradient(circle at center, #1a2639 0%, #050b14 100%);
+            display: flex; align-items: center; justify-content: center;
+            min-height: 450px;
+        }
+        .main-image { max-width: 100%; max-height: 450px; transition: 0.3s; filter: drop-shadow(0 0 10px rgba(0,242,255,0.1)); }
+        .main-image:hover { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(0,242,255,0.3)); }
+
+        /* Typography */
+        .product-title { font-family: var(--font-display); font-size: 2rem; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .price-current { font-family: var(--font-display); font-size: 2.2rem; color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 242, 255, 0.4); font-weight: 700; }
+        .price-old { text-decoration: line-through; color: #6c757d; font-size: 1.2rem; }
+
+        /* Voucher Select (Style giống Search Bar) */
+        .voucher-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 10px 15px;
+            transition: 0.3s;
+        }
+        .voucher-wrapper:hover { border-color: var(--accent-cyan); background: rgba(0, 242, 255, 0.05); }
+        .form-select-voucher {
+            background: transparent; border: none; color: var(--accent-cyan); font-weight: 500; cursor: pointer; width: 100%;
+        }
+        .form-select-voucher:focus { outline: none; box-shadow: none; }
+        .form-select-voucher option { background: var(--bg-card); color: #fff; }
+
+        /* Quantity & Action Buttons */
+        .qty-box {
+            display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; height: 50px; width: 130px;
+        }
+        .qty-btn { width: 40px; background: rgba(255,255,255,0.05); color: #fff; border: none; transition: 0.2s; }
+        .qty-btn:hover { background: var(--accent-cyan); color: #000; }
+        .qty-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; }
+        .qty-input:focus { outline: none; }
+
+        .btn-buy-now {
+            background: linear-gradient(45deg, var(--accent-cyan), #00a8ff);
+            color: #050b14; font-family: var(--font-display); font-weight: 700; border: none;
+            height: 50px; border-radius: 6px; letter-spacing: 1px; transition: 0.3s;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+        .btn-buy-now:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); color: #000; }
+
+        /* Tabs */
+        .nav-tabs { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .nav-tabs .nav-link { color: #8b9bb4 !important; border: none; font-family: var(--font-display); letter-spacing: 1px; padding: 15px 25px; }
+        .nav-tabs .nav-link:hover { color: #fff !important; }
+        .nav-tabs .nav-link.active {
+            background: transparent; color: var(--accent-cyan) !important;
+            border-bottom: 2px solid var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+        }
+        .tab-content { color: #aab8c5; line-height: 1.7; padding: 25px 0; }
+
+        /* Breadcrumb */
+        .breadcrumb-item a { color: #8b9bb4; text-decoration: none; }
+        .breadcrumb-item.active { color: var(--accent-cyan); }
+        .breadcrumb-item + .breadcrumb-item::before { color: #555; }
+
+        /* Footer */
+        footer { background-color: #020408; border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: 60px; color: #6c757d; }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .search-bar-wrapper { width: 100%; margin-top: 10px; }
+            .form-control-custom { width: 100%; }
+            .detail-container { padding: 15px; }
+            .product-gallery { min-height: 300px; }
+            .action-wrapper { flex-direction: column; }
+            .btn-buy-now { width: 100%; margin-top: 10px; }
+            .qty-box { width: 100%; }
+        }
     </style>
 </head>
-
 <body>
 
 <nav class="navbar navbar-expand-lg sticky-top">
     <div class="container">
         <a class="navbar-brand d-flex align-items-center gap-2" href="/">
             <i class="bi bi-box-seam-fill fs-3 text-info"></i>
-            <span class="fw-bold fs-4 text-white">MODEL WORLD</span>
+            <span class="fw-bold fs-4">MODEL WORLD</span>
         </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="bi bi-list text-white fs-2"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
-             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
-                <li class="nav-item"><a class="nav-link" href="/cart">Giỏ hàng</a></li>
-                <li th:if="${session.account == null}" class="nav-item"><a class="nav-link" href="/login">Đăng nhập</a></li>
-                <li th:if="${session.account != null}" class="nav-item"><a class="nav-link" href="/account">Tài khoản</a></li>
-             </ul>
+            <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
+                <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
+                
+                <th:block th:if="${session.account == null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+                </th:block>
+
+                <th:block th:if="${session.account != null}">
+                    <li class="nav-item mx-1"><a class="nav-link" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
+                    <li class="nav-item mx-1"><a class="nav-link" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
+                    
+                    <li class="nav-item dropdown mx-2">
+                        <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" 
+                                 onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'"
+                                 alt="avatar" class="rounded-circle border border-info" style="width: 38px; height: 38px; object-fit: cover;">
+                            <i th:if="${session.account.photo == null}" class="bi bi-person-circle fs-3 text-info"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                            <li><span class="dropdown-header text-info" th:text="${session.account.fullName}">User</span></li>
+                            <li><hr class="dropdown-divider border-secondary"></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
+                            <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                        </ul>
+                    </li>
+                </th:block>
+            </ul>
+
+            <form action="/products" method="get" class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
+                <div class="search-bar-wrapper">
+                    <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
+                    <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 10px;"></div>
+                    <select class="form-select form-select-custom text-end" name="categoryId">
+                        <option value="">Tất cả</option>
+                        <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" 
+                                th:selected="${cate.id != null && selectedCategory != null && cate.id.toString() == selectedCategory}"></option>
+                    </select>
+                    <button type="submit" class="btn-search"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
         </div>
     </div>
 </nav>
 
 <div class="container py-5">
     
-    <div th:if="${success}" class="alert alert-custom mb-4 d-flex align-items-center">
-        <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
-    </div>
-    <div th:if="${error}" class="alert alert-error mb-4 d-flex align-items-center">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
-    </div>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">TRANG CHỦ</a></li>
+            <li class="breadcrumb-item"><a href="/products">SẢN PHẨM</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Detail</li>
+        </ol>
+    </nav>
 
-    <div class="card-dark p-4 mb-5">
+    <div class="detail-container mb-5">
         <div class="row g-5">
-          <div class="col-md-5">
+            <div class="col-lg-6 position-relative">
+                <span th:if="${selectedVoucher != null}" class="position-absolute top-0 start-0 m-2 badge bg-danger rounded-pill px-3 py-2 shadow" style="z-index: 5;">
+                    <i class="bi bi-lightning-fill"></i> FLASH SALE
+                </span>
 
-    <div id="productCarousel" class="carousel slide position-relative" data-bs-ride="carousel">
-
-        <!-- indicators -->
-        <div class="carousel-indicators" th:if="${!#lists.isEmpty(product.images)}">
-            <button th:each="img,stat : ${product.images}"
-                    type="button"
-                    data-bs-target="#productCarousel"
-                    th:data-bs-slide-to="${stat.index}"
-                    th:classappend="${stat.index == 0} ? 'active'">
-            </button>
-        </div>
-
-        <!-- images -->
-        <div class="carousel-inner rounded shadow-lg">
-
-            <!-- nhiều ảnh -->
-            <div th:each="img,stat : ${product.images}"
-                 th:class="'carousel-item ' + (${stat.index == 0} ? 'active' : '')">
-
-                <img th:src="@{${img.image}}"
-                     class="d-block w-100"
-                     style="height:420px; object-fit:contain; background:#000;">
+                <div class="product-gallery">
+                    <img th:if="${product.image != null}" 
+                         th:src="@{'/images/products/' + ${product.image}}" 
+                         class="main-image" alt="Product Image"
+                         onerror="this.src='https://placehold.co/600x600/1a2639/FFF?text=No+Image'">
+                    
+                    <img th:if="${product.image == null}" 
+                         src="https://placehold.co/600x600/1a2639/FFF?text=No+Image" 
+                         class="main-image">
+                </div>
             </div>
 
-            <!-- fallback nếu không có ảnh -->
-            <div th:if="${#lists.isEmpty(product.images)}" class="carousel-item active">
-                <img src="/images/no-image.jpg"
-                     class="d-block w-100"
-                     style="height:420px; object-fit:contain; background:#000;">
-            </div>
-        </div>
-
-        <!-- arrows -->
-        <button class="carousel-control-prev" type="button"
-                data-bs-target="#productCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-
-        <button class="carousel-control-next" type="button"
-                data-bs-target="#productCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-
-        <!-- badge giữ nguyên -->
-        <span th:if="${selectedVoucher != null}"
-              class="position-absolute top-0 start-0 badge bg-danger m-2 fs-6">
-            Đã giảm giá
-        </span>
-
-    </div>
-</div>
-          
-
-            <div class="col-md-7">
-                <div class="mb-2">
-                    <span class="badge bg-info text-dark" th:text="${product.category != null ? product.category.name : 'Mô hình'}"></span>
-                    <span class="text-secondary ms-2" th:text="'Mã SP: #' + ${product.id}"></span>
+            <div class="col-lg-6 d-flex flex-column justify-content-center">
+                <div class="mb-3">
+                    <span class="badge border border-info text-info bg-transparent" th:text="${product.category != null ? product.category.name : 'Figure'}">CATEGORY</span>
+                    <span class="text-secondary ms-2 small">#ID: <span th:text="${product.id}"></span></span>
                 </div>
 
-                <h1 th:text="${product.name}" class="fw-bold mb-3" style="font-family: 'Orbitron', sans-serif;"></h1>
+                <h1 class="product-title mb-3" th:text="${product.name}">GUNDAM EXIA</h1>
 
-                <div class="mb-4">
-                    <div th:if="${finalPrice < product.price}">
-                        <span class="price-original me-2" 
-                              th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="price-final" 
-                                  th:text="${#numbers.formatDecimal(finalPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
-                            <span class="badge bg-danger" th:if="${selectedVoucher != null}">
-                                -<span th:if="${selectedVoucher.discountPercent != null}" th:text="${selectedVoucher.discountPercent} + '%'"></span>
-                                 <span th:if="${selectedVoucher.discountAmount != null}" th:text="${#numbers.formatDecimal(selectedVoucher.discountAmount,0,'COMMA',0,'POINT')} + '₫'"></span>
-                            </span>
-                        </div>
-                    </div>
-                    <div th:unless="${finalPrice < product.price}">
-                        <span class="price-final" 
-                              th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
-                    </div>
+                <div class="mb-4 pb-3 border-bottom border-secondary d-flex align-items-end gap-3" style="border-color: rgba(255,255,255,0.1) !important;">
+                    <span class="price-current" th:text="${#numbers.formatDecimal(finalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                    <span th:if="${product.price != null and finalPrice < product.price}" class="price-old mb-1" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                    <span th:if="${product.price != null and finalPrice < product.price}" class="badge bg-danger mb-2">Giảm <span th:text="${#numbers.formatDecimal((product.price - finalPrice)/product.price * 100, 0, 'COMMA', 0, 'POINT')}"></span>%</span>
                 </div>
 
-                <div class="p-3 mb-4 rounded" style="background: rgba(255,255,255,0.05);">
-                    <form id="voucherForm" method="get" th:action="@{'/product-detail/' + ${product.id}}">
-                        <label class="form-label text-info fw-bold"><i class="bi bi-ticket-perforated"></i> Mã giảm giá của bạn:</label>
-                        <select name="voucherId" class="form-select form-select-dark mb-2" onchange="this.form.submit()">
-                            <option value="">-- Chọn mã giảm giá --</option>
+                <form id="voucherForm" method="get" th:action="@{'/product-detail/' + ${product.id}}" class="mb-4">
+                    <label class="mb-2 text-info fw-bold small"><i class="bi bi-ticket-perforated-fill"></i> MÃ ƯU ĐÃI</label>
+                    <div class="voucher-wrapper d-flex align-items-center justify-content-between">
+                        <select name="voucherId" class="form-select-voucher" onchange="this.form.submit()">
+                            <option value="">Chọn mã giảm giá của bạn...</option>
                             <option th:each="v : ${vouchers}"
                                     th:value="${v.id}"
                                     th:selected="${selectedVoucher != null && v.id == selectedVoucher.id}"
-                                    th:text="${v.code + ' (HSD: ' + #temporals.format(v.expiredAt, 'dd/MM') + ')' 
-                                            + (v.minOrderValue != null ? ' - Đơn từ ' + #numbers.formatDecimal(v.minOrderValue,0,'COMMA',0,'POINT') : '')}">
+                                    th:text="|${v.code} (Giảm ${v.discountPercent != null ? v.discountPercent + '%' : #numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT') + 'đ'})|">
                             </option>
                         </select>
-                        <small th:if="${selectedVoucher != null}" class="text-success fst-italic">
-                            <i class="bi bi-check-circle"></i> Đã áp dụng mã giảm giá!
-                        </small>
-                    </form>
-                </div>
+                        <i th:if="${selectedVoucher != null}" class="bi bi-check-circle-fill text-success fs-5"></i>
+                    </div>
+                    <div th:if="${voucherError}" class="text-danger mt-2 small fst-italic"><i class="bi bi-exclamation-circle"></i> <span th:text="${voucherError}"></span></div>
+                </form>
 
-                <form method="get" th:action="@{'/cart/add/' + ${product.id}}">
-                    <input type="hidden" name="customPrice" th:value="${finalPrice}">
-                    
-                    <div class="row g-3">
-                        <div class="col-4">
-                            <div class="input-group">
-                                <span class="input-group-text bg-dark text-white border-secondary">-</span>
-                                <input type="number" name="quantity" value="1" min="1" class="form-control form-control-dark text-center border-secondary">
-                                <span class="input-group-text bg-dark text-white border-secondary">+</span>
-                            </div>
+                <form method="post" th:action="@{/cart/add}">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <div class="d-flex gap-3 align-items-stretch action-wrapper">
+                        <div class="qty-box">
+                            <button class="qty-btn" type="button" onclick="this.parentNode.querySelector('input').stepDown()">-</button>
+                            <input type="number" name="quantity" value="1" min="1" class="qty-input">
+                            <button class="qty-btn" type="button" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
                         </div>
-                        <div class="col-8">
-                            <button class="btn btn-main w-100 py-2">
-                                <i class="bi bi-cart-plus-fill me-2"></i> THÊM VÀO GIỎ
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-buy-now flex-grow-1">
+                            <i class="bi bi-cart-plus-fill me-2"></i> THÊM VÀO GIỎ HÀNG
+                        </button>
                     </div>
                 </form>
+                
+                <div class="mt-4 pt-3 d-flex gap-4 text-secondary small">
+                    <span><i class="bi bi-shield-check text-success"></i> Hàng chính hãng 100%</span>
+                    <span><i class="bi bi-truck text-info"></i> Miễn phí vận chuyển</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="mt-5 border-top border-secondary pt-4">
-            <h4 class="text-info mb-3">Mô tả sản phẩm</h4>
-            <p class="text-light opacity-75" style="line-height: 1.8;" 
-               th:text="${product.description != null ? product.description : 'Đang cập nhật mô tả...'}"></p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card-dark p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom border-secondary pb-2">
-                    <h4 class="mb-0 text-white"><i class="bi bi-chat-square-quote-fill text-info me-2"></i> Đánh giá từ khách hàng</h4>
-                    <span class="badge bg-secondary" th:text="${#lists.size(comments)} + ' đánh giá'"></span>
-                </div>
-
-                <div th:if="${canComment}" class="mb-5 p-3 rounded border border-info" style="background: rgba(0, 242, 255, 0.05);">
-                    <h5 class="text-info mb-3">Viết đánh giá của bạn</h5>
+    <div class="detail-container">
+        <ul class="nav nav-tabs mb-3" id="productTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc-pane" type="button">MÔ TẢ SẢN PHẨM</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review-pane" type="button">ĐÁNH GIÁ (<span th:text="${comments.size()}">0</span>)</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="productTabsContent">
+            <div class="tab-pane fade show active" id="desc-pane" role="tabpanel">
+                <p th:text="${product.description != null ? product.description : 'Đang cập nhật thông tin sản phẩm...'}" style="white-space: pre-line;"></p>
+            </div>
+            
+            <div class="tab-pane fade" id="review-pane" role="tabpanel">
+                <div th:if="${canComment}" class="p-4 mb-4 rounded border border-secondary" style="background: rgba(0,0,0,0.3);">
+                    <h6 class="text-info font-display mb-3">VIẾT ĐÁNH GIÁ</h6>
                     <form th:action="@{'/product-detail/comment/' + ${product.id}}" method="post" enctype="multipart/form-data">
-                        
                         <div class="mb-3">
-                            <label class="form-label">Đánh giá sao:</label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="rating" value="5" id="r5" checked>
-                                    <label class="form-check-label text-warning" for="r5">⭐⭐⭐⭐⭐ (Tuyệt vời)</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="rating" value="4" id="r4">
-                                    <label class="form-check-label text-warning" for="r4">⭐⭐⭐⭐ (Tốt)</label>
-                                </div>
-                                </div>
+                            <label class="text-light me-3">Đánh giá:</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" value="5" id="r5" checked>
+                                <label class="form-check-label text-warning" for="r5">⭐⭐⭐⭐⭐</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" value="4" id="r4">
+                                <label class="form-check-label text-warning" for="r4">⭐⭐⭐⭐</label>
+                            </div>
                         </div>
-
                         <div class="mb-3">
-                            <textarea name="content" class="form-control form-control-dark" rows="3" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." required></textarea>
+                            <textarea name="content" class="form-control bg-dark text-light border-secondary" rows="3" placeholder="Chia sẻ cảm nhận của bạn..." required></textarea>
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label text-secondary"><i class="bi bi-image"></i> Thêm ảnh thực tế (tùy chọn)</label>
-                            <input type="file" name="imageFile" class="form-control form-control-dark" accept="image/*">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <input type="file" name="imageFile" class="form-control bg-dark text-secondary border-secondary w-50">
+                            <button type="submit" class="btn btn-outline-info px-4 fw-bold">GỬI ĐÁNH GIÁ</button>
                         </div>
-
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Gửi đánh giá</button>
                     </form>
                 </div>
-                
-                <div th:unless="${canComment}" class="mb-4 text-center p-3 rounded" style="background: rgba(255,255,255,0.05);">
-                    <span th:if="${session.account == null}" class="text-secondary">
-                        Vui lòng <a href="/login" class="text-info text-decoration-none">Đăng nhập</a> để viết đánh giá.
-                    </span>
-                    <span th:if="${session.account != null}" class="text-secondary">
-                        <i class="bi bi-lock-fill"></i> Bạn cần mua sản phẩm này thành công để có thể viết đánh giá.
-                    </span>
+
+                <div th:unless="${canComment}" class="alert alert-dark border-secondary text-center text-secondary mb-4">
+                    <i class="bi bi-lock-fill"></i> <span th:if="${session.account == null}">Vui lòng <a href="/login" class="text-info fw-bold text-decoration-none">đăng nhập</a> để đánh giá.</span>
+                    <span th:if="${session.account != null}">Bạn cần mua sản phẩm này để viết đánh giá.</span>
                 </div>
 
                 <div class="comment-list">
-                    <div th:if="${#lists.isEmpty(comments)}" class="text-center text-secondary py-4">
-                        <i class="bi bi-stars fs-1 d-block mb-2 opacity-50"></i>
-                        Chưa có đánh giá nào. Hãy là người đầu tiên!
+                    <div th:if="${#lists.isEmpty(comments)}" class="text-center text-secondary py-4 opacity-75">
+                        Chưa có đánh giá nào cho sản phẩm này.
                     </div>
 
-                    <div th:each="cmt : ${comments}" class="comment-item d-flex gap-3">
-                        <div class="flex-shrink-0">
-                            <img th:src="${cmt.account.photo != null ? cmt.account.photo : '/images/user-default.png'}" 
-                                 class="rounded-circle border border-secondary" style="width: 50px; height: 50px; object-fit: cover;">
-                        </div>
-                        
-                        <div class="flex-grow-1">
-                            <div class="d-flex justify-content-between mb-1">
-                                <h6 class="mb-0 text-info fw-bold" th:text="${cmt.account.fullName != null ? cmt.account.fullName : cmt.account.username}"></h6>
-                                <small class="text-secondary" th:text="${#temporals.format(cmt.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
-                            </div>
-
-                            <div class="mb-2">
-                                <span th:each="i : ${#numbers.sequence(1, 5)}">
-                                    <i class="bi bi-star-fill" th:classappend="${i <= cmt.rating} ? 'star-filled' : 'star-empty'"></i>
+                    <div th:each="cmt : ${comments}" class="d-flex gap-3 mb-4 pb-4 border-bottom border-secondary" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <img th:src="${cmt.account.photo != null ? cmt.account.photo : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
+                             class="rounded-circle border border-secondary" style="width: 50px; height: 50px; object-fit: cover;">
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="mb-0 text-white fw-bold" th:text="${cmt.account.fullName != null ? cmt.account.fullName : cmt.account.username}">User</h6>
+                                <span class="text-warning small" th:if="${cmt.rating != null}">
+                                    <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, cmt.rating)}"></i>
                                 </span>
                             </div>
-
+                            <small class="text-secondary d-block mb-2" th:text="${#temporals.format(cmt.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
                             <p class="text-light mb-2" th:text="${cmt.content}"></p>
-
                             <div th:if="${cmt.image != null}">
-                                <img th:src="@{'/uploads/comments/' + ${cmt.image}}" class="rounded mt-2 border border-secondary" style="max-width: 150px; max-height: 150px;">
+                                <a th:href="@{'/uploads/comments/' + ${cmt.image}}" target="_blank">
+                                    <img th:src="@{'/uploads/comments/' + ${cmt.image}}" class="rounded border border-secondary mt-1" style="height: 80px; object-fit: cover;">
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
-
-            </div>
-        </div>
-        
-        <div class="col-lg-4 d-none d-lg-block">
-            <div class="card-dark p-3 text-center">
-                <h5 class="text-info mb-3">Cam kết chất lượng</h5>
-                <ul class="list-unstyled text-start text-secondary px-3">
-                    <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i> Chính hãng 100%</li>
-                    <li class="mb-2"><i class="bi bi-truck text-warning me-2"></i> Giao hàng siêu tốc</li>
-                    <li class="mb-2"><i class="bi bi-shield-check text-primary me-2"></i> Bảo hành gãy vỡ</li>
-                </ul>
             </div>
         </div>
     </div>
 </div>
 
-<footer class="text-center mt-5 py-4 border-top border-secondary bg-black">
+<footer class="text-center">
     <div class="container">
-        <p class="mb-0 text-secondary">&copy; 2025 Model World.</p>
+        <p class="mb-0">&copy; 2025 Model World. Dark Blue Luxury Store.</p>
     </div>
 </footer>
 
