@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,9 @@ import com.example.demo.repository.CartDetailRepository;
 import com.example.demo.repository.OrdersDetailRepository;
 import com.example.demo.repository.OrdersRepository;
 import com.example.demo.service.MembershipService;
+import com.example.demo.service.VNPayService; // ✅ Import Service VNPay
 
+import jakarta.servlet.http.HttpServletRequest; // ✅ Cần cho VNPay
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -39,8 +42,11 @@ public class CheckoutController {
     @Autowired private CartDetailRepository cartDetailRepo;
     @Autowired private OrdersRepository orderRepo;
     @Autowired private OrdersDetailRepository orderDetailRepo;
-    @Autowired private AccountRepository accountRepo; // ✅ Cần repo để update user
-    @Autowired private MembershipService membershipService; // ✅ Inject Service xử lý hạng
+    @Autowired private AccountRepository accountRepo;
+    @Autowired private MembershipService membershipService;
+    
+    // ✅ Inject VNPayService đã tạo ở bước trước
+    @Autowired private VNPayService vnPayService;
 
     // --- CẤU HÌNH TỈNH THÀNH ---
     private static final List<String> SOUTH_PROVINCES = Arrays.asList(
@@ -52,31 +58,19 @@ public class CheckoutController {
 
     // --- HELPER METHODS ---
     public static String unAccent(String s) {
-        if (s == null) {
-			return "";
-		}
+        if (s == null) return "";
         String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(temp).replaceAll("").replaceAll("đ", "d");
     }
 
     private int calculateShippingFee(String address, int subTotal) {
-        if (subTotal >= 1000000) {
-			return 0;
-		}
-        if (address == null || address.trim().isEmpty()) {
-			return 50000;
-		}
-
+        if (subTotal >= 1000000) return 0;
+        if (address == null || address.trim().isEmpty()) return 50000;
         String normAddress = unAccent(address.toLowerCase());
-
-        if (normAddress.contains("can tho")) {
-			return 0;
-		}
+        if (normAddress.contains("can tho")) return 0;
         for (String p : SOUTH_PROVINCES) {
-            if (normAddress.contains(p)) {
-				return 30000;
-			}
+            if (normAddress.contains(p)) return 30000;
         }
         return 45000;
     }
@@ -86,38 +80,24 @@ public class CheckoutController {
     @GetMapping
     public String viewCheckout(Model model) {
         Account account = (Account) session.getAttribute("account");
-        if (account == null) {
-			return "redirect:/login";
-		}
+        if (account == null) return "redirect:/login";
 
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
-        if (cartDetails.isEmpty()) {
-			return "redirect:/cart";
-		}
+        if (cartDetails.isEmpty()) return "redirect:/cart";
 
-        // 1. Tính tổng tiền hàng
         int subTotal = cartDetails.stream().mapToInt(cd -> cd.getPrice() * cd.getQuantity()).sum();
-
-        // 2. Tính phí ship
         int shippingFee = calculateShippingFee(account.getAddress(), subTotal);
-
-        // 3. ✅ Tính giảm giá thành viên
         int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());
         int discountAmount = (int) (subTotal * discountPercent / 100.0);
-
-        // 4. Tổng cuối cùng
         int finalTotal = subTotal - discountAmount + shippingFee;
 
         model.addAttribute("cartDetails", cartDetails);
-        model.addAttribute("subTotal", subTotal); // Tổng tiền hàng chưa giảm
+        model.addAttribute("subTotal", subTotal);
         model.addAttribute("shippingFee", shippingFee);
-        model.addAttribute("discountPercent", discountPercent); // % Giảm
-        model.addAttribute("discountAmount", discountAmount);   // Số tiền giảm
-        model.addAttribute("total", finalTotal); // Tổng thanh toán
-
+        model.addAttribute("discountPercent", discountPercent);
+        model.addAttribute("discountAmount", discountAmount);
+        model.addAttribute("total", finalTotal);
         model.addAttribute("account", account);
-        model.addAttribute("keyword", "");
-        model.addAttribute("selectedCategory", "");
 
         return "client/checkout";
     }
@@ -127,31 +107,25 @@ public class CheckoutController {
             @RequestParam("address") String address,
             @RequestParam("phone") String phone,
             @RequestParam("paymentMethod") String paymentMethod,
+            HttpServletRequest request, // ✅ Thêm request để lấy base URL cho VNPay
             Model model) {
 
         Account account = (Account) session.getAttribute("account");
-        if (account == null) {
-			return "redirect:/login";
-		}
-
-        // Reload account từ DB để đảm bảo dữ liệu mới nhất
+        if (account == null) return "redirect:/login";
+        
+        // Refresh account
         account = accountRepo.findById(account.getId()).orElse(account);
 
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
-        if (cartDetails.isEmpty()) {
-			return "redirect:/cart";
-		}
+        if (cartDetails.isEmpty()) return "redirect:/cart";
 
-        // Tính toán lại Server-side (Bảo mật)
         int subTotal = cartDetails.stream().mapToInt(cd -> cd.getPrice() * cd.getQuantity()).sum();
         int shippingFee = calculateShippingFee(address, subTotal);
-
-        // ✅ Áp dụng giảm giá
         int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());
         int discountAmount = (int) (subTotal * discountPercent / 100.0);
         int finalTotal = subTotal - discountAmount + shippingFee;
 
-        // Lưu đơn hàng
+        // Tạo đơn hàng
         Orders order = new Orders();
         order.setAccountId(account);
         order.setCreatedDate(new Date());
@@ -159,17 +133,17 @@ public class CheckoutController {
         order.setPhone(phone);
         order.setPaymentMethod(paymentMethod);
         order.setFeeship(shippingFee);
-        order.setTotal(finalTotal); // Lưu số tiền sau khi đã giảm giá
-
+        order.setTotal(finalTotal);
+        
+        // Tạo mã đơn hàng duy nhất để mapping với VNPay
         String uniqueOrderCode = "DH" + System.currentTimeMillis();
-        order.setNote(uniqueOrderCode);
+        order.setNote(uniqueOrderCode); 
 
         order.setPaymentStatus(false);
         order.setStatus(0);
 
         Orders savedOrder = orderRepo.save(order);
 
-        // Lưu chi tiết
         List<OrderDetail> orderDetails = cartDetails.stream().map(item -> {
             OrderDetail detail = new OrderDetail();
             detail.setOrders(savedOrder);
@@ -179,42 +153,84 @@ public class CheckoutController {
             return detail;
         }).toList();
         orderDetailRepo.saveAll(orderDetails);
-
         cartDetailRepo.deleteAll(cartDetails);
 
-        // ✅ XỬ LÝ CỘNG TIỀN TÍCH LŨY
+        // --- XỬ LÝ THANH TOÁN ---
+
+        // 1. THANH TOÁN VNPAY
+        if ("VNPAY".equals(paymentMethod)) {
+            // Tạo URL trả về (http://localhost:8080/checkout/vnpay-return)
+            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+            String vnpayUrl = vnPayService.createOrder(finalTotal, uniqueOrderCode, baseUrl + "/checkout/vnpay-return");
+            return "redirect:" + vnpayUrl;
+        }
+
+        // 2. COD (Thanh toán khi nhận hàng)
         if ("COD".equals(paymentMethod)) {
-            // Đối với COD, giả định đơn thành công thì cộng điểm luôn (hoặc chờ admin duyệt)
-            // Ở đây demo mình cộng luôn để thấy kết quả
             updateMembershipSpending(account, finalTotal);
             return "redirect:/orders";
-        } else {
-            // Chuyển khoản thì chưa cộng tiền vội, chờ xác nhận ở trang payment
+        } 
+        
+        // 3. QR / MOMO (Chuyển khoản thủ công)
+        else {
             session.setAttribute("pendingOrderId", savedOrder.getId());
             return "redirect:/checkout/payment";
+        }
+    }
+
+    // --- ✅ XỬ LÝ KẾT QUẢ TRẢ VỀ TỪ VNPAY ---
+    @GetMapping("/vnpay-return")
+    public String vnpayReturn(HttpServletRequest request, Model model){
+        // 1. Kiểm tra chữ ký bảo mật (Checksum)
+        int paymentStatus = vnPayService.orderReturn(request);
+
+        String orderInfo = request.getParameter("vnp_OrderInfo"); // Đây chính là uniqueOrderCode ta đã gửi đi
+        String totalPrice = request.getParameter("vnp_Amount");
+        String transactionId = request.getParameter("vnp_TransactionNo");
+
+        model.addAttribute("orderId", orderInfo);
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("transactionId", transactionId);
+
+        if(paymentStatus == 1){
+            // --- GIAO DỊCH THÀNH CÔNG ---
+            
+            // Tìm đơn hàng bằng mã ghi chú (Dùng hàm findByNote trong Repo bạn vừa sửa)
+            Optional<Orders> orderOpt = orderRepo.findByNote(orderInfo);
+            
+            if(orderOpt.isPresent()) {
+                Orders order = orderOpt.get();
+                
+                // Kiểm tra để tránh cộng điểm 2 lần nếu user f5 trang
+                if (!Boolean.TRUE.equals(order.getPaymentStatus())) {
+                    order.setPaymentStatus(true);
+                    order.setStatus(1); // Đã xác nhận
+                    orderRepo.save(order);
+                    
+                    // Cộng điểm thành viên
+                    updateMembershipSpending(order.getAccountId(), order.getTotal());
+                }
+            }
+            
+            return "client/order-success"; // Bạn cần tạo file templates/client/order-success.html
+        } else {
+            // --- GIAO DỊCH THẤT BẠI ---
+            return "client/order-fail";   // Bạn cần tạo file templates/client/order-fail.html
         }
     }
 
     @GetMapping("/payment")
     public String viewPaymentQR(Model model) {
         Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-        if (orderId == null) {
-			return "redirect:/cart";
-		}
+        if (orderId == null) return "redirect:/cart";
 
         Orders order = orderRepo.findById(orderId).orElse(null);
-        if(order == null) {
-			return "redirect:/cart";
-		}
+        if(order == null) return "redirect:/cart";
 
-        if (Boolean.TRUE.equals(order.getPaymentStatus())) {
-             return "redirect:/orders";
-        }
+        if (Boolean.TRUE.equals(order.getPaymentStatus())) return "redirect:/orders";
 
         String content = order.getNote();
         String qrUrl = "";
-
-        // --- INFO BANK ---
         String bankId = "ICB";
         String accountNo = "103878028110";
         String accountName = "NGUYEN GIA HUY";
@@ -241,7 +257,6 @@ public class CheckoutController {
         return "client/payment-qr";
     }
 
-    // API Ajax check status
     @GetMapping("/check-status")
     @ResponseBody
     public Map<String, Boolean> checkOrderStatus() {
@@ -259,45 +274,30 @@ public class CheckoutController {
         return response;
     }
 
-    // --- XỬ LÝ XÁC NHẬN THANH TOÁN (ONLINE) ---
     @PostMapping("/confirm-payment")
     public String confirmPaymentManual() {
         Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-
         if (orderId != null) {
             Orders order = orderRepo.findById(orderId).orElse(null);
             if (order != null) {
-                // 1. Cập nhật trạng thái đơn hàng
-                order.setPaymentStatus(true); // Đã thanh toán
-                order.setStatus(1); // Đã xác nhận (Ví dụ)
+                order.setPaymentStatus(true);
+                order.setStatus(1);
                 orderRepo.save(order);
-
-                // 2. ✅ CỘNG TIỀN VÀO TÀI KHOẢN & UPDATE HẠNG
-                Account account = order.getAccountId();
-                if (account != null) {
-                    updateMembershipSpending(account, order.getTotal());
+                if (order.getAccountId() != null) {
+                    updateMembershipSpending(order.getAccountId(), order.getTotal());
                 }
             }
-            // Xóa session
             session.removeAttribute("pendingOrderId");
         }
-
         return "redirect:/orders";
     }
 
-    // --- ✅ HÀM PRIVATE HỖ TRỢ CỘNG TIỀN ---
+    // --- HELPER: CẬP NHẬT ĐIỂM VÀ HẠNG ---
     private void updateMembershipSpending(Account account, int amountToAdd) {
-        // Cộng tiền
         long currentSpending = account.getTotalSpending() == null ? 0 : account.getTotalSpending();
         account.setTotalSpending(currentSpending + amountToAdd);
-
-        // Tính lại hạng
-        membershipService.updateMembershipLevel(account);
-
-        // Lưu vào DB
+        membershipService.updateMembershipLevel(account); // Service tính toán hạng
         accountRepo.save(account);
-
-        // Cập nhật lại session để hiển thị ngay trên Header
-        session.setAttribute("account", account);
+        session.setAttribute("account", account); // Update session
     }
 }

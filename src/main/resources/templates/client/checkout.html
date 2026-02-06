@@ -268,7 +268,7 @@
                                 <label class="form-label">Phương thức thanh toán</label>
                                 <select class="form-select form-select-dark" name="paymentMethod">
                                     <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                    <option value="VIETQR">Chuyển khoản Ngân hàng (VietQR)</option>
+                                    <option value="VNPAY">Thanh toán qua VNPAY (ATM/Visa/QR)</option> <option value="VIETQR">Chuyển khoản Ngân hàng (VietQR)</option>
                                     <option value="MOMO">Ví điện tử MoMo</option>
                                 </select>
                             </div>
@@ -301,7 +301,14 @@
                         <div class="mt-4">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-secondary">Tạm tính:</span>
-                                <span class="text-light" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                                <span class="text-light" th:text="${#numbers.formatDecimal(subTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mb-2" th:if="${discountAmount > 0}">
+                                <span class="text-secondary">
+                                    Giảm giá thành viên (<span th:text="${discountPercent}"></span>%):
+                                </span>
+                                <span class="text-success" th:text="'- ' + ${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                             </div>
                             
                             <div class="d-flex justify-content-between mb-3">
@@ -317,7 +324,7 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-white fs-5 fw-bold">TỔNG CỘNG</span>
                                 <span class="price-text text-info fs-4 fw-bold"
-                                    th:text="${#numbers.formatDecimal(total + shippingFee, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">
                                     0₫
                                 </span>
                             </div>

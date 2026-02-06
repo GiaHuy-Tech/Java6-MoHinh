@@ -278,19 +278,31 @@
                         </div>
                     </form>
 
-                    <form method="post" th:action="@{/cart/add}">
-                        <input type="hidden" name="productId" th:value="${product.id}">
-                        <div class="d-flex gap-3 align-items-stretch action-wrapper">
-                            <div class="qty-box">
-                                <button class="qty-btn" type="button" onclick="this.parentNode.querySelector('input').stepDown()">-</button>
-                                <input type="number" name="quantity" value="1" min="1" class="qty-input">
-                                <button class="qty-btn" type="button" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
-                            </div>
-                            <button type="submit" class="btn btn-buy-now flex-grow-1">
-                                <i class="bi bi-cart-plus-fill me-2"></i> THÊM VÀO GIỎ HÀNG
-                            </button>
-                        </div>
-                    </form>
+                    <form method="get" th:action="@{'/cart/add/' + ${product.id}}">
+    
+    <!-- SỐ LƯỢNG -->
+    <input type="hidden" name="quantity" value="1">
+
+    <!-- GIÁ SAU KHI ÁP VOUCHER -->
+    <input type="hidden" name="customPrice" th:value="${finalPrice}">
+
+    <div class="d-flex gap-3 align-items-stretch action-wrapper">
+        <div class="qty-box">
+            <button class="qty-btn" type="button"
+                onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
+
+            <input type="number" name="quantity" value="1" min="1" class="qty-input">
+
+            <button class="qty-btn" type="button"
+                onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
+        </div>
+
+        <button type="submit" class="btn btn-buy-now flex-grow-1">
+            <i class="bi bi-cart-plus-fill me-2"></i> THÊM VÀO GIỎ HÀNG
+        </button>
+    </div>
+</form>
+
 
                     <div class="mt-4 pt-3 d-flex gap-4 text-secondary small">
                         <span><i class="bi bi-shield-check text-success"></i> Hàng chính hãng 100%</span> 
