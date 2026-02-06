@@ -67,7 +67,7 @@ public class StatsController {
         //Số đơn tháng hiện tại & năm hiện tại
         YearMonth current = YearMonth.now();
 
-        Long monthOrders = ordersRepo.countOrdersInMonth(current.getMonthValue());
+        Long monthOrders = ordersRepo.countOrdersByMonth(current.getMonthValue());
         Long yearOrders = ordersRepo.countOrdersInYear(current.getYear());
 
         model.addAttribute("monthOrders", monthOrders != null ? monthOrders : 0);

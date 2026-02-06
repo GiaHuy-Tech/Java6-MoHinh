@@ -2,7 +2,6 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <base href="/"> 
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="|${product.name} - Model World|">Chi tiết sản phẩm</title>
@@ -15,109 +14,43 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-        /* GIỮ NGUYÊN CSS CŨ CỦA BẠN */
-        :root { --bg-dark: #050b14; --bg-card: #0c1525; --text-light: #e1e7ff; --accent-cyan: #00f2ff; --accent-pink: #ff3864; --border-color: rgba(0, 242, 255, 0.2); --font-main: "Be Vietnam Pro", sans-serif; --font-display: "Orbitron", sans-serif; --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.5), 0 0 20px rgba(0, 242, 255, 0.3), 0 0 40px rgba(0, 242, 255, 0.1); }
+        :root { --bg-dark: #050b14; --bg-card: #0c1525; --text-light: #e1e7ff; --accent-cyan: #00f2ff; --border-color: rgba(0, 242, 255, 0.2); --font-main: "Be Vietnam Pro", sans-serif; --font-display: "Orbitron", sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-light); font-family: var(--font-main); }
-        .navbar-brand { font-family: var(--font-display); }
-        h1, h2, h3, h4 { font-family: var(--font-main); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .navbar { background-color: rgba(12, 21, 37, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 0.8rem 0; }
-        .navbar-brand span { color: #fff; letter-spacing: 1px; }
-        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; white-space: nowrap; }
+        .navbar-brand { font-family: var(--font-display); }
+        .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; }
         .nav-link:hover { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
-        .search-bar-wrapper { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); border-radius: 50px; padding: 4px 10px; transition: 0.3s; width: auto; display: flex; align-items: center; }
-        .search-bar-wrapper:focus-within { border-color: var(--accent-cyan); box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
-        .form-control-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan) !important; font-weight: 500; width: 120px; }
-        .form-control-custom::placeholder { color: rgba(0, 242, 255, 0.6) !important; }
-        .form-control-custom:focus { background: transparent; color: var(--accent-cyan) !important; box-shadow: none; }
-        .form-select-custom { background: transparent; border: none; box-shadow: none; color: var(--accent-cyan); cursor: pointer; width: auto; padding-right: 25px; }
-        .form-select-custom option { background: var(--bg-card); color: #fff; }
-        .btn-search { color: var(--text-light); border: none; background: transparent; transition: 0.3s;}
-        .btn-search:hover { color: var(--accent-cyan); transform: scale(1.1); }
-        .dropdown-menu-dark { background-color: var(--bg-card); border: 1px solid var(--border-color); }
-        .dropdown-item { color: #aab8c5; }
-        .dropdown-item:hover { background-color: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
+        
         .detail-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
         
-        /* CSS UPDATE FOR CAROUSEL */
+        /* CAROUSEL & IMAGE FIX */
         .product-gallery { 
-            border-radius: 12px; 
-            overflow: hidden; 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
+            border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.05); 
             background: radial-gradient(circle at center, #1a2639 0%, #050b14 100%); 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 450px; 
-            width: 100%; 
-            position: relative;
+            display: flex; align-items: center; justify-content: center; height: 450px; width: 100%; position: relative;
         }
         #productCarousel { width: 100%; height: 100%; }
-        .carousel-inner { height: 100%; width: 100%; }
-        .carousel-item { height: 100%; width: 100%; text-align: center; }
+        .carousel-item { height: 100%; text-align: center; }
         .main-image { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
-            transition: 0.3s; 
-            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.1)); 
+            width: 100%; height: 450px; object-fit: contain; /* Ảnh không bị méo, cố định 450px */
+            padding: 10px; transition: 0.3s; filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.1)); 
         }
-        .main-image:hover { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.3)); }
-        
-        /* Indicators and Controls */
-        .carousel-control-prev-icon, .carousel-control-next-icon {
-            background-color: rgba(0, 0, 0, 0.5); border-radius: 50%; background-size: 50%; width: 3rem; height: 3rem;
-        }
-        .carousel-indicators [data-bs-target] { background-color: var(--accent-cyan); height: 4px; }
 
-        /* Other CSS */
-        .product-title { font-family: var(--font-display); font-size: 2rem; color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
-        .price-current { font-family: var(--font-display); font-size: 2.2rem; color: var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 242, 255, 0.4); font-weight: 700; }
-        .price-old { text-decoration: line-through; color: #6c757d; font-size: 1.2rem; }
-        .voucher-wrapper { background: rgba(255, 255, 255, 0.05); border: 1px dashed var(--border-color); border-radius: 8px; padding: 10px 15px; transition: 0.3s; }
-        .voucher-wrapper:hover { border-color: var(--accent-cyan); background: rgba(0, 242, 255, 0.05); }
-        .form-select-voucher { background: transparent; border: none; color: var(--accent-cyan); font-weight: 500; cursor: pointer; width: 100%; }
-        .form-select-voucher:focus { outline: none; box-shadow: none; }
-        .form-select-voucher option { background: var(--bg-card); color: #fff; }
+        /* PRICE & BUTTONS */
+        .product-title { font-family: var(--font-display); font-size: 2rem; color: #fff; }
+        .price-current { font-family: var(--font-display); font-size: 2.2rem; color: var(--accent-cyan); font-weight: 700; }
+        .price-old { text-decoration: line-through; color: #6c757d; }
         .qty-box { display: flex; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; height: 50px; width: 130px; }
-        .qty-btn { width: 40px; background: rgba(255, 255, 255, 0.05); color: #fff; border: none; transition: 0.2s; }
-        .qty-btn:hover { background: var(--accent-cyan); color: #000; }
-        .qty-input { width: 100%; background: transparent; border: none; color: #fff; text-align: center; font-weight: bold; }
-        .qty-input:focus { outline: none; }
-        .btn-buy-now { background: linear-gradient(45deg, var(--accent-cyan), #00a8ff); color: #050b14; font-family: var(--font-display); font-weight: 700; border: none; height: 50px; border-radius: 6px; letter-spacing: 1px; transition: 0.3s; box-shadow: 0 0 15px rgba(0, 242, 255, 0.3); }
-        .btn-buy-now:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(0, 242, 255, 0.6); color: #000; }
-        .nav-tabs { border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .nav-tabs .nav-link { color: #8b9bb4 !important; border: none; font-family: var(--font-display); letter-spacing: 1px; padding: 15px 25px; }
-        .nav-tabs .nav-link:hover { color: #fff !important; }
-        .nav-tabs .nav-link.active { background: transparent; color: var(--accent-cyan) !important; border-bottom: 2px solid var(--accent-cyan); text-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
-        .tab-content { color: #aab8c5; line-height: 1.7; padding: 25px 0; }
-        .breadcrumb-item a { color: #8b9bb4; text-decoration: none; }
-        .breadcrumb-item.active { color: var(--accent-cyan); }
-        .breadcrumb-item+.breadcrumb-item::before { color: #555; }
-        footer { background-color: #020408; border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: 60px; color: #6c757d; }
-        
-        /* DEBUG BOX STYLES (Dễ nhìn để sửa lỗi) */
-        .debug-container {
-            margin-top: 15px;
-            padding: 15px;
-            background: #2b2100;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            color: #ffc107;
-            font-family: 'Consolas', monospace;
-            font-size: 13px;
-        }
-        .debug-title { font-weight: bold; text-decoration: underline; display: block; margin-bottom: 5px; }
-        .debug-item { display: block; margin-bottom: 2px; }
+        .qty-btn { width: 40px; background: rgba(255, 255, 255, 0.05); color: #fff; border: none; }
+        .btn-buy-now { background: linear-gradient(45deg, var(--accent-cyan), #00a8ff); color: #050b14; font-family: var(--font-display); font-weight: 700; border: none; height: 50px; border-radius: 6px; transition: 0.3s; }
+        .btn-buy-now:hover { transform: translateY(-2px); box-shadow: 0 0 15px var(--accent-cyan); }
 
-        @media ( max-width : 991px) {
-            .search-bar-wrapper { width: 100%; margin-top: 10px; }
-            .form-control-custom { width: 100%; }
-            .detail-container { padding: 15px; }
-            .product-gallery { height: 350px; }
-            .action-wrapper { flex-direction: column; }
-            .btn-buy-now { width: 100%; margin-top: 10px; }
-            .qty-box { width: 100%; }
-        }
+        /* TABS & COMMENTS */
+        .nav-tabs .nav-link { color: #8b9bb4 !important; border: none; font-family: var(--font-display); }
+        .nav-tabs .nav-link.active { background: transparent; color: var(--accent-cyan) !important; border-bottom: 2px solid var(--accent-cyan); }
+        .comment-form { background: rgba(255,255,255,0.03); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
+        
+        footer { background-color: #020408; border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: 60px; color: #6c757d; }
     </style>
 </head>
 <body>
@@ -125,266 +58,185 @@
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="/">
-                <i class="bi bi-box-seam-fill fs-3 text-info"></i> <span class="fw-bold fs-4">MODEL WORLD</span>
+                <i class="bi bi-box-seam-fill fs-3 text-info"></i> <span class="fw-bold fs-4 text-white">MODEL WORLD</span>
             </a>
-
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="bi bi-list text-white fs-2"></span>
-            </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
-                    <li class="nav-item mx-1"><a class="nav-link" href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
-
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
                     <th:block th:if="${session.account == null}">
-                        <li class="nav-item mx-1"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/login">Đăng nhập</a></li>
                     </th:block>
-
                     <th:block th:if="${session.account != null}">
-                        <li class="nav-item mx-1"><a class="nav-link" href="/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
-                        <li class="nav-item mx-1"><a class="nav-link" href="/orders"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-                        <li class="nav-item mx-1"><a class="nav-link" href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
-                        <li class="nav-item dropdown mx-2">
-                            <a class="nav-link dropdown-toggle p-0 d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"> 
-                                <img th:if="${session.account.photo != null}" th:src="@{${session.account.photo}}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'" alt="avatar" class="rounded-circle border border-info" style="width: 38px; height: 38px; object-fit: cover;"> 
-                                <i th:if="${session.account.photo == null}" class="bi bi-person-circle fs-3 text-info"></i>
+                        <li class="nav-item"><a class="nav-link" href="/cart">Giỏ hàng</a></li>
+                        <li class="nav-item dropdown ms-lg-3">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <img th:src="${session.account.photo != null ? session.account.photo : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover;">
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" aria-labelledby="userDropdown">
-                                <li><span class="dropdown-header text-info" th:text="${session.account.fullName}">User</span></li>
-                                <li><hr class="dropdown-divider border-secondary"></li>
-                                <li><a class="dropdown-item d-flex align-items-center gap-2" href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
-                                <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a></li>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/account">Tài khoản</a></li>
+                                <li><a class="dropdown-item text-danger" href="/logout">Đăng xuất</a></li>
                             </ul>
                         </li>
                     </th:block>
                 </ul>
-
-                <form action="/products" method="get" class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
-                    <div class="search-bar-wrapper">
-                        <input type="text" class="form-control form-control-custom" placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
-                        <div style="width: 1px; height: 20px; background: rgba(255, 255, 255, 0.2); margin: 0 10px;"></div>
-                        <select class="form-select form-select-custom text-end" name="categoryId">
-                            <option value="">Tất cả</option>
-                            <option th:each="cate : ${categories}" th:value="${cate.id}" th:text="${cate.name}" th:selected="${cate.id != null && selectedCategory != null && cate.id.toString() == selectedCategory}"></option>
-                        </select>
-                        <button type="submit" class="btn-search"><i class="bi bi-search"></i></button>
-                    </div>
-                </form>
             </div>
         </div>
     </nav>
 
     <div class="container py-5">
-
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">TRANG CHỦ</a></li>
-                <li class="breadcrumb-item"><a href="/products">SẢN PHẨM</a></li>
-                <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Detail</li>
+                <li class="breadcrumb-item"><a href="/" class="text-secondary">TRANG CHỦ</a></li>
+                <li class="breadcrumb-item active text-info" th:text="${product.name}">Detail</li>
             </ol>
         </nav>
 
         <div class="detail-container mb-5">
             <div class="row g-5">
-                <div class="col-lg-6 position-relative">
-                    <span th:if="${selectedVoucher != null}" class="position-absolute top-0 start-0 m-2 badge bg-danger rounded-pill px-3 py-2 shadow" style="z-index: 5;"> 
-                        <i class="bi bi-lightning-fill"></i> FLASH SALE
-                    </span>
-
-                  <div class="product-gallery">
-    <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
-        
-        <div class="carousel-indicators" th:if="${not #lists.isEmpty(extraImages)}">
-            <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
-            <button th:each="img, stat : ${extraImages}" type="button" data-bs-target="#productCarousel" 
-                    th:data-bs-slide-to="${stat.count}" th:aria-label="|Slide ${stat.count}|"></button>
-        </div>
-
-        <div class="carousel-inner">
-            
-            <div class="carousel-item active">
-                <th:block th:with="imgUrl=${product.image != null ? product.image.trim() : ''}">
-                    <img th:if="${imgUrl != ''}"
-                         th:src="${(imgUrl.startsWith('http') or imgUrl.startsWith('/')) ? imgUrl : '/uploads/' + imgUrl}" 
-                         class="main-image" alt="Main Image"
-                         onerror="this.onerror=null;this.src='https://placehold.co/600x600/1a2639/FFF?text=Main+Image+Error'">
-                         
-                    <img th:if="${imgUrl == ''}" 
-                         src="https://placehold.co/600x600/1a2639/FFF?text=No+Main+Image" 
-                         class="main-image" alt="No Image">
-                </th:block>
-            </div>
-
-            <div class="carousel-item" th:each="extra : ${extraImages}">
-                <th:block th:with="extraUrl=${extra.image != null ? extra.image.trim() : ''}">
-                    <img th:if="${extraUrl != ''}"
-                         th:src="${(extraUrl.startsWith('http') or extraUrl.startsWith('/')) ? extraUrl : '/uploads/' + extraUrl}" 
-                         class="main-image" th:alt="|Extra Image ${extra.id}|"
-                         onerror="this.onerror=null;this.src='https://placehold.co/600x600/1a2639/FFF?text=Extra+Img+Error'">
-                </th:block>
-            </div>
-        </div>
-
-        <button th:if="${not #lists.isEmpty(extraImages)}" class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button th:if="${not #lists.isEmpty(extraImages)}" class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-</div>
-                    <div class="debug-container">
-                        <span class="debug-title">🛠️ DEBUG INFO (Xóa khi hoàn thành):</span>
-                        <span class="debug-item">- Product Name: <span th:text="${product.name}" class="text-white"></span></span>
-                        <span class="debug-item">- Main Image Raw: <span th:text="${product.image}" class="text-white"></span></span>
-                        <span class="debug-item">- Extra Images Count: <span th:text="${extraImages != null ? extraImages.size() : 'NULL'}" class="text-danger fw-bold fs-5"></span></span>
-                        <div th:if="${extraImages != null and !extraImages.isEmpty()}">
-                            <hr style="border-color: #ffc107; margin: 5px 0;">
-                            <span class="debug-item">List ảnh phụ:</span>
-                            <div th:each="img : ${extraImages}">
-                                + ID: <span th:text="${img.id}"></span> | Raw: <span th:text="${img.image}" class="text-white"></span>
+                <div class="col-lg-6">
+                    <div class="product-gallery">
+                        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+                            
+                            <div class="carousel-indicators" th:if="${extraImages != null and !extraImages.isEmpty()}">
+                                <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="0" class="active"></button>
+                                <button th:each="img, stat : ${extraImages}" type="button" 
+                                        data-bs-target="#productCarousel" th:data-bs-slide-to="${stat.count}"></button>
                             </div>
+
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <th:block th:with="imgUrl=${product.image != null ? product.image.trim() : ''}">
+                                        <img th:src="${(imgUrl.startsWith('http') or imgUrl.startsWith('/')) ? imgUrl : '/uploads/' + imgUrl}" 
+                                             class="main-image" alt="Main Image"
+                                             onerror="this.src='https://placehold.co/600x600/1a2639/FFF?text=No+Image'">
+                                    </th:block>
+                                </div>
+
+                                <th:block th:if="${extraImages != null}">
+                                    <div class="carousel-item" th:each="exImg : ${extraImages}">
+                                        <th:block th:with="exUrl=${exImg.image != null ? exImg.image.trim() : ''}">
+                                            <img th:src="${(exUrl.startsWith('http') or exUrl.startsWith('/')) ? exUrl : '/uploads/' + exUrl}" 
+                                                 class="main-image" alt="Extra Image"
+                                                 onerror="this.src='https://placehold.co/600x600/1a2639/FFF?text=Error'">
+                                        </th:block>
+                                    </div>
+                                </th:block>
+                            </div>
+
+                            <th:block th:if="${extraImages != null and !extraImages.isEmpty()}">
+                                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            </th:block>
                         </div>
                     </div>
                 </div>
 
                 <div class="col-lg-6 d-flex flex-column justify-content-center">
-                    <div class="mb-3">
-                        <span class="badge border border-info text-info bg-transparent" th:text="${product.category != null ? product.category.name : 'Figure'}">CATEGORY</span>
-                        <span class="text-secondary ms-2 small">#ID: <span th:text="${product.id}"></span></span>
+                    <div class="mb-2">
+                        <span class="badge border border-info text-info" th:text="${product.category.name}">Category</span>
                     </div>
+                    <h1 class="product-title mb-3" th:text="${product.name}">TÊN SẢN PHẨM</h1>
 
-                    <h1 class="product-title mb-3" th:text="${product.name}">GUNDAM EXIA</h1>
-
-                    <div class="mb-4 pb-3 border-bottom border-secondary d-flex align-items-end gap-3" style="border-color: rgba(255, 255, 255, 0.1) !important;">
+                    <div class="mb-4 pb-3 border-bottom border-secondary d-flex align-items-end gap-3">
                         <span class="price-current" th:text="${#numbers.formatDecimal(finalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                        <span th:if="${product.price != null and finalPrice < product.price}" class="price-old mb-1" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
-                        <span th:if="${product.price != null and finalPrice < product.price}" class="badge bg-danger mb-2">Giảm <span th:text="${#numbers.formatDecimal((product.price - finalPrice)/product.price * 100, 0, 'COMMA', 0, 'POINT')}"></span>%</span>
+                        <span th:if="${product.price > finalPrice}" class="price-old mb-1" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
                     </div>
 
                     <form id="voucherForm" method="get" th:action="@{'/product-detail/' + ${product.id}}" class="mb-4">
-                        <label class="mb-2 text-info fw-bold small"><i class="bi bi-ticket-perforated-fill"></i> MÃ ƯU ĐÃI</label>
-                        <div class="voucher-wrapper d-flex align-items-center justify-content-between">
-                            <select name="voucherId" class="form-select-voucher" onchange="this.form.submit()">
-                                <option value="">Chọn mã giảm giá của bạn...</option>
-                                <option th:each="v : ${vouchers}" th:value="${v.id}" th:selected="${selectedVoucher != null && v.id == selectedVoucher.id}" th:text="|${v.code} (Giảm ${v.discountPercent != null ? v.discountPercent + '%' : #numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT') + 'đ'})|"></option>
-                            </select> 
-                            <i th:if="${selectedVoucher != null}" class="bi bi-check-circle-fill text-success fs-5"></i>
-                        </div>
-                        <div th:if="${voucherError}" class="text-danger mt-2 small fst-italic">
-                            <i class="bi bi-exclamation-circle"></i> <span th:text="${voucherError}"></span>
-                        </div>
+                        <label class="mb-2 text-info fw-bold small">MÃ ƯU ĐÃI</label>
+                        <select name="voucherId" class="form-select bg-dark text-info border-secondary" onchange="this.form.submit()">
+                            <option value="">Chọn mã giảm giá...</option>
+                            <option th:each="v : ${vouchers}" th:value="${v.id}" th:selected="${selectedVoucher != null && v.id == selectedVoucher.id}"
+                                    th:text="|${v.code} (Giảm ${v.discountPercent != null ? v.discountPercent + '%' : v.discountAmount + 'đ'})|"></option>
+                        </select>
                     </form>
 
-                    <form method="get" th:action="@{'/cart/add/' + ${product.id}}">
-    
-    <!-- SỐ LƯỢNG -->
-    <input type="hidden" name="quantity" value="1">
-
-    <!-- GIÁ SAU KHI ÁP VOUCHER -->
-    <input type="hidden" name="customPrice" th:value="${finalPrice}">
-
-    <div class="d-flex gap-3 align-items-stretch action-wrapper">
-        <div class="qty-box">
-            <button class="qty-btn" type="button"
-                onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
-
-            <input type="number" name="quantity" value="1" min="1" class="qty-input">
-
-            <button class="qty-btn" type="button"
-                onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
-        </div>
-
-        <button type="submit" class="btn btn-buy-now flex-grow-1">
-            <i class="bi bi-cart-plus-fill me-2"></i> THÊM VÀO GIỎ HÀNG
-        </button>
-    </div>
-</form>
-
-
-                    <div class="mt-4 pt-3 d-flex gap-4 text-secondary small">
-                        <span><i class="bi bi-shield-check text-success"></i> Hàng chính hãng 100%</span> 
-                        <span><i class="bi bi-truck text-info"></i> Miễn phí vận chuyển</span>
-                    </div>
+                    <form method="post" action="/cart/add">
+                        <input type="hidden" name="productId" th:value="${product.id}">
+                        <div class="d-flex gap-3">
+                            <div class="qty-box">
+                                <button class="qty-btn" type="button" onclick="this.parentNode.querySelector('input').stepDown()">-</button>
+                                <input type="number" name="quantity" value="1" min="1" class="qty-input bg-transparent border-0 text-white text-center w-100">
+                                <button class="qty-btn" type="button" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+                            </div>
+                            <button type="submit" class="btn btn-buy-now flex-grow-1">THÊM VÀO GIỎ HÀNG</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
         <div class="detail-container">
-            <ul class="nav nav-tabs mb-3" id="productTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc-pane" type="button">MÔ TẢ SẢN PHẨM</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="review-tab" data-bs-toggle="tab" data-bs-target="#review-pane" type="button">ĐÁNH GIÁ (<span th:text="${comments.size()}">0</span>)</button>
-                </li>
+            <ul class="nav nav-tabs mb-3" id="productTabs">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#desc">MÔ TẢ</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rev">ĐÁNH GIÁ (<span th:text="${comments.size()}">0</span>)</button></li>
             </ul>
-
-            <div class="tab-content" id="productTabsContent">
-                <div class="tab-pane fade show active" id="desc-pane" role="tabpanel">
-                    <p th:text="${product.description != null ? product.description : 'Đang cập nhật thông tin sản phẩm...'}" style="white-space: pre-line;"></p>
+            
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="desc">
+                    <p th:text="${product.description}" style="white-space: pre-line;"></p>
                 </div>
 
-                <div class="tab-pane fade" id="review-pane" role="tabpanel">
-                    <div th:if="${canComment}" class="p-4 mb-4 rounded border border-secondary" style="background: rgba(0, 0, 0, 0.3);">
-                        <h6 class="text-info font-display mb-3">VIẾT ĐÁNH GIÁ</h6>
+                <div class="tab-pane fade" id="rev">
+                    
+                    <div th:if="${canComment}" class="comment-form mb-4">
+                        <h6 class="text-info mb-3">Gửi đánh giá của bạn</h6>
                         <form th:action="@{'/product-detail/comment/' + ${product.id}}" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label class="text-light me-3">Đánh giá:</label>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="rating" value="5" id="r5" checked> <label class="form-check-label text-warning" for="r5">⭐⭐⭐⭐⭐</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="rating" value="4" id="r4"> <label class="form-check-label text-warning" for="r4">⭐⭐⭐⭐</label>
-                                </div>
+                                <label class="small text-secondary">Xếp hạng:</label>
+                                <select name="rating" class="form-select bg-dark text-warning border-secondary w-auto">
+                                    <option value="5">⭐⭐⭐⭐⭐ (5 sao)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4 sao)</option>
+                                    <option value="3">⭐⭐⭐ (3 sao)</option>
+                                    <option value="2">⭐⭐ (2 sao)</option>
+                                    <option value="1">⭐ (1 sao)</option>
+                                </select>
                             </div>
                             <div class="mb-3">
-                                <textarea name="content" class="form-control bg-dark text-light border-secondary" rows="3" placeholder="Chia sẻ cảm nhận của bạn..." required></textarea>
+                                <textarea name="content" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Nhập cảm nhận của bạn về sản phẩm..." required></textarea>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <input type="file" name="imageFile" class="form-control bg-dark text-secondary border-secondary w-50">
-                                <button type="submit" class="btn btn-outline-info px-4 fw-bold">GỬI ĐÁNH GIÁ</button>
+                            <div class="mb-3">
+                                <label class="small text-secondary d-block">Hình ảnh thực tế (nếu có):</label>
+                                <input type="file" name="imageFile" class="form-control bg-dark text-secondary border-secondary">
                             </div>
+                            <button type="submit" class="btn btn-outline-info">GỬI ĐÁNH GIÁ</button>
                         </form>
                     </div>
 
-                    <div th:unless="${canComment}" class="alert alert-dark border-secondary text-center text-secondary mb-4">
-                        <i class="bi bi-lock-fill"></i> <span th:if="${session.account == null}">Vui lòng <a href="/login" class="text-info fw-bold text-decoration-none">đăng nhập</a> để đánh giá.</span> <span th:if="${session.account != null}">Bạn cần hoàn tất đơn hàng này để viết đánh giá.</span>
+                    <div th:unless="${canComment}" class="alert alert-dark border-secondary text-secondary small text-center">
+                        <i class="bi bi-info-circle"></i> Bạn cần mua sản phẩm và hoàn tất đơn hàng để có thể gửi đánh giá.
                     </div>
 
-                    <div class="comment-list">
-                        <div th:if="${#lists.isEmpty(comments)}" class="text-center text-secondary py-4 opacity-75">Chưa có đánh giá nào cho sản phẩm này.</div>
+                    <hr class="border-secondary opacity-25">
 
-                        <div th:each="cmt : ${comments}" class="d-flex gap-3 mb-4 pb-4 border-bottom border-secondary" style="border-color: rgba(255, 255, 255, 0.05) !important;">
-                            <img th:src="${cmt.account.photo != null ? cmt.account.photo : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-secondary" style="width: 50px; height: 50px; object-fit: cover;">
-                            <div>
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <h6 class="mb-0 text-white fw-bold" th:text="${cmt.account.fullName != null ? cmt.account.fullName : cmt.account.username}">User</h6>
-                                    <span class="text-warning small" th:if="${cmt.rating != null}">
-                                        <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, cmt.rating)}"></i>
-                                    </span>
+                    <div class="comment-list">
+                        <div th:if="${#lists.isEmpty(comments)}" class="text-center text-secondary py-3">Chưa có đánh giá nào.</div>
+                        <div th:each="cmt : ${comments}" class="d-flex gap-3 mb-4 pb-3 border-bottom border-secondary" style="border-color: rgba(255,255,255,0.05) !important;">
+                            <img th:src="${cmt.account.photo != null ? cmt.account.photo : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                            <div class="w-100">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="mb-0 text-white" th:text="${cmt.account.fullName}">User</h6>
+                                    <small class="text-secondary" th:text="${#temporals.format(cmt.createdAt, 'dd/MM/yyyy')}"></small>
                                 </div>
-                                <small class="text-secondary d-block mb-2" th:text="${#temporals.format(cmt.createdAt, 'dd/MM/yyyy HH:mm')}"></small>
-                                <p class="text-light mb-2" th:text="${cmt.content}"></p>
+                                <div class="text-warning small my-1">
+                                    <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, cmt.rating)}"></i>
+                                </div>
+                                <p class="mb-2 text-light" th:text="${cmt.content}"></p>
                                 <div th:if="${cmt.image != null}">
-                                    <a th:href="@{'/uploads/comments/' + ${cmt.image}}" target="_blank"> 
-                                        <img th:src="@{'/uploads/comments/' + ${cmt.image}}" class="rounded border border-secondary mt-1" style="height: 80px; object-fit: cover;">
-                                    </a>
+                                    <img th:src="@{'/uploads/comments/' + ${cmt.image}}" class="rounded border border-secondary" style="max-height: 100px;">
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </div> </div> </div>
     </div>
 
     <footer class="text-center">
-        <div class="container">
-            <p class="mb-0">&copy; 2025 Model World. Dark Blue Luxury Store.</p>
-        </div>
+        <p class="mb-0">&copy; 2025 Model World. Dark Blue Luxury Store.</p>
     </footer>
 
 </body>
