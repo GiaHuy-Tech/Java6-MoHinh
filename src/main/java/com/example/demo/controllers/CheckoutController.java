@@ -1,303 +1,209 @@
 package com.example.demo.controllers;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.text.Normalizer;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+import com.example.demo.service.MembershipService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.model.Account;
-import com.example.demo.model.CartDetail;
-import com.example.demo.model.OrderDetail;
-import com.example.demo.model.Orders;
-import com.example.demo.repository.AccountRepository;
-import com.example.demo.repository.CartDetailRepository;
-import com.example.demo.repository.OrdersDetailRepository;
-import com.example.demo.repository.OrdersRepository;
-import com.example.demo.service.MembershipService;
-
-import jakarta.servlet.http.HttpSession;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 @RequestMapping("/checkout")
 public class CheckoutController {
 
     @Autowired private HttpSession session;
-    @Autowired private CartDetailRepository cartDetailRepo;
     @Autowired private OrdersRepository orderRepo;
-    @Autowired private OrdersDetailRepository orderDetailRepo;
-    @Autowired private AccountRepository accountRepo; // ✅ Cần repo để update user
-    @Autowired private MembershipService membershipService; // ✅ Inject Service xử lý hạng
+    @Autowired private CartDetailRepository cartRepo;
+    @Autowired private AccountRepository accountRepo;
+    @Autowired private MembershipService membershipService;
 
-    // --- CẤU HÌNH TỈNH THÀNH ---
-    private static final List<String> SOUTH_PROVINCES = Arrays.asList(
-        "ho chi minh", "hcm", "sai gon", "can tho", "binh duong", "dong nai", "long an",
-        "tien giang", "ben tre", "tra vinh", "vinh long", "dong thap", "an giang",
-        "kien giang", "hau giang", "soc trang", "bac lieu", "ca mau", "ba ria",
-        "vung tau", "tay ninh", "binh phuoc"
-    );
+    // ===== VNPAY SANDBOX CONFIG =====
+    private static final String VNP_TMN_CODE = "XXXXXXX";        // TMN CODE
+    private static final String VNP_HASH_SECRET = "YYYYYYYY";   // SECRET KEY
+    private static final String VNP_PAY_URL =
+            "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
-    // --- HELPER METHODS ---
-    public static String unAccent(String s) {
-        if (s == null) {
-			return "";
-		}
-        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
-        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(temp).replaceAll("").replaceAll("đ", "d");
-    }
+    private static final String VNP_RETURN_URL =
+    	    "https://punchy-sondra-unanswerably.ngrok-free.dev/checkout/vnpay-return";
 
-    private int calculateShippingFee(String address, int subTotal) {
-        if (subTotal >= 1000000) {
-			return 0;
-		}
-        if (address == null || address.trim().isEmpty()) {
-			return 50000;
-		}
 
-        String normAddress = unAccent(address.toLowerCase());
-
-        if (normAddress.contains("can tho")) {
-			return 0;
-		}
-        for (String p : SOUTH_PROVINCES) {
-            if (normAddress.contains(p)) {
-				return 30000;
-			}
-        }
-        return 45000;
-    }
-
-    // --- CONTROLLER METHODS ---
-
+    // ===== CHECKOUT PAGE =====
     @GetMapping
-    public String viewCheckout(Model model) {
+    public String checkoutPage(Model model) {
+
         Account account = (Account) session.getAttribute("account");
-        if (account == null) {
-			return "redirect:/login";
-		}
+        if (account == null) return "redirect:/login";
 
-        List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
-        if (cartDetails.isEmpty()) {
-			return "redirect:/cart";
-		}
+        List<CartDetail> cart = cartRepo.findByCart_Account_Id(account.getId());
+        if (cart.isEmpty()) return "redirect:/cart";
 
-        // 1. Tính tổng tiền hàng
-        int subTotal = cartDetails.stream().mapToInt(cd -> cd.getPrice() * cd.getQuantity()).sum();
+        int subTotal = cart.stream()
+                .mapToInt(i -> i.getPrice() * i.getQuantity())
+                .sum();
 
-        // 2. Tính phí ship
-        int shippingFee = calculateShippingFee(account.getAddress(), subTotal);
-
-        // 3. ✅ Tính giảm giá thành viên
-        int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());
-        int discountAmount = (int) (subTotal * discountPercent / 100.0);
-
-        // 4. Tổng cuối cùng
-        int finalTotal = subTotal - discountAmount + shippingFee;
-
-        model.addAttribute("cartDetails", cartDetails);
-        model.addAttribute("subTotal", subTotal); // Tổng tiền hàng chưa giảm
-        model.addAttribute("shippingFee", shippingFee);
-        model.addAttribute("discountPercent", discountPercent); // % Giảm
-        model.addAttribute("discountAmount", discountAmount);   // Số tiền giảm
-        model.addAttribute("total", finalTotal); // Tổng thanh toán
+        int shippingFee = subTotal >= 1_000_000 ? 0 : 30000;
+        int finalTotal = subTotal + shippingFee;
 
         model.addAttribute("account", account);
-        model.addAttribute("keyword", "");
-        model.addAttribute("selectedCategory", "");
+        model.addAttribute("cartDetails", cart);
+        model.addAttribute("total", subTotal);
+        model.addAttribute("shippingFee", shippingFee);
+        model.addAttribute("finalTotal", finalTotal);
 
         return "client/checkout";
     }
 
+    // ===== CHECKOUT SUBMIT =====
     @PostMapping
-    public String processCheckout(
-            @RequestParam("address") String address,
-            @RequestParam("phone") String phone,
-            @RequestParam("paymentMethod") String paymentMethod,
-            Model model) {
+    public String checkout(@RequestParam("paymentMethod") String paymentMethod,
+                           HttpServletRequest request) {
 
         Account account = (Account) session.getAttribute("account");
-        if (account == null) {
-			return "redirect:/login";
-		}
+        if (account == null) return "redirect:/login";
 
-        // Reload account từ DB để đảm bảo dữ liệu mới nhất
-        account = accountRepo.findById(account.getId()).orElse(account);
+        List<CartDetail> cart = cartRepo.findByCart_Account_Id(account.getId());
+        if (cart.isEmpty()) return "redirect:/cart";
 
-        List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
-        if (cartDetails.isEmpty()) {
-			return "redirect:/cart";
-		}
+        int subTotal = cart.stream()
+                .mapToInt(i -> i.getPrice() * i.getQuantity())
+                .sum();
 
-        // Tính toán lại Server-side (Bảo mật)
-        int subTotal = cartDetails.stream().mapToInt(cd -> cd.getPrice() * cd.getQuantity()).sum();
-        int shippingFee = calculateShippingFee(address, subTotal);
+        int shippingFee = subTotal >= 1_000_000 ? 0 : 30000;
+        int finalTotal = subTotal + shippingFee;
 
-        // ✅ Áp dụng giảm giá
-        int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());
-        int discountAmount = (int) (subTotal * discountPercent / 100.0);
-        int finalTotal = subTotal - discountAmount + shippingFee;
-
-        // Lưu đơn hàng
         Orders order = new Orders();
         order.setAccountId(account);
         order.setCreatedDate(new Date());
-        order.setAddress(address);
-        order.setPhone(phone);
-        order.setPaymentMethod(paymentMethod);
-        order.setFeeship(shippingFee);
-        order.setTotal(finalTotal); // Lưu số tiền sau khi đã giảm giá
-
-        String uniqueOrderCode = "DH" + System.currentTimeMillis();
-        order.setNote(uniqueOrderCode);
-
+        order.setTotal(finalTotal);                 // ✅ TỔNG CUỐI
         order.setPaymentStatus(false);
-        order.setStatus(0);
+        order.setPaymentMethod(paymentMethod);
+        order.setNote("DH" + System.currentTimeMillis()); // <= 34 ký tự
 
         Orders savedOrder = orderRepo.save(order);
 
-        // Lưu chi tiết
-        List<OrderDetail> orderDetails = cartDetails.stream().map(item -> {
-            OrderDetail detail = new OrderDetail();
-            detail.setOrders(savedOrder);
-            detail.setProductId(item.getProduct());
-            detail.setQuantity(item.getQuantity());
-            detail.setPrice(item.getPrice());
-            return detail;
-        }).toList();
-        orderDetailRepo.saveAll(orderDetails);
-
-        cartDetailRepo.deleteAll(cartDetails);
-
-        // ✅ XỬ LÝ CỘNG TIỀN TÍCH LŨY
-        if ("COD".equals(paymentMethod)) {
-            // Đối với COD, giả định đơn thành công thì cộng điểm luôn (hoặc chờ admin duyệt)
-            // Ở đây demo mình cộng luôn để thấy kết quả
-            updateMembershipSpending(account, finalTotal);
-            return "redirect:/orders";
-        } else {
-            // Chuyển khoản thì chưa cộng tiền vội, chờ xác nhận ở trang payment
-            session.setAttribute("pendingOrderId", savedOrder.getId());
-            return "redirect:/checkout/payment";
-        }
-    }
-
-    @GetMapping("/payment")
-    public String viewPaymentQR(Model model) {
-        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-        if (orderId == null) {
-			return "redirect:/cart";
-		}
-
-        Orders order = orderRepo.findById(orderId).orElse(null);
-        if(order == null) {
-			return "redirect:/cart";
-		}
-
-        if (Boolean.TRUE.equals(order.getPaymentStatus())) {
-             return "redirect:/orders";
-        }
-
-        String content = order.getNote();
-        String qrUrl = "";
-
-        // --- INFO BANK ---
-        String bankId = "ICB";
-        String accountNo = "103878028110";
-        String accountName = "NGUYEN GIA HUY";
-
-        if ("VIETQR".equals(order.getPaymentMethod())) {
-             qrUrl = String.format("https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s",
-                bankId, accountNo, order.getTotal(), content, URLEncoder.encode(accountName, StandardCharsets.UTF_8));
-        }
-        else if ("MOMO".equals(order.getPaymentMethod())) {
-            String MOMO_PHONE = "0914211221";
-            String momoLink = String.format("https://me.momo.vn/%s?amount=%d&message=%s",
-                 MOMO_PHONE, order.getTotal(), URLEncoder.encode(content, StandardCharsets.UTF_8));
-            qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" + URLEncoder.encode(momoLink, StandardCharsets.UTF_8);
-        }
-
-        model.addAttribute("qrUrl", qrUrl);
-        model.addAttribute("total", order.getTotal());
-        model.addAttribute("content", content);
-        model.addAttribute("bankName", "VietinBank");
-        model.addAttribute("accountNo", accountNo);
-        model.addAttribute("accountName", accountName);
-        model.addAttribute("paymentMethod", order.getPaymentMethod());
-
-        return "client/payment-qr";
-    }
-
-    // API Ajax check status
-    @GetMapping("/check-status")
-    @ResponseBody
-    public Map<String, Boolean> checkOrderStatus() {
-        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-        Map<String, Boolean> response = new HashMap<>();
-
-        if (orderId != null) {
-            Orders order = orderRepo.findById(orderId).orElse(null);
-            if (order != null && Boolean.TRUE.equals(order.getPaymentStatus())) {
-                response.put("paid", true);
-                return response;
-            }
-        }
-        response.put("paid", false);
-        return response;
-    }
-
-    // --- XỬ LÝ XÁC NHẬN THANH TOÁN (ONLINE) ---
-    @PostMapping("/confirm-payment")
-    public String confirmPaymentManual() {
-        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-
-        if (orderId != null) {
-            Orders order = orderRepo.findById(orderId).orElse(null);
-            if (order != null) {
-                // 1. Cập nhật trạng thái đơn hàng
-                order.setPaymentStatus(true); // Đã thanh toán
-                order.setStatus(1); // Đã xác nhận (Ví dụ)
-                orderRepo.save(order);
-
-                // 2. ✅ CỘNG TIỀN VÀO TÀI KHOẢN & UPDATE HẠNG
-                Account account = order.getAccountId();
-                if (account != null) {
-                    updateMembershipSpending(account, order.getTotal());
-                }
-            }
-            // Xóa session
-            session.removeAttribute("pendingOrderId");
+        if ("VNPAY".equals(paymentMethod)) {
+            return "redirect:" + createVNPayUrl(savedOrder, request);
         }
 
         return "redirect:/orders";
     }
 
-    // --- ✅ HÀM PRIVATE HỖ TRỢ CỘNG TIỀN ---
-    private void updateMembershipSpending(Account account, int amountToAdd) {
-        // Cộng tiền
-        long currentSpending = account.getTotalSpending() == null ? 0 : account.getTotalSpending();
-        account.setTotalSpending(currentSpending + amountToAdd);
+    // ===== CREATE VNPAY URL =====
+    private String createVNPayUrl(Orders order, HttpServletRequest request) {
 
-        // Tính lại hạng
+        try {
+            Map<String, String> params = new TreeMap<>();
+
+            params.put("vnp_Version", "2.1.0");
+            params.put("vnp_Command", "pay");
+            params.put("vnp_TmnCode", VNP_TMN_CODE);
+            params.put("vnp_Amount", String.valueOf(order.getTotal() * 100));
+            params.put("vnp_CurrCode", "VND");
+
+            params.put("vnp_TxnRef", order.getNote());
+            params.put("vnp_OrderInfo", "Thanh toan don hang");
+            params.put("vnp_OrderType", "other");
+
+            params.put("vnp_Locale", "vn");
+            params.put("vnp_ReturnUrl", VNP_RETURN_URL);
+            params.put("vnp_IpAddr", request.getRemoteAddr());
+
+            String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            params.put("vnp_CreateDate", time);
+
+            StringBuilder hashData = new StringBuilder();
+            StringBuilder query = new StringBuilder();
+
+            for (Map.Entry<String, String> e : params.entrySet()) {
+                hashData.append(e.getKey()).append("=")
+                        .append(e.getValue()).append("&");
+
+                query.append(e.getKey()).append("=")
+                        .append(URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
+                        .append("&");
+            }
+
+            hashData.deleteCharAt(hashData.length() - 1);
+            query.deleteCharAt(query.length() - 1);
+
+            String secureHash = hmacSHA512(VNP_HASH_SECRET, hashData.toString());
+
+            return VNP_PAY_URL + "?" + query + "&vnp_SecureHash=" + secureHash;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // ===== VNPAY RETURN (VERIFY HASH) =====
+    @GetMapping("/vnpay-return")
+    public String vnpayReturn(@RequestParam Map<String, String> params) {
+
+        String vnpSecureHash = params.remove("vnp_SecureHash");
+        params.remove("vnp_SecureHashType");
+
+        StringBuilder hashData = new StringBuilder();
+        params.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach(e -> hashData.append(e.getKey())
+                        .append("=")
+                        .append(e.getValue())
+                        .append("&"));
+
+        hashData.deleteCharAt(hashData.length() - 1);
+
+        String myHash = hmacSHA512(VNP_HASH_SECRET, hashData.toString());
+
+        if (myHash.equalsIgnoreCase(vnpSecureHash)
+                && "00".equals(params.get("vnp_ResponseCode"))) {
+
+            String orderCode = params.get("vnp_TxnRef");
+
+            orderRepo.findByNote(orderCode).ifPresent(order -> {
+                if (!order.getPaymentStatus()) {
+                    order.setPaymentStatus(true);
+                    orderRepo.save(order);
+                    updateMembership(order.getAccountId(), order.getTotal());
+                }
+            });
+        }
+
+        return "redirect:/orders";
+    }
+
+    // ===== MEMBERSHIP =====
+    private void updateMembership(Account account, int amount) {
+        long total = Optional.ofNullable(account.getTotalSpending()).orElse(0L);
+        account.setTotalSpending(total + amount);
         membershipService.updateMembershipLevel(account);
-
-        // Lưu vào DB
         accountRepo.save(account);
-
-        // Cập nhật lại session để hiển thị ngay trên Header
         session.setAttribute("account", account);
+    }
+
+    // ===== HASH =====
+    private String hmacSHA512(String key, String data) {
+        try {
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA512");
+            mac.init(new javax.crypto.spec.SecretKeySpec(
+                    key.getBytes(StandardCharsets.UTF_8), "HmacSHA512"));
+
+            byte[] raw = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : raw) sb.append(String.format("%02x", b));
+            return sb.toString();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

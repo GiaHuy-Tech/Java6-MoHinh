@@ -264,14 +264,16 @@
                                        th:value="${account.phone}" placeholder="Nhập số điện thoại" required>
                             </div>
                             
-                            <div class="mb-4">
-                                <label class="form-label">Phương thức thanh toán</label>
-                                <select class="form-select form-select-dark" name="paymentMethod">
-                                    <option value="COD">Thanh toán khi nhận hàng (COD)</option>
-                                    <option value="VIETQR">Chuyển khoản Ngân hàng (VietQR)</option>
-                                    <option value="MOMO">Ví điện tử MoMo</option>
-                                </select>
-                            </div>
+                           <div class="mb-4">
+    <label class="form-label">Phương thức thanh toán</label>
+    <select class="form-select form-select-dark" name="paymentMethod" required>
+        <option value="COD">Thanh toán khi nhận hàng (COD)</option>
+        <option value="VNPAY">Thanh toán VNPay (Sandbox)</option>
+        <option value="VIETQR">Chuyển khoản Ngân hàng (VietQR)</option>
+        <option value="MOMO">Ví điện tử MoMo</option>
+    </select>
+</div>
+
                             
                             <button type="submit" class="btn-checkout-confirm">
                                 XÁC NHẬN ĐẶT HÀNG <i class="bi bi-arrow-right ms-1"></i>
@@ -317,7 +319,8 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="text-white fs-5 fw-bold">TỔNG CỘNG</span>
                                 <span class="price-text text-info fs-4 fw-bold"
-                                    th:text="${#numbers.formatDecimal(total + shippingFee, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                    th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"
+>
                                     0₫
                                 </span>
                             </div>
