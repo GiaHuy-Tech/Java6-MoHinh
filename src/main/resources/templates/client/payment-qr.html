@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán QR - Model World</title>
+    <title>Thanh toán chuyển khoản - Model World</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
@@ -24,10 +24,11 @@
             background-color: var(--bg-dark);
             color: var(--text-light);
             font-family: var(--font-main);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         .payment-card {
             background: var(--bg-card);
@@ -44,52 +45,68 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 30px;
+            padding: 40px;
+            border-right: 1px solid #eee;
         }
         .info-section {
             padding: 40px;
         }
         .qr-img {
             width: 100%;
-            max-width: 300px;
+            max-width: 280px;
             border: 2px dashed #333;
             padding: 10px;
             border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         .price-text {
             font-family: var(--font-logo);
             color: var(--accent-cyan);
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
         }
         .copy-btn {
             background: rgba(0, 242, 255, 0.1);
             border: 1px solid var(--accent-cyan);
             color: var(--accent-cyan);
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            border-radius: 4px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
             transition: 0.3s;
             cursor: pointer;
+            white-space: nowrap;
         }
         .copy-btn:hover {
             background: var(--accent-cyan);
             color: #000;
         }
-        /* Style cho nút xác nhận mới */
         .btn-confirm {
             background: linear-gradient(45deg, #198754, #20c997);
             border: none;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
         }
         .btn-confirm:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(32, 201, 151, 0.4);
+            box-shadow: 0 6px 20px rgba(32, 201, 151, 0.5);
             color: white;
+        }
+        .highlight-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .qr-section { border-right: none; border-bottom: 1px solid #eee; padding: 30px; }
+            .info-section { padding: 25px; }
         }
     </style>
 </head>
@@ -98,55 +115,62 @@
 <div class="payment-card">
     <div class="row g-0">
         <div class="col-md-5 qr-section">
-            <h5 class="text-dark fw-bold mb-3 text-uppercase" th:text="${paymentMethod == 'MOMO'} ? 'Quét MoMo' : 'Quét VietQR'">QR CODE</h5>
+            <h5 class="text-dark fw-bold mb-3 text-uppercase badge bg-warning text-dark fs-6" 
+                th:text="${paymentMethod == 'MOMO'} ? 'QUÉT MOMO' : 'QUÉT VIETQR'">
+                QR CODE
+            </h5>
             
             <img th:src="${qrUrl}" alt="QR Code" class="qr-img mb-3">
             
-            <p class="text-secondary small text-center mb-0">
-                <i class="bi bi-phone-vibrate"></i> Mở ứng dụng ngân hàng/MoMo<br>để quét mã thanh toán
+            <p class="text-secondary small text-center mb-0 fst-italic">
+                <i class="bi bi-phone-vibrate"></i> Sử dụng App Ngân hàng hoặc MoMo<br>để quét mã thanh toán tự động.
             </p>
         </div>
 
         <div class="col-md-7 info-section">
-            <h3 class="mb-4" style="font-family: var(--font-logo)">THANH TOÁN</h3>
+            <h3 class="mb-4 text-white" style="font-family: var(--font-logo)">
+                <i class="bi bi-wallet2 text-info me-2"></i>THANH TOÁN
+            </h3>
             
             <div class="mb-4">
-                <label class="text-secondary small">Số tiền cần thanh toán:</label>
-                <div class="price-text" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' VND'"></div>
+                <label class="text-secondary small text-uppercase fw-bold">Số tiền cần thanh toán</label>
+                <div class="price-text" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
             </div>
 
-            <div class="mb-3">
-                <label class="text-secondary small d-block">Nội dung chuyển khoản (Bắt buộc):</label>
+            <div class="mb-4 highlight-box">
+                <label class="text-secondary small d-block mb-1">Nội dung chuyển khoản (Bắt buộc):</label>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="fs-5 fw-bold text-white bg-danger px-2 rounded" th:text="${content}">DH123456</span>
+                    <span class="fs-4 fw-bold text-white font-monospace" id="content-text" th:text="${content}">DH123456</span>
                     
                     <button class="copy-btn" 
                             th:data-copy="${content}" 
-                            onclick="copyText(this.getAttribute('data-copy'))">
+                            onclick="copyText(this, this.getAttribute('data-copy'))">
                         <i class="bi bi-clipboard"></i> Copy
                     </button>
                 </div>
-                <small class="text-warning fst-italic">* Vui lòng nhập đúng nội dung để hệ thống xử lý nhanh nhất.</small>
+                <small class="text-danger mt-2 d-block" style="font-size: 0.8rem;">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Vui lòng nhập đúng nội dung để đơn hàng được xác nhận.
+                </small>
             </div>
 
-            <div class="mb-4 border-top border-secondary pt-3">
-                <div class="row">
+            <div class="mb-4 pt-2">
+                <div class="row g-3">
                     <div class="col-6">
                         <small class="text-secondary">Ngân hàng:</small>
                         <div class="fw-bold text-light" th:text="${bankName}">VietinBank</div>
                     </div>
                     <div class="col-6">
                         <small class="text-secondary">Chủ tài khoản:</small>
-                        <div class="fw-bold text-light" th:text="${accountName}">NGUYEN GIA HUY</div>
+                        <div class="fw-bold text-light text-uppercase" th:text="${accountName}">NGUYEN GIA HUY</div>
                     </div>
-                    <div class="col-12 mt-2">
+                    <div class="col-12">
                         <small class="text-secondary">Số tài khoản:</small>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold text-light fs-5" th:text="${accountNo}">103878028110</span>
+                            <span class="fw-bold text-light fs-5 font-monospace" th:text="${accountNo}">103878028110</span>
                             
                             <button class="copy-btn" 
                                     th:data-copy="${accountNo}" 
-                                    onclick="copyText(this.getAttribute('data-copy'))">
+                                    onclick="copyText(this, this.getAttribute('data-copy'))">
                                 <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
@@ -154,11 +178,11 @@
                 </div>
             </div>
 
-            <div class="d-flex flex-column gap-3">
+            <div class="d-flex flex-column gap-3 mt-auto">
                 
                 <form th:action="@{/checkout/confirm-payment}" method="post" class="w-100">
-                    <button type="submit" class="btn btn-confirm w-100 py-3">
-                        <i class="bi bi-check-circle-fill me-2"></i> Xác nhận đã chuyển khoản
+                    <button type="submit" class="btn btn-confirm w-100 py-3 rounded-3">
+                        <i class="bi bi-check-circle-fill me-2"></i> TÔI ĐÃ CHUYỂN KHOẢN
                     </button>
                 </form>
 
@@ -168,9 +192,9 @@
                 </div>
             </div>
             
-            <div class="mt-4 border-top border-secondary pt-3 text-center">
-                <a href="/orders" class="text-secondary small text-decoration-none hover-white">
-                    <i class="bi bi-arrow-left"></i> Quay lại danh sách đơn hàng
+            <div class="mt-3 text-center">
+                <a href="/orders" class="text-secondary text-decoration-none" style="font-size: 0.9rem;">
+                    <i class="bi bi-arrow-left"></i> Xem đơn hàng của tôi
                 </a>
             </div>
         </div>
@@ -178,25 +202,49 @@
 </div>
 
 <script>
-    // Hàm copy tổng quát
-    function copyText(textToCopy) {
+    // Hàm copy cải tiến (User Friendly hơn alert)
+    function copyText(btnElement, textToCopy) {
         if (!textToCopy) return;
+        
         navigator.clipboard.writeText(textToCopy).then(() => {
-            alert("Đã sao chép: " + textToCopy);
+            // Hiệu ứng đổi nút
+            const originalContent = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="bi bi-check-lg"></i> Đã chép';
+            btnElement.classList.remove('copy-btn'); // Tạm bỏ style cũ
+            btnElement.style.background = '#198754';
+            btnElement.style.color = '#fff';
+            btnElement.style.borderColor = '#198754';
+
+            // Trả lại nút cũ sau 2 giây
+            setTimeout(() => {
+                btnElement.innerHTML = originalContent;
+                btnElement.classList.add('copy-btn');
+                btnElement.removeAttribute('style'); // Xóa inline style
+            }, 2000);
         }).catch(err => {
-            console.error('Lỗi khi sao chép:', err);
-            alert("Vui lòng bôi đen và copy thủ công: " + textToCopy);
+            console.error('Lỗi sao chép:', err);
+            prompt("Nhấn Ctrl+C để sao chép:", textToCopy);
         });
     }
 
-    // Polling kiểm tra trạng thái thanh toán (Giữ lại nếu sau này dùng Webhook)
+    // Polling kiểm tra trạng thái thanh toán (3s / lần)
     setInterval(() => {
         fetch('/checkout/check-status')
             .then(response => response.json())
             .then(data => {
                 if (data.paid === true) {
-                    alert("Thanh toán thành công! Đang chuyển hướng...");
-                    window.location.href = "/orders";
+                    // Nếu Server báo đã thanh toán -> Chuyển hướng
+                    // Tạo hiệu ứng trước khi chuyển
+                    document.body.innerHTML = `
+                        <div style="color:white; text-align:center;">
+                            <h1><i class="bi bi-check-circle-fill text-success"></i></h1>
+                            <h2>Thanh toán thành công!</h2>
+                            <p>Đang chuyển hướng...</p>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        window.location.href = "/orders";
+                    }, 1500);
                 }
             })
             .catch(error => console.error('Checking status...', error));
