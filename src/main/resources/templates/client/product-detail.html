@@ -235,19 +235,6 @@
         </button>
     </div>
 </div>
-                    <div class="debug-container">
-                        <span class="debug-title">🛠️ DEBUG INFO (Xóa khi hoàn thành):</span>
-                        <span class="debug-item">- Product Name: <span th:text="${product.name}" class="text-white"></span></span>
-                        <span class="debug-item">- Main Image Raw: <span th:text="${product.image}" class="text-white"></span></span>
-                        <span class="debug-item">- Extra Images Count: <span th:text="${extraImages != null ? extraImages.size() : 'NULL'}" class="text-danger fw-bold fs-5"></span></span>
-                        <div th:if="${extraImages != null and !extraImages.isEmpty()}">
-                            <hr style="border-color: #ffc107; margin: 5px 0;">
-                            <span class="debug-item">List ảnh phụ:</span>
-                            <div th:each="img : ${extraImages}">
-                                + ID: <span th:text="${img.id}"></span> | Raw: <span th:text="${img.image}" class="text-white"></span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="col-lg-6 d-flex flex-column justify-content-center">

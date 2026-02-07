@@ -97,7 +97,7 @@
             Đơn hàng của bạn đang được hệ thống xử lý.
         </p>
 
-        <div class="d-flex justify-content-center gap-3">
+        <div class="d-flex justify-content-center gap-3 mb-4">
             <a href="/" class="btn btn-home text-decoration-none">
                 <i class="bi bi-house"></i> Trang chủ
             </a>
@@ -105,7 +105,28 @@
                 <i class="bi bi-box-seam"></i> Đơn hàng
             </a>
         </div>
+
+        <p class="small text-secondary fst-italic mb-0">
+            Tự động quay về trang chủ sau <span id="countdown" class="text-info fw-bold">10</span> giây...
+        </p>
     </div>
+
+    <script>
+        // Thời gian đếm ngược (giây)
+        let seconds = 10;
+        const countdownElement = document.getElementById('countdown');
+
+        const timer = setInterval(() => {
+            seconds--;
+            countdownElement.textContent = seconds;
+
+            if (seconds <= 0) {
+                clearInterval(timer);
+                // Chuyển hướng về trang chủ ('/') hoặc trang đơn hàng ('/orders')
+                window.location.href = '/'; 
+            }
+        }, 1000);
+    </script>
 
 </body>
 </html>
