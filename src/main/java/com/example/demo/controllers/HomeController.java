@@ -2,11 +2,12 @@ package com.example.demo.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Products;
@@ -26,40 +27,35 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model, HttpSession session) {
-
-        // ================= 1. XỬ LÝ USER LOGIN =================
+        // Xử lý login
         Account user = (Account) session.getAttribute("loggedInUser");
-        if (user != null) {
-            model.addAttribute("isLoggedIn", true);
-            model.addAttribute("user", user);
-        } else {
-            model.addAttribute("isLoggedIn", false);
-        }
-
-        // ================= 2. LẤY DANH MỤC =================
+        model.addAttribute("isLoggedIn", user != null);
+        
+        // Danh mục
         model.addAttribute("categories", categoryRepo.findAll());
 
-        // ================= 3. SẢN PHẨM MỚI NHẤT (TOP 5) =================
-        // Dùng hàm có sẵn trong Repo của bạn: Lấy 5 sản phẩm mới tạo gần đây nhất
-        // Thích hợp để hiển thị ở Banner hoặc Slider đầu trang
-        List<Products> top5Newest = productsRepo.findTop5ByOrderByCreatedDateDesc();
-        model.addAttribute("featuredProducts", top5Newest);
-
-        // ================= 4. DANH SÁCH SẢN PHẨM (Lấy 8 cái) =================
-        // Vì Repo của bạn chỉ có findAllByOrderByIdDesc() (lấy tất cả giảm dần theo ID)
-        // Nên ta lấy hết về, sau đó dùng Java cắt lấy 8 cái đầu tiên
-
+        // Sản phẩm mới nhất (Top 8)
         List<Products> allProducts = productsRepo.findAllByOrderByIdDesc();
-        List<Products> latest8Products = new ArrayList<>();
-
-        if (allProducts.size() > 8) {
-            latest8Products = allProducts.subList(0, 8);
-        } else {
-            latest8Products = allProducts;
-        }
-
+        List<Products> latest8Products = allProducts.size() > 8 ? allProducts.subList(0, 8) : allProducts;
         model.addAttribute("latestProducts", latest8Products);
 
         return "client/index";
+    }
+
+    @GetMapping("/api/products/search")
+    @ResponseBody
+    public List<Products> searchProducts(@RequestParam("keyword") String keyword) {
+        // Nếu keyword rỗng hoặc quá ngắn thì không tìm để tránh nặng máy
+        if (keyword == null || keyword.trim().length() < 1) {
+            return new ArrayList<>();
+        }
+
+        // Lấy TẤT CẢ các sản phẩm thỏa mãn điều kiện
+        List<Products> list = productsRepo.findByNameContainingIgnoreCase(keyword);
+        
+        // Bạn có thể log ra console để kiểm tra xem Server đã lấy đúng chưa
+        System.out.println("Tìm thấy: " + list.size() + " sản phẩm cho từ khóa: " + keyword);
+        
+        return list; 
     }
 }

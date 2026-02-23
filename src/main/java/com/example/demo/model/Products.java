@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,7 +42,7 @@ public class Products {
     private String name;
 
     @Column(columnDefinition = "nvarchar(255)")
-    private String image; // ảnh đại diện
+    private String image;
 
     @Min(value = 50000, message = "Giá phải lớn hơn 50000")
     private int price;
@@ -50,18 +52,20 @@ public class Products {
 
     private boolean available;
 
+    // 🔥 Chặn vòng lặp JSON
     @ManyToOne
     @JoinColumn(name = "categoryId")
+    @JsonIgnore
     private Category category;
 
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
 
-    // ✅ ẢNH PHỤ
+    // 🔥 Chặn vòng lặp JSON
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
 
-    // ✅ BẮT BUỘC THÊM HÀM NÀY
     public void addImage(ProductImage img) {
         images.add(img);
         img.setProduct(this);
