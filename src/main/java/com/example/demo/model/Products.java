@@ -45,6 +45,12 @@ public class Products {
     @Min(value = 50000, message = "Giá phải lớn hơn 50000")
     private int price;
 
+    // ✅ MỚI THÊM: CỘT SỐ LƯỢNG
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
+    // Thêm columnDefinition = "int default 0" để SQL Server tự điền số 0 cho dữ liệu cũ
+    @Column(nullable = false, columnDefinition = "int default 0") 
+    private Integer quantity = 0;
+
     @Temporal(TemporalType.DATE)
     private Date createdDate;
 
@@ -59,7 +65,6 @@ public class Products {
     
     @Column
     private Double weight; // kg
-
 
     // ✅ ẢNH PHỤ
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

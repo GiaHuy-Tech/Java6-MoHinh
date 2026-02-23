@@ -51,6 +51,11 @@ public class ProductManaController {
         if (product.getWeight() == null || product.getWeight() <= 0) {
             product.setWeight(0.5);
         }
+        
+        // ✅ Kiểm tra quantity, nếu null thì set về 0 (đề phòng lỗi)
+        if (product.getQuantity() == null) {
+            product.setQuantity(0);
+        }
 
         Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
         if (!Files.exists(uploadPath)) {
@@ -103,8 +108,10 @@ public class ProductManaController {
         Products old = productRepo.findById(product.getId()).orElse(null);
         if (old == null) return "redirect:/product-mana";
 
+        // ✅ Cập nhật các trường thông tin
         old.setName(product.getName());
         old.setPrice(product.getPrice());
+        old.setQuantity(product.getQuantity()); // <-- Cập nhật số lượng
         old.setAvailable(product.isAvailable());
         old.setCategory(product.getCategory());
         old.setDescription(product.getDescription());
