@@ -314,7 +314,8 @@
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-3 col-md-4 col-sm-6" th:each="prod : ${latestProducts}">
+        <div class="col-lg-3 col-md-4 col-sm-6" th:each="prod : ${latestProducts}" 
+             th:if="${prod.quantity != null and prod.quantity > 10}">
             <div class="product-card">
                 <div class="product-img-box">
                     <a th:href="@{'/product-detail/' + ${prod.id}}">
