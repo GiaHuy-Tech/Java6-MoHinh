@@ -1,7 +1,8 @@
 package com.example.demo.repository;
 
 import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.demo.model.Products;
 
@@ -21,9 +22,17 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
 	List<Products> findAllByOrderByPriceDesc();
 
 	List<Products> findAllByOrderByIdDesc();
-	
+
 	List<Products> findByNameContainingIgnoreCase(String name);
-	
-    List<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name);
+
+	List<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name);
+
+	Page<Products> findByAvailableTrue(Pageable pageable);
+
+	Page<Products> findByCategoryId(Integer categoryId, Pageable pageable);
+
+	Page<Products> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+	Page<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name, Pageable pageable);
 
 }

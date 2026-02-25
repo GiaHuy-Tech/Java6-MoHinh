@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Account;
+import com.example.demo.model.Address;
 import com.example.demo.repository.AccountRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -50,7 +51,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             String name = oAuth2User.getAttribute("name");
             account.setFullName(name != null ? name : email);
             
-            account.setAddress("Chưa cập nhật");
+            Address address = new Address();
+            address.setFullName(account.getFullName());
+            address.setPhone("0000000000");
+            address.setStreet("Chưa cập nhật");
+            address.setCity("Chưa cập nhật");
+            address.setIsDefault(true);
+            address.setAccount(account);
+
+            account.setAddresses(List.of(address));;
             account.setPhone("0000000000");
             account.setGender(false); // false = nữ
 

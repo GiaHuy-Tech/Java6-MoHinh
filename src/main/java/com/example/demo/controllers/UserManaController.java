@@ -52,7 +52,6 @@ public class UserManaController {
 			acc.setFullName(formAcc.getFullName());
 			acc.setEmail(formAcc.getEmail());
 			acc.setPhone(formAcc.getPhone());
-			acc.setAddress(formAcc.getAddress());
 
 			repo.save(acc);
 			return "redirect:/user-mana";
