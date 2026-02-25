@@ -3,6 +3,11 @@ package com.example.demo.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+<<<<<<< Updated upstream
+=======
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+>>>>>>> Stashed changes
 import com.example.demo.model.Products;
 
 public interface ProductRepository extends JpaRepository<Products, Integer> {
@@ -23,7 +28,20 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
 	List<Products> findAllByOrderByIdDesc();
 	
 	List<Products> findByNameContainingIgnoreCase(String name);
+<<<<<<< Updated upstream
 	
     List<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name);
+=======
+
+	List<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name);
+>>>>>>> Stashed changes
+
+	Page<Products> findByAvailableTrue(Pageable pageable);
+
+	Page<Products> findByCategoryId(Integer categoryId, Pageable pageable);
+
+	Page<Products> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+	Page<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name, Pageable pageable);
 
 }
