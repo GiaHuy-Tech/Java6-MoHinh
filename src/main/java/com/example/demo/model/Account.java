@@ -1,14 +1,17 @@
 package com.example.demo.model;
 
-import java.util.Date; 
+import java.util.Date;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -46,11 +49,6 @@ public class Account {
     @Size(max = 100, message = "Họ tên không vượt quá 100 ký tự")
     String fullName;
 
-    @NotBlank(message = "Địa chỉ không được để trống")
-    @Column(columnDefinition = "nvarchar(255)")
-    @Size(max = 255, message = "Địa chỉ không vượt quá 255 ký tự")
-    String address;
-
     @Column(columnDefinition = "nvarchar(255)")
     String photo;
 
@@ -69,4 +67,7 @@ public class Account {
     Boolean actived;
 
     Boolean role;
+    
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
 }

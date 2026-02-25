@@ -9,13 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes; // ✅ thêm import này
 
 import com.example.demo.model.Account;
+import com.example.demo.model.Address;
 import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.AddressRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -24,6 +27,9 @@ public class AccountController {
 
 	@Autowired
 	private AccountRepository accountRepo;
+	
+	@Autowired
+    private AddressRepository addressRepo;
 
 	@Autowired
 	private HttpSession session;
@@ -31,14 +37,17 @@ public class AccountController {
 	// Trang thông tin tài khoản
 	@GetMapping("/account")
 	public String accountPage(Model model) {
-		Account acc = (Account) session.getAttribute("account");
-		if (acc == null) {
-			return "redirect:/login";
-		}
-		model.addAttribute("account", acc);
-		return "client/account";
-	}
+	    Account acc = (Account) session.getAttribute("account");
+	    if (acc == null) {
+	        return "redirect:/login";
+	    }
+	    model.addAttribute("account", acc);
+	    model.addAttribute("addresses", addressRepo.findByAccountId(acc.getId()));
+	    model.addAttribute("newAddress", new Address());
 
+	    return "client/account";
+	}
+	
 	@PostMapping("/account/update-fullname")
 	public String updateFullName(@RequestParam("fullName") String fullName, Model model, RedirectAttributes redirect) {
 		Account acc = (Account) session.getAttribute("account");
@@ -98,23 +107,42 @@ public class AccountController {
 		redirect.addFlashAttribute("success", "✅ Cập nhật số điện thoại thành công!");
 		return "redirect:/account";
 	}
+	
+	@PostMapping("/account/add-address")
+	public String addAddress(@RequestParam("detail") String detail,
+	                         RedirectAttributes redirect) {
 
-	@PostMapping("/account/update-address")
-	public String updateAddress(@RequestParam("address") String address, Model model, RedirectAttributes redirect) {
-		Account acc = (Account) session.getAttribute("account");
-		if (acc == null)
-			return "redirect:/login";
+	    Account acc = (Account) session.getAttribute("account");
+	    if (acc == null) return "redirect:/login";
 
-		if (address == null || address.trim().isEmpty()) {
-			redirect.addFlashAttribute("error", "❌ Địa chỉ không được để trống!");
-			return "redirect:/account";
-		}
+	    if (detail == null || detail.trim().isEmpty()) {
+	        redirect.addFlashAttribute("error", "❌ Địa chỉ không được để trống!");
+	        return "redirect:/account";
+	    }
 
-		acc.setAddress(address.trim());
-		accountRepo.save(acc);
-		session.setAttribute("account", acc);
-		redirect.addFlashAttribute("success", "✅ Cập nhật địa chỉ thành công!");
-		return "redirect:/account";
+	    // Giới hạn tối đa 4 địa chỉ
+	    if (addressRepo.findByAccountId(acc.getId()).size() >= 4) {
+	        redirect.addFlashAttribute("error", "⚠️ Chỉ được tối đa 4 địa chỉ!");
+	        return "redirect:/account";
+	    }
+
+	    Address address = new Address();
+	    address.setDetail(detail.trim());
+	    address.setAccount(acc);
+
+	    addressRepo.save(address);
+
+	    redirect.addFlashAttribute("success", "✅ Thêm địa chỉ thành công!");
+	    return "redirect:/account";
+	}
+	
+	@GetMapping("/account/delete-address/{id}")
+	public String deleteAddress(@PathVariable("id") Integer id,
+	                            RedirectAttributes redirect) {
+
+	    addressRepo.deleteById(id);
+	    redirect.addFlashAttribute("success", "🗑 Đã xóa địa chỉ!");
+	    return "redirect:/account";
 	}
 
 	@PostMapping("/account/update-password")
