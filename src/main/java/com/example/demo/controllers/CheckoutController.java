@@ -2,7 +2,10 @@ package com.example.demo.controllers;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
-import com.example.demo.service.GhnShippingService;
+import com.example.demo.service.LocalShippingService;
 import com.example.demo.service.MembershipService;
 
 import jakarta.servlet.http.HttpSession;
@@ -27,7 +30,7 @@ public class CheckoutController {
     @Autowired private AccountRepository accountRepo;
 
     @Autowired private MembershipService membershipService;
-    @Autowired private GhnShippingService ghnShippingService;
+    @Autowired private LocalShippingService localShippingService;
 
     // ===================== VIEW CHECKOUT =====================
     @GetMapping
@@ -41,20 +44,37 @@ public class CheckoutController {
 
         if (cartDetails.isEmpty()) return "redirect:/cart";
 
-        // 1️⃣ Tổng tiền hàng
+        // ===== 1️⃣ Tổng tiền hàng =====
         int subTotal = cartDetails.stream()
                 .mapToInt(cd -> cd.getPrice() * cd.getQuantity())
                 .sum();
 
-        // 2️⃣ TÍNH PHÍ SHIP GHN
-        int shippingFee = ghnShippingService.tinhPhiTuCart(account, cartDetails);
+        // ===== 2️⃣ Tổng cân nặng (gram) =====
+        int totalWeight = cartDetails.stream()
+                .mapToInt(cd -> {
+                    Double kg = cd.getProduct().getWeight();
+                    if (kg == null) return 0;
+                    return (int) Math.ceil(kg * 1000) * cd.getQuantity();
+                }).sum();
 
-        // 3️⃣ Giảm giá theo hạng thành viên
+        // ===== 3️⃣ GIẢ LẬP TỌA ĐỘ KHÁCH (ĐỔI THEO TỈNH) =====
+        double customerLat = 10.762622;   // TP.HCM demo
+        double customerLng = 106.660172;
+
+        // ===== 4️⃣ TÍNH SHIP =====
+        int shippingFee = localShippingService.calculateShipping(
+                customerLat,
+                customerLng,
+                totalWeight,
+                subTotal,
+                false
+        );
+
+        // ===== 5️⃣ Giảm giá thành viên =====
         int discountPercent =
                 membershipService.getDiscountPercent(account.getMembershipLevel());
         int discountAmount = subTotal * discountPercent / 100;
 
-        // 4️⃣ Tổng cuối
         int total = subTotal - discountAmount + shippingFee;
 
         model.addAttribute("cartDetails", cartDetails);
@@ -86,15 +106,34 @@ public class CheckoutController {
 
         if (cartDetails.isEmpty()) return "redirect:/cart";
 
-        // 1️⃣ Tổng tiền hàng
+        // ===== 1️⃣ Tổng tiền =====
         int subTotal = cartDetails.stream()
                 .mapToInt(cd -> cd.getPrice() * cd.getQuantity())
                 .sum();
 
-        // 2️⃣ TÍNH SHIP GHN (SERVER-SIDE – KHÔNG TIN FRONTEND)
-        int shippingFee = ghnShippingService.tinhPhiTuCart(account, cartDetails);
+        // ===== 2️⃣ Tổng cân nặng =====
+        int totalWeight = cartDetails.stream()
+                .mapToInt(cd -> {
+                    Double kg = cd.getProduct().getWeight();
+                    if (kg == null) return 0;
+                    return (int) Math.ceil(kg * 1000) * cd.getQuantity();
+                }).sum();
 
-        // 3️⃣ Giảm giá thành viên
+        // ===== 3️⃣ Tọa độ khách =====
+        double customerLat = 10.762622;
+        double customerLng = 106.660172;
+
+        boolean isCOD = "COD".equals(paymentMethod);
+
+        int shippingFee = localShippingService.calculateShipping(
+                customerLat,
+                customerLng,
+                totalWeight,
+                subTotal,
+                isCOD
+        );
+
+        // ===== 4️⃣ Giảm giá =====
         int discountPercent =
                 membershipService.getDiscountPercent(account.getMembershipLevel());
         int discountAmount = subTotal * discountPercent / 100;
@@ -131,91 +170,14 @@ public class CheckoutController {
         orderDetailRepo.saveAll(orderDetails);
         cartDetailRepo.deleteAll(cartDetails);
 
-        // ===================== THANH TOÁN =====================
-        if ("COD".equals(paymentMethod)) {
+        // ===== COD =====
+        if (isCOD) {
             updateMembershipSpending(account, finalTotal);
             return "redirect:/orders";
         }
 
         session.setAttribute("pendingOrderId", savedOrder.getId());
         return "redirect:/checkout/payment";
-    }
-
-    // ===================== VIEW QR PAYMENT =====================
-    @GetMapping("/payment")
-    public String viewPaymentQR(Model model) {
-
-        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-        if (orderId == null) return "redirect:/cart";
-
-        Orders order = orderRepo.findById(orderId).orElse(null);
-        if (order == null) return "redirect:/cart";
-
-        if (Boolean.TRUE.equals(order.getPaymentStatus()))
-            return "redirect:/orders";
-
-        String bankId = "ICB";
-        String accountNo = "103878028110";
-        String accountName = "NGUYEN GIA HUY";
-
-        String qrUrl = "";
-        if ("VIETQR".equals(order.getPaymentMethod())) {
-            qrUrl = String.format(
-                    "https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s",
-                    bankId,
-                    accountNo,
-                    order.getTotal(),
-                    order.getNote(),
-                    URLEncoder.encode(accountName, StandardCharsets.UTF_8)
-            );
-        }
-
-        model.addAttribute("qrUrl", qrUrl);
-        model.addAttribute("total", order.getTotal());
-        model.addAttribute("content", order.getNote());
-        model.addAttribute("accountNo", accountNo);
-        model.addAttribute("accountName", accountName);
-
-        return "client/payment-qr";
-    }
-
-    // ===================== CHECK STATUS (AJAX) =====================
-    @GetMapping("/check-status")
-    @ResponseBody
-    public Map<String, Boolean> checkOrderStatus() {
-
-        Map<String, Boolean> res = new HashMap<>();
-        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-
-        if (orderId != null) {
-            Orders order = orderRepo.findById(orderId).orElse(null);
-            if (order != null && Boolean.TRUE.equals(order.getPaymentStatus())) {
-                res.put("paid", true);
-                return res;
-            }
-        }
-        res.put("paid", false);
-        return res;
-    }
-
-    // ===================== CONFIRM PAYMENT =====================
-    @PostMapping("/confirm-payment")
-    public String confirmPaymentManual() {
-
-        Integer orderId = (Integer) session.getAttribute("pendingOrderId");
-        if (orderId == null) return "redirect:/orders";
-
-        Orders order = orderRepo.findById(orderId).orElse(null);
-        if (order != null) {
-            order.setPaymentStatus(true);
-            order.setStatus(1);
-            orderRepo.save(order);
-
-            updateMembershipSpending(order.getAccountId(), order.getTotal());
-        }
-
-        session.removeAttribute("pendingOrderId");
-        return "redirect:/orders";
     }
 
     // ===================== UPDATE MEMBERSHIP =====================
