@@ -80,21 +80,27 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public
                         .requestMatchers("/", "/login", "/register", "/forgot",
-                                "/css/**", "/js/**", "/images/**", "/uploads/**", "/vendor/**").permitAll()
+                                "/css/**", "/js/**", "/images/**", "/uploads/**", "/vendor/**")
+                        .permitAll()
 
-                        // USER & ADMIN can access user pages
-                        .requestMatchers("/account/**", "/cart/**", "/checkout/**").hasAnyRole("USER", "ADMIN")
+                        // ✅ VNPay CALLBACK (BẮT BUỘC)
+                        .requestMatchers("/checkout/vnpay-return").permitAll()
+
+                        // USER & ADMIN
+                        .requestMatchers("/account/**", "/cart/**", "/checkout/**")
+                        .hasAnyRole("USER", "ADMIN")
 
                         // ADMIN only
                         .requestMatchers("/stats/**",
                                 "/product-mana/**",
                                 "/admin/cart/**",
                                 "/user-mana/**",
-                                "/cata-mana/**").hasRole("ADMIN")
+                                "/cata-mana/**")
+                        .hasRole("ADMIN")
 
-                        // Other pages require login
                         .anyRequest().authenticated()
                 )
+
                 // Thêm JwtFilter trước UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
 

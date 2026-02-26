@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,18 +42,26 @@ public class Products {
     private String name;
 
     @Column(columnDefinition = "nvarchar(255)")
-    private String image; // ảnh đại diện
+    private String image;
 
     @Min(value = 50000, message = "Giá phải lớn hơn 50000")
     private int price;
+
+    // ✅ MỚI THÊM: CỘT SỐ LƯỢNG
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
+    // Thêm columnDefinition = "int default 0" để SQL Server tự điền số 0 cho dữ liệu cũ
+    @Column(nullable = false, columnDefinition = "int default 0") 
+    private Integer quantity = 0;
 
     @Temporal(TemporalType.DATE)
     private Date createdDate;
 
     private boolean available;
 
+    // 🔥 Chặn vòng lặp JSON
     @ManyToOne
     @JoinColumn(name = "categoryId")
+    @JsonIgnore
     private Category category;
 
     @Column(columnDefinition = "nvarchar(MAX)")
@@ -60,12 +70,11 @@ public class Products {
     @Column
     private Double weight; // kg
 
-
-    // ✅ ẢNH PHỤ
+    // 🔥 Chặn vòng lặp JSON
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
 
-    // ✅ BẮT BUỘC THÊM HÀM NÀY
     public void addImage(ProductImage img) {
         images.add(img);
         img.setProduct(this);
