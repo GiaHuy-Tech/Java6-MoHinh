@@ -1,41 +1,30 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import java.io.Serializable;
+import java.util.Date;
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+@SuppressWarnings("serial")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "cart_detail")
-public class CartDetail {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
-//
-    @ManyToOne
-    @JoinColumn(name = "cartId")
-    @NotNull(message = "Chi tiết giỏ hàng phải thuộc về một giỏ hàng")
-    Cart cart;
+public class CartDetail implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name = "productId")
-    @NotNull(message = "Sản phẩm không được để trống")
-    Products product;
+	private Integer quantity;
 
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
-    int quantity;
+	@Column(name = "createdate")
+	@Temporal(TemporalType.DATE)
+	private Date createDate;
 
-    @Min(value = 0, message = "Đơn giá không hợp lệ")
-    int price;
+	@ManyToOne
+	@JoinColumn(name = "account_id")
+	private Account account;
+
+	@ManyToOne
+	@JoinColumn(name = "product_id")
+	private Products product;
 }

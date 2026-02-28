@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -9,6 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -44,6 +48,8 @@ public class Account {
     @Size(max = 100, message = "Họ tên không vượt quá 100 ký tự")
     String fullName;
 
+    // Nếu bạn dùng bảng Address riêng (OneToMany) thì nên bỏ dòng String address này đi 
+    // hoặc giữ lại làm địa chỉ chính tùy logic
     @NotBlank(message = "Địa chỉ không được để trống")
     @Column(columnDefinition = "nvarchar(255)")
     @Size(max = 255, message = "Địa chỉ không vượt quá 255 ký tự")
@@ -59,20 +65,42 @@ public class Account {
     @NotNull(message = "Giới tính không được để trống")
     Boolean gender;
 
-    // --- SỬA CHỖ NÀY: birthday -> birthDay (chữ D hoa) ---
     @NotNull(message = "Ngày sinh không được để trống")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Ngày sinh phải là trong quá khứ")
     @Column(name = "BirthDay")
-    LocalDate birthDay; // <--- Đổi tên biến ở đây để khớp với th:field="*{birthDay}"
+    LocalDate birthDay;
 
-    // --- CÁC TRƯỜNG MỚI ---
     @Column(columnDefinition = "bigint default 0")
     Long totalSpending = 0L;
 
-    @Column(columnDefinition = "nvarchar(50) default 'Đồng'")
-    String membershipLevel = "Đồng";
-
     Boolean actived;
     Boolean role;
+
+    // =================================================================
+    // PHẦN QUAN TRỌNG: THÊM VÀO ĐỂ SỬA LỖI MAPPED BY
+    // =================================================================
+    
+    @ManyToOne
+    @JoinColumn(name = "membership_id")
+    private Membership membership; 
+    // Lưu ý: Tên biến phải là "membership" thì bên Membership.java mới mappedBy="membership" được
+
+    // Nếu bạn muốn lấy tên hạng (Ví dụ: "Đồng"), hãy dùng: account.getMembership().getName()
+    // Dòng dưới đây nên bỏ đi để tránh dư thừa dữ liệu:
+    // @Column(columnDefinition = "nvarchar(50) default 'Đồng'")
+    // String membershipLevel = "Đồng";
+
+    
+    // =================================================================
+    // CÁC QUAN HỆ KHÁC THEO ERD (Thêm vào để đầy đủ model)
+    // =================================================================
+    
+    // Nếu bạn có Entity CartDetail
+    @OneToMany(mappedBy = "account")
+    private List<CartDetail> cartDetails;
+
+    // Nếu bạn có Entity Order (nhớ import Order model của bạn, cẩn thận trùng với sql Order)
+    // @OneToMany(mappedBy = "account")
+    // private List<Order> orders;
 }

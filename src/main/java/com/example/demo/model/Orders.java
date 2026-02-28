@@ -1,58 +1,55 @@
 package com.example.demo.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.format.annotation.DateTimeFormat;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+@SuppressWarnings("serial")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "orders")
-public class Orders {
+public class Orders implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id; // Đã khớp Integer
+    private Integer id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    Date createdDate;
+    @Column(name = "created_date")
+    private Date createdDate;
 
-    @Column(columnDefinition = "nvarchar(255)")
-    String address;
-
-    int total;
-    int status;
-    int feeship;
-    String paymentMethod;
-    Boolean paymentStatus;
-    String phone;
-
-    // --- THÊM TRƯỜNG NÀY ĐỂ CHẠY SEPAY ---
-    @Column(name = "note")
-    private String note; // Chứa mã đơn hàng (VD: DH17150022...)
-    // --------------------------------------
+    private Double feeship;
+    
+    @Column(columnDefinition = "nvarchar(500)")
+    private String note;
+    
+    @Column(name = "payment_method")
+    private String paymentMethod;
+    
+    @Column(name = "payment_status")
+    private Boolean paymentStatus; // true: đã thanh toán
+    
+    private String phone;
+    private Integer status; // 0: Chờ, 1: Xác nhận, 2: Giao, 3: Hoàn tất, 4: Hủy
+    
+    @Column(name = "voucher_code")
+    private String voucherCode;
+    
+    @Column(name = "money_discounted")
+    private Double moneyDiscounted;
+    
+    private Double total;
 
     @ManyToOne
-    @JoinColumn(name = "accountId")
-    Account accountId; // Lưu ý tên biến này là accountId
+    @JoinColumn(name = "account_id")
+    private Account account;
+    
+    // Liên kết với bảng Address để biết giao đến đâu
+    @ManyToOne
+    @JoinColumn(name = "address_id") 
+    private Address address;
 
-    @OneToMany(mappedBy = "orders")
-    List<OrderDetail> orderDetails;
+    @OneToMany(mappedBy = "order")
+    private List<OrderDetail> orderDetails;
 }
