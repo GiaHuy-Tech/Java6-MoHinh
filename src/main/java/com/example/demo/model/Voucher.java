@@ -51,7 +51,5 @@ public class Voucher {
     // --- THÊM PHẦN NÀY ---
     // Nếu account null -> Ai dùng cũng được (Voucher chung)
     // Nếu account có dữ liệu -> Chỉ người này được dùng
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    Account account;
+ 
 }

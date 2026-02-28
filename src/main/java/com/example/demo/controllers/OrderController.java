@@ -1,6 +1,6 @@
 package com.example.demo.controllers;
 
-import java.util.List;
+import java.util.List; 
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
 import com.example.demo.model.OrderDetail; // MỚI THÊM: Để lấy chi tiết đơn
-import com.example.demo.model.Product;     // MỚI THÊM: Để lấy thông tin sản phẩm
+import com.example.demo.model.Products;     // MỚI THÊM: Để lấy thông tin sản phẩm
 import com.example.demo.repository.OrdersRepository;
 import com.example.demo.repository.ProductRepository; // MỚI THÊM: Để cập nhật kho
 

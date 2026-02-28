@@ -35,10 +35,6 @@ public class VoucherDetail {
     @JoinColumn(name = "vouchers_id")
     private Voucher voucher;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Orders order;
-
     @Column(name = "is_used")
     private Boolean isUsed;
 
@@ -51,4 +47,6 @@ public class VoucherDetail {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "received_at")
     private Date receivedAt;
+    
+
 }
