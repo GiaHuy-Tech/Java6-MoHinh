@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
 <style>
-/* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
 :root {
     --bg-dark: #050b14;
     --bg-card: #0c1525;
@@ -19,411 +18,290 @@
     --neon-pink: #ff007f;
     --neon-green: #00ff7f;
     --border-color: rgba(0, 242, 255, 0.2);
-    --font-main: "Be Vietnam Pro", sans-serif;
-    --font-display: "Orbitron", sans-serif;
 }
 
 body {
-    background: 
-        linear-gradient(135deg, var(--bg-dark), #1a0033),
-        url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
+    background: linear-gradient(135deg, var(--bg-dark), #1a0033);
     color: var(--text-light);
     min-height: 100vh;
-    font-family: var(--font-main);
-    overflow-x: hidden;
+    font-family: "Be Vietnam Pro", sans-serif;
 }
 
-/* TYPOGRAPHY */
-h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
-.navbar-brand { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px; }
-.text-neon { color: var(--accent-cyan) !important; }
-
-/* NAVBAR */
 .navbar {
     background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
     border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); 
-}
-.navbar .nav-link { 
-    color: var(--accent-cyan) !important; 
-    transition: 0.3s; font-weight: 500;
-}
-.navbar .nav-link:hover {
-    color: var(--text-light) !important;
-    text-shadow: 0 0 8px var(--accent-cyan);
 }
 
-/* CARD & TABLE */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
+
 .card-header {
     background: rgba(0, 242, 255, 0.05);
     border-bottom: 1px solid var(--border-color);
-    font-family: var(--font-display);
     color: var(--accent-cyan);
     font-weight: 700;
 }
+
 .table { --bs-table-bg: transparent; --bs-table-color: var(--text-light); }
 .table thead { background-color: var(--bg-dark); }
-.table th { color: var(--accent-cyan); border-bottom: 1px solid var(--border-color); }
-.table td { border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
-.table-hover tbody tr:hover { background-color: rgba(0,242,255,0.1) !important; }
+.table th { color: var(--accent-cyan); }
 
-/* FORM ELEMENTS */
-.form-control, .form-select {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-    color: var(--text-light) !important;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+img.thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
 }
-.form-control:focus, .form-select:focus {
-    border-color: var(--accent-cyan);
-    box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
-}
-.form-label { color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem;}
 
-/* BUTTONS */
-.btn-neon-action {
-    background: transparent;
-    border: 1px solid var(--accent-cyan);
-    color: var(--accent-cyan);
-    font-weight: 600;
-    transition: 0.3s;
+.text-danger-glow {
+    color: var(--neon-pink) !important;
+    font-weight: bold;
 }
-.btn-neon-action:hover {
-    background: var(--accent-cyan);
-    color: #000;
-    box-shadow: 0 0 15px var(--accent-cyan);
-}
-.btn-neon-edit {
-    color: var(--accent-cyan);
-    border: 1px solid var(--accent-cyan);
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-}
-.btn-neon-edit:hover { background: var(--accent-cyan); color: #000; }
 
-/* UTILS */
-img.thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); }
-.text-danger-glow { color: var(--neon-pink) !important; text-shadow: 0 0 5px rgba(255, 0, 127, 0.5); font-weight: bold; }
 .badge.bg-success { background-color: var(--neon-green) !important; color: #000; }
 .badge.bg-danger { background-color: var(--neon-pink) !important; color: #000; }
-
-/* POPUP STYLE */
-.popup-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.8); z-index: 9999;
-    display: flex; justify-content: center; align-items: center;
-    backdrop-filter: blur(5px);
-}
-.popup-content {
-    background: var(--bg-card);
-    border: 1px solid var(--neon-pink);
-    width: 450px; padding: 30px; border-radius: 12px;
-    text-align: center; color: var(--text-light);
-    box-shadow: 0 0 30px rgba(255, 0, 127, 0.3);
-    animation: popupFadeIn 0.3s ease-out;
-}
-@keyframes popupFadeIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.popup-icon-circle {
-    width: 70px; height: 70px; border: 3px solid var(--neon-pink); border-radius: 50%;
-    margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
-}
-.popup-icon-circle i { font-size: 35px; color: var(--neon-pink); }
-.btn-popup-primary {
-    background: var(--neon-pink); color: #fff; border: none;
-    padding: 8px 25px; border-radius: 6px; font-weight: 600;
-}
 </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
+<nav class="navbar navbar-expand-lg px-4 py-3">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/stats}"> 
-        <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
-        <span class="fw-bold fs-4 text-white">MODEL WORLD</span>
+    <a class="navbar-brand text-white fw-bold" th:href="@{/stats}">
+        MODEL WORLD
     </a>
-    <div class="collapse navbar-collapse justify-content-end">
-      <ul class="navbar-nav me-3">
-        <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
-      </ul>
-    </div>
   </div>
 </nav>
 
+<!-- POPUP LOW STOCK -->
 <th:block th:with="lowStockList=${list.?[quantity < 10]}">
-    <div th:if="${not #lists.isEmpty(lowStockList) and product.id == null}" id="stockPopup" class="popup-overlay">
-        <div class="popup-content">
-            <div class="popup-icon-circle"><i class="bi bi-exclamation-lg"></i></div>
-            <h4 class="mb-3" style="font-family: 'Orbitron'">CẢNH BÁO KHO!</h4>
-            <div class="mb-4">
-                Có <strong th:text="${#lists.size(lowStockList)}" style="color: var(--neon-pink)"></strong> sản phẩm số lượng dưới 10.<br>
-                <div class="mt-3 text-start p-2 rounded" style="background: rgba(0,0,0,0.5); max-height: 120px; overflow-y: auto;">
-                    <div th:each="p : ${lowStockList}" class="border-bottom border-secondary py-1 d-flex justify-content-between">
-                        <span th:text="${p.name}"></span>
-                        <span class="badge bg-danger" th:text="'SL: ' + ${p.quantity}"></span>
-                    </div>
+    <div th:if="${not #lists.isEmpty(lowStockList) and product.id == null}" 
+         id="stockPopup" 
+         style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;">
+
+        <div style="background:#111;padding:30px;border-radius:10px;width:400px;text-align:center;">
+            <h4 style="color:#ff007f;">CẢNH BÁO KHO</h4>
+            <p>Có <b th:text="${#lists.size(lowStockList)}"></b> sản phẩm dưới 10</p>
+            <div style="max-height:150px;overflow-y:auto;text-align:left;">
+                <div th:each="p:${lowStockList}" class="d-flex justify-content-between border-bottom py-1">
+                    <span th:text="${p.name}"></span>
+                    <span class="badge bg-danger" th:text="${p.quantity}"></span>
                 </div>
             </div>
-            <div class="d-flex justify-content-center gap-2">
-                <button type="button" class="btn-popup-primary" onclick="closePopup()">Đã hiểu</button>
-            </div>
+            <button class="btn btn-danger mt-3" onclick="document.getElementById('stockPopup').style.display='none'">
+                Đã hiểu
+            </button>
         </div>
     </div>
 </th:block>
 
 <div class="container py-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="text-neon mb-0"><i class="bi bi-box-seam"></i> QUẢN LÝ SẢN PHẨM</h2>
-        <a th:href="@{/stats}" class="btn btn-neon-action"><i class="bi bi-arrow-left-circle me-1"></i> Về menu Admin</a>
-    </div>
 
-    <div class="card mb-5">
-        <div class="card-header"><i class="bi bi-list-ul me-2"></i> Danh sách sản phẩm</div>
-        <div class="card-body p-0 table-responsive">
-            <table class="table table-hover text-center align-middle mb-0">
-                <thead>
-                    <tr class="text-uppercase small">
-                        <th>ID</th>
-                        <th>Ảnh</th>
-                        <th class="text-start">Tên sản phẩm</th>
-                        <th>Giá bán</th>
-                        <th>Tồn kho</th> 
-                        <th>Cân nặng</th>
-                        <th>Danh mục</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="p : ${list}">
-                        <td th:text="${p.id}" class="text-muted"></td>
-                        <td>
-                            <img th:src="@{${p.image != null ? p.image : '/images/no-image.png'}}" class="thumb">
-                        </td>
-                        <td class="text-start">
-                            <div th:text="${p.name}" class="fw-bold text-light"></div>
-                            <small class="text-muted" th:if="${p.description != null}" 
-                                   th:text="${#strings.abbreviate(p.description, 40)}"></small>
-                        </td>
-                        <td th:text="${#numbers.formatInteger(p.price,0,'POINT')} + ' ₫'" class="text-neon fw-bold"></td>
-                        
-                        <td class="fw-bold">
-                            <span th:if="${p.quantity < 10}" class="text-danger-glow">
-                                <i class="bi bi-lightning-fill"></i> <span th:text="${p.quantity}"></span>
-                            </span>
-                            <span th:unless="${p.quantity < 10}" th:text="${p.quantity}"></span>
-                        </td>
+<h2 class="mb-4 text-info">QUẢN LÝ SẢN PHẨM</h2>
 
-                        <td th:text="${p.weight} + ' kg'"></td>
-                        <td><span class="badge bg-secondary bg-opacity-25 border border-secondary" th:text="${p.category != null ? p.category.name : '---'}"></span></td>
-                        
-                        <td>
-                            <span th:if="${p.quantity > 0}" class="badge bg-success bg-opacity-75">Còn hàng</span>
-                            <span th:unless="${p.quantity > 0}" class="badge bg-danger bg-opacity-75">Hết hàng</span>
-                        </td>
-                        
-                        <td>
-                            <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" class="btn btn-sm btn-neon-edit">
-                               <i class="bi bi-pencil-square"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<!-- ================= TABLE ================= -->
+<div class="card mb-5">
+<div class="card-header">Danh sách sản phẩm</div>
+<div class="card-body table-responsive p-0">
+<table class="table table-hover text-center align-middle mb-0">
+<thead>
+<tr>
+<th>ID</th>
+<th>Ảnh</th>
+<th>Tên</th>
+<th>Giá</th>
+<th>Tồn kho</th>
+<th>Cân nặng</th>
+<th>Danh mục</th>
+<th>Trạng thái</th>
+<th>Thao tác</th>
+</tr>
+</thead>
+<tbody>
+<tr th:each="p:${list}">
+<td th:text="${p.id}"></td>
+<td>
+<img th:src="@{${p.image != null ? p.image : '/images/no-image.png'}}" class="thumb">
+</td>
+<td th:text="${p.name}"></td>
+<td th:text="${#numbers.formatInteger(p.price,0,'POINT')} + ' ₫'"></td>
 
-    <form th:if="${product.id == null}"
-          th:action="@{/product-mana/add}"
-          th:object="${product}"
-          method="post"
-          enctype="multipart/form-data">
+<td>
+<span th:if="${p.quantity < 10}" class="text-danger-glow"
+      th:text="${p.quantity}"></span>
+<span th:unless="${p.quantity < 10}" 
+      th:text="${p.quantity}"></span>
+</td>
 
-    <div class="card mb-5">
-        <div class="card-header text-success"><i class="bi bi-plus-circle me-2"></i> THÊM SẢN PHẨM MỚI</div>
-        <div class="card-body row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Tên sản phẩm</label>
-                <input th:field="*{name}" class="form-control" placeholder="Nhập tên sản phẩm..." required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Giá (VNĐ)</label>
-                <input th:field="*{price}" type="number" class="form-control" required>
-            </div>
-            
-            <div class="col-md-3">
-                <label class="form-label">Số lượng kho</label>
-                <input th:field="*{quantity}" id="addQuantity" type="number" min="0" class="form-control" value="0" oninput="checkStock(this, 'addStatus')">
-            </div>
+<td th:text="${p.weight} + ' kg'"></td>
 
-            <div class="col-md-3">
-                <label class="form-label">Cân nặng (kg)</label>
-                <input th:field="*{weight}" type="number" step="0.1" class="form-control" value="0.5">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Danh mục</label>
-                <select th:field="*{category.id}" class="form-select">
-                    <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-                </select>
-            </div>
-            
-            <div class="col-md-3">
-                <label class="form-label">Trạng thái (Tự động)</label>
-                <select th:field="*{available}" id="addStatus" class="form-select" style="pointer-events: none; background-color: rgba(0,0,0,0.5);">
-                    <option th:value="true">Còn hàng</option>
-                    <option th:value="false">Hết hàng</option>
-                </select>
-            </div>
-            
-            <div class="col-md-3">
-                 <label class="form-label">Index ảnh chính</label>
-                 <input type="number" name="thumbnailIndex" value="0" class="form-control">
-            </div>
-            <div class="col-12">
-                <label class="form-label">Mô tả chi tiết</label>
-                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="col-md-12">
-                <label class="form-label">Ảnh sản phẩm</label>
-                <input type="file" name="imageFiles" multiple class="form-control">
-            </div>
-            <div class="col-12 text-end mt-4">
-                <button class="btn btn-neon-action px-5"><i class="bi bi-save me-2"></i> LƯU SẢN PHẨM</button>
-            </div>
-        </div>
-    </div>
-    </form>
+<td th:text="${p.category != null ? p.category.name : '---'}"></td>
 
-    <form th:if="${product.id != null}"
-          th:action="@{/product-mana/update}"
-          th:object="${product}"
-          method="post"
-          enctype="multipart/form-data">
+<td>
+<span th:if="${p.quantity > 0}" class="badge bg-success">
+Còn hàng
+</span>
+<span th:unless="${p.quantity > 0}" class="badge bg-danger">
+Hết hàng
+</span>
+</td>
 
-    <input type="hidden" th:field="*{id}">
+<td>
+<a th:href="@{/product-mana/edit/{id}(id=${p.id})}" 
+   class="btn btn-sm btn-warning">
+   Sửa
+</a>
+</td>
 
-    <div class="card" style="border-color: var(--accent-cyan);">
-        <div class="card-header" style="color: var(--accent-cyan);"><i class="bi bi-gear-fill me-2"></i> CẬP NHẬT SẢN PHẨM: <span th:text="*{name}" class="text-white"></span></div>
-        <div class="card-body row g-3">
-            <div class="col-md-6">
-                <label class="form-label">Tên sản phẩm</label>
-                <input th:field="*{name}" class="form-control" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Giá (VNĐ)</label>
-                <input th:field="*{price}" type="number" class="form-control" required>
-            </div>
-            
-            <div class="col-md-3">
-                <label class="form-label">Số lượng kho</label>
-                <input th:field="*{quantity}" id="editQuantity" type="number" min="0" class="form-control" oninput="checkStock(this, 'editStatus')">
-            </div>
-
-            <div class="col-md-3">
-                <label class="form-label">Cân nặng (kg)</label>
-                <input th:field="*{weight}" type="number" step="0.1" class="form-control">
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Danh mục</label>
-                <select th:field="*{category.id}" class="form-select">
-                    <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-                </select>
-            </div>
-            
-            <div class="col-md-3">
-                <label class="form-label">Trạng thái (Tự động)</label>
-                <select th:field="*{available}" id="editStatus" class="form-select" style="pointer-events: none; background-color: rgba(0,0,0,0.5);">
-                    <option th:value="true">Còn hàng</option>
-                    <option th:value="false">Hết hàng</option>
-                </select>
-            </div>
-            
-            <div class="col-md-3">
-                <label class="form-label">Index ảnh chính</label>
-                <input type="number" name="thumbnailIndex" value="0" class="form-control">
-           </div>
-             <div class="col-12">
-                <label class="form-label">Mô tả chi tiết</label>
-                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-            </div>
-            <div class="col-md-12 mt-4">
-                <label class="form-label">Ảnh hiện tại</label>
-                <div class="d-flex gap-3 flex-wrap p-3 rounded" style="background: rgba(0,0,0,0.3); border: 1px dashed var(--border-color)">
-                    <img th:each="img:${product.images}" th:src="@{${img.image}}" class="thumb" style="width: 80px; height: 80px;">
-                    <span th:if="${#lists.isEmpty(product.images)}" class="text-muted small align-self-center">Chưa có ảnh nào.</span>
-                </div>
-            </div>
-            <div class="col-md-12">
-                <label class="form-label">Thêm/Thay thế ảnh mới</label>
-                <input type="file" name="imageFiles" multiple class="form-control">
-            </div>
-            <div class="col-12 text-end mt-4">
-                <a th:href="@{/product-mana}" class="btn btn-outline-secondary me-2 px-4">Hủy</a>
-                <button class="btn btn-neon-action px-5"><i class="bi bi-arrow-repeat me-2"></i> CẬP NHẬT</button>
-            </div>
-        </div>
-    </div>
-    </form>
-
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
-<footer class="text-center py-4 mt-5" style="border-top: 1px solid var(--border-color); color: rgba(255,255,255,0.7)">
-  <small>© 2025 <span style="color: var(--accent-cyan);">MODEL WORLD</span> | Product Management System</small>
-</footer>
+<!-- ================= FORM ADD ================= -->
+<form th:if="${product.id == null}"
+      th:action="@{/product-mana/add}"
+      th:object="${product}"
+      method="post"
+      enctype="multipart/form-data">
 
-<script>
-    // Hàm đóng Popup
-    function closePopup() {
-        var popup = document.getElementById('stockPopup');
-        if (popup) { popup.style.display = 'none'; }
-    }
+<div class="card mb-5">
+<div class="card-header text-success">Thêm sản phẩm mới</div>
+<div class="card-body row g-3">
 
-    // Hàm kiểm tra tồn kho và update select tự động
-    function checkStock(inputObj, targetSelectId) {
-        var val = parseInt(inputObj.value);
-        var statusSelect = document.getElementById(targetSelectId);
-        
-        if (statusSelect) {
-            if (!isNaN(val) && val > 0) {
-                statusSelect.value = 'true'; // Set thành Còn hàng
-                // Đổi màu text để dễ nhìn (Optional)
-                statusSelect.classList.remove('text-danger');
-                statusSelect.classList.add('text-success');
-            } else {
-                statusSelect.value = 'false'; // Set thành Hết hàng
-                statusSelect.classList.remove('text-success');
-                statusSelect.classList.add('text-danger');
-            }
-        }
-    }
+<div class="col-md-6">
+<label>Tên sản phẩm</label>
+<input th:field="*{name}" class="form-control" required>
+</div>
 
-    // Tự động chạy khi trang load để đồng bộ Form Edit/Add ngay lập tức
-    document.addEventListener("DOMContentLoaded", function() {
-        // Kiểm tra Form Edit
-        var editQtyInput = document.getElementById('editQuantity');
-        if (editQtyInput) {
-            checkStock(editQtyInput, 'editStatus');
-        }
-        
-        // Kiểm tra Form Add
-        var addQtyInput = document.getElementById('addQuantity');
-        if (addQtyInput) {
-             checkStock(addQtyInput, 'addStatus'); 
-        }
-    });
-</script>
+<div class="col-md-3">
+<label>Giá</label>
+<input th:field="*{price}" type="number" class="form-control" required>
+</div>
+
+<div class="col-md-3">
+<label>Số lượng</label>
+<input th:field="*{quantity}" type="number" min="0" class="form-control" value="0">
+</div>
+
+<div class="col-md-3">
+<label>Cân nặng (kg)</label>
+<input th:field="*{weight}" type="number" step="0.1" class="form-control" value="0.5">
+</div>
+
+<div class="col-md-3">
+<label>Danh mục</label>
+<select th:field="*{category.id}" class="form-select">
+<option th:each="c:${categories}" 
+        th:value="${c.id}" 
+        th:text="${c.name}">
+</option>
+</select>
+</div>
+
+<div class="col-md-3">
+<label>Index ảnh chính</label>
+<input type="number" name="thumbnailIndex" value="0" class="form-control">
+</div>
+
+<div class="col-12">
+<label>Mô tả</label>
+<textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+</div>
+
+<div class="col-12">
+<label>Ảnh sản phẩm</label>
+<input type="file" name="imageFiles" multiple class="form-control">
+</div>
+
+<div class="col-12 text-end mt-3">
+<button class="btn btn-info px-4">Lưu sản phẩm</button>
+</div>
+
+</div>
+</div>
+</form>
+
+<!-- ================= FORM EDIT ================= -->
+<form th:if="${product.id != null}"
+      th:action="@{/product-mana/update}"
+      th:object="${product}"
+      method="post"
+      enctype="multipart/form-data">
+
+<input type="hidden" th:field="*{id}">
+
+<div class="card">
+<div class="card-header">Cập nhật sản phẩm</div>
+<div class="card-body row g-3">
+
+<div class="col-md-6">
+<label>Tên sản phẩm</label>
+<input th:field="*{name}" class="form-control" required>
+</div>
+
+<div class="col-md-3">
+<label>Giá</label>
+<input th:field="*{price}" type="number" class="form-control" required>
+</div>
+
+<div class="col-md-3">
+<label>Số lượng</label>
+<input th:field="*{quantity}" type="number" min="0" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Cân nặng (kg)</label>
+<input th:field="*{weight}" type="number" step="0.1" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label>Danh mục</label>
+<select th:field="*{category.id}" class="form-select">
+<option th:each="c:${categories}" 
+        th:value="${c.id}" 
+        th:text="${c.name}">
+</option>
+</select>
+</div>
+
+<div class="col-md-3">
+<label>Index ảnh chính</label>
+<input type="number" name="thumbnailIndex" value="0" class="form-control">
+</div>
+
+<div class="col-12">
+<label>Mô tả</label>
+<textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+</div>
+
+<div class="col-12">
+<label>Ảnh hiện tại</label>
+<div class="d-flex gap-2 flex-wrap">
+<img th:each="img:${product.images}" 
+     th:src="@{${img.image}}" 
+     class="thumb">
+</div>
+</div>
+
+<div class="col-12">
+<label>Thêm ảnh mới</label>
+<input type="file" name="imageFiles" multiple class="form-control">
+</div>
+
+<div class="col-12 text-end mt-3">
+<a th:href="@{/product-mana}" class="btn btn-secondary me-2">Hủy</a>
+<button class="btn btn-warning px-4">Cập nhật</button>
+</div>
+
+</div>
+</div>
+</form>
+
+</div>
 
 </body>
 </html>

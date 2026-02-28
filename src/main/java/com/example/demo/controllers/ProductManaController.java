@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.demo.model.Category;
 import com.example.demo.model.ProductImage;
 import com.example.demo.model.Products;
 import com.example.demo.repository.CategoryRepository;
@@ -20,10 +21,10 @@ import com.example.demo.repository.ProductRepository;
 public class ProductManaController {
 
     @Autowired
-    ProductRepository productRepo;
+    private ProductRepository productRepo;
 
     @Autowired
-    CategoryRepository categoryRepo;
+    private CategoryRepository categoryRepo;
 
     public static String UPLOAD_DIRECTORY =
             System.getProperty("user.dir") + "/uploads/products";
@@ -47,41 +48,20 @@ public class ProductManaController {
 
         product.setCreatedDate(new Date());
 
-        // Mặc định 0.5kg
-        if (product.getWeight() == null || product.getWeight() <= 0) {
-            product.setWeight(0.5);
-        }
-        
-        // ✅ Kiểm tra quantity, nếu null thì set về 0 (đề phòng lỗi)
         if (product.getQuantity() == null) {
             product.setQuantity(0);
         }
 
-        Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        if (product.getWeight() == null || product.getWeight() <= 0) {
+            product.setWeight(0.5);
         }
 
-        if (files != null) {
-            for (int i = 0; i < files.length; i++) {
-                MultipartFile f = files[i];
-                if (!f.isEmpty()) {
-                    String fileName = System.currentTimeMillis() + "_" + f.getOriginalFilename();
-                    Files.copy(f.getInputStream(),
-                            uploadPath.resolve(fileName),
-                            StandardCopyOption.REPLACE_EXISTING);
-
-                    ProductImage img = new ProductImage();
-                    img.setImage("/images/products/" + fileName);
-                    img.setThumbnail(i == thumbnailIndex);
-                    product.addImage(img);
-
-                    if (i == thumbnailIndex) {
-                        product.setImage(img.getImage());
-                    }
-                }
-            }
+        if (product.getCategory() != null && product.getCategory().getId() != null) {
+            Category c = categoryRepo.findById(product.getCategory().getId()).orElse(null);
+            product.setCategory(c);
         }
+
+        saveImages(product, files, thumbnailIndex);
 
         productRepo.save(product);
         return "redirect:/product-mana";
@@ -108,21 +88,20 @@ public class ProductManaController {
         Products old = productRepo.findById(product.getId()).orElse(null);
         if (old == null) return "redirect:/product-mana";
 
-        // ✅ Cập nhật các trường thông tin
         old.setName(product.getName());
         old.setPrice(product.getPrice());
-        old.setQuantity(product.getQuantity()); // <-- Cập nhật số lượng
-        old.setAvailable(product.isAvailable());
-        old.setCategory(product.getCategory());
         old.setDescription(product.getDescription());
+
+        Integer qty = product.getQuantity() == null ? 0 : product.getQuantity();
+        old.setQuantity(qty);
 
         if (product.getWeight() != null && product.getWeight() > 0) {
             old.setWeight(product.getWeight());
         }
 
-        Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        if (product.getCategory() != null && product.getCategory().getId() != null) {
+            Category c = categoryRepo.findById(product.getCategory().getId()).orElse(null);
+            old.setCategory(c);
         }
 
         if (imageFiles != null && imageFiles.length > 0 && !imageFiles[0].isEmpty()) {
@@ -131,27 +110,43 @@ public class ProductManaController {
                 old.getImages().forEach(i -> i.setThumbnail(false));
             }
 
-            for (int i = 0; i < imageFiles.length; i++) {
-                MultipartFile f = imageFiles[i];
-                if (!f.isEmpty()) {
-                    String fileName = System.currentTimeMillis() + "_" + f.getOriginalFilename();
-                    Files.copy(f.getInputStream(),
-                            uploadPath.resolve(fileName),
-                            StandardCopyOption.REPLACE_EXISTING);
-
-                    ProductImage img = new ProductImage();
-                    img.setImage("/images/products/" + fileName);
-                    img.setThumbnail(i == thumbnailIndex);
-                    old.addImage(img);
-
-                    if (i == thumbnailIndex) {
-                        old.setImage(img.getImage());
-                    }
-                }
-            }
+            saveImages(old, imageFiles, thumbnailIndex);
         }
 
         productRepo.save(old);
         return "redirect:/product-mana";
+    }
+
+    // ================= HANDLE IMAGE =================
+    private void saveImages(Products product,
+                            MultipartFile[] files,
+                            int thumbnailIndex) throws IOException {
+
+        Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        for (int i = 0; i < files.length; i++) {
+            MultipartFile f = files[i];
+            if (!f.isEmpty()) {
+
+                String fileName = System.currentTimeMillis() + "_" + f.getOriginalFilename();
+
+                Files.copy(f.getInputStream(),
+                        uploadPath.resolve(fileName),
+                        StandardCopyOption.REPLACE_EXISTING);
+
+                ProductImage img = new ProductImage();
+                img.setImage("/uploads/products/" + fileName);
+                img.setThumbnail(i == thumbnailIndex);
+
+                product.addImage(img);
+
+                if (i == thumbnailIndex) {
+                    product.setImage(img.getImage());
+                }
+            }
+        }
     }
 }
