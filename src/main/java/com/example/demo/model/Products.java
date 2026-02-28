@@ -60,6 +60,10 @@ public class Products {
 
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
+    
+    @Column
+    private Double weight; // kg
+
 
     // 🔥 Chặn vòng lặp JSON
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

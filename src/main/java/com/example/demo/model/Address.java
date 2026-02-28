@@ -36,6 +36,12 @@ public class Address {
     private String province;
     private String district;
     private String detail;
+    
+    @Column(name = "district_id")
+    private Integer districtId;
+
+    @Column(name = "ward_code")
+    private String wardCode;
 
     @Column(name = "is_default")
     private Boolean isDefault;
