@@ -1,56 +1,30 @@
 package com.example.demo.model;
 
+import java.io.Serializable;
+import java.util.Date;
 import jakarta.persistence.*;
+import lombok.Data;
 
+@SuppressWarnings("serial")
+@Data
 @Entity
 @Table(name = "cart_detail")
-public class CartDetail {
+public class CartDetail implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+	private Integer quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+	@Column(name = "createdate")
+	@Temporal(TemporalType.DATE)
+	private Date createDate;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Products product;
+	@ManyToOne
+	@JoinColumn(name = "account_id")
+	private Account account;
 
-    private int quantity;
-
-    // ===== Getter Setter =====
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    public Products getProduct() {
-        return product;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+	@ManyToOne
+	@JoinColumn(name = "product_id")
+	private Products product;
 }

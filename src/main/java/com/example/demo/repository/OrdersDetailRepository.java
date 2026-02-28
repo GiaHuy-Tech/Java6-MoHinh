@@ -10,26 +10,13 @@ import com.example.demo.model.OrderDetail;
 @Repository
 public interface OrdersDetailRepository extends JpaRepository<OrderDetail, Integer> {
 
-    @Query("""
-        SELECT COUNT(od) > 0
-        FROM OrderDetail od
-        WHERE od.order.account.id = :accountId
-          AND od.product.id = :productId
-    """)
-    boolean hasPurchased(
-            @Param("accountId") Integer accountId,
-            @Param("productId") Integer productId
-    );
 
     @Query("""
-        SELECT COUNT(od) > 0
-        FROM OrderDetail od
-        WHERE od.order.account.id = :accountId
-          AND od.product.id = :productId
-          AND od.order.status = 3
-    """)
-    boolean hasCompletedOrder(
-            @Param("accountId") Integer accountId,
-            @Param("productId") Integer productId
-    );
+           SELECT COUNT(od) > 0
+           FROM OrderDetail od
+           WHERE od.order.account.id = :accountId
+           AND od.product.id = :productId
+           """)
+    boolean hasCompletedOrder(@Param("accountId") Integer accountId,
+                              @Param("productId") Integer productId);
 }

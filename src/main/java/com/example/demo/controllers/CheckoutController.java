@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class CheckoutController {
     private OrdersRepository ordersRepo;
 
     @Autowired
-    private OrderDetailRepository orderDetailRepo;
+    private OrdersDetailRepository orderDetailRepo;
 
     @Autowired
     private AccountRepository accountRepo;
@@ -44,7 +45,9 @@ public class CheckoutController {
 
         BigDecimal total = BigDecimal.ZERO;
 
+        // ===== TÍNH TỔNG TIỀN =====
         for (CartDetail item : cartList) {
+
             BigDecimal price = item.getProduct().getPrice();
             BigDecimal quantity =
                     BigDecimal.valueOf(item.getQuantity());
@@ -55,8 +58,12 @@ public class CheckoutController {
         // ===== TẠO ORDER =====
         Orders order = new Orders();
         order.setAccount(account);
+        order.setCreatedDate(new Date());
         order.setTotal(total);
         order.setFeeship(BigDecimal.ZERO);
+        order.setMoneyDiscounted(BigDecimal.ZERO);
+        order.setStatus(0);              // 0 = chờ xác nhận
+        order.setPaymentStatus(false);   // chưa thanh toán
 
         ordersRepo.save(order);
 
@@ -64,19 +71,21 @@ public class CheckoutController {
         for (CartDetail item : cartList) {
 
             OrderDetail detail = new OrderDetail();
-            detail.setOrders(order);
+            detail.setOrder(order);
             detail.setProduct(item.getProduct());
             detail.setQuantity(item.getQuantity());
-            detail.setPrice(item.getProduct().getPrice());
+            detail.setPrice(item.getProduct().getPrice()); // 🔥 giờ đã đúng
 
             orderDetailRepo.save(detail);
         }
 
         // ===== CẬP NHẬT TỔNG CHI TIÊU ACCOUNT =====
-        BigDecimal newSpending =
-                account.getTotalSpending().add(total);
+        BigDecimal currentSpending =
+                account.getTotalSpending() == null
+                        ? BigDecimal.ZERO
+                        : account.getTotalSpending();
 
-        account.setTotalSpending(newSpending);
+        account.setTotalSpending(currentSpending.add(total));
         accountRepo.save(account);
 
         // ===== XOÁ GIỎ HÀNG =====

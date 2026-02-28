@@ -1,14 +1,20 @@
 package com.example.demo.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
+import com.example.demo.model.Products;
 
-public interface CartDetailRepository extends JpaRepository<CartDetail, Integer> {
+public interface CartDetailRepository 
+        extends JpaRepository<CartDetail, Integer> {
 
-    // Lấy giỏ hàng theo accountId
+    // Lấy toàn bộ giỏ hàng theo accountId
     List<CartDetail> findByAccount_Id(Integer accountId);
 
+    // 🔥 THÊM DÒNG NÀY (QUAN TRỌNG)
+    Optional<CartDetail> findByAccountAndProduct(Account account, Products product);
 }

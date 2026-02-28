@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,22 +50,31 @@ public class ProductsController {
             products = productRepo.findByAvailableTrue();
         }
 
-        // ✅ 2. LỌC THEO GIÁ (nếu có)
+        // ✅ 2. LỌC THEO GIÁ (BigDecimal fix)
         if (minPrice != null && maxPrice != null) {
+
+            BigDecimal min = BigDecimal.valueOf(minPrice);
+            BigDecimal max = BigDecimal.valueOf(maxPrice);
+
             products = products.stream()
-                    .filter(p -> p.getPrice() >= minPrice && p.getPrice() <= maxPrice)
+                    .filter(p -> 
+                        p.getPrice().compareTo(min) >= 0 &&
+                        p.getPrice().compareTo(max) <= 0
+                    )
                     .toList();
         }
 
-        // ✅ 3. SẮP XẾP THEO GIÁ
+        // ✅ 3. SẮP XẾP THEO GIÁ (BigDecimal fix)
         if ("asc".equalsIgnoreCase(sort)) {
-            products.sort(Comparator.comparingDouble(Products::getPrice));
-        } else if ("desc".equalsIgnoreCase(sort)) {
-            products.sort(Comparator.comparingDouble(Products::getPrice).reversed());
+            products.sort(Comparator.comparing(Products::getPrice));
+        } 
+        else if ("desc".equalsIgnoreCase(sort)) {
+            products.sort(Comparator.comparing(Products::getPrice).reversed());
         }
 
         // ✅ 4. TRUYỀN DỮ LIỆU RA VIEW
         List<Category> categories = categoryRepo.findAll();
+
         model.addAttribute("products", products);
         model.addAttribute("categories", categories);
         model.addAttribute("selectedCategory", categoryId);

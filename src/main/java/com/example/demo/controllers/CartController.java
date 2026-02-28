@@ -7,8 +7,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
 import com.example.demo.repository.CartDetailRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/cart")
@@ -17,12 +20,18 @@ public class CartController {
     @Autowired
     private CartDetailRepository cartDetailRepo;
 
-    // ===== XEM GIỎ HÀNG =====
-    @GetMapping("/{accountId}")
-    public String viewCart(@PathVariable Integer accountId, Model model) {
+    // ================= VIEW CART =================
+    @GetMapping
+    public String viewCart(HttpSession session, Model model) {
+
+        Account account = (Account) session.getAttribute("account");
+
+        if (account == null) {
+            return "redirect:/login";
+        }
 
         List<CartDetail> cartList =
-                cartDetailRepo.findByAccount_Id(accountId);
+                cartDetailRepo.findByAccount_Id(account.getId());
 
         long total = 0;
 
@@ -39,11 +48,11 @@ public class CartController {
         return "cart/view";
     }
 
-    // ===== XOÁ SẢN PHẨM KHỎI GIỎ =====
+    // ================= DELETE ITEM =================
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id) {
 
         cartDetailRepo.deleteById(id);
-        return "redirect:/cart/1";
+        return "redirect:/cart";
     }
 }

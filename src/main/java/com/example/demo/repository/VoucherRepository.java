@@ -10,19 +10,12 @@ import com.example.demo.model.Voucher;
 
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
 
-    // ===== VOUCHER CỦA USER =====
-    List<Voucher> findByAccount_IdOrderByIdDesc(Integer accountId);
+    // Lấy voucher còn hạn + active (voucher chung)
+    List<Voucher> findByActiveTrueAndExpiredAtAfter(LocalDateTime now);
 
-    boolean existsByAccount_IdAndCode(Integer accountId, String code);
-    List<Voucher> findByAccount_IdAndActiveTrueAndExpiredAtAfter(
-            Integer accountId,
-            LocalDateTime now
-    );
-    // ===== VOUCHER CHUNG =====
-    List<Voucher> findByAccountIsNullAndActiveTrueAndExpiredAtAfter(LocalDateTime now);
+    // Tìm voucher theo code
+    Optional<Voucher> findByCode(String code);
 
-    // 🔥 DÙNG CHO PRODUCT DETAIL
-    List<Voucher> findByExpiredAtAfterAndActiveTrue(LocalDateTime now);
-
-    Optional<Voucher> findByIdAndAccountIsNull(Integer id);
+    // Tìm voucher theo id
+    Optional<Voucher> findById(Integer id);
 }

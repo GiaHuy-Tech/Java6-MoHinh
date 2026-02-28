@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -21,7 +22,8 @@ public class Orders implements Serializable {
     @Column(name = "created_date")
     private Date createdDate;
 
-    private Double feeship = 0.0;
+    @Column(precision = 15, scale = 2)
+    private BigDecimal feeship = BigDecimal.ZERO;
 
     @Column(columnDefinition = "nvarchar(500)")
     private String note;
@@ -40,10 +42,11 @@ public class Orders implements Serializable {
     @Column(name = "voucher_code")
     private String voucherCode;
 
-    @Column(name = "money_discounted")
-    private Double moneyDiscounted = 0.0;
+    @Column(name = "money_discounted", precision = 15, scale = 2)
+    private BigDecimal moneyDiscounted = BigDecimal.ZERO;
 
-    private Double total = 0.0;
+    @Column(precision = 15, scale = 2)
+    private BigDecimal total = BigDecimal.ZERO;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
@@ -53,6 +56,6 @@ public class Orders implements Serializable {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderDetail> orderDetails;
 }

@@ -1,8 +1,8 @@
 package com.example.demo.controllers;
 
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -67,35 +67,39 @@ public class OrdersManaController {
                                @RequestParam("status") int status) {
 
         Orders order = ordersRepo.findById(id).orElse(null);
+        if (order == null) return "redirect:/orders-mana";
 
-        if (order != null) {
+        order.setStatus(status);
 
-            order.setStatus(status);
+        // ==== TÍNH SUBTOTAL ====
+        BigDecimal subTotal = order.getOrderDetails()
+                .stream()
+                .map(d -> d.getPrice()
+                        .multiply(BigDecimal.valueOf(d.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            double subTotal = order.getOrderDetails()
-                    .stream()
-                    .mapToDouble(d -> d.getPrice() * d.getQuantity())
-                    .sum();
+        // ==== LẤY ĐỊA CHỈ AN TOÀN ====
+        String fullAddress = order.getAddress() != null
+                ? order.getAddress().getFullAddress()
+                : null;
 
-            int fee = calculateShippingFee(
-                    order.getAddress().getFullAddress(),
-                    (int) subTotal
+        int feeInt = calculateShippingFee(fullAddress, subTotal.intValue());
+
+        BigDecimal fee = BigDecimal.valueOf(feeInt);
+
+        order.setFeeship(fee);
+        order.setTotal(subTotal.add(fee));
+
+        ordersRepo.save(order);
+
+        Account acc = order.getAccount();
+
+        if (acc != null && acc.getEmail() != null) {
+            mailService.sendStatusMail(
+                    acc.getEmail(),
+                    "Cập nhật đơn #" + order.getId(),
+                    "Trạng thái mới: " + status
             );
-
-            order.setFeeship((double) fee);
-            order.setTotal(subTotal + fee);
-
-            ordersRepo.save(order);
-
-            Account acc = order.getAccount();
-
-            if (acc != null && acc.getEmail() != null) {
-                mailService.sendStatusMail(
-                        acc.getEmail(),
-                        "Cập nhật đơn #" + order.getId(),
-                        "Trạng thái mới: " + status
-                );
-            }
         }
 
         return "redirect:/orders-mana";
@@ -103,11 +107,13 @@ public class OrdersManaController {
 
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Integer id, Model model) {
+
         Orders order = ordersRepo.findById(id).orElse(null);
         if (order == null) return "redirect:/orders-mana";
 
         model.addAttribute("order", order);
         model.addAttribute("orderDetails", order.getOrderDetails());
+
         return "admin/order-detail";
     }
 }

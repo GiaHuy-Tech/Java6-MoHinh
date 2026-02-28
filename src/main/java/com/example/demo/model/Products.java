@@ -1,23 +1,14 @@
 package com.example.demo.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -44,13 +35,14 @@ public class Products {
     @Column(columnDefinition = "nvarchar(255)")
     private String image;
 
-    @Min(value = 50000, message = "Giá phải lớn hơn 50000")
-    private int price;
+    // 🔥 SỬA CHUẨN TIỀN TỆ
+    @DecimalMin(value = "50000", message = "Giá phải lớn hơn 50000")
+    @Column(precision = 15, scale = 2, nullable = false)
+    private BigDecimal price;
 
-    // ✅ MỚI THÊM: CỘT SỐ LƯỢNG
+    // ✅ SỐ LƯỢNG
     @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
-    // Thêm columnDefinition = "int default 0" để SQL Server tự điền số 0 cho dữ liệu cũ
-    @Column(nullable = false, columnDefinition = "int default 0") 
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer quantity = 0;
 
     @Temporal(TemporalType.DATE)
@@ -58,7 +50,7 @@ public class Products {
 
     private boolean available;
 
-    // 🔥 Chặn vòng lặp JSON
+    // 🔥 Quan hệ Category
     @ManyToOne
     @JoinColumn(name = "categoryId")
     @JsonIgnore
@@ -66,12 +58,14 @@ public class Products {
 
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
-    
+
     @Column
     private Double weight; // kg
 
-    // 🔥 Chặn vòng lặp JSON
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    // 🔥 Danh sách ảnh
+    @OneToMany(mappedBy = "product",
+               cascade = CascadeType.ALL,
+               orphanRemoval = true)
     @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
 

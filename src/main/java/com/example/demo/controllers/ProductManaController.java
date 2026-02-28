@@ -48,14 +48,19 @@ public class ProductManaController {
 
         product.setCreatedDate(new Date());
 
-        if (product.getQuantity() == null) {
-            product.setQuantity(0);
-        }
+        // ===== FIX QUANTITY =====
+        Integer qty = product.getQuantity() == null ? 0 : product.getQuantity();
+        product.setQuantity(qty);
 
+        // ===== AUTO AVAILABLE =====
+        product.setAvailable(qty > 0);
+
+        // ===== DEFAULT WEIGHT =====
         if (product.getWeight() == null || product.getWeight() <= 0) {
             product.setWeight(0.5);
         }
 
+        // ===== CATEGORY =====
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             Category c = categoryRepo.findById(product.getCategory().getId()).orElse(null);
             product.setCategory(c);
@@ -92,8 +97,12 @@ public class ProductManaController {
         old.setPrice(product.getPrice());
         old.setDescription(product.getDescription());
 
+        // ===== FIX QUANTITY =====
         Integer qty = product.getQuantity() == null ? 0 : product.getQuantity();
         old.setQuantity(qty);
+
+        // ===== AUTO AVAILABLE WHEN UPDATE =====
+        old.setAvailable(qty > 0);
 
         if (product.getWeight() != null && product.getWeight() > 0) {
             old.setWeight(product.getWeight());

@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,8 +17,9 @@ public class OrderDetail implements Serializable {
 
     private Integer quantity;
 
-    // Lưu giá tại thời điểm mua
-    private Double price;
+    // Giá tại thời điểm mua
+    @Column(precision = 15, scale = 2)
+    private BigDecimal price;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
