@@ -3,277 +3,451 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MODEL WORLD - Quản trị</title>
+    <title>Quản lý Sản phẩm - MODEL WORLD</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #e2e8f0;
-            --accent: #38bdf8; /* Sky Blue */
-            --border: #334155;
-            --input-bg: #0f172a;
+            --bg-body: #020609;       
+            --bg-sidebar: #05111a;    
+            --bg-card: #081a26;       
+            --text-main: #e0fbfc;     
+            --text-sub: #00f2ff;      
+            --accent-cyan: #00f2ff;
+            --accent-green: #00ff9d;
+            --border-color: #00f2ff;  
+            --sidebar-width: 260px;
         }
 
         body {
             background-color: var(--bg-body);
             color: var(--text-main);
             font-family: 'Be Vietnam Pro', sans-serif;
+            overflow-x: hidden;
         }
 
-        /* Card Styles */
-        .card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        /* --- WRAPPER & SIDEBAR --- */
+        #wrapper { display: flex; width: 100%; transition: all 0.3s; }
+
+        #sidebar-wrapper {
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid rgba(0, 242, 255, 0.3);
+            min-height: 100vh;
+            position: fixed;
+            z-index: 1000;
+            height: 100%;
         }
-        .card-header {
-            background-color: rgba(56, 189, 248, 0.1);
-            border-bottom: 1px solid var(--border);
-            color: var(--accent);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+
+        #page-content-wrapper {
+            width: 100%;
+            margin-left: var(--sidebar-width);
+            transition: margin 0.3s ease-out;
         }
+
+        body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
+        body.toggled #page-content-wrapper { margin-left: 0; }
+
+        /* Sidebar Items */
+        .sidebar-heading {
+            padding: 1.5rem 1.25rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            text-align: center;
+            background: rgba(0, 242, 255, 0.1);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.7);
+        }
+
+        .list-group-item {
+            background-color: transparent;
+            color: var(--text-main);
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .list-group-item:hover, .list-group-item.active {
+            color: var(--accent-cyan);
+            background-color: rgba(0, 242, 255, 0.1);
+            border-left-color: var(--accent-cyan);
+            text-shadow: 0 0 5px var(--accent-cyan);
+        }
+        .list-group-item i { margin-right: 10px; width: 20px; text-align: center; }
+
+        /* Navbar */
+        .top-navbar {
+            background: rgba(5, 17, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            padding: 15px 30px;
+            position: sticky; top: 0; z-index: 999;
+        }
+        .btn-toggle {
+            background: transparent; border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan); padding: 5px 12px; border-radius: 6px; transition: 0.3s;
+            box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
+        }
+        .btn-toggle:hover { 
+            background: var(--accent-cyan); color: #000; 
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        /* Custom Text Classes */
+        .text-neon { color: var(--accent-cyan) !important; }
+        .text-neon-green { color: var(--accent-green) !important; }
+        .text-bright { color: #ffffff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        
+        /* Containers */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px; padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+        }
+        
+        /* Table Styles */
+        .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); }
+        .table thead th { 
+            color: var(--accent-cyan); border-bottom: 1px solid var(--accent-cyan);
+            text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
+            background: rgba(0, 242, 255, 0.05);
+        }
+        .table td { border-bottom: 1px solid rgba(0, 242, 255, 0.15); vertical-align: middle; color: var(--text-main); }
 
         /* Form Controls */
-        .form-control, .form-select {
-            background-color: var(--input-bg);
-            border: 1px solid var(--border);
+        .form-control-custom, .form-select-custom {
+            background-color: rgba(5, 17, 26, 0.8);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            color: var(--text-main);
+        }
+        .form-control-custom:focus, .form-select-custom:focus {
+            background-color: rgba(5, 17, 26, 1);
+            border-color: var(--accent-cyan);
             color: #fff;
+            box-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
         }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--input-bg);
-            border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        .form-select-custom option {
+            background-color: var(--bg-card);
+            color: var(--text-main);
         }
-        label {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            margin-bottom: 0.25rem;
-        }
-
-        /* Table */
-        .table {
-            --bs-table-bg: transparent;
-            --bs-table-color: var(--text-main);
-            --bs-table-border-color: var(--border);
-        }
-        .table thead th {
-            color: var(--accent);
-            font-weight: 600;
-            border-bottom-width: 2px;
-        }
-        
-        /* Image Thumbnails */
-        .product-thumb {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-        }
-
-        /* Badge Custom */
-        .badge-custom { padding: 0.5em 0.8em; font-weight: 500; }
-        
-        /* Preview Grid */
-        #preview-area img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
+        .form-control-custom::file-selector-button {
+            background: transparent;
+            color: var(--accent-cyan);
+            border: 1px solid var(--accent-cyan);
             border-radius: 4px;
             margin-right: 10px;
-            border: 2px solid transparent;
+            transition: 0.3s;
         }
-        #preview-area img.selected-thumb {
-            border-color: var(--accent);
+        .form-control-custom::file-selector-button:hover {
+            background: var(--accent-cyan);
+            color: #000;
+        }
+
+        /* Buttons & Badges */
+        .btn-neon { border: 1px solid var(--accent-cyan); color: var(--accent-cyan); background: transparent; transition: .3s; }
+        .btn-neon:hover { background: var(--accent-cyan); color: #000; box-shadow: 0 0 10px var(--accent-cyan); }
+        
+        .btn-neon-warning { border: 1px solid #ffc107; color: #ffc107; background: transparent; transition: .3s; }
+        .btn-neon-warning:hover { background: #ffc107; color: #000; box-shadow: 0 0 10px rgba(255, 193, 7, 0.6); }
+
+        .product-thumb {
+            width: 50px; height: 50px; object-fit: cover;
+            border-radius: 4px; border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
+        }
+
+        /* Preview Grid */
+        #preview-area img {
+            width: 70px; height: 70px; object-fit: cover;
+            border-radius: 4px; border: 1px dashed var(--accent-cyan);
+            margin-bottom: 5px;
+        }
+
+        /* Rain Effect */
+        .raindrop {
+            position: absolute; width: 2px; height: 15px;
+            background: var(--accent-cyan); opacity: 0.8; 
+            animation: fall linear infinite; z-index: 1; pointer-events: none;
+            box-shadow: 0 0 5px var(--accent-cyan);
+        }
+        @keyframes fall {
+            0% { transform: translateY(-20px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
         }
     </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-dark border-bottom border-secondary px-4 py-3" style="background: #0b1120;">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1 fw-bold text-info">
-            <i class="bi bi-box-seam-fill me-2"></i>QUẢN LÝ SẢN PHẨM
-        </span>
-        <a href="/" class="btn btn-outline-light btn-sm">Về trang chủ</a>
-    </div>
-</nav>
+<div id="rain" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></div>
 
-<div class="container-fluid py-4 px-4">
+<div id="wrapper">
     
-    <div th:if="${message}" class="alert alert-dismissible fade show" 
-         th:classappend="${messageType == 'danger' ? 'alert-danger' : 'alert-success'}" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <strong th:text="${message}"></strong>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div id="sidebar-wrapper">
+        <div class="sidebar-heading">
+            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
+        </div>
+        <div class="list-group list-group-flush mt-3">
+            <a href="/stats" class="list-group-item list-group-item-action">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/cata-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-tags"></i> Quản lý Danh mục
+            </a>
+            <a href="/product-mana" class="list-group-item list-group-item-action active">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/vouchers" class="list-group-item list-group-item-action">
+                <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+            </a>
+            <a href="/orders-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/user-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/cart" class="list-group-item list-group-item-action">
+                <i class="bi bi-cart3"></i> Giỏ hàng Admin
+            </a>
+            <div class="mt-4 px-3">
+                <small class="text-neon fw-bold text-uppercase" style="font-size: 0.7rem;">Hệ thống</small>
+            </div>
+            <a href="/logout" class="list-group-item list-group-item-action text-danger fw-bold">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </div>
     </div>
 
-    <div class="row g-4">
+    <div id="page-content-wrapper">
         
-        <div class="col-lg-4">
-            <form th:action="@{${product.id == null ? '/product-mana/add' : '/product-mana/update'}}"
-                  th:object="${product}"
-                  method="post"
-                  enctype="multipart/form-data">
+        <nav class="top-navbar d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-toggle" id="menu-toggle">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h5 class="mb-0 text-neon fw-bold d-none d-md-block" style="letter-spacing: 1px;">Quản lý Sản phẩm</h5>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end d-none d-sm-block">
+                    <span class="d-block text-bright small">Admin User</span>
+                    <span class="d-block text-neon" style="font-size: 0.75rem;">Super Admin</span>
+                </div>
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="rounded-circle border border-info shadow-sm" width="40" height="40" alt="Avatar">
+            </div>
+        </nav>
+
+        <div class="container-fluid p-4">
+            
+            <div th:if="${message}" class="alert alert-dismissible fade show" 
+                 th:classappend="${messageType == 'danger' ? 'alert-danger' : 'alert-success'}" 
+                 th:style="${messageType == 'danger' ? 'background: rgba(255,0,0,0.1); border: 1px solid red; color: #ff6b6b;' : 'background: rgba(0,255,157,0.1); border: 1px solid var(--accent-green); color: var(--accent-green);'}" role="alert">
+                <i class="bi" th:classappend="${messageType == 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'}"></i>
+                <strong class="ms-2" th:text="${message}"></strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="row g-4">
                 
-                <input type="hidden" th:field="*{id}">
+                <div class="col-lg-4">
+                    <form th:action="@{${product.id == null ? '/product-mana/add' : '/product-mana/update'}}"
+                          th:object="${product}"
+                          method="post"
+                          enctype="multipart/form-data" class="h-100">
+                        
+                        <input type="hidden" th:field="*{id}">
 
-                <div class="card h-100">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <span th:text="${product.id == null ? 'THÊM SẢN PHẨM MỚI' : 'CẬP NHẬT SẢN PHẨM'}"></span>
-                        <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-sm btn-outline-secondary">Hủy</a>
-                    </div>
-                    
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label><i class="bi bi-tag-fill me-1"></i>Tên sản phẩm</label>
-                                <input th:field="*{name}" class="form-control" placeholder="Nhập tên mô hình..." required>
+                        <div class="table-container h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0 text-bright text-uppercase" style="font-size: 1.1rem;">
+                                    <i class="bi bi-box me-2 text-neon"></i>
+                                    <span th:text="${product.id == null ? 'Thêm SP Mới' : 'Cập nhật SP'}"></span>
+                                </h5>
+                                <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-sm text-white" style="border: 1px solid #666;">Hủy</a>
                             </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="text-bright small text-uppercase mb-1"><i class="bi bi-tag-fill me-1 text-neon"></i>Tên sản phẩm</label>
+                                    <input th:field="*{name}" class="form-control form-control-custom" placeholder="Nhập tên mô hình..." required>
+                                </div>
 
-                            <div class="col-6">
-                                <label><i class="bi bi-currency-dollar me-1"></i>Giá (VNĐ)</label>
-                                <input th:field="*{price}" type="number" class="form-control" required>
-                            </div>
-                            <div class="col-6">
-                                <label><i class="bi bi-bookmark-fill me-1"></i>Danh mục</label>
-                                <select th:field="*{category.id}" class="form-select">
-                                    <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
-                                </select>
-                            </div>
+                                <div class="col-6">
+                                    <label class="text-bright small text-uppercase mb-1"><i class="bi bi-currency-dollar me-1 text-neon"></i>Giá (VNĐ)</label>
+                                    <input th:field="*{price}" type="number" class="form-control form-control-custom" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-bright small text-uppercase mb-1"><i class="bi bi-bookmark-fill me-1 text-neon"></i>Danh mục</label>
+                                    <select th:field="*{category.id}" class="form-select form-select-custom">
+                                        <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                                    </select>
+                                </div>
 
-                            <div class="col-6">
-                                <label><i class="bi bi-boxes me-1"></i>Số lượng</label>
-                                <input th:field="*{quantity}" type="number" class="form-control" min="0">
-                            </div>
-                            <div class="col-6">
-                                <label><i class="bi bi-speedometer2 me-1"></i>Nặng (kg)</label>
-                                <input th:field="*{weight}" type="number" step="0.1" class="form-control">
-                            </div>
+                                <div class="col-6">
+                                    <label class="text-bright small text-uppercase mb-1"><i class="bi bi-boxes me-1 text-neon"></i>Số lượng</label>
+                                    <input th:field="*{quantity}" type="number" class="form-control form-control-custom" min="0">
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-bright small text-uppercase mb-1"><i class="bi bi-speedometer2 me-1 text-neon"></i>Nặng (kg)</label>
+                                    <input th:field="*{weight}" type="number" step="0.1" class="form-control form-control-custom">
+                                </div>
 
-                            <div class="col-12">
-                                <label>Mô tả chi tiết</label>
-                                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-                            </div>
+                                <div class="col-12">
+                                    <label class="text-bright small text-uppercase mb-1">Mô tả chi tiết</label>
+                                    <textarea th:field="*{description}" class="form-control form-control-custom" rows="3"></textarea>
+                                </div>
 
-                            <hr class="border-secondary my-2">
+                                <hr class="border-secondary my-3" style="border-color: rgba(0,242,255,0.3) !important;">
 
-                            <div class="col-12">
-                                <label class="text-info fw-bold mb-2">
-                                    <i class="bi bi-images me-1"></i>Hình ảnh (Tối thiểu 2)
-                                </label>
-                                
-                                <div th:if="${product.id != null}" class="mb-2 d-flex gap-2 overflow-auto pb-2">
-                                    <div th:each="img : *{images}" class="position-relative">
-                                        <img th:src="@{${img.image}}" class="product-thumb" style="width: 60px; height: 60px;">
-                                        <span th:if="${img.thumbnail}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5em;">Main</span>
+                                <div class="col-12">
+                                    <label class="text-neon fw-bold mb-2 small text-uppercase">
+                                        <i class="bi bi-images me-1"></i>Hình ảnh (Tối thiểu 2)
+                                    </label>
+                                    
+                                    <div th:if="${product.id != null}" class="mb-3 d-flex gap-2 overflow-auto pb-2 px-2 rounded" style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(0,242,255,0.2);">
+                                        <div th:each="img : *{images}" class="position-relative mt-2">
+                                            <img th:src="@{${img.image}}" class="product-thumb">
+                                            <span th:if="${img.thumbnail}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5em; box-shadow: 0 0 5px red;">Main</span>
+                                        </div>
                                     </div>
+
+                                    <input type="file" name="imageFiles" id="imageInput" multiple class="form-control form-control-custom mb-2" 
+                                           th:required="${product.id == null}">
+                                    <small class="text-muted d-block fst-italic mb-3" style="font-size: 0.75rem;">Giữ phím <b>Ctrl</b> để chọn nhiều ảnh.</small>
+
+                                    <div class="input-group input-group-sm mb-1">
+                                        <span class="input-group-text bg-dark text-neon border-secondary" style="border-color: rgba(0,242,255,0.3) !important;">Ảnh đại diện là số:</span>
+                                        <input type="number" name="thumbnailIndex" value="0" min="0" class="form-control form-control-custom text-center">
+                                    </div>
+                                    <small class="text-secondary" style="font-size: 0.75rem;">(0 là ảnh đầu tiên bạn chọn)</small>
+
+                                    <div id="preview-area" class="d-flex flex-wrap mt-3 gap-2"></div>
                                 </div>
 
-                                <input type="file" name="imageFiles" id="imageInput" multiple class="form-control mb-2" 
-                                       th:required="${product.id == null}">
-                                <small class="text-muted d-block fst-italic mb-2">Giữ phím <b>Ctrl</b> để chọn nhiều ảnh.</small>
-
-                                <div class="input-group input-group-sm mb-2">
-                                    <span class="input-group-text bg-dark text-light border-secondary">Ảnh đại diện là số:</span>
-                                    <input type="number" name="thumbnailIndex" value="0" min="0" class="form-control text-center">
+                                <div class="col-12 mt-4">
+                                    <button class="btn btn-neon w-100 fw-bold">
+                                        <i class="bi bi-save me-2"></i>LƯU DỮ LIỆU
+                                    </button>
                                 </div>
-                                <small class="text-secondary">(0 là ảnh đầu tiên bạn chọn)</small>
-
-                                <div id="preview-area" class="d-flex flex-wrap mt-2 gap-2"></div>
                             </div>
+                        </div>
+                    </form>
+                </div>
 
-                            <div class="col-12 mt-4">
-                                <button class="btn btn-info w-100 fw-bold text-dark">
-                                    <i class="bi bi-save me-2"></i>LƯU DỮ LIỆU
-                                </button>
-                            </div>
+                <div class="col-lg-8">
+                    <div class="table-container h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-bright"><i class="bi bi-list-task me-2 text-neon"></i>Danh sách Sản phẩm</h5>
+                            <span class="badge" style="background: rgba(0, 242, 255, 0.2); color: var(--accent-cyan); border: 1px solid var(--accent-cyan);" th:text="${#lists.size(list)} + ' items'"></span>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle text-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Hình ảnh</th>
+                                        <th class="text-start">Tên sản phẩm</th>
+                                        <th>Giá bán</th>
+                                        <th>Kho</th>
+                                        <th>Loại</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${list}">
+                                        <td class="text-muted small fw-bold" th:text="${'#' + p.id}"></td>
+                                        
+                                        <td>
+                                            <th:block th:with="thumbList=${p.images.?[thumbnail == true]}">
+                                                <img th:if="${not #lists.isEmpty(thumbList)}" 
+                                                     th:src="@{${thumbList[0].image}}" class="product-thumb">
+                                                
+                                                <img th:if="${#lists.isEmpty(thumbList) and not #lists.isEmpty(p.images)}" 
+                                                     th:src="@{${p.images[0].image}}" class="product-thumb opacity-50" style="border-color: #666;">
+                                                
+                                                <span th:if="${#lists.isEmpty(p.images)}" class="badge border border-secondary text-secondary" style="background: rgba(255,255,255,0.05);">No Img</span>
+                                            </th:block>
+                                        </td>
+
+                                        <td class="text-start fw-bold text-bright" th:text="${p.name}"></td>
+                                        <td class="text-neon" th:text="${#numbers.formatInteger(p.price, 0, 'POINT') + ' đ'}"></td>
+                                        
+                                        <td>
+                                            <span th:class="${p.quantity > 0 ? 'badge bg-success bg-opacity-10 border border-success text-success' : 'badge bg-danger bg-opacity-10 border border-danger text-danger'}" 
+                                                  th:text="${p.quantity > 0 ? p.quantity : 'Hết'}">
+                                            </span>
+                                        </td>
+
+                                        <td class="text-light" th:text="${p.category != null ? p.category.name : '-'}"></td>
+                                        
+                                        <td>
+                                            <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" 
+                                               class="btn btn-sm btn-neon-warning">
+                                               <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${list == null or list.empty}">
+                                        <td colspan="7" class="text-center text-neon py-4">Chưa có sản phẩm nào.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3 pt-3" style="border-top: 1px dashed rgba(0,242,255,0.2);">
+                            <small class="text-muted fst-italic">Hiển thị tối đa 50 dòng mới nhất</small>
                         </div>
                     </div>
                 </div>
-            </form>
-        </div>
 
-        <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>DANH SÁCH SẢN PHẨM</span>
-                    <span class="badge bg-primary rounded-pill" th:text="${#lists.size(list)} + ' items'"></span>
-                </div>
-                <div class="card-body p-0 table-responsive">
-                    <table class="table table-hover align-middle text-center mb-0">
-                        <thead class="bg-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Hình ảnh</th>
-                                <th class="text-start">Tên sản phẩm</th>
-                                <th>Giá bán</th>
-                                <th>Kho</th>
-                                <th>Loại</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="p : ${list}">
-                                <td class="text-muted" th:text="${'#' + p.id}"></td>
-                                
-                                <td>
-                                    <th:block th:with="thumbList=${p.images.?[thumbnail == true]}">
-                                        <img th:if="${not #lists.isEmpty(thumbList)}" 
-                                             th:src="@{${thumbList[0].image}}" class="product-thumb">
-                                        
-                                        <img th:if="${#lists.isEmpty(thumbList) and not #lists.isEmpty(p.images)}" 
-                                             th:src="@{${p.images[0].image}}" class="product-thumb opacity-50">
-                                        
-                                        <span th:if="${#lists.isEmpty(p.images)}" class="text-muted small">No Img</span>
-                                    </th:block>
-                                </td>
-
-                                <td class="text-start fw-bold text-light" th:text="${p.name}"></td>
-                                <td class="text-info" th:text="${#numbers.formatInteger(p.price, 0, 'POINT') + ' đ'}"></td>
-                                
-                                <td>
-                                    <span th:class="${p.quantity > 0 ? 'badge bg-dark border border-success text-success' : 'badge bg-danger text-dark'}" 
-                                          th:text="${p.quantity > 0 ? p.quantity : 'Hết'}">
-                                    </span>
-                                </td>
-
-                                <td th:text="${p.category != null ? p.category.name : '-'}"></td>
-                                
-                                <td>
-                                    <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" 
-                                       class="btn btn-sm btn-outline-warning">
-                                       <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer border-top border-secondary text-center text-muted small">
-                    Hiển thị tối đa 50 dòng mới nhất
-                </div>
             </div>
         </div>
+        
+        <footer class="text-center py-4 text-neon small mt-4" style="background: #05111a; border-top: 1px solid var(--accent-cyan);">
+            © 2025 MODEL WORLD - Admin System
+        </footer>
 
-    </div>
+    </div> 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
+    // Xử lý Sidebar Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const body = document.body;
+    if (menuToggle) {
+        menuToggle.addEventListener('click', e => {
+            e.preventDefault();
+            body.classList.toggle('toggled');
+        });
+    }
+
+    // Hiệu ứng mưa (Rain Effect)
+    const rainContainer = document.getElementById('rain');
+    for(let i=0; i<50; i++){
+        const drop = document.createElement('div');
+        drop.classList.add('raindrop');
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.animationDuration = (Math.random()*1+0.5) + 's';
+        drop.style.animationDelay = Math.random() * 5 + 's';
+        rainContainer.appendChild(drop);
+    }
+
+    // Xử lý Preview Multiple Images
     const imageInput = document.getElementById('imageInput');
     const previewArea = document.getElementById('preview-area');
 
     imageInput.addEventListener('change', function() {
-        previewArea.innerHTML = ''; // Xóa preview cũ
+        previewArea.innerHTML = ''; 
         const files = this.files;
         
         if (files.length > 0) {
@@ -285,17 +459,26 @@
                     reader.onload = function(e) {
                         const imgContainer = document.createElement('div');
                         imgContainer.style.textAlign = 'center';
+                        imgContainer.style.position = 'relative';
                         
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         
+                        // Badge hiển thị index
                         const indexLabel = document.createElement('span');
                         indexLabel.innerText = '#' + i;
-                        indexLabel.style.fontSize = '12px';
-                        indexLabel.style.color = '#ccc';
+                        indexLabel.style.position = 'absolute';
+                        indexLabel.style.bottom = '-5px';
+                        indexLabel.style.left = '50%';
+                        indexLabel.style.transform = 'translateX(-50%)';
+                        indexLabel.style.fontSize = '10px';
+                        indexLabel.style.background = 'var(--bg-card)';
+                        indexLabel.style.color = 'var(--accent-cyan)';
+                        indexLabel.style.border = '1px solid var(--accent-cyan)';
+                        indexLabel.style.padding = '0 4px';
+                        indexLabel.style.borderRadius = '4px';
                         
                         imgContainer.appendChild(img);
-                        imgContainer.appendChild(document.createElement('br'));
                         imgContainer.appendChild(indexLabel);
                         
                         previewArea.appendChild(imgContainer);
@@ -307,6 +490,5 @@
     });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

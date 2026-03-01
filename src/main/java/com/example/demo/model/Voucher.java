@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-// Nhập hết các annotation
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,10 +45,14 @@ public class Voucher {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime expiredAt;
 
+    // Biến này rất quan trọng, đừng xóa nhé
     Boolean active;
 
-    // --- THÊM PHẦN NÀY ---
+    // --- MỐI QUAN HỆ VỚI ACCOUNT ---
     // Nếu account null -> Ai dùng cũng được (Voucher chung)
     // Nếu account có dữ liệu -> Chỉ người này được dùng
- 
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
 }

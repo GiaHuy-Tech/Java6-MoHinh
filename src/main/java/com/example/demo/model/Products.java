@@ -75,4 +75,21 @@ public class Products {
         images.remove(img);
         img.setProduct(null);
     }
+
+    // --- ĐOẠN CODE MỚI THÊM VÀO ĐỂ SỬA LỖI GỌI p.image ---
+ // --- ĐOẠN CODE LẤY ẢNH ĐẠI DIỆN ---
+    public String getImage() {
+        if (this.images != null && !this.images.isEmpty()) {
+            // 1. Ưu tiên tìm ảnh được đánh dấu là ảnh đại diện (thumbnail = true)
+            for (ProductImage img : this.images) {
+                if (Boolean.TRUE.equals(img.getThumbnail())) {
+                    return img.getImage(); // Đã sửa từ getName() thành getImage()
+                }
+            }
+            // 2. Nếu không có ảnh nào set thumbnail = true, lấy tạm ảnh đầu tiên
+            return this.images.get(0).getImage(); 
+        }
+        // Trả về ảnh mặc định nếu sản phẩm chưa có ảnh nào
+        return "default.png"; 
+    }
 }
