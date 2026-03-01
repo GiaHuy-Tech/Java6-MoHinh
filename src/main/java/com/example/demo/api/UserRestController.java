@@ -47,7 +47,6 @@ public class UserRestController {
             acc.setPassword(password);
             acc.setFullName(fullName);
             acc.setPhone(phone);
-            acc.setAddress(address);
             acc.setGender(gender);
             
             // 3. Dòng này sẽ hết lỗi vì cả 2 đều là LocalDate

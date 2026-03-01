@@ -193,6 +193,19 @@ h1, h2, h3, h4, h5, h6 {
 	background: rgba(255, 255, 255, 0.05);
 }
 
+.address-card {
+    background: linear-gradient(145deg, #0c1525, #0a1120);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px;
+    transition: 0.3s;
+}
+
+.address-card:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+}
+
 /* Benefits Box */
 .benefits-box {
 	background: rgba(0, 242, 255, 0.05);
@@ -554,13 +567,12 @@ footer {
 						</h4>
 
 						<div th:each="addr : ${addresses}"
-							class="card bg-dark border-info mb-3 p-3">
+							class="address-card mb-3">
 
 							<div class="d-flex justify-content-between align-items-center">
 								<div>
-									<strong th:text="${addr.fullName}"></strong> <span
-										th:if="${addr.isDefault}"
-										class="badge bg-warning text-dark ms-2"> Mặc định </span> <br>
+									<strong th:text="${addr.fullName}"></strong> 
+									<span th:if="${addr.isDefault}" class="badge bg-warning text-dark ms-2"> Mặc định </span> <br>
 									<small th:text="${addr.phone}"></small><br> <small>
 										<span th:text="${addr.street}"></span>, <span
 										th:text="${addr.ward}"></span>, <span
@@ -571,7 +583,7 @@ footer {
 
 								<div class="text-end">
 									<a
-										th:href="@{/account/address/set-default/{id}(id=${addr.id})}"
+										th:href="@{/account/address/default/{id}(id=${addr.id})}"
 										class="btn btn-sm btn-outline-warning mb-1">Mặc định</a> <a
 										th:href="@{/account/address/edit/{id}(id=${addr.id})}"
 										class="btn btn-sm btn-outline-info mb-1">Sửa</a> <a
@@ -582,11 +594,10 @@ footer {
 						</div>
 
 						<!-- Nút thêm nếu < 4 địa chỉ -->
-						<div th:if="${addresses.size() < 4}">
-							<a href="/account/address/add-form" class="btn btn-cyan"> <i
-								class="bi bi-plus-lg"></i> Thêm địa chỉ
-							</a>
-						</div>
+						<button class="btn btn-cyan" data-bs-toggle="modal"
+							data-bs-target="#addAddressModal">
+							<i class="bi bi-plus-lg"></i> Thêm địa chỉ
+						</button>
 
 						<div class="border-top border-secondary pt-4 mt-5">
 							<h6 class="text-info fw-bold mb-3">
@@ -640,6 +651,72 @@ footer {
 				Luxury Boutique</p>
 		</div>
 	</footer>
+
+	<!-- ADD ADDRESS MODAL -->
+	<div class="modal fade" id="addAddressModal" tabindex="-1">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-content bg-dark border border-info">
+
+				<div class="modal-header border-info">
+					<h5 class="modal-title text-info fw-bold">
+						<i class="bi bi-geo-alt-fill me-2"></i>Thêm địa chỉ giao hàng
+					</h5>
+					<button type="button" class="btn-close btn-close-white"
+						data-bs-dismiss="modal"></button>
+				</div>
+
+				<form th:action="@{/account/address/add}" method="post">
+					<div class="modal-body">
+
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label class="form-label">Họ và tên</label> <input type="text"
+									name="fullName" required class="form-control form-control-dark">
+							</div>
+
+							<div class="col-md-6">
+								<label class="form-label">Số điện thoại</label> <input
+									type="text" name="phone" required
+									class="form-control form-control-dark">
+							</div>
+
+							<div class="col-12">
+								<label class="form-label">Địa chỉ cụ thể</label> <input
+									type="text" name="street" required
+									class="form-control form-control-dark">
+							</div>
+
+							<div class="col-md-4">
+								<label class="form-label">Phường/Xã</label> <input type="text"
+									name="ward" required class="form-control form-control-dark">
+							</div>
+
+							<div class="col-md-4">
+								<label class="form-label">Quận/Huyện</label> <input type="text"
+									name="district" required class="form-control form-control-dark">
+							</div>
+
+							<div class="col-md-4">
+								<label class="form-label">Tỉnh/Thành phố</label> <input
+									type="text" name="city" required
+									class="form-control form-control-dark">
+							</div>
+						</div>
+
+					</div>
+
+					<div class="modal-footer border-info">
+						<button type="button" class="btn btn-outline-secondary-custom"
+							data-bs-dismiss="modal">Hủy</button>
+						<button type="submit" class="btn btn-cyan">
+							<i class="bi bi-check-lg"></i> Lưu địa chỉ
+						</button>
+					</div>
+				</form>
+
+			</div>
+		</div>
+	</div>
 
 	<script>
     setTimeout(() => {

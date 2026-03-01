@@ -40,7 +40,7 @@ public class Address {
     @Column(columnDefinition = "nvarchar(255)")
     String city;
 
-    Boolean isDefault = false;
+    Boolean isDefault = true;
 
     @ManyToOne
     @JoinColumn(name = "account_id")

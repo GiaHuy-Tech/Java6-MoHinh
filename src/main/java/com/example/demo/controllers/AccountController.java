@@ -25,195 +25,199 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class AccountController {
 
-    @Autowired
-    private AccountRepository accountRepo;
+	@Autowired
+	private AccountRepository accountRepo;
 
-    @Autowired
-    private AddressRepository addressRepo;
+	@Autowired
+	private AddressRepository addressRepo;
 
-    @Autowired
-    private OrdersRepository ordersRepo;
+	@Autowired
+	private OrdersRepository ordersRepo;
 
-    @Autowired
-    private MembershipService membershipService;
+	@Autowired
+	private MembershipService membershipService;
 
-    @Autowired
-    private HttpSession session;
+	@Autowired
+	private HttpSession session;
 
-    /* ================== ACCOUNT PAGE ================== */
+	/* ================== ACCOUNT PAGE ================== */
 
-    @GetMapping("/account")
-    public String accountPage(Model model) {
+	@GetMapping("/account")
+	public String accountPage(Model model) {
 
-        Account acc = (Account) session.getAttribute("account");
-        if (acc == null) return "redirect:/login";
+		Account acc = (Account) session.getAttribute("account");
+		if (acc == null)
+			return "redirect:/login";
 
-        acc = accountRepo.findById(acc.getId()).orElse(acc);
+		acc = accountRepo.findById(acc.getId()).orElse(acc);
 
-        membershipService.updateMembershipLevel(acc);
-        accountRepo.save(acc);
-        session.setAttribute("account", acc);
+		membershipService.updateMembershipLevel(acc);
+		accountRepo.save(acc);
+		session.setAttribute("account", acc);
 
-        // ==== Thống kê ====
-        Long totalSpentDB = ordersRepo.sumTotalSpentByAccountId(acc.getId());
-        Long totalOrdersDB = ordersRepo.countByAccountId(acc.getId());
+		// ==== Thống kê ====
+		Long totalSpentDB = ordersRepo.sumTotalSpentByAccountId(acc.getId());
+		Long totalOrdersDB = ordersRepo.countByAccountId(acc.getId());
 
-        long totalSpent = (totalSpentDB != null) ? totalSpentDB : 0L;
-        long orderCount = (totalOrdersDB != null) ? totalOrdersDB : 0L;
+		long totalSpent = (totalSpentDB != null) ? totalSpentDB : 0L;
+		long orderCount = (totalOrdersDB != null) ? totalOrdersDB : 0L;
 
-        model.addAttribute("totalSpent", totalSpent);
-        model.addAttribute("orderCount", orderCount);
+		model.addAttribute("totalSpent", totalSpent);
+		model.addAttribute("orderCount", orderCount);
 
-        // ==== Load Address ====
-        List<Address> addresses = addressRepo.findByAccountId(acc.getId());
-        model.addAttribute("addresses", addresses);
+		// ==== Load Address ====
+		List<Address> addresses = addressRepo.findByAccountId(acc.getId());
+		model.addAttribute("addresses", addresses);
 
-        model.addAttribute("account", acc);
+		model.addAttribute("account", acc);
 
-        return "client/account";
-    }
+		return "client/account";
+	}
 
-    /* ================== UPDATE FULLNAME ================== */
+	/* ================== UPDATE FULLNAME ================== */
 
-    @PostMapping("/account/update-fullname")
-    public String updateFullName(@RequestParam("fullName") String fullName,
-                                 RedirectAttributes redirect) {
+	@PostMapping("/account/update-fullname")
+	public String updateFullName(@RequestParam("fullName") String fullName, RedirectAttributes redirect) {
 
-        Account acc = (Account) session.getAttribute("account");
-        if (acc == null) return "redirect:/login";
+		Account acc = (Account) session.getAttribute("account");
+		if (acc == null)
+			return "redirect:/login";
 
-        if (fullName == null || fullName.trim().isEmpty()) {
-            redirect.addFlashAttribute("error", "❌ Họ tên không được để trống!");
-            return "redirect:/account";
-        }
+		if (fullName == null || fullName.trim().isEmpty()) {
+			redirect.addFlashAttribute("error", "❌ Họ tên không được để trống!");
+			return "redirect:/account";
+		}
 
-        acc.setFullName(fullName.trim());
-        accountRepo.save(acc);
-        session.setAttribute("account", acc);
+		acc.setFullName(fullName.trim());
+		accountRepo.save(acc);
+		session.setAttribute("account", acc);
 
-        redirect.addFlashAttribute("success", "✅ Cập nhật họ tên thành công!");
-        return "redirect:/account";
-    }
+		redirect.addFlashAttribute("success", "✅ Cập nhật họ tên thành công!");
+		return "redirect:/account";
+	}
 
-    /* ================== UPLOAD AVATAR ================== */
+	/* ================== UPLOAD AVATAR ================== */
 
-    @PostMapping("/account/upload-avatar")
-    public String uploadAvatar(@RequestParam("avatar") MultipartFile file,
-                               RedirectAttributes redirect) {
+	@PostMapping("/account/upload-avatar")
+	public String uploadAvatar(@RequestParam("avatar") MultipartFile file, RedirectAttributes redirect) {
 
-        Account acc = (Account) session.getAttribute("account");
+		Account acc = (Account) session.getAttribute("account");
 
-        if (acc != null && file != null && !file.isEmpty()) {
-            try {
-                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+		if (acc != null && file != null && !file.isEmpty()) {
+			try {
+				String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-                Path uploadDir = Paths.get("uploads/avatar/");
-                if (!Files.exists(uploadDir)) Files.createDirectories(uploadDir);
+				Path uploadDir = Paths.get("uploads/avatar/");
+				if (!Files.exists(uploadDir))
+					Files.createDirectories(uploadDir);
 
-                Path filePath = uploadDir.resolve(fileName);
-                Files.write(filePath, file.getBytes());
+				Path filePath = uploadDir.resolve(fileName);
+				Files.write(filePath, file.getBytes());
 
-                acc.setPhoto("/uploads/avatar/" + fileName);
-                accountRepo.save(acc);
-                session.setAttribute("account", acc);
+				acc.setPhoto("/uploads/avatar/" + fileName);
+				accountRepo.save(acc);
+				session.setAttribute("account", acc);
 
-                redirect.addFlashAttribute("success", "✅ Ảnh đại diện đã được cập nhật!");
+				redirect.addFlashAttribute("success", "✅ Ảnh đại diện đã được cập nhật!");
 
-            } catch (IOException e) {
-                e.printStackTrace();
-                redirect.addFlashAttribute("error", "⚠️ Lỗi hệ thống khi lưu ảnh!");
-            }
-        } else {
-            redirect.addFlashAttribute("error", "❌ Vui lòng chọn ảnh!");
-        }
+			} catch (IOException e) {
+				e.printStackTrace();
+				redirect.addFlashAttribute("error", "⚠️ Lỗi hệ thống khi lưu ảnh!");
+			}
+		} else {
+			redirect.addFlashAttribute("error", "❌ Vui lòng chọn ảnh!");
+		}
 
-        return "redirect:/account";
-    }
+		return "redirect:/account";
+	}
 
-    /* ================== ADD ADDRESS ================== */
+	// thêm địa chỉ
 
-    @GetMapping("/account/address/add-form")
-    public String showAddAddressForm(Model model) {
+	@PostMapping("/account/address/add")
+	public String saveAddress(Address address, RedirectAttributes redirect) {
 
-        Account acc = (Account) session.getAttribute("account");
-        if (acc == null) return "redirect:/login";
+		Account acc = (Account) session.getAttribute("account");
+		if (acc == null)
+			return "redirect:/login";
 
-        model.addAttribute("address", new Address());
+		List<Address> list = addressRepo.findByAccountId(acc.getId());
 
-        return "client/address";   // file: templates/client/address.html
-    }
-    
-    @PostMapping("/account/address/add")
-    public String saveAddress(Address address,
-                              RedirectAttributes redirect) {
+		if (list.size() >= 4) {
+			redirect.addFlashAttribute("error", "⚠️ Chỉ tối đa 4 địa chỉ!");
+			return "redirect:/account";
+		}
 
-        Account acc = (Account) session.getAttribute("account");
-        if (acc == null) return "redirect:/login";
+		address.setAccount(acc);
 
-        List<Address> list = addressRepo.findByAccountId(acc.getId());
+		if (list.isEmpty()) {
+			address.setIsDefault(true);
+		}
 
-        if (list.size() >= 4) {
-            redirect.addFlashAttribute("error", "⚠️ Chỉ tối đa 4 địa chỉ!");
-            return "redirect:/account";
-        }
+		addressRepo.save(address);
 
-        address.setAccount(acc);
+		redirect.addFlashAttribute("success", "✅ Thêm địa chỉ thành công!");
+		return "redirect:/account";
+	}
 
-        if (list.isEmpty()) {
-            address.setIsDefault(true);
-        }
+	// DELETE đian chỉ
 
-        addressRepo.save(address);
+	@GetMapping("/account/address/delete/{id}")
+	public String deleteAddress(@PathVariable("id") Integer id, RedirectAttributes redirect) {
 
-        redirect.addFlashAttribute("success", "✅ Thêm địa chỉ thành công!");
-        return "redirect:/account";
-    }
+		Account acc = (Account) session.getAttribute("account");
+		if (acc == null)
+			return "redirect:/login";
 
-    /* ================== DELETE ADDRESS ================== */
+		Address address = addressRepo.findById(id).orElse(null);
+		if (address != null && address.getAccount().getId().equals(acc.getId())) {
 
-    @GetMapping("/account/address/delete/{id}")
-    public String deleteAddress(@PathVariable("id") Integer id,
-                                RedirectAttributes redirect) {
+			boolean wasDefault = Boolean.TRUE.equals(address.getIsDefault());
+			addressRepo.delete(address);
 
-        Account acc = (Account) session.getAttribute("account");
-        if (acc == null) return "redirect:/login";
+			// Nếu xóa default thì set cái khác làm default
+			if (wasDefault) {
+				List<Address> list = addressRepo.findByAccountId(acc.getId());
+				if (!list.isEmpty()) {
+					list.get(0).setIsDefault(true);
+					addressRepo.save(list.get(0));
+				}
+			}
 
-        Address address = addressRepo.findById(id).orElse(null);
-        if (address != null && address.getAccount().getId().equals(acc.getId())) {
+			redirect.addFlashAttribute("success", "Đã xóa địa chỉ!");
+		}
 
-        	boolean wasDefault = Boolean.TRUE.equals(address.getIsDefault());
-            addressRepo.delete(address);
+		return "redirect:/account";
+	}
 
-            // Nếu xóa default thì set cái khác làm default
-            if (wasDefault) {
-                List<Address> list = addressRepo.findByAccountId(acc.getId());
-                if (!list.isEmpty()) {
-                    list.get(0).setIsDefault(true);
-                    addressRepo.save(list.get(0));
-                }
-            }
+	// set địa chỉ mặc định
 
-            redirect.addFlashAttribute("success", "🗑️ Đã xóa địa chỉ!");
-        }
+	@GetMapping("/account/address/default/{id}")
+	public String setDefaultAddress(@PathVariable("id") Integer id, RedirectAttributes redirect) {
 
-        return "redirect:/account";
-    }
+		Account acc = (Account) session.getAttribute("account");
+		if (acc == null)
+			return "redirect:/login";
 
-    /* ================== SET DEFAULT ADDRESS ================== */
+		// Lấy tất cả địa chỉ của account
+		List<Address> list = addressRepo.findByAccountId(acc.getId());
 
-    @GetMapping("/account/address/default/{id}")
-    public String setDefaultAddress(@PathVariable("id") Long id) {
+		// Bỏ default tất cả
+		for (Address a : list) {
+			a.setIsDefault(false);
+		}
 
-        Account acc = (Account) session.getAttribute("account");
-        if (acc == null) return "redirect:/login";
+		// Tìm địa chỉ được chọn
+		for (Address a : list) {
+			if (a.getId().equals(id)) {
+				a.setIsDefault(true);
+				break;
+			}
+		}
 
-        List<Address> list = addressRepo.findByAccountId(acc.getId());
+		// Lưu lại
+		addressRepo.saveAll(list);
 
-        for (Address a : list) {
-            a.setIsDefault(a.getId().equals(id));
-            addressRepo.save(a);
-        }
-
-        return "redirect:/account";
-    }
+		redirect.addFlashAttribute("success", "Đã đặt làm địa chỉ mặc định!");
+		return "redirect:/account";
+	}
 }

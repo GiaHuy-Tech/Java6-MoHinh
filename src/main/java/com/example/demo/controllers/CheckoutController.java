@@ -91,6 +91,8 @@ public class CheckoutController {
 		
 		// 2. Tính phí ship
 		int shippingFee = calculateShippingFee(defaultAddress.getCity(), subTotal);
+		
+		model.addAttribute("defaultAddress", defaultAddress);
 
 		// 3. ✅ Tính giảm giá thành viên
 		int discountPercent = membershipService.getDiscountPercent(account.getMembershipLevel());

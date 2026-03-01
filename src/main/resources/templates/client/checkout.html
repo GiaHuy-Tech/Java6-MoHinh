@@ -243,7 +243,7 @@
                             </div>
                             
                             <div class="mb-3">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">Email</label>	
                                 <input type="email" class="form-control form-control-dark"
                                        th:value="${account.email}" readonly>
                             </div>
@@ -251,7 +251,10 @@
                             <div class="mb-3">
                                 <label class="form-label">Địa chỉ nhận hàng (Ghi rõ Tỉnh/TP)</label>
                                 <input type="text" class="form-control form-control-dark" name="address"
-                                       th:value="${account.address}" 
+                                       th:value="${defaultAddress.street + ', ' 
+											          + defaultAddress.ward + ', ' 
+											          + defaultAddress.district + ', ' 
+											          + defaultAddress.city}"
                                        placeholder="Số nhà, Đường, Quận/Huyện, Tỉnh/TP..." required>
                                 <small class="text-light fst-italic mt-1 d-block">
                                     * Phí vận chuyển được tính tự động dựa trên địa chỉ (Kho tại Cần Thơ).
