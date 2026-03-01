@@ -3,9 +3,9 @@ package com.example.demo.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.example.demo.model.CartDetail;
 import com.example.demo.repository.CartDetailRepository;
 
 @Controller
@@ -15,29 +15,17 @@ public class CartAdminController {
     @Autowired
     private CartDetailRepository cartDetailRepo;
 
-    // ===== DANH SÁCH CART DETAIL =====
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("carts", cartDetailRepo.findAll());
+    public String stats(Model model) {
+        // Lấy danh sách thống kê sản phẩm trong giỏ hàng
+        model.addAttribute("cartStats", cartDetailRepo.getTopProductsInCarts());
+        
+        // Tính tổng số lượng item đang nằm trong các giỏ hàng (để hiển thị con số tổng quan)
+        long totalItems = cartDetailRepo.findAll().stream()
+                            .mapToInt(c -> c.getQuantity())
+                            .sum();
+        model.addAttribute("totalItemsInCarts", totalItems);
+
         return "admin/cart-list";
-    }
-
-    // ===== CHI TIẾT =====
-    @GetMapping("/{id}")
-    public String detail(@PathVariable("id") Integer id, Model model) {
-
-        CartDetail cartDetail =
-                cartDetailRepo.findById(id).orElse(null);
-
-        if (cartDetail == null) {
-            model.addAttribute("errorMessage",
-                    "Không tìm thấy cart detail ID " + id);
-            model.addAttribute("carts",
-                    cartDetailRepo.findAll());
-            return "admin/cart-list";
-        }
-
-        model.addAttribute("cart", cartDetail);
-        return "admin/cart-detail";
     }
 }

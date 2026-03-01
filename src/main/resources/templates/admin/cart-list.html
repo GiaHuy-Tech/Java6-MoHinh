@@ -1,227 +1,311 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MODEL WORLD - Quản lý giỏ hàng</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-
-<style>
-/* --- CẤU HÌNH MÀU SẮC & BIẾN (ĐỒNG BỘ) --- */
-:root {
-    --bg-dark: #050b14;
-    --bg-card: #0c1525;
-    --text-light: #e1e7ff;
-    --accent-cyan: #00f2ff; /* Màu Neon Cyan chính */
-    --border-color: rgba(0, 242, 255, 0.2);
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thống kê Giỏ hàng - MODEL WORLD</title>
     
-    /* Font Variables */
-    --font-main: "Be Vietnam Pro", sans-serif;
-    --font-display: "Orbitron", sans-serif;
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #020609;       
+            --bg-sidebar: #05111a;    
+            --bg-card: #081a26;       
+            --text-main: #e0fbfc;     
+            --accent-cyan: #00f2ff;   
+            --accent-green: #00ff9d;
+            --accent-purple: #bc13fe;
+            --sidebar-width: 260px;
+        }
 
-    /* ĐỊNH NGHĨA HIỆU ỨNG NEON GLOW */
-    --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-}
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main); 
+            font-family: 'Be Vietnam Pro', sans-serif;
+            overflow-x: hidden;
+        }
 
-body {
-    /* Background neon city */
-    background: 
-        linear-gradient(135deg, var(--bg-dark), #1a0033),
-        url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
-    color: var(--text-light);
-    min-height: 100vh;
-    font-family: var(--font-main);
-    position: relative;
-    overflow-x: hidden;
-}
+        /* --- LAYOUT --- */
+        #wrapper { display: flex; width: 100%; overflow: hidden; }
 
-/* TYPOGRAPHY FIX */
-h2, h4, h5, h6 { font-family: var(--font-main); font-weight: 700; }
-.navbar-brand { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px; }
-.navbar-brand span { color: #fff; }
+        #sidebar-wrapper {
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid rgba(0, 242, 255, 0.3); 
+            min-height: 100vh;
+            position: fixed; z-index: 1000; height: 100%; overflow-y: auto;
+            transition: margin-left 0.3s ease-out;
+        }
 
-/* 🌟 NAVBAR (ĐÃ ĐỒNG BỘ) */
-.navbar {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); 
-}
-.navbar .nav-link { 
-    color: var(--accent-cyan) !important; 
-    transition: 0.3s;
-    font-weight: 500;
-}
-.navbar .nav-link:hover {
-    color: var(--text-light) !important;
-    text-shadow: 0 0 8px var(--accent-cyan);
-}
+        #page-content-wrapper {
+            width: 100%;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease-out;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
 
-/* CARD & BOX STYLE */
-.card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    transition: 0.3s ease;
-}
-.card:hover {
-    box-shadow: var(--neon-box-shadow);
-}
-.card h6, label, th, .text-neon {
-  color: var(--accent-cyan) !important;
-}
+        body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
+        body.toggled #page-content-wrapper { margin-left: 0; }
 
-/* TABLE */
-.table {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
-.table thead { background-color: var(--bg-dark); }
-.table th { 
-    color: var(--accent-cyan); 
-    font-weight: 600; 
-    border-bottom: 1px solid var(--border-color);
-}
-.table-dark tbody tr { 
-    background-color: transparent !important;
-    border-color: rgba(255,255,255,0.05);
-}
-.table td { color: var(--text-light); vertical-align: middle; }
-.table-hover tbody tr:hover { 
-    background-color: rgba(0,242,255,0.1) !important; 
-}
+        /* Sidebar & Nav Items */
+        .sidebar-heading {
+            padding: 1.5rem 1.25rem;
+            font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 1.5rem;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            text-align: center;
+            background: rgba(0, 242, 255, 0.1);
+            text-shadow: 0 0 10px rgba(0, 242, 255, 0.7); 
+        }
 
-/* BUTTONS (Sử dụng style Neon Cyan) */
-.btn-neon-action {
-  background: transparent;
-  border: 1px solid var(--accent-cyan);
-  color: var(--accent-cyan);
-  font-weight: 600;
-  border-radius: 8px;
-  transition: 0.3s;
-}
-.btn-neon-action:hover {
-  background: var(--accent-cyan);
-  color: var(--bg-dark);
-  box-shadow: 0 0 15px var(--accent-cyan);
-  transform: scale(1.02);
-}
+        .list-group-item {
+            background-color: transparent; color: var(--text-main); border: none;
+            padding: 1rem 1.5rem; font-weight: 500; transition: all 0.2s;
+            border-left: 3px solid transparent; display: flex; align-items: center;
+        }
+        .list-group-item:hover, .list-group-item.active {
+            color: var(--accent-cyan); background-color: rgba(0, 242, 255, 0.1);
+            border-left-color: var(--accent-cyan);
+            text-shadow: 0 0 5px var(--accent-cyan);
+        }
+        .list-group-item i { margin-right: 12px; font-size: 1.2rem; }
 
-/* Footer */
-.footer {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-top: 1px solid var(--border-color);
-    color: rgba(255,255,255,0.85);
-    padding: 20px 0;
-}
+        /* Top Navbar */
+        .top-navbar {
+            background: rgba(5, 17, 26, 0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            padding: 15px 30px; position: sticky; top: 0; z-index: 990;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .page-title { font-family: 'Orbitron', sans-serif; font-weight: 700; margin: 0; }
+        .btn-toggle { background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); border-radius: 6px; }
 
-/* Rain effect (ĐÃ GIẢM TẦN SUẤT) */
-.rain {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-}
-.drop {
-  position: absolute;
-  width: 2px;
-  height: 15px;
-  background: linear-gradient(to bottom, var(--accent-cyan), rgba(0,255,255,0));
-  animation: fall linear infinite;
-  opacity: 0.7;
-}
-@keyframes fall { 0% { transform: translateY(-20px); } 100% { transform: translateY(100vh); } }
-</style>
+        /* --- CONTENT STYLES --- */
+        .cyber-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px; padding: 25px;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+            margin-bottom: 20px; position: relative; overflow: hidden;
+        }
+        .cyber-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        /* Stats Box */
+        .stat-value { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 700; color: var(--text-main); }
+        .stat-label { font-size: 0.9rem; color: #a0b1c5; text-transform: uppercase; letter-spacing: 1px; }
+        .icon-box {
+            width: 50px; height: 50px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+            background: rgba(0, 242, 255, 0.1); color: var(--accent-cyan);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+        }
+
+        /* Table */
+        .table { color: var(--text-main); vertical-align: middle; --bs-table-bg: transparent; }
+        .table thead th {
+            background-color: rgba(0, 242, 255, 0.05); color: var(--accent-cyan);
+            font-family: 'Orbitron', sans-serif; text-transform: uppercase; font-size: 0.8rem;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3); padding: 15px; border-top: none;
+        }
+        .table tbody td { border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; font-size: 0.95rem; }
+        .table-hover tbody tr:hover { background-color: rgba(0, 242, 255, 0.05); }
+
+        .product-img {
+            width: 50px; height: 50px; object-fit: cover; border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Top 3 Badges */
+        .rank-badge {
+            width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-weight: bold; font-family: 'Orbitron', sans-serif;
+            border: 1px solid currentColor;
+        }
+        .rank-1 { color: #ffd700; background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+        .rank-2 { color: #c0c0c0; background: rgba(192, 192, 192, 0.1); }
+        .rank-3 { color: #cd7f32; background: rgba(205, 127, 50, 0.1); }
+        .rank-normal { color: var(--text-main); border-color: rgba(255,255,255,0.1); font-size: 0.9rem; }
+
+        /* Progress Bar for Quantity */
+        .progress-slim { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 8px; }
+        .progress-bar-cyan { background: var(--accent-cyan); box-shadow: 0 0 8px var(--accent-cyan); }
+    </style>
 </head>
+
 <body>
 
-<nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/stats}"> 
-        <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
-        <span class="fw-bold fs-4">MODEL WORLD</span>
-    </a>
-    <div class="collapse navbar-collapse justify-content-end">
-      <ul class="navbar-nav me-3">
-        <li class="nav-item"><a class="nav-link" th:href="@{/cata-mana}"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/product-mana}"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/orders-mana}"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/user-mana}"><i class="bi bi-people me-1"></i> Người dùng</a></li>
-        <li class="nav-item"><a class="nav-link" th:href="@{/admin/cart}"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
-      </ul>
+<div id="wrapper">
+    
+    <div id="sidebar-wrapper">
+        <div class="sidebar-heading">
+            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
+        </div>
+        
+        <div class="list-group list-group-flush mt-2">
+            <a href="/stats" class="list-group-item">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/cata-mana" class="list-group-item">
+                <i class="bi bi-tags"></i> Quản lý Danh mục
+            </a>
+            <a href="/product-mana" class="list-group-item">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/vouchers" class="list-group-item">
+                <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+            </a>
+            <a href="/orders-mana" class="list-group-item">
+                <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/user-mana" class="list-group-item">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/cart" class="list-group-item active">
+                <i class="bi bi-cart3"></i> Giỏ hàng Admin
+            </a>
+            
+            <div class="mt-4 px-4 mb-2 text-white-50 text-uppercase small fw-bold">Hệ thống</div>
+            <a href="/logout" class="list-group-item text-danger">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </div>
     </div>
-  </div>
-</nav>
 
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-neon mb-0">
-      <i class="bi bi-cart4"></i> Quản lý giỏ hàng
-    </h2>
-    <a th:href="@{/stats}" class="btn btn-neon-action"><i class="bi bi-arrow-left-circle me-1"></i> Về menu Admin</a>
-  </div>
+    <div id="page-content-wrapper">
+        
+        <nav class="top-navbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-toggle" id="menu-toggle"><i class="bi bi-list"></i></button>
+                <h4 class="page-title text-uppercase">Phân Tích Giỏ Hàng</h4>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-end d-none d-sm-block">
+                    <div class="fw-bold small">Admin User</div>
+                </span>
+                <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" width="35" class="rounded-circle border border-info p-1">
+            </div>
+        </nav>
 
-  <div class="card shadow mb-5">
-    <div class="card-body p-0">
-      <table class="table table-dark table-hover mb-0 text-center align-middle">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Họ tên</th>
-            <th>Ngày tạo</th>
-            <th>Số loại sản phẩm</th>
-            <th>Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="cart : ${carts}">
-            <td th:text="${cart.id}">1</td>
-            <td th:text="${cart.account != null ? cart.account.email : 'Không có'}">email@example.com</td>
-            <td th:text="${cart.account != null ? cart.account.fullName : 'Không có'}">Nguyễn Văn A</td>
-            <td th:text="${cart.createdDate != null ? #dates.format(cart.createdDate, 'dd/MM/yyyy HH:mm') : 'Chưa có'}">01/01/2025</td>
-            <td th:text="${cart.cartDetails != null ? #lists.size(cart.cartDetails) : 0}">0</td>
-            <td>
-              <a th:href="@{'/admin/cart/' + ${cart.id}}" class="btn btn-sm btn-neon-action me-1" title="Chi tiết">
-                <i class="bi bi-eye-fill"></i>
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <div class="container-fluid px-4 pb-4">
+            
+            <div class="row g-4 mt-2 mb-4">
+                <div class="col-md-6 col-xl-4">
+                    <div class="cyber-card d-flex align-items-center p-4 h-100">
+                        <div class="icon-box me-3">
+                            <i class="bi bi-basket3"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" th:text="${totalItemsInCarts}">0</div>
+                            <div class="stat-label">Tổng sản phẩm đang chờ mua</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-xl-4">
+                    <div class="cyber-card d-flex align-items-center p-4 h-100">
+                        <div class="icon-box me-3" style="color: var(--accent-green); border-color: var(--accent-green); background: rgba(0, 255, 157, 0.1);">
+                            <i class="bi bi-upc-scan"></i>
+                        </div>
+                        <div>
+                            <div class="stat-value" th:text="${#lists.size(cartStats)}">0</div>
+                            <div class="stat-label">Mã sản phẩm được quan tâm</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cyber-card">
+                <h5 class="mb-4 font-monospace d-flex align-items-center text-white">
+                    <i class="bi bi-graph-up-arrow me-2" style="color: var(--accent-cyan)"></i>
+                    TOP SẢN PHẨM ĐƯỢC THÊM VÀO GIỎ NHIỀU NHẤT
+                </h5>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;" class="text-center">Hạng</th>
+                                <th>Sản phẩm</th>
+                                <th>Giá bán</th>
+                                <th>Category</th>
+                                <th style="width: 250px;">Số lượng trong giỏ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item, stat : ${cartStats}">
+                                <td class="text-center">
+                                    <span th:if="${stat.index == 0}" class="rank-badge rank-1">1</span>
+                                    <span th:if="${stat.index == 1}" class="rank-badge rank-2">2</span>
+                                    <span th:if="${stat.index == 2}" class="rank-badge rank-3">3</span>
+                                    <span th:if="${stat.index > 2}" class="rank-badge rank-normal" th:text="${stat.index + 1}"></span>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="${item.product.image != null} ? ${item.product.image} : '/images/no-image.png'" 
+                                             class="product-img me-3" 
+                                             onerror="this.src='https://placehold.co/50x50?text=Model'">
+                                        <div>
+                                            <div class="fw-bold text-white" th:text="${item.product.name}">Tên sản phẩm</div>
+                                            <div class="small text-white-50" th:text="'ID: #' + ${item.product.id}"></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="fw-bold" style="color: var(--accent-green)" 
+                                    th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                </td>
+
+                                <td>
+                                    <span class="badge" 
+                                          style="border: 1px solid var(--accent-purple); color: var(--accent-purple); background: rgba(188, 19, 254, 0.1);"
+                                          th:text="${item.product.category != null ? item.product.category.name : 'N/A'}">
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-bold" style="color: var(--accent-cyan); font-size: 1.1rem;" th:text="${item.totalQuantity}"></span>
+                                        <small class="text-white-50">Lượt thêm</small>
+                                    </div>
+                                    <div class="progress progress-slim">
+                                        <div class="progress-bar progress-bar-cyan" role="progressbar" 
+                                             th:style="'width: ' + (${item.totalQuantity} * 100.0 / ${cartStats[0].totalQuantity}) + '%'">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr th:if="${#lists.isEmpty(cartStats)}">
+                                <td colspan="5" class="text-center py-5 text-white-50">
+                                    <i class="bi bi-cart-x display-4 d-block mb-3"></i>
+                                    Chưa có sản phẩm nào trong giỏ hàng của người dùng.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
     </div>
-  </div>
 </div>
-
-<footer class="footer text-center py-4 mt-5">
-  <small>© 2025 <span style="color: var(--accent-cyan);">MODEL WORLD</span> | Cart Management</small>
-</footer>
-
-<div class="rain" id="rain"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Tạo mưa neon (ĐÃ GIẢM TẦN SUẤT)
-const rain = document.getElementById('rain');
-const drops = 50; // Giảm số lượng giọt
-for(let i=0;i<drops;i++){
-  const drop = document.createElement('div');
-  drop.className = 'drop';
-  drop.style.left = Math.random() * 100 + 'vw';
-  drop.style.animationDuration = 0.5 + Math.random()*0.5 + 's';
-  drop.style.animationDelay = Math.random()*10 + 's'; // Tăng thời gian delay tối đa
-  rain.appendChild(drop);
-}
+    const toggleButton = document.getElementById("menu-toggle");
+    toggleButton.onclick = function (e) {
+        e.preventDefault();
+        document.body.classList.toggle("toggled");
+    };
 </script>
 
 </body>

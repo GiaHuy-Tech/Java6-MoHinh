@@ -21,6 +21,8 @@
             
             --accent-cyan: #00f2ff;
             --accent-green: #00ff9d;
+            --accent-purple: #bc13fe;
+            --accent-yellow: #fcd34d;
             --border-color: #00f2ff;  
             --sidebar-width: 260px;
         }
@@ -41,15 +43,11 @@
             background-color: var(--bg-sidebar);
             border-right: 1px solid rgba(0, 242, 255, 0.3); 
             min-height: 100vh;
-            position: fixed;
-            z-index: 1000;
-            height: 100%;
+            position: fixed; z-index: 1000; height: 100%;
         }
 
         #page-content-wrapper {
-            width: 100%;
-            margin-left: var(--sidebar-width);
-            transition: margin 0.3s ease-out;
+            width: 100%; margin-left: var(--sidebar-width); transition: margin 0.3s ease-out;
         }
 
         body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
@@ -57,40 +55,28 @@
 
         /* Sidebar Items */
         .sidebar-heading {
-            padding: 1.5rem 1.25rem;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            color: var(--accent-cyan);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-            text-align: center;
-            background: rgba(0, 242, 255, 0.1);
+            padding: 1.5rem 1.25rem; font-family: 'Orbitron', sans-serif; font-size: 1.4rem;
+            color: var(--accent-cyan); border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            text-align: center; background: rgba(0, 242, 255, 0.1);
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.7); 
         }
 
         .list-group-item {
-            background-color: transparent;
-            color: var(--text-main); 
-            border: none;
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.2s;
+            background-color: transparent; color: var(--text-main); border: none;
+            padding: 1rem 1.5rem; font-weight: 500; transition: all 0.2s;
             border-left: 3px solid transparent;
         }
 
         .list-group-item:hover, .list-group-item.active {
-            color: var(--accent-cyan); 
-            background-color: rgba(0, 242, 255, 0.1);
-            border-left-color: var(--accent-cyan);
-            text-shadow: 0 0 5px var(--accent-cyan);
+            color: var(--accent-cyan); background-color: rgba(0, 242, 255, 0.1);
+            border-left-color: var(--accent-cyan); text-shadow: 0 0 5px var(--accent-cyan);
         }
         .list-group-item i { margin-right: 10px; width: 20px; text-align: center; }
 
         /* Navbar */
         .top-navbar {
-            background: rgba(5, 17, 26, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-            padding: 15px 30px;
+            background: rgba(5, 17, 26, 0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3); padding: 15px 30px;
             position: sticky; top: 0; z-index: 999;
         }
         .btn-toggle {
@@ -99,25 +85,18 @@
             box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
         }
         .btn-toggle:hover { 
-            background: var(--accent-cyan); color: #000; 
-            box-shadow: 0 0 15px var(--accent-cyan);
+            background: var(--accent-cyan); color: #000; box-shadow: 0 0 15px var(--accent-cyan);
         }
 
         /* Cards */
         .stats-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 8px;
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            transition: transform 0.3s;
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+            background: var(--bg-card); border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px; padding: 25px; display: flex; align-items: center;
+            transition: transform 0.3s; box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
             height: 100%;
         }
         .stats-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+            transform: translateY(-5px); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
             border-color: var(--accent-cyan);
         }
         .icon-box {
@@ -138,10 +117,8 @@
         
         /* Tables & Charts */
         .table-container {
-            background: var(--bg-card);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 8px; padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
+            background: var(--bg-card); border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
         }
         .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); }
         .table thead th { 
@@ -149,6 +126,20 @@
             text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
         }
         .table td { border-bottom: 1px solid rgba(0, 242, 255, 0.15); vertical-align: middle; color: var(--text-main); }
+
+        /* Custom Modal */
+        .modal-content {
+            background-color: var(--bg-card); border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+        .modal-header { border-bottom: 1px solid rgba(0, 242, 255, 0.3); }
+        .modal-footer { border-top: 1px solid rgba(0, 242, 255, 0.3); }
+        .form-control {
+            background-color: rgba(0,0,0,0.3); border: 1px solid rgba(0, 242, 255, 0.3); color: white;
+        }
+        .form-control:focus {
+            background-color: rgba(0,0,0,0.5); border-color: var(--accent-cyan); color: white; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
+        }
 
         /* Rain Effect */
         .raindrop {
@@ -259,7 +250,7 @@
                         <div>
                             <h6 class="text-neon text-uppercase small mb-1">Khách hàng</h6>
                             <h3 class="fw-bold text-bright m-0" th:text="${totalAccounts}">0</h3>
-                            <small class="text-neon-green fw-bold"><i class="bi bi-arrow-up"></i> +12 user mới</small>
+                            <small class="text-neon-green fw-bold"><i class="bi bi-arrow-up"></i> + Active users</small>
                         </div>
                     </div>
                 </div>
@@ -271,11 +262,9 @@
                         <h6 class="text-neon text-uppercase fw-bold w-100 text-start mb-3">
                             <i class="bi bi-pie-chart-fill me-2"></i>Doanh thu Danh mục
                         </h6>
-                        
                         <div style="width: 100%; max-width: 250px; position: relative;">
                             <canvas id="revenueChart"></canvas>
                         </div>
-
                         <div class="mt-4 pt-3 w-100" style="border-top: 1px solid var(--accent-cyan);">
                             <small class="text-neon text-uppercase">Tổng doanh thu toàn thời gian</small>
                             <h3 class="fw-bold text-neon-green mt-1" 
@@ -348,6 +337,85 @@
             <div class="row mb-4">
                 <div class="col-12">
                     <div class="table-container">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-bright">
+                                <i class="bi bi-gem me-2" style="color: var(--accent-purple);"></i>
+                                Quản Lý & Thống Kê Hạng Thành Viên
+                            </h5>
+                            <span class="badge rounded-pill bg-dark border border-light">Cập nhật quyền lợi</span>
+                        </div>
+                        
+                        <div class="row g-4 align-items-center">
+                            <div class="col-md-4 text-center border-end border-secondary">
+                                <div style="max-width: 220px; margin: 0 auto;">
+                                    <canvas id="memberChart"></canvas>
+                                </div>
+                                <p class="text-neon mt-3 small fst-italic">Phân bố thành viên</p>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Hạng</th>
+                                                <th>Điều kiện (Điểm)</th>
+                                                <th>Ưu đãi</th>
+                                                <th>Thành viên</th>
+                                                <th class="text-end">Cấu hình</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="mem, stat : ${memberships}">
+                                                <td>
+                                                    <span class="fw-bold text-neon" th:text="${mem.name}">NAME</span>
+                                                    <div class="small text-white-50" th:text="'ID: ' + ${mem.id}"></div>
+                                                </td>
+                                                <td>
+                                                    <i class="bi bi-star-fill text-warning me-1"></i>
+                                                    <span class="text-bright" th:text="${#numbers.formatDecimal(mem.pointRequired, 0, 'COMMA', 0, 'POINT')}"></span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="badge bg-transparent border border-success text-success" 
+                                                              th:text="'Giảm ' + ${mem.discount} + '%'"></span>
+                                                        <span th:if="${mem.freeShipping}" class="badge bg-transparent border border-info text-info">Free Ship</span>
+                                                    </div>
+                                                </td>
+                                                <td style="width: 25%;">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="progress flex-grow-1" style="height: 4px; background: rgba(255,255,255,0.1);">
+                                                            <div class="progress-bar" style="background-color: var(--accent-purple);" 
+                                                                 th:style="|width: ${(mem.accounts.size() * 5)}%|"></div>
+                                                        </div>
+                                                        <span class="ms-2 fw-bold text-white" th:text="${mem.accounts.size()}"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-end">
+                                                    <button class="btn btn-sm btn-outline-light rounded-circle"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#membershipModal"
+                                                            th:attr="data-id=${mem.id}, 
+                                                                     data-name=${mem.name}, 
+                                                                     data-point=${mem.pointRequired}, 
+                                                                     data-discount=${mem.discount}, 
+                                                                     data-freeship=${mem.freeShipping}">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="table-container">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0 text-bright"><i class="bi bi-graph-up-arrow me-2 text-neon"></i>Biểu đồ Doanh thu theo Tháng</h5>
                         </div>
@@ -363,7 +431,6 @@
                     <div class="table-container">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="mb-0 text-bright"><i class="bi bi-bar-chart-line me-2 text-neon"></i>Tiến độ đơn hàng theo tháng</h5>
-                            <button class="btn btn-sm btn-outline-info" style="color: var(--accent-cyan); border-color: var(--accent-cyan);">Chi tiết</button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0">
@@ -373,7 +440,6 @@
                                         <th>Trạng thái</th>
                                         <th>Đơn hàng (Hoàn tất)</th>
                                         <th>Tiến độ</th>
-                                        <th class="text-end">Xem</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -393,12 +459,6 @@
                                                 <span class="ms-2 small text-neon" th:text="${orderCounts[iStat.index]}"></span>
                                             </div>
                                         </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm text-neon" style="border: 1px solid var(--accent-cyan); background: transparent;"><i class="bi bi-search"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${months == null or months.empty}">
-                                        <td colspan="5" class="text-center text-neon py-3">Chưa có dữ liệu đơn hàng hoàn tất nào.</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -416,6 +476,53 @@
     </div> 
 </div> 
 
+<div class="modal fade" id="membershipModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form action="/admin/membership/update" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title text-neon font-monospace">
+                        <i class="bi bi-gear-wide-connected me-2"></i>CẬP NHẬT QUYỀN LỢI
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body text-white">
+                    <input type="hidden" name="id" id="modalMemId">
+
+                    <div class="mb-3">
+                        <label class="form-label text-neon small">Tên hạng</label>
+                        <input type="text" class="form-control" name="name" id="modalMemName" required placeholder="Ví dụ: Vàng, Kim Cương...">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-neon small">Điểm yêu cầu</label>
+                            <input type="number" class="form-control" name="pointRequired" id="modalMemPoint" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-neon small">Giảm giá (%)</label>
+                            <input type="number" class="form-control" name="discount" id="modalMemDiscount" min="0" max="100" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 form-check bg-dark p-3 rounded border border-secondary mx-1">
+                        <input type="checkbox" class="form-check-input" name="freeShipping" id="modalMemFreeship" style="background-color: #333; border-color: var(--accent-cyan);">
+                        <label class="form-check-label text-white" for="modalMemFreeship">
+                            <i class="bi bi-truck me-1 text-info"></i> Miễn phí vận chuyển (Free Shipping)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm text-white" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-info fw-bold btn-sm" style="background: var(--accent-cyan); border: none; color: #000; box-shadow: 0 0 10px var(--accent-cyan);">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
@@ -430,7 +537,7 @@
 
     // Rain Effect
     const rainContainer = document.getElementById('rain');
-    for(let i=0; i<50; i++){
+    for(let i=0; i<30; i++){
         const drop = document.createElement('div');
         drop.classList.add('raindrop');
         drop.style.left = Math.random() * 100 + 'vw';
@@ -439,7 +546,7 @@
         rainContainer.appendChild(drop);
     }
 
-    // --- 1. PIE CHART (Doanh thu danh mục) ---
+    // --- 1. PIE CHART (Revenue) ---
     const ctx = document.getElementById('revenueChart').getContext('2d');
     const dbLabels = /*[[${chartLabels}]]*/ []; 
     const dbData = /*[[${chartData}]]*/ [];
@@ -452,56 +559,23 @@
             labels: labels,
             datasets: [{
                 data: dataValues, 
-                backgroundColor: [
-                    '#00f2ff', '#00ff9d', '#00bfff', '#7df9ff', '#50c878', '#e0ffff'  
-                ],
-                borderColor: '#081a26',
-                borderWidth: 2,
-                hoverOffset: 4
+                backgroundColor: ['#00f2ff', '#00ff9d', '#00bfff', '#7df9ff', '#50c878', '#e0ffff'],
+                borderColor: '#081a26', borderWidth: 2
             }]
         },
         options: {
-            responsive: true,
-            cutout: '75%', 
+            responsive: true, cutout: '75%', 
             plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        color: '#00f2ff', 
-                        font: { family: 'Be Vietnam Pro', size: 11 },
-                        usePointStyle: true,
-                        boxWidth: 8
-                    }
-                },
-                tooltip: {
-                    backgroundColor: 'rgba(5, 17, 26, 0.9)',
-                    titleColor: '#00f2ff',
-                    bodyColor: '#e0fbfc',
-                    borderColor: '#00f2ff',
-                    borderWidth: 1,
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.label || '';
-                            if (label) { label += ': '; }
-                            if (context.parsed !== null) {
-                                label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed);
-                            }
-                            return label;
-                        }
-                    }
-                }
+                legend: { position: 'bottom', labels: { color: '#00f2ff', boxWidth: 8 } }
             }
         }
     });
 
-    // --- 2. BAR CHART (Doanh thu theo tháng) ---
+    // --- 2. BAR CHART (Monthly Revenue) ---
     const ctxBar = document.getElementById('monthlyRevenueChart').getContext('2d');
-    
-    // Dữ liệu từ Controller (hoặc fallback nếu chưa có)
-    const barLabels = /*[[${revenueMonthLabels}]]*/ ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-    const barData = /*[[${revenueMonthData}]]*/ [12000000, 19000000, 3000000, 5000000, 2000000, 3000000, 15000000, 10000000, 20000000, 25000000, 18000000, 30000000];
+    const barLabels = /*[[${revenueMonthLabels}]]*/ [];
+    const barData = /*[[${revenueMonthData}]]*/ [];
 
-    // Tạo gradient
     const gradientBar = ctxBar.createLinearGradient(0, 0, 0, 400);
     gradientBar.addColorStop(0, 'rgba(0, 242, 255, 0.8)');
     gradientBar.addColorStop(1, 'rgba(0, 242, 255, 0.1)');
@@ -511,63 +585,70 @@
         data: {
             labels: barLabels,
             datasets: [{
-                label: 'Doanh thu',
-                data: barData,
-                backgroundColor: gradientBar,
-                borderColor: '#00f2ff',
-                borderWidth: 1,
-                borderRadius: 4,
-                barPercentage: 0.6,
-                hoverBackgroundColor: '#00ff9d',
-                hoverBorderColor: '#00ff9d'
+                label: 'Doanh thu', data: barData, backgroundColor: gradientBar,
+                borderColor: '#00f2ff', borderWidth: 1, borderRadius: 4, barPercentage: 0.6
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0, 242, 255, 0.1)' }, ticks: { color: '#e0fbfc' } },
+                x: { grid: { display: false }, ticks: { color: '#00f2ff' } }
+            }
+        }
+    });
+
+    // --- 3. DOUGHNUT CHART (Membership Stats) - NEW ---
+    const ctxMem = document.getElementById('memberChart').getContext('2d');
+    const memLabels = /*[[${memLabels}]]*/ ['Đồng', 'Bạc', 'Vàng'];
+    const memData = /*[[${memData}]]*/ [10, 5, 2];
+
+    new Chart(ctxMem, {
+        type: 'doughnut',
+        data: {
+            labels: memLabels,
+            datasets: [{
+                data: memData,
+                backgroundColor: ['#bc13fe', '#fcd34d', '#00ff9d', '#00f2ff'], // Màu Tím, Vàng, Xanh
+                borderColor: '#081a26', borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true, cutout: '60%',
             plugins: {
-                legend: { display: false },
+                legend: { display: false }, // Ẩn legend để tiết kiệm chỗ
                 tooltip: {
-                    backgroundColor: 'rgba(5, 17, 26, 0.9)',
-                    titleColor: '#00f2ff',
-                    bodyColor: '#e0fbfc',
-                    borderColor: '#00f2ff',
-                    borderWidth: 1,
-                    displayColors: false,
                     callbacks: {
                         label: function(context) {
-                            let value = context.parsed.y;
-                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                            return ' ' + context.label + ': ' + context.parsed + ' user';
                         }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 242, 255, 0.1)',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#e0fbfc',
-                        font: { family: 'Be Vietnam Pro', size: 11 },
-                        callback: function(value) {
-                            if(value >= 1000000) return (value/1000000) + ' Tr';
-                            return value;
-                        }
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        color: '#00f2ff',
-                        font: { family: 'Be Vietnam Pro', size: 12 }
                     }
                 }
             }
         }
     });
+
+    // --- 4. MODAL LOGIC ---
+    const memModal = document.getElementById('membershipModal');
+    if (memModal) {
+        memModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            const point = button.getAttribute('data-point');
+            const discount = button.getAttribute('data-discount');
+            const freeship = button.getAttribute('data-freeship');
+
+            document.getElementById('modalMemId').value = id;
+            document.getElementById('modalMemName').value = name;
+            document.getElementById('modalMemPoint').value = point;
+            document.getElementById('modalMemDiscount').value = discount;
+            
+            const fsCheck = document.getElementById('modalMemFreeship');
+            fsCheck.checked = (freeship === 'true');
+        });
+    }
 </script>
 
 </body>
