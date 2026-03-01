@@ -5,22 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MODEL WORLD - Quản lý người dùng</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
 body {
     background: #0c1525;
     color: #e1e7ff;
 }
-
+.sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: #111c33;
+}
+.sidebar a {
+    display: block;
+    padding: 12px 20px;
+    color: #cbd5ff;
+    text-decoration: none;
+}
+.sidebar a:hover {
+    background: #1c2b4a;
+}
+.content {
+    flex: 1;
+    padding: 30px;
+}
 .table td, .table th {
     vertical-align: middle;
 }
-
 .preview-img {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     object-fit: cover;
     border-radius: 8px;
 }
@@ -29,256 +45,236 @@ body {
 
 <body>
 
-<div class="container py-5">
+<div class="d-flex">
 
-    <h2 class="mb-4">Quản lý người dùng</h2>
-
-    <div th:if="${param.success}" class="alert alert-success">
-        Cập nhật thành công!
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h5 class="text-center py-3">ADMIN PANEL</h5>
+        <a href="/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/order-mana"><i class="bi bi-receipt"></i> Quản lý đơn hàng</a>
+        <a href="/user-mana" class="bg-primary"><i class="bi bi-people"></i> Quản lý người dùng</a>
+        <a href="/product-mana"><i class="bi bi-box"></i> Quản lý sản phẩm</a>
+        <a href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
     </div>
 
-    <div th:if="${param.error}" class="alert alert-danger">
-        Có lỗi xảy ra!
-    </div>
+    <!-- CONTENT -->
+    <div class="content">
 
-    <div class="table-responsive">
-        <table class="table table-dark table-bordered table-hover text-center align-middle">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Avatar</th>
-                <th>Họ tên</th>
-                <th>Email</th>
-                <th>Giới tính</th>
-                <th>Vai trò</th>
-                <th>Điện thoại</th>
-                <th>Ngày sinh</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-            </thead>
+        <h3 class="mb-4">Quản lý người dùng</h3>
 
-            <tbody>
-            <tr th:each="acc : ${accounts}">
-                <td th:text="${acc.id}"></td>
+        <!-- ALERT -->
+        <div th:if="${param.success != null}" class="alert alert-success">
+            Cập nhật thành công!
+        </div>
+        <div th:if="${param.error != null}" class="alert alert-danger">
+            Có lỗi xảy ra!
+        </div>
 
-                <td>
-                    <img th:src="@{${acc.avatar != null ? acc.avatar : '/images/user-default.png'}}"
-                         class="preview-img">
-                </td>
+        <div class="table-responsive">
+            <table class="table table-dark table-bordered text-center align-middle">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Avatar</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Vai trò</th>
+                    <th>Membership</th>
+                    <th>Tổng chi tiêu</th>
+                    <th>Địa chỉ</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
 
-                <td th:text="${acc.fullName}"></td>
-                <td th:text="${acc.email}"></td>
+                <tbody>
+                <tr th:each="acc : ${accounts}">
+                    <td th:text="${acc.id}"></td>
 
-                <td>
-                    <span th:if="${acc.gender == true}">Nam</span>
-                    <span th:if="${acc.gender == false}">Nữ</span>
-                </td>
+                    <!-- AVATAR -->
+                    <td>
+                        <img th:src="${acc.avatar != null && acc.avatar != ''} ? ${acc.avatar} : '/images/user-default.png'"
+                             class="preview-img">
+                    </td>
 
-                <td>
-                    <span th:text="${acc.role ? 'Admin' : 'User'}"
-                          th:classappend="${acc.role} ? 'badge bg-warning text-dark' : 'badge bg-secondary'">
-                    </span>
-                </td>
+                    <td th:text="${acc.fullName}"></td>
+                    <td th:text="${acc.email}"></td>
 
-                <td th:text="${acc.phone}"></td>
+                    <!-- ROLE (FIX NULL BOOLEAN) -->
+                    <td>
+                        <span th:text="${acc.role != null and acc.role} ? 'Admin' : 'User'"
+                              th:classappend="${acc.role != null and acc.role} ? 'badge bg-warning text-dark' : 'badge bg-secondary'">
+                        </span>
+                    </td>
 
-                <td th:text="${#temporals.format(acc.birthDay, 'dd/MM/yyyy')}"></td>
+                    <!-- MEMBERSHIP (FIX NULL) -->
+                    <td>
+                        <span th:if="${acc.membership != null}"
+                              th:text="${acc.membership.name}"
+                              class="badge bg-info text-dark"></span>
+                        <span th:unless="${acc.membership != null}"
+                              class="badge bg-secondary">Chưa có</span>
+                    </td>
 
-                <td>
-                    <span th:text="${acc.active ? 'Hoạt động' : 'Đã khóa'}"
-                          th:classappend="${acc.active} ? 'badge bg-success' : 'badge bg-danger'">
-                    </span>
-                </td>
+                    <!-- TOTAL SPENDING (NULL SAFE) -->
+                    <td th:text="${acc.totalSpending != null} ? ${#numbers.formatDecimal(acc.totalSpending,0,'COMMA',0,'POINT')} + ' ₫' : '0 ₫'"></td>
 
-                <td>
-                    <!-- EDIT -->
-                    <button class="btn btn-sm btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editModal"
-                            th:attr="
-                                data-id=${acc.id},
-                                data-fullname=${acc.fullName},
-                                data-phone=${acc.phone},
-                                data-email=${acc.email},
-                                data-avatar=${acc.avatar},
-                                data-gender=${acc.gender},
-                                data-role=${acc.role},
-                                data-birthday=${acc.birthDay}">
-                        Sửa
-                    </button>
+                    <!-- ADDRESS (FIX NULL LIST) -->
+                    <td>
+                        <span th:text="${acc.addresses != null} ? ${#lists.size(acc.addresses)} : 0"></span>
+                        <button th:if="${acc.addresses != null and #lists.size(acc.addresses) > 0}"
+                                class="btn btn-sm btn-info mt-1"
+                                data-bs-toggle="modal"
+                                th:attr="data-bs-target='#addressModal__' + ${acc.id}">
+                            Xem
+                        </button>
+                    </td>
 
-                    <!-- LOCK -->
-                    <a th:if="${!acc.role and acc.active}"
-                       th:href="@{'/user-mana/lock/' + ${acc.id}}"
-                       class="btn btn-sm btn-danger">
-                        Khóa
-                    </a>
+                    <!-- STATUS (FIX NULL BOOLEAN) -->
+                    <td>
+                        <span th:text="${acc.active != null and acc.active} ? 'Hoạt động' : 'Đã khóa'"
+                              th:classappend="${acc.active != null and acc.active} ? 'badge bg-success' : 'badge bg-danger'">
+                        </span>
+                    </td>
 
-                    <!-- UNLOCK -->
-                    <a th:if="${!acc.role and !acc.active}"
-                       th:href="@{'/user-mana/unlock/' + ${acc.id}}"
-                       class="btn btn-sm btn-success">
-                        Mở
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+                    <!-- ACTION -->
+                    <td>
+                        <!-- EDIT -->
+                        <button class="btn btn-sm btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editModal"
+                                th:attr="
+                                    data-id=${acc.id},
+                                    data-fullname=${acc.fullName},
+                                    data-email=${acc.email},
+                                    data-phone=${acc.phone},
+                                    data-gender=${acc.gender != null ? acc.gender : false},
+                                    data-role=${acc.role != null ? acc.role : false},
+                                    data-active=${acc.active != null ? acc.active : false},
+                                    data-birthday=${acc.birthDay},
+                                    data-membership=${acc.membership != null ? acc.membership.id : ''},
+                                    data-avatar=${acc.avatar}">
+                            Sửa
+                        </button>
 
+                        <!-- LOCK / UNLOCK (FIX NULL ROLE) -->
+                        <a th:if="${(acc.role == null or !acc.role) and (acc.active != null and acc.active)}"
+                           th:href="@{'/user-mana/lock/' + ${acc.id}}"
+                           class="btn btn-sm btn-danger">
+                            Khóa
+                        </a>
 
-<!-- ================= MODAL EDIT ================= -->
-
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-
-            <div class="modal-header">
-                <h5 class="modal-title">Cập nhật thông tin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <form id="editForm" method="post" enctype="multipart/form-data">
-                <div class="modal-body">
-
-                    <input type="hidden" id="userId" name="id">
-
-                    <div class="row">
-                        <div class="col-md-6">
-
-                            <div class="mb-3">
-                                <label>Họ và tên</label>
-                                <input type="text" id="fullName" name="fullName"
-                                       class="form-control" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Email</label>
-                                <input type="email" id="email" name="email"
-                                       class="form-control" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Điện thoại</label>
-                                <input type="text" id="phone" name="phone"
-                                       class="form-control" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Ngày sinh</label>
-                                <input type="date" id="birthDay" name="birthDay"
-                                       class="form-control" required>
-                            </div>
-
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <div class="mb-3">
-                                <label>Giới tính</label><br>
-                                <input type="radio" name="gender" value="true" id="genderMale">
-                                <label for="genderMale">Nam</label>
-
-                                <input type="radio" name="gender" value="false" id="genderFemale">
-                                <label for="genderFemale">Nữ</label>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Vai trò</label><br>
-                                <input type="radio" name="role" value="false" id="roleUser">
-                                <label for="roleUser">User</label>
-
-                                <input type="radio" name="role" value="true" id="roleAdmin">
-                                <label for="roleAdmin">Admin</label>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Avatar</label>
-                                <input type="file" name="file" id="photoFile"
-                                       class="form-control" accept="image/*">
-
-                                <img id="photoPreview"
-                                     src="/images/user-default.png"
-                                     class="preview-img mt-2">
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">Hủy</button>
-
-                    <button type="submit"
-                            class="btn btn-primary">Lưu</button>
-                </div>
-            </form>
-
+                        <a th:if="${(acc.role == null or !acc.role) and (acc.active == null or !acc.active)}"
+                           th:href="@{'/user-mana/unlock/' + ${acc.id}}"
+                           class="btn btn-sm btn-success">
+                            Mở
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light">
+            <form id="editForm" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cập nhật người dùng</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="active" id="active">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Họ tên</label>
+                            <input type="text" name="fullName" id="fullName" class="form-control mb-3">
+
+                            <label>Email</label>
+                            <input type="email" name="email" id="email" class="form-control mb-3">
+
+                            <label>Điện thoại</label>
+                            <input type="text" name="phone" id="phone" class="form-control mb-3">
+
+                            <label>Ngày sinh</label>
+                            <input type="date" name="birthDay" id="birthDay" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Membership</label>
+                            <select name="membershipId" id="membershipId" class="form-control mb-3">
+                                <option value="">-- Không có --</option>
+                                <option th:each="m : ${memberships}"
+                                        th:value="${m.id}"
+                                        th:text="${m.name}">
+                                </option>
+                            </select>
+
+                            <label>Giới tính</label><br>
+                            <input type="radio" name="gender" value="true" id="genderMale"> Nam
+                            <input type="radio" name="gender" value="false" id="genderFemale"> Nữ
+                            <br><br>
+
+                            <label>Vai trò</label><br>
+                            <input type="radio" name="role" value="false" id="roleUser"> User
+                            <input type="radio" name="role" value="true" id="roleAdmin"> Admin
+
+                            <div class="mt-3">
+                                <label>Avatar</label>
+                                <input type="file" name="file" class="form-control" accept="image/*">
+                                <img id="preview" class="preview-img mt-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+const editModal = document.getElementById('editModal');
 
-    const editModal = document.getElementById('editModal');
+editModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
 
-    editModal.addEventListener('show.bs.modal', event => {
+    const id = button.getAttribute('data-id');
+    const fullName = button.getAttribute('data-fullname');
+    const email = button.getAttribute('data-email');
+    const phone = button.getAttribute('data-phone');
+    const gender = button.getAttribute('data-gender');
+    const role = button.getAttribute('data-role');
+    const active = button.getAttribute('data-active');
+    const birthday = button.getAttribute('data-birthday');
+    const membership = button.getAttribute('data-membership');
+    const avatar = button.getAttribute('data-avatar');
 
-        const button = event.relatedTarget;
+    document.getElementById('editForm').action = '/user-mana/update/' + id;
+    document.getElementById('fullName').value = fullName || '';
+    document.getElementById('email').value = email || '';
+    document.getElementById('phone').value = phone || '';
+    document.getElementById('birthDay').value = birthday || '';
+    document.getElementById('active').value = active || false;
 
-        const id = button.getAttribute('data-id');
-        const fullName = button.getAttribute('data-fullname');
-        const phone = button.getAttribute('data-phone');
-        const email = button.getAttribute('data-email');
-        const avatar = button.getAttribute('data-avatar');
-        const birthDay = button.getAttribute('data-birthday');
-        const gender = button.getAttribute('data-gender');
-        const role = button.getAttribute('data-role');
+    if (gender === 'true') document.getElementById('genderMale').checked = true;
+    else document.getElementById('genderFemale').checked = true;
 
-        document.getElementById('editForm').action = '/user-mana/update/' + id;
-        document.getElementById('userId').value = id;
-        document.getElementById('fullName').value = fullName || '';
-        document.getElementById('phone').value = phone || '';
-        document.getElementById('email').value = email || '';
-        document.getElementById('birthDay').value = birthDay || '';
+    if (role === 'true') document.getElementById('roleAdmin').checked = true;
+    else document.getElementById('roleUser').checked = true;
 
-        if (gender === 'true') {
-            document.getElementById('genderMale').checked = true;
-        } else {
-            document.getElementById('genderFemale').checked = true;
-        }
-
-        if (role === 'true') {
-            document.getElementById('roleAdmin').checked = true;
-        } else {
-            document.getElementById('roleUser').checked = true;
-        }
-
-        const preview = document.getElementById('photoPreview');
-        if (avatar && avatar !== 'null') {
-            preview.src = avatar;
-        } else {
-            preview.src = '/images/user-default.png';
-        }
-    });
-
-    document.getElementById('photoFile').addEventListener('change', event => {
-        const [file] = event.target.files;
-        if (file) {
-            document.getElementById('photoPreview').src =
-                URL.createObjectURL(file);
-        }
-    });
-
+    document.getElementById('membershipId').value = membership || '';
+    document.getElementById('preview').src = avatar ? avatar : '/images/user-default.png';
 });
 </script>
 

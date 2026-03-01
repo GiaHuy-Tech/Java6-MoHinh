@@ -1,6 +1,6 @@
 package com.example.demo.controllers;
 
-import java.util.List; 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
-import com.example.demo.model.OrderDetail; // MỚI THÊM: Để lấy chi tiết đơn
-import com.example.demo.model.Products;     // MỚI THÊM: Để lấy thông tin sản phẩm
+import com.example.demo.model.OrderDetail;
+import com.example.demo.model.Products;
 import com.example.demo.repository.OrdersRepository;
-import com.example.demo.repository.ProductRepository; // MỚI THÊM: Để cập nhật kho
+import com.example.demo.repository.ProductRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -30,7 +30,7 @@ public class OrderController {
     private OrdersRepository orderRepo;
     
     @Autowired
-    private ProductRepository productRepo; // MỚI THÊM: Inject ProductRepository
+    private ProductRepository productRepo;
 
     /**
      * Hiển thị trang "Đơn hàng của tôi" có chức năng Sắp xếp
@@ -46,11 +46,11 @@ public class OrderController {
 
         List<Orders> orders;
 
-        // Xử lý logic sắp xếp
+        // SỬA: Gọi đúng tên hàm trong Repository đã khai báo
         if ("oldest".equals(sort)) {
-            orders = orderRepo.findByAccountId_IdOrderByCreatedDateAsc(account.getId());
+            orders = orderRepo.findByAccount_IdOrderByCreatedDateAsc(account.getId());
         } else {
-            orders = orderRepo.findByAccountId_IdOrderByCreatedDateDesc(account.getId());
+            orders = orderRepo.findByAccount_IdOrderByCreatedDateDesc(account.getId());
         }
 
         model.addAttribute("orders", orders);
@@ -73,7 +73,8 @@ public class OrderController {
 
         if (orderOpt.isPresent()) {
             Orders order = orderOpt.get();
-            if (order.getAccountId().getId().equals(account.getId())) {
+            // SỬA: getAccountId() -> getAccount().getId() vì quan hệ là đối tượng Account
+            if (order.getAccount().getId().equals(account.getId())) {
                 model.addAttribute("order", order);
                 model.addAttribute("orderDetails", order.getOrderDetails());
                 return "client/order-detail";
@@ -84,7 +85,7 @@ public class OrderController {
     }
 
     /**
-     * MỚI THÊM: Xử lý Khách xác nhận đã nhận hàng (Hoàn thành đơn) -> TRỪ KHO
+     * Xử lý Khách xác nhận đã nhận hàng (Hoàn thành đơn) -> TRỪ KHO
      */
     @PostMapping("/orders/confirm/{id}")
     public String confirmOrder(@PathVariable("id") Integer orderId) {
@@ -97,28 +98,38 @@ public class OrderController {
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();
 
-            // Kiểm tra: Phải là đơn của user đó VÀ trạng thái đang là "Đang giao" (ví dụ status = 2) 
-            // hoặc chưa hoàn thành. Tránh trường hợp trừ kho 2 lần.
-            // Giả sử: 3 là trạng thái "Hoàn thành"
-            if (order.getAccountId().getId().equals(account.getId()) && order.getStatus() != 3) {
+            // Status: 0=Chờ, 1=Xác nhận, 2=Đang giao, 3=Hoàn thành, 4=Hủy
+            // Chỉ cho phép xác nhận khi đơn chưa hoàn thành (status != 3) và đúng chủ sở hữu
+            if (order.getAccount().getId().equals(account.getId()) && order.getStatus() != 3 && order.getStatus() != 4) {
 
-                // --- LOGIC TRỪ KHO BẮT ĐẦU TẠI ĐÂY ---
-                for (OrderDetail detail : order.getOrderDetails()) {
-                    Product product = detail.getProduct();
-                    
-                    // Tính số lượng mới = Tồn kho - Số lượng mua
-                    int newQuantity = product.getQuantity() - detail.getQuantity();
-                    
-                    // Cập nhật số lượng
-                    product.setQuantity(newQuantity);
-                    
-                    // Nếu hết hàng thì ẩn sản phẩm luôn (tuỳ chọn)
-                    if (newQuantity <= 0) {
-                        product.setAvailable(false);
+                // --- LOGIC TRỪ KHO ---
+                List<OrderDetail> details = order.getOrderDetails();
+                
+                if (details != null) {
+                    for (OrderDetail detail : details) {
+                        Products product = detail.getProduct();
+                        
+                        // Kiểm tra null để tránh lỗi NullPointerException
+                        if (product != null) {
+                            int currentStock = product.getQuantity();
+                            int quantitySold = detail.getQuantity();
+                            
+                            // Tính tồn kho mới
+                            int newQuantity = currentStock - quantitySold;
+                            
+                            // Đảm bảo không âm
+                            if (newQuantity < 0) newQuantity = 0;
+
+                            product.setQuantity(newQuantity);
+                            
+                            // Nếu hết hàng thì ẩn sản phẩm
+                            if (newQuantity <= 0) {
+                                product.setAvailable(false);
+                            }
+                            
+                            productRepo.save(product);
+                        }
                     }
-                    
-                    // Lưu lại Product
-                    productRepo.save(product);
                 }
                 // --- KẾT THÚC LOGIC TRỪ KHO ---
 
@@ -142,8 +153,10 @@ public class OrderController {
         Optional<Orders> optionalOrder = orderRepo.findById(orderId);
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();
+            
+            // SỬA: getAccount().getId()
             // Chỉ cho phép hủy đơn chờ xử lý (0) hoặc đã xác nhận (1)
-            if (order.getAccountId().getId().equals(account.getId()) &&
+            if (order.getAccount().getId().equals(account.getId()) &&
                 (order.getStatus() == 0 || order.getStatus() == 1)) {
 
                 order.setStatus(4); // 4 = Đã hủy

@@ -75,4 +75,22 @@ public class Products {
         images.remove(img);
         img.setProduct(null);
     }
+// --- THÊM ĐOẠN NÀY VÀO CUỐI FILE PRODUCTS.JAVA ---
+    
+    // Hàm này giúp Thymeleaf gọi được bằng cú pháp: ${product.mainImage}
+    public String getMainImage() {
+        if (images == null || images.isEmpty()) {
+            return "no-image.jpg"; // Tên ảnh mặc định nếu sản phẩm chưa có ảnh
+        }
+        
+        // 1. Ưu tiên tìm ảnh được đánh dấu là Thumbnail (true)
+        for (ProductImage img : images) {
+            if (Boolean.TRUE.equals(img.getThumbnail())) {
+                return img.getImage();
+            }
+        }
+        
+        // 2. Nếu không có thumbnail nào, lấy ảnh đầu tiên trong danh sách
+        return images.get(0).getImage();
+    }
 }
