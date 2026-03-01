@@ -4,19 +4,8 @@ import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-// Nhập hết các annotation
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,30 +17,39 @@ public class Voucher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
+    private Integer id;
 
-    @Column(nullable = false, unique = false)
-    String code;
+    @Column(nullable = false)
+    private String code;
 
     @Column(name = "discount_percent")
-    Integer discountPercent;
+    private Integer discountPercent;
 
     @Column(name = "discount_amount")
-    Double discountAmount;
+    private Double discountAmount;
 
     @Column(name = "min_order_value")
-    Double minOrderValue;
+    private Double minOrderValue;
 
     @Column(name = "expired_at")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    LocalDateTime expiredAt;
+    private LocalDateTime expiredAt;
 
-    Boolean active;
+    private Boolean active;
 
+<<<<<<< Updated upstream
     // --- THÊM PHẦN NÀY ---
     // Nếu account null -> Ai dùng cũng được (Voucher chung)
     // Nếu account có dữ liệu -> Chỉ người này được dùng
     @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
+=======
+    // ✅ THÊM QUAN HỆ VỚI ACCOUNT
+    // null = voucher dùng chung
+    // có giá trị = voucher riêng của user đó
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+>>>>>>> Stashed changes
 }

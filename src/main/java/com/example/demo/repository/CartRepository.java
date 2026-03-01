@@ -8,9 +8,14 @@ import com.example.demo.model.Account;
 import com.example.demo.model.Cart;
 
 public interface CartRepository extends JpaRepository<Cart, Integer> {
+<<<<<<< Updated upstream
     Optional<Cart> findByAccount(Account account);
     @Override
 	Optional<Cart> findById(Integer id);
     Cart findByAccount_Id(Integer accountId);
+=======
+
+    Optional<Cart> findByAccount(Account account);
+>>>>>>> Stashed changes
 
 }

@@ -25,14 +25,14 @@ import com.example.demo.model.Cart;
 import com.example.demo.model.CartDetail;
 import com.example.demo.model.Comment;
 import com.example.demo.model.Products;
-import com.example.demo.model.ProductImage; // <--- Import Model Ảnh
+import com.example.demo.model.ProductImage; 
 import com.example.demo.model.Voucher;
 import com.example.demo.repository.CartDetailRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.OrdersDetailRepository;
 import com.example.demo.repository.ProductRepository;
-import com.example.demo.repository.ProductImageRepository; // <--- Import Repo Ảnh
+import com.example.demo.repository.ProductImageRepository; 
 import com.example.demo.repository.VoucherRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -44,22 +44,27 @@ public class DetailController {
     private ProductRepository productRepo;
     
     @Autowired
-    private ProductImageRepository productImageRepo; // <--- Inject Repository Ảnh vào đây
+    private ProductImageRepository productImageRepo; 
     
     @Autowired
     private CommentRepository commentRepo;
+
     @Autowired
     private OrdersDetailRepository orderDetailRepo;
+
     @Autowired
     private VoucherRepository voucherRepo;
+
     @Autowired
-    private CartRepository cartRepo;
+    private CartRepository cartRepo; // Đã sửa: Dùng CartRepository cho bảng Cart
+
     @Autowired
-    private CartDetailRepository cartDetailRepo;
+    private CartDetailRepository cartDetailRepo; // Dùng CartDetailRepository cho item
+
     @Autowired
     private HttpSession session;
 
-    // ================== PRODUCT DETAIL ==================
+    // ================== CHI TIẾT SẢN PHẨM ==================
     @GetMapping("/product-detail/{id}")
     public String productDetail(@PathVariable Integer id, @RequestParam(required = false) Integer voucherId, Model model) {
         Account account = (Account) session.getAttribute("account");
@@ -67,48 +72,44 @@ public class DetailController {
 
         if (product == null) return "redirect:/products";
 
-        // --- 1. LẤY DANH SÁCH ẢNH PHỤ (Logic Mới) ---
-        // Lấy list ảnh từ bảng products_image dựa vào product_id
+        // 1. Ảnh phụ
         List<ProductImage> extraImages = productImageRepo.findByProduct_Id(id);
         model.addAttribute("extraImages", extraImages);
 
-        // --- 2. Voucher logic ---
+        // 2. Danh sách Voucher khả dụng
         List<Voucher> vouchers = new ArrayList<>();
         if (account != null) {
-            try {
-                vouchers = voucherRepo.findByAccount_IdAndActiveTrueAndExpiredAtAfter(account.getId(), LocalDateTime.now());
-            } catch (Exception e) {}
+            vouchers = voucherRepo.findByAccount_IdAndActiveTrueAndExpiredAtAfter(account.getId(), LocalDateTime.now());
         }
         model.addAttribute("vouchers", vouchers);
 
-        // --- 3. Price logic ---
-        double finalPrice = product.getPrice();
+        // 3. Logic tính giá khuyến mãi
+        double originalPrice = product.getPrice();
+        double finalPrice = originalPrice;
         Voucher selectedVoucher = null;
         String voucherError = null;
 
         if (voucherId != null && account != null) {
-            boolean isOwner = vouchers.stream().anyMatch(v -> v.getId().equals(voucherId));
-            if (isOwner) {
-                selectedVoucher = voucherRepo.findById(voucherId).orElse(null);
-                if (selectedVoucher != null) {
-                    if (selectedVoucher.getMinOrderValue() != null && product.getPrice() < selectedVoucher.getMinOrderValue()) {
-                        voucherError = "Chưa đạt giá trị tối thiểu.";
-                        selectedVoucher = null;
-                    } else {
-                        if (selectedVoucher.getDiscountPercent() != null) {
-                            finalPrice -= product.getPrice() * (selectedVoucher.getDiscountPercent() / 100.0);
-                        } else if (selectedVoucher.getDiscountAmount() != null) {
-                            finalPrice -= selectedVoucher.getDiscountAmount();
-                        }
+            Optional<Voucher> vOpt = voucherRepo.findById(voucherId);
+            if (vOpt.isPresent() && vOpt.get().getAccount().getId().equals(account.getId())) {
+                selectedVoucher = vOpt.get();
+                if (selectedVoucher.getMinOrderValue() != null && originalPrice < selectedVoucher.getMinOrderValue()) {
+                    voucherError = "Chưa đạt giá trị tối thiểu cho voucher này.";
+                    selectedVoucher = null;
+                } else {
+                    if (selectedVoucher.getDiscountPercent() != null) {
+                        finalPrice -= originalPrice * (selectedVoucher.getDiscountPercent() / 100.0);
+                    } else if (selectedVoucher.getDiscountAmount() != null) {
+                        finalPrice -= selectedVoucher.getDiscountAmount();
                     }
                 }
             } else {
-                voucherError = "Mã không hợp lệ.";
+                voucherError = "Mã giảm giá không hợp lệ hoặc không thuộc về bạn.";
             }
         }
         if (finalPrice < 0) finalPrice = 0;
 
-        // --- 4. Comment Permission Logic ---
+        // 4. Quyền bình luận (Đã mua + Chưa bình luận)
         boolean canComment = false;
         if (account != null) {
             boolean hasCompletedOrder = orderDetailRepo.hasCompletedOrder(account.getId(), id);
@@ -126,7 +127,7 @@ public class DetailController {
         return "client/product-detail";
     }
 
-    // ================== ADD TO CART ==================
+    // ================== THÊM VÀO GIỎ HÀNG ==================
     @PostMapping("/cart/add")
     public String addToCart(
             @RequestParam Integer productId,
@@ -138,16 +139,17 @@ public class DetailController {
             return "redirect:/login";
         }
 
-        Cart cart = cartRepo.findByAccount(account).orElse(null);
-        if (cart == null) {
-            cart = new Cart();
-            cart.setAccount(account);
-            cart.setCreatedDate(new Date());
-            cartRepo.save(cart);
-        }
+        // Đảm bảo User luôn có 1 giỏ hàng (Header)
+        Cart cart = cartRepo.findByAccount(account).orElseGet(() -> {
+            Cart newCart = new Cart();
+            newCart.setAccount(account);
+            newCart.setCreatedDate(new Date());
+            return cartRepo.save(newCart);
+        });
 
         Products product = productRepo.findById(productId).orElse(null);
-        if (product != null) {
+        if (product != null && quantity > 0) {
+            // Kiểm tra xem item này đã có trong giỏ chưa
             Optional<CartDetail> existingDetail = cartDetailRepo.findByCartAndProduct(cart, product);
 
             if (existingDetail.isPresent()) {
@@ -159,7 +161,7 @@ public class DetailController {
                 newDetail.setCart(cart);
                 newDetail.setProduct(product);
                 newDetail.setQuantity(quantity);
-                newDetail.setPrice((int) product.getPrice());
+                newDetail.setPrice((double) product.getPrice());
                 cartDetailRepo.save(newDetail);
             }
             redirectAttributes.addFlashAttribute("successMessage", "Đã thêm vào giỏ hàng!");
@@ -168,7 +170,7 @@ public class DetailController {
         return "redirect:/cart"; 
     }
 
-    // ================== POST COMMENT ==================
+    // ================== GỬI BÌNH LUẬN ==================
     @PostMapping("/product-detail/comment/{productId}")
     public String postComment(
             @PathVariable Integer productId,
@@ -195,7 +197,8 @@ public class DetailController {
             if (imageFile != null && !imageFile.isEmpty()) {
                 try {
                     String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
-                    Path uploadPath = Paths.get("uploads/comments");
+                    // Lưu ý: Đường dẫn này cần tồn tại trên ổ đĩa
+                    Path uploadPath = Paths.get("src/main/resources/static/uploads/comments");
                     if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
                     Files.write(uploadPath.resolve(fileName), imageFile.getBytes());
                     comment.setImage(fileName);

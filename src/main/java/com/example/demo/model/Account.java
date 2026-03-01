@@ -1,6 +1,7 @@
 package com.example.demo.model;
 
 import java.time.LocalDate;
+<<<<<<< Updated upstream
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -17,6 +18,10 @@ import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+=======
+import java.util.List;
+import jakarta.persistence.*;
+>>>>>>> Stashed changes
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,7 +33,16 @@ import lombok.NoArgsConstructor;
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+<<<<<<< Updated upstream
     Integer id;
+=======
+    private Integer id;
+
+    // Thống nhất dùng active (để khớp với logic Service bên dưới)
+    private Boolean active = true;
+
+    private LocalDate birthDay;
+>>>>>>> Stashed changes
 
     @NotBlank(message = "Email không được để trống")
     @Column(unique = true)
@@ -52,6 +66,7 @@ public class Account {
     @Column(columnDefinition = "nvarchar(255)")
     String photo;
 
+<<<<<<< Updated upstream
     @NotBlank(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Số điện thoại không hợp lệ")
     String phone;
@@ -65,6 +80,16 @@ public class Account {
     @Past(message = "Ngày sinh phải là trong quá khứ")
     @Column(name = "BirthDay")
     LocalDate birthDay; // <--- Đổi tên biến ở đây để khớp với th:field="*{birthDay}"
+=======
+    private String avatar;
+
+    // true = admin, false = user
+    private Boolean role = false;
+
+    // Thêm precision/scale để Hibernate không cố gắng alter cột này liên tục
+    @Column(name = "total_spending", precision = 38, scale = 2)
+    private BigDecimal totalSpending = BigDecimal.ZERO;
+>>>>>>> Stashed changes
 
     // --- CÁC TRƯỜNG MỚI ---
     @Column(columnDefinition = "bigint default 0")

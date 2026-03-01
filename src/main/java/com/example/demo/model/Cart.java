@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+<<<<<<< Updated upstream
 import java.util.Date;
 import java.util.List;
 
@@ -42,3 +43,36 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     List<CartDetail> cartDetails;
 }
+=======
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+@Entity
+@Table(name = "cart")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Cart {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    // Mỗi user có 1 cart
+    @ManyToOne
+    @JoinColumn(name = "account_id")
+    private Account account;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+
+    // 1 cart có nhiều cartDetail
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartDetail> cartDetails = new ArrayList<>();
+}
+>>>>>>> Stashed changes

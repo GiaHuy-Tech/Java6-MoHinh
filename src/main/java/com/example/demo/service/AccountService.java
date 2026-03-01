@@ -29,14 +29,15 @@ public class AccountService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<Account> optionalAccount = accountRepo.findByEmail(email);
+        
         if (optionalAccount.isEmpty()) {
             throw new UsernameNotFoundException("Không tìm thấy tài khoản với email: " + email);
         }
 
         Account acc = optionalAccount.get();
 
-        // ✅ Chặn tài khoản bị khóa
-        if (acc.getActived() == null || !acc.getActived()) {
+        // ✅ Chặn tài khoản bị khóa (Sửa từ getActived thành getActive)
+        if (acc.getActive() == null || !acc.getActive()) {
             throw new LockedException("Tài khoản của bạn đã bị khóa!");
         }
 
@@ -64,8 +65,8 @@ public class AccountService implements UserDetailsService {
     @Transactional
     public boolean deleteById(Integer id) {
         if (!accountRepo.existsById(id)) {
-			return false;
-		}
+            return false;
+        }
         accountRepo.deleteById(id);
         return true;
     }
@@ -76,10 +77,14 @@ public class AccountService implements UserDetailsService {
     public boolean toggleActive(Integer id) {
         Optional<Account> optional = accountRepo.findById(id);
         if (optional.isEmpty()) {
-			return false;
-		}
+            return false;
+        }
         Account acc = optional.get();
-        acc.setActived(!acc.getActived());
+        
+        // ✅ Đảo trạng thái active (Sửa từ setActived thành setActive)
+        boolean currentStatus = (acc.getActive() != null) ? acc.getActive() : false;
+        acc.setActive(!currentStatus);
+        
         accountRepo.save(acc);
         return true;
     }

@@ -11,12 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
+<<<<<<< Updated upstream
 import com.example.demo.model.Cart;
+=======
+>>>>>>> Stashed changes
 import com.example.demo.model.CartDetail;
 import com.example.demo.model.Products;
 import com.example.demo.repository.CartDetailRepository;
 import com.example.demo.repository.CartRepository;
 import com.example.demo.repository.ProductRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -27,6 +32,7 @@ public class CartController {
     @Autowired
     private CartDetailRepository cartDetailRepo;
 
+<<<<<<< Updated upstream
     @Autowired
     private CartRepository cartRepo;
 
@@ -43,6 +49,26 @@ public class CartController {
         if (account == null) {
             return "redirect:/login";
         }
+=======
+    // ===== XEM GIỎ HÀNG =====
+    @GetMapping
+    public String viewCart(Model model, HttpSession session) {
+
+        Account acc = (Account) session.getAttribute("user");
+
+        if (acc == null) {
+            return "redirect:/login";
+        }
+
+        List<CartDetail> cartList =
+                cartDetailRepo.findByAccount_Id(acc.getId());
+
+        double total = cartList.stream()
+                .filter(i -> i.getProduct() != null)
+                .mapToDouble(i ->
+                        i.getProduct().getPrice() * i.getQuantity())
+                .sum();
+>>>>>>> Stashed changes
 
         List<CartDetail> cartDetails = cartDetailRepo.findByCart_Account_Id(account.getId());
 
@@ -58,6 +84,7 @@ public class CartController {
 
     // ✅ Xóa sản phẩm khỏi giỏ hàng
     @GetMapping("/delete/{id}")
+<<<<<<< Updated upstream
     public String deleteCartItem(@PathVariable Integer id) {
         cartDetailRepo.deleteById(id);
         return "redirect:/cart";
@@ -114,6 +141,23 @@ public class CartController {
 
             cd.setQuantity(quantity);
             cartDetailRepo.save(cd);
+=======
+    public String delete(@PathVariable Integer id,
+                         HttpSession session) {
+
+        Account acc = (Account) session.getAttribute("user");
+
+        if (acc == null) {
+            return "redirect:/login";
+        }
+
+        CartDetail cartDetail = cartDetailRepo.findById(id).orElse(null);
+
+        if (cartDetail != null &&
+            cartDetail.getCart().getAccount().getId().equals(acc.getId())) {
+
+            cartDetailRepo.delete(cartDetail);
+>>>>>>> Stashed changes
         }
 
         return "redirect:/cart";

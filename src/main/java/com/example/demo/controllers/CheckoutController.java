@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+<<<<<<< Updated upstream
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -7,6 +8,15 @@ import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+=======
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+>>>>>>> Stashed changes
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.*;
@@ -29,13 +39,19 @@ public class CheckoutController {
     @Autowired private MembershipService membershipService;
     @Autowired private GhnShippingService ghnShippingService;
 
+<<<<<<< Updated upstream
     // ===================== VIEW CHECKOUT =====================
     @GetMapping
     public String viewCheckout(Model model) {
+=======
+    @Autowired
+    private OrdersDetailRepository orderDetailRepo;
+>>>>>>> Stashed changes
 
         Account account = (Account) session.getAttribute("account");
         if (account == null) return "redirect:/login";
 
+<<<<<<< Updated upstream
         List<CartDetail> cartDetails =
                 cartDetailRepo.findByCart_Account_Id(account.getId());
 
@@ -66,6 +82,76 @@ public class CheckoutController {
         model.addAttribute("account", account);
 
         return "client/checkout";
+=======
+    @PostMapping("/{accountId}")
+    @Transactional 
+    public String checkout(@PathVariable Integer accountId) {
+
+        Account account = accountRepo.findById(accountId).orElse(null);
+        if (account == null) {
+            return "redirect:/auth/login";
+        }
+
+        List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(accountId);
+        if (cartList == null || cartList.isEmpty()) {
+            return "redirect:/cart/" + accountId;
+        }
+
+        // Dùng BigDecimal để tính toán tổng tiền chính xác
+        BigDecimal totalCal = BigDecimal.ZERO;
+
+        for (CartDetail item : cartList) {
+            if (item.getProduct() != null) { 
+                // ✅ Sửa lỗi Type mismatch (Ảnh 1)
+                BigDecimal price = BigDecimal.valueOf(item.getProduct().getPrice());
+                BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
+                totalCal = totalCal.add(price.multiply(quantity));
+            }
+        }
+
+        // ===== TẠO ORDER =====
+        Orders order = new Orders();
+        order.setAccount(account);
+        order.setCreatedDate(new Date()); 
+        
+        // Gán giá trị vào Double (Model Orders dùng Double)
+        order.setTotal(totalCal.doubleValue());
+        order.setFeeship(0.0); 
+        order.setStatus(0);
+        order.setPaymentStatus(false);
+
+        Orders savedOrder = ordersRepo.save(order);
+
+        // ===== TẠO ORDER DETAIL =====
+        for (CartDetail item : cartList) {
+            if (item.getProduct() != null) {
+                OrderDetail detail = new OrderDetail();
+                
+                // ✅ Sửa lỗi undefined method setOrders (Ảnh 2)
+                // Đổi thành setOrder (theo đúng field trong Model OrderDetail của bạn)
+                detail.setOrder(savedOrder); 
+                
+                detail.setProduct(item.getProduct());
+                detail.setQuantity(item.getQuantity());
+                
+                // Ép kiểu về Double cho đúng Model OrderDetail
+                detail.setPrice((double) item.getProduct().getPrice());
+                
+                orderDetailRepo.save(detail);
+            }
+        }
+
+        // ===== CẬP NHẬT TỔNG CHI TIÊU ACCOUNT =====
+        BigDecimal currentSpending = (account.getTotalSpending() != null) 
+                                     ? account.getTotalSpending() : BigDecimal.ZERO;
+        account.setTotalSpending(currentSpending.add(totalCal));
+        accountRepo.save(account);
+
+        // ===== XOÁ GIỎ HÀNG =====
+        cartDetailRepo.deleteAll(cartList);
+
+        return "redirect:/orders/history/" + accountId;
+>>>>>>> Stashed changes
     }
 
     // ===================== PROCESS CHECKOUT =====================
