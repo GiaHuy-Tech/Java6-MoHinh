@@ -1,307 +1,312 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MODEL WORLD - Quản lý sản phẩm</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MODEL WORLD - Quản trị</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-<style>
-:root {
-    --bg-dark: #050b14;
-    --bg-card: #0c1525;
-    --text-light: #e1e7ff;
-    --accent-cyan: #00f2ff;
-    --neon-pink: #ff007f;
-    --neon-green: #00ff7f;
-    --border-color: rgba(0, 242, 255, 0.2);
-}
+    <style>
+        :root {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #e2e8f0;
+            --accent: #38bdf8; /* Sky Blue */
+            --border: #334155;
+            --input-bg: #0f172a;
+        }
 
-body {
-    background: linear-gradient(135deg, var(--bg-dark), #1a0033);
-    color: var(--text-light);
-    min-height: 100vh;
-    font-family: "Be Vietnam Pro", sans-serif;
-}
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Be Vietnam Pro', sans-serif;
+        }
 
-.navbar {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-bottom: 1px solid var(--border-color);
-}
+        /* Card Styles */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: rgba(56, 189, 248, 0.1);
+            border-bottom: 1px solid var(--border);
+            color: var(--accent);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-.card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-}
+        /* Form Controls */
+        .form-control, .form-select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border);
+            color: #fff;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--input-bg);
+            border-color: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+        }
+        label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
 
-.card-header {
-    background: rgba(0, 242, 255, 0.05);
-    border-bottom: 1px solid var(--border-color);
-    color: var(--accent-cyan);
-    font-weight: 700;
-}
+        /* Table */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--text-main);
+            --bs-table-border-color: var(--border);
+        }
+        .table thead th {
+            color: var(--accent);
+            font-weight: 600;
+            border-bottom-width: 2px;
+        }
+        
+        /* Image Thumbnails */
+        .product-thumb {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
 
-.table { --bs-table-bg: transparent; --bs-table-color: var(--text-light); }
-.table thead { background-color: var(--bg-dark); }
-.table th { color: var(--accent-cyan); }
-
-img.thumb {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
-}
-
-.text-danger-glow {
-    color: var(--neon-pink) !important;
-    font-weight: bold;
-}
-
-.badge.bg-success { background-color: var(--neon-green) !important; color: #000; }
-.badge.bg-danger { background-color: var(--neon-pink) !important; color: #000; }
-</style>
+        /* Badge Custom */
+        .badge-custom { padding: 0.5em 0.8em; font-weight: 500; }
+        
+        /* Preview Grid */
+        #preview-area img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 10px;
+            border: 2px solid transparent;
+        }
+        #preview-area img.selected-thumb {
+            border-color: var(--accent);
+        }
+    </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-lg px-4 py-3">
-  <div class="container-fluid">
-    <a class="navbar-brand text-white fw-bold" th:href="@{/stats}">
-        MODEL WORLD
-    </a>
-  </div>
+<nav class="navbar navbar-dark border-bottom border-secondary px-4 py-3" style="background: #0b1120;">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1 fw-bold text-info">
+            <i class="bi bi-box-seam-fill me-2"></i>QUẢN LÝ SẢN PHẨM
+        </span>
+        <a href="/" class="btn btn-outline-light btn-sm">Về trang chủ</a>
+    </div>
 </nav>
 
-<!-- POPUP LOW STOCK -->
-<th:block th:with="lowStockList=${list.?[quantity < 10]}">
-    <div th:if="${not #lists.isEmpty(lowStockList) and product.id == null}" 
-         id="stockPopup" 
-         style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:9999;">
+<div class="container-fluid py-4 px-4">
+    
+    <div th:if="${message}" class="alert alert-dismissible fade show" 
+         th:classappend="${messageType == 'danger' ? 'alert-danger' : 'alert-success'}" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong th:text="${message}"></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
 
-        <div style="background:#111;padding:30px;border-radius:10px;width:400px;text-align:center;">
-            <h4 style="color:#ff007f;">CẢNH BÁO KHO</h4>
-            <p>Có <b th:text="${#lists.size(lowStockList)}"></b> sản phẩm dưới 10</p>
-            <div style="max-height:150px;overflow-y:auto;text-align:left;">
-                <div th:each="p:${lowStockList}" class="d-flex justify-content-between border-bottom py-1">
-                    <span th:text="${p.name}"></span>
-                    <span class="badge bg-danger" th:text="${p.quantity}"></span>
+    <div class="row g-4">
+        
+        <div class="col-lg-4">
+            <form th:action="@{${product.id == null ? '/product-mana/add' : '/product-mana/update'}}"
+                  th:object="${product}"
+                  method="post"
+                  enctype="multipart/form-data">
+                
+                <input type="hidden" th:field="*{id}">
+
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span th:text="${product.id == null ? 'THÊM SẢN PHẨM MỚI' : 'CẬP NHẬT SẢN PHẨM'}"></span>
+                        <a th:if="${product.id != null}" th:href="@{/product-mana}" class="btn btn-sm btn-outline-secondary">Hủy</a>
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label><i class="bi bi-tag-fill me-1"></i>Tên sản phẩm</label>
+                                <input th:field="*{name}" class="form-control" placeholder="Nhập tên mô hình..." required>
+                            </div>
+
+                            <div class="col-6">
+                                <label><i class="bi bi-currency-dollar me-1"></i>Giá (VNĐ)</label>
+                                <input th:field="*{price}" type="number" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label><i class="bi bi-bookmark-fill me-1"></i>Danh mục</label>
+                                <select th:field="*{category.id}" class="form-select">
+                                    <option th:each="c:${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                                </select>
+                            </div>
+
+                            <div class="col-6">
+                                <label><i class="bi bi-boxes me-1"></i>Số lượng</label>
+                                <input th:field="*{quantity}" type="number" class="form-control" min="0">
+                            </div>
+                            <div class="col-6">
+                                <label><i class="bi bi-speedometer2 me-1"></i>Nặng (kg)</label>
+                                <input th:field="*{weight}" type="number" step="0.1" class="form-control">
+                            </div>
+
+                            <div class="col-12">
+                                <label>Mô tả chi tiết</label>
+                                <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+                            </div>
+
+                            <hr class="border-secondary my-2">
+
+                            <div class="col-12">
+                                <label class="text-info fw-bold mb-2">
+                                    <i class="bi bi-images me-1"></i>Hình ảnh (Tối thiểu 2)
+                                </label>
+                                
+                                <div th:if="${product.id != null}" class="mb-2 d-flex gap-2 overflow-auto pb-2">
+                                    <div th:each="img : *{images}" class="position-relative">
+                                        <img th:src="@{${img.image}}" class="product-thumb" style="width: 60px; height: 60px;">
+                                        <span th:if="${img.thumbnail}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5em;">Main</span>
+                                    </div>
+                                </div>
+
+                                <input type="file" name="imageFiles" id="imageInput" multiple class="form-control mb-2" 
+                                       th:required="${product.id == null}">
+                                <small class="text-muted d-block fst-italic mb-2">Giữ phím <b>Ctrl</b> để chọn nhiều ảnh.</small>
+
+                                <div class="input-group input-group-sm mb-2">
+                                    <span class="input-group-text bg-dark text-light border-secondary">Ảnh đại diện là số:</span>
+                                    <input type="number" name="thumbnailIndex" value="0" min="0" class="form-control text-center">
+                                </div>
+                                <small class="text-secondary">(0 là ảnh đầu tiên bạn chọn)</small>
+
+                                <div id="preview-area" class="d-flex flex-wrap mt-2 gap-2"></div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button class="btn btn-info w-100 fw-bold text-dark">
+                                    <i class="bi bi-save me-2"></i>LƯU DỮ LIỆU
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>DANH SÁCH SẢN PHẨM</span>
+                    <span class="badge bg-primary rounded-pill" th:text="${#lists.size(list)} + ' items'"></span>
+                </div>
+                <div class="card-body p-0 table-responsive">
+                    <table class="table table-hover align-middle text-center mb-0">
+                        <thead class="bg-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Hình ảnh</th>
+                                <th class="text-start">Tên sản phẩm</th>
+                                <th>Giá bán</th>
+                                <th>Kho</th>
+                                <th>Loại</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${list}">
+                                <td class="text-muted" th:text="${'#' + p.id}"></td>
+                                
+                                <td>
+                                    <th:block th:with="thumbList=${p.images.?[thumbnail == true]}">
+                                        <img th:if="${not #lists.isEmpty(thumbList)}" 
+                                             th:src="@{${thumbList[0].image}}" class="product-thumb">
+                                        
+                                        <img th:if="${#lists.isEmpty(thumbList) and not #lists.isEmpty(p.images)}" 
+                                             th:src="@{${p.images[0].image}}" class="product-thumb opacity-50">
+                                        
+                                        <span th:if="${#lists.isEmpty(p.images)}" class="text-muted small">No Img</span>
+                                    </th:block>
+                                </td>
+
+                                <td class="text-start fw-bold text-light" th:text="${p.name}"></td>
+                                <td class="text-info" th:text="${#numbers.formatInteger(p.price, 0, 'POINT') + ' đ'}"></td>
+                                
+                                <td>
+                                    <span th:class="${p.quantity > 0 ? 'badge bg-dark border border-success text-success' : 'badge bg-danger text-dark'}" 
+                                          th:text="${p.quantity > 0 ? p.quantity : 'Hết'}">
+                                    </span>
+                                </td>
+
+                                <td th:text="${p.category != null ? p.category.name : '-'}"></td>
+                                
+                                <td>
+                                    <a th:href="@{/product-mana/edit/{id}(id=${p.id})}" 
+                                       class="btn btn-sm btn-outline-warning">
+                                       <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer border-top border-secondary text-center text-muted small">
+                    Hiển thị tối đa 50 dòng mới nhất
                 </div>
             </div>
-            <button class="btn btn-danger mt-3" onclick="document.getElementById('stockPopup').style.display='none'">
-                Đã hiểu
-            </button>
         </div>
+
     </div>
-</th:block>
-
-<div class="container py-5">
-
-<h2 class="mb-4 text-info">QUẢN LÝ SẢN PHẨM</h2>
-
-<!-- ================= TABLE ================= -->
-<div class="card mb-5">
-<div class="card-header">Danh sách sản phẩm</div>
-<div class="card-body table-responsive p-0">
-<table class="table table-hover text-center align-middle mb-0">
-<thead>
-<tr>
-<th>ID</th>
-<th>Ảnh</th>
-<th>Tên</th>
-<th>Giá</th>
-<th>Tồn kho</th>
-<th>Cân nặng</th>
-<th>Danh mục</th>
-<th>Trạng thái</th>
-<th>Thao tác</th>
-</tr>
-</thead>
-<tbody>
-<tr th:each="p:${list}">
-<td th:text="${p.id}"></td>
-<td>
-<img th:src="@{${p.image != null ? p.image : '/images/no-image.png'}}" class="thumb">
-</td>
-<td th:text="${p.name}"></td>
-<td th:text="${#numbers.formatInteger(p.price,0,'POINT')} + ' ₫'"></td>
-
-<td>
-<span th:if="${p.quantity < 10}" class="text-danger-glow"
-      th:text="${p.quantity}"></span>
-<span th:unless="${p.quantity < 10}" 
-      th:text="${p.quantity}"></span>
-</td>
-
-<td th:text="${p.weight} + ' kg'"></td>
-
-<td th:text="${p.category != null ? p.category.name : '---'}"></td>
-
-<td>
-<span th:if="${p.quantity > 0}" class="badge bg-success">
-Còn hàng
-</span>
-<span th:unless="${p.quantity > 0}" class="badge bg-danger">
-Hết hàng
-</span>
-</td>
-
-<td>
-<a th:href="@{/product-mana/edit/{id}(id=${p.id})}" 
-   class="btn btn-sm btn-warning">
-   Sửa
-</a>
-</td>
-
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 
-<!-- ================= FORM ADD ================= -->
-<form th:if="${product.id == null}"
-      th:action="@{/product-mana/add}"
-      th:object="${product}"
-      method="post"
-      enctype="multipart/form-data">
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const previewArea = document.getElementById('preview-area');
 
-<div class="card mb-5">
-<div class="card-header text-success">Thêm sản phẩm mới</div>
-<div class="card-body row g-3">
+    imageInput.addEventListener('change', function() {
+        previewArea.innerHTML = ''; // Xóa preview cũ
+        const files = this.files;
+        
+        if (files.length > 0) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const imgContainer = document.createElement('div');
+                        imgContainer.style.textAlign = 'center';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        
+                        const indexLabel = document.createElement('span');
+                        indexLabel.innerText = '#' + i;
+                        indexLabel.style.fontSize = '12px';
+                        indexLabel.style.color = '#ccc';
+                        
+                        imgContainer.appendChild(img);
+                        imgContainer.appendChild(document.createElement('br'));
+                        imgContainer.appendChild(indexLabel);
+                        
+                        previewArea.appendChild(imgContainer);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+    });
+</script>
 
-<div class="col-md-6">
-<label>Tên sản phẩm</label>
-<input th:field="*{name}" class="form-control" required>
-</div>
-
-<div class="col-md-3">
-<label>Giá</label>
-<input th:field="*{price}" type="number" class="form-control" required>
-</div>
-
-<div class="col-md-3">
-<label>Số lượng</label>
-<input th:field="*{quantity}" type="number" min="0" class="form-control" value="0">
-</div>
-
-<div class="col-md-3">
-<label>Cân nặng (kg)</label>
-<input th:field="*{weight}" type="number" step="0.1" class="form-control" value="0.5">
-</div>
-
-<div class="col-md-3">
-<label>Danh mục</label>
-<select th:field="*{category.id}" class="form-select">
-<option th:each="c:${categories}" 
-        th:value="${c.id}" 
-        th:text="${c.name}">
-</option>
-</select>
-</div>
-
-<div class="col-md-3">
-<label>Index ảnh chính</label>
-<input type="number" name="thumbnailIndex" value="0" class="form-control">
-</div>
-
-<div class="col-12">
-<label>Mô tả</label>
-<textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-</div>
-
-<div class="col-12">
-<label>Ảnh sản phẩm</label>
-<input type="file" name="imageFiles" multiple class="form-control">
-</div>
-
-<div class="col-12 text-end mt-3">
-<button class="btn btn-info px-4">Lưu sản phẩm</button>
-</div>
-
-</div>
-</div>
-</form>
-
-<!-- ================= FORM EDIT ================= -->
-<form th:if="${product.id != null}"
-      th:action="@{/product-mana/update}"
-      th:object="${product}"
-      method="post"
-      enctype="multipart/form-data">
-
-<input type="hidden" th:field="*{id}">
-
-<div class="card">
-<div class="card-header">Cập nhật sản phẩm</div>
-<div class="card-body row g-3">
-
-<div class="col-md-6">
-<label>Tên sản phẩm</label>
-<input th:field="*{name}" class="form-control" required>
-</div>
-
-<div class="col-md-3">
-<label>Giá</label>
-<input th:field="*{price}" type="number" class="form-control" required>
-</div>
-
-<div class="col-md-3">
-<label>Số lượng</label>
-<input th:field="*{quantity}" type="number" min="0" class="form-control">
-</div>
-
-<div class="col-md-3">
-<label>Cân nặng (kg)</label>
-<input th:field="*{weight}" type="number" step="0.1" class="form-control">
-</div>
-
-<div class="col-md-3">
-<label>Danh mục</label>
-<select th:field="*{category.id}" class="form-select">
-<option th:each="c:${categories}" 
-        th:value="${c.id}" 
-        th:text="${c.name}">
-</option>
-</select>
-</div>
-
-<div class="col-md-3">
-<label>Index ảnh chính</label>
-<input type="number" name="thumbnailIndex" value="0" class="form-control">
-</div>
-
-<div class="col-12">
-<label>Mô tả</label>
-<textarea th:field="*{description}" class="form-control" rows="3"></textarea>
-</div>
-
-<div class="col-12">
-<label>Ảnh hiện tại</label>
-<div class="d-flex gap-2 flex-wrap">
-<img th:each="img:${product.images}" 
-     th:src="@{${img.image}}" 
-     class="thumb">
-</div>
-</div>
-
-<div class="col-12">
-<label>Thêm ảnh mới</label>
-<input type="file" name="imageFiles" multiple class="form-control">
-</div>
-
-<div class="col-12 text-end mt-3">
-<a th:href="@{/product-mana}" class="btn btn-secondary me-2">Hủy</a>
-<button class="btn btn-warning px-4">Cập nhật</button>
-</div>
-
-</div>
-</div>
-</form>
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

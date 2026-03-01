@@ -24,6 +24,8 @@ public class Membership implements Serializable {
 
     private Integer discount;
     
+    private Boolean freeShipping;
+    
     @Column(name = "point_required")
     private Integer pointRequired;
 

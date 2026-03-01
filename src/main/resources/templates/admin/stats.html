@@ -1,267 +1,447 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dashboard - MODEL WORLD</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-
-
-<style>
-/* --- CẤU HÌNH MÀU SẮC & BIẾN (ĐỒNG BỘ) --- */
-:root {
-    --bg-dark: #050b14;
-    --bg-card: #0c1525;
-    --text-light: #e1e7ff;
-    --accent-cyan: #00f2ff; /* Màu Neon Cyan chính */
-    --border-color: rgba(0, 242, 255, 0.2);
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard - MODEL WORLD</title>
     
-    /* Font Variables */
-    --font-main: "Be Vietnam Pro", sans-serif;
-    --font-display: "Orbitron", sans-serif;
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    /* ĐỊNH NGHĨA HIỆU ỨNG NEON GLOW */
-    --neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
-}
+    <style>
+        :root {
+            --bg-body: #050b14;
+            --bg-sidebar: #0b1120;
+            --bg-card: #0f172a;
+            --text-main: #e2e8f0;
+            --text-sub: #cbd5e1; 
+            --accent-cyan: #00f2ff;
+            --accent-pink: #ff007f;
+            --accent-purple: #8a2be2;
+            --border-color: rgba(0, 242, 255, 0.15);
+            --sidebar-width: 260px;
+        }
 
-body {
-    /* Điều chỉnh nền để phù hợp với màu Dark Blue chính */
-    background: 
-    linear-gradient(135deg, var(--bg-dark), #1a0033),
-    url('https://file.hstatic.net/200000838897/article/anime_figure_008aea7949c540cd8500f596197eb317.jpg') center/cover no-repeat fixed;
-    color: var(--text-light);
-    min-height: 100vh;
-    font-family: var(--font-main); /* Dùng font Be Vietnam Pro */
-    overflow-x: hidden;
-    position: relative;
-}
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Be Vietnam Pro', sans-serif;
+            overflow-x: hidden;
+        }
 
-/* TYPOGRAPHY FIX */
-h2, h4, h5, h6, .fw-bold { font-family: var(--font-main); font-weight: 700; }
-.navbar-brand { font-family: var(--font-display); text-transform: uppercase; letter-spacing: 1px; }
-.navbar-brand span { color: #fff; }
+        /* --- WRAPPER & SIDEBAR --- */
+        #wrapper { display: flex; width: 100%; transition: all 0.3s; }
 
+        #sidebar-wrapper {
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            min-height: 100vh;
+            transition: margin 0.3s ease-out;
+            position: fixed;
+            z-index: 1000;
+            height: 100%;
+        }
 
-/* Mưa */
-.raindrop {
-  position: absolute;
-  width: 2px;
-  height: 15px;
-  background: var(--accent-cyan); /* Dùng màu Neon Cyan */
-  animation-name: fall;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-}
-@keyframes fall {
-  0% { transform: translateY(-20px); opacity: 0; }
-  10% { opacity: 1; }
-  100% { transform: translateY(110vh); opacity: 0; }
-}
+        #page-content-wrapper {
+            width: 100%;
+            margin-left: var(--sidebar-width);
+            transition: margin 0.3s ease-out;
+        }
 
-/* Navbar */
-.navbar {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 0 15px rgba(0, 242, 255, 0.5); /* Neon glow */
-}
-.navbar .nav-link { 
-    color: var(--accent-cyan) !important; 
-    transition: 0.3s;
-    font-weight: 500;
-}
-.navbar .nav-link:hover {
-    color: var(--text-light) !important;
-    text-shadow: 0 0 8px var(--accent-cyan);
-}
+        body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
+        body.toggled #page-content-wrapper { margin-left: 0; }
 
-/* Card - DÙNG CHUNG STYLE CỦA CÁC TRANG KHÁC */
-.card {
-    background-color: var(--bg-card); /* Màu nền tối */
-    border: 1px solid var(--border-color); /* Viền màu Neon */
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(6px);
-    box-shadow: none; 
-}
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--neon-box-shadow); /* Thêm Neon glow khi hover */
-}
-.card h6 { color: var(--accent-cyan); font-weight: 600; }
-.card i { transition: 0.3s; }
-.card:hover i { transform: scale(1.1); }
+        /* Sidebar Items */
+        .sidebar-heading {
+            padding: 1.5rem 1.25rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+            background: rgba(0, 242, 255, 0.05);
+        }
 
-/* Bảng */
-.table {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
-.table thead { background-color: var(--bg-card); }
-.table th { 
-    color: var(--accent-cyan); 
-    font-weight: 600; 
-    border-bottom: 1px solid var(--border-color);
-}
-.table-dark tbody tr { 
-    background-color: transparent !important;
-    border-color: rgba(255,255,255,0.05);
-}
-.table td { color: var(--text-light); }
-.table-hover tbody tr:hover { 
-    background-color: rgba(0,242,255,0.1) !important; 
-}
+        .list-group-item {
+            background-color: transparent;
+            color: var(--text-sub);
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
 
-/* Footer */
-.footer {
-    background: linear-gradient(90deg, var(--bg-dark), var(--bg-card));
-    border-top: 1px solid var(--border-color);
-    color: rgba(255,255,255,0.85);
-    margin-top: 60px; /* Đảm bảo khoảng cách với nội dung */
-}
+        .list-group-item:hover, .list-group-item.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--accent-cyan);
+        }
+        .list-group-item i { margin-right: 10px; width: 20px; text-align: center; }
 
-/* Chart */
-canvas { max-height: 400px; }
+        /* Navbar */
+        .top-navbar {
+            background: rgba(11, 17, 32, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            position: sticky; top: 0; z-index: 999;
+        }
+        .btn-toggle {
+            background: transparent; border: 1px solid var(--border-color);
+            color: var(--accent-cyan); padding: 5px 12px; border-radius: 6px; transition: 0.3s;
+        }
+        .btn-toggle:hover { background: var(--accent-cyan); color: #000; }
 
-/* Màu sắc thống kê */
-.text-custom-primary { color: #8a2be2 !important; /* BlueViolet for Primary */ }
-.text-custom-success { color: #00ff7f !important; /* Spring Green for Success */ }
-.text-custom-warning { color: #ffeb3b !important; /* Yellow for Warning */ }
-.text-custom-danger { color: #ff007f !important; /* Pink for Danger/Heart */ }
-</style>
+        /* Cards */
+        .stats-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            height: 100%;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            border-color: var(--accent-cyan);
+        }
+        .icon-box {
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; margin-right: 20px; flex-shrink: 0;
+        }
+        .bg-icon-primary { background: rgba(138, 43, 226, 0.15); color: var(--accent-purple); }
+        .bg-icon-success { background: rgba(0, 255, 127, 0.15); color: var(--accent-cyan); }
+        .bg-icon-warning { background: rgba(255, 235, 59, 0.15); color: #ffeb3b; }
+
+        /* Tables & Charts */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 20px;
+        }
+        .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); }
+        .table thead th { 
+            color: var(--accent-cyan); border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase; font-size: 0.85rem;
+        }
+        .table td { border-bottom: 1px solid rgba(255,255,255,0.1); vertical-align: middle; }
+
+        /* Rain Effect */
+        .raindrop {
+            position: absolute; width: 2px; height: 15px;
+            background: var(--accent-cyan); opacity: 0.5;
+            animation: fall linear infinite; z-index: 1; pointer-events: none;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="rain"></div>
+<div id="rain" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></div>
 
-<nav class="navbar navbar-expand-lg px-4 py-3 sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="/stats"> 
-        <i class="bi bi-box-seam-fill fs-3" style="color: var(--accent-cyan);"></i>
-        <span class="fw-bold fs-4">MODEL WORLD</span>
-    </a>
-    <div class="collapse navbar-collapse justify-content-end">
-      <ul class="navbar-nav me-3">
-        <li class="nav-item"><a class="nav-link" href="/cata-mana"><i class="bi bi-tags me-1"></i> Danh mục</a></li>
-        <li class="nav-item"><a class="nav-link" href="/product-mana"><i class="bi bi-box-seam me-1"></i> Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" href="/orders-mana"><i class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-        <li class="nav-item"><a class="nav-link" href="/user-mana"><i class="bi bi-people me-1"></i> Người dùng</a></li>
-        <li class="nav-item"><a class="nav-link" href="/admin/cart"><i class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
-      </ul>
+<div id="wrapper">
+    
+    <div id="sidebar-wrapper">
+        <div class="sidebar-heading">
+            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
+        </div>
+        <div class="list-group list-group-flush mt-3">
+            <a href="/stats" class="list-group-item list-group-item-action active">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/cata-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-tags"></i> Quản lý Danh mục
+            </a>
+            <a href="/product-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/vouchers" class="list-group-item list-group-item-action">
+                <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+            </a>
+            <a href="/orders-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/user-mana" class="list-group-item list-group-item-action">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/cart" class="list-group-item list-group-item-action">
+                <i class="bi bi-cart3"></i> Giỏ hàng Admin
+            </a>
+            <div class="mt-4 px-3">
+                <small class="text-light opacity-50 text-uppercase fw-bold" style="font-size: 0.7rem;">Hệ thống</small>
+            </div>
+            <a href="/logout" class="list-group-item list-group-item-action text-danger">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </div>
     </div>
-  </div>
-</nav>
 
-<div class="container py-5">
-  <h2 class="text-center fw-bold mb-5" style="color: var(--accent-cyan) !important;">📊 DASHBOARD HỆ THỐNG QUẢN TRỊ</h2>
-  
-  <div class="row g-4 mb-5 text-center">
-    <div class="col-md-3">
-      <div class="card p-3">
-        <h6>Tổng đơn hàng</h6>
-        <i class="bi bi-bag-check-fill fs-2 text-custom-primary"></i>
-        <h4 class="fw-bold mt-2 text-custom-primary" th:text="${totalOrders}">0</h4>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-3">
-        <h6>Tổng sản phẩm</h6>
-        <i class="bi bi-box-seam-fill fs-2 text-custom-success"></i>
-        <h4 class="fw-bold mt-2 text-custom-success" th:text="${totalProducts}">0</h4>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-3">
-        <h6>Người dùng</h6>
-        <i class="bi bi-people-fill fs-2 text-custom-warning"></i>
-        <h4 class="fw-bold mt-2 text-custom-warning" th:text="${totalAccounts}">0</h4>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card p-3">
-        <h6>Tổng danh mục</h6>
-        <i class="bi bi-tags-fill fs-2 text-custom-danger"></i>
-        <h4 class="fw-bold mt-2 text-custom-danger" th:text="${totalCategories}">0</h4>
-      </div>
-    </div>
-  </div>
+    <div id="page-content-wrapper">
+        
+        <nav class="top-navbar d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-toggle" id="menu-toggle">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h5 class="mb-0 text-white fw-bold d-none d-md-block">Admin Dashboard</h5>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-end d-none d-sm-block">
+                    <span class="d-block text-white small">Admin User</span>
+                    <span class="d-block text-info" style="font-size: 0.75rem;">Super Admin</span>
+                </div>
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="rounded-circle border border-info" width="40" height="40" alt="Avatar">
+            </div>
+        </nav>
 
-  <div class="row g-4 mb-5 text-center">
-    <div class="col-md-6 col-lg-3">
-      <div class="card p-3">
-        <h6>Sản phẩm được yêu thích nhất</h6>
-        <i class="bi bi-heart-fill fs-2 text-custom-danger"></i>
-        <h5 class="mt-2 fw-bold text-custom-danger" th:text="${topWish != null ? topWish.name : 'Chưa có'}">Chưa có</h5>
-      </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-      <div class="card p-3">
-        <h6>Sản phẩm bán chạy nhất</h6>
-        <i class="bi bi-cart-check-fill fs-2 text-custom-success"></i>
-        <h5 class="mt-2 fw-bold text-custom-success" th:text="${topSold != null ? topSold.name : 'Chưa có'}">Chưa có</h5>
-      </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-      <div class="card p-3">
-        <h6>Đơn hàng tháng</h6>
-        <i class="bi bi-bar-chart-line-fill fs-2" style="color: var(--accent-cyan);"></i>
-        <h5 class="mt-2 fw-bold" style="color: var(--accent-cyan);" th:text="${monthOrders}">0</h5>
-      </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-      <div class="card p-3">
-        <h6>Đơn hàng năm</h6>
-        <i class="bi bi-cash-stack fs-2" style="color: var(--accent-cyan);"></i>
-        <h5 class="mt-2 fw-bold" style="color: var(--accent-cyan);" th:text="${yearOrders}">0</h5>
-      </div>
-    </div>
-  </div>
-  
-  <div class="card p-4 mb-5">
-      <h5 class="text-center mb-3" style="color: var(--accent-cyan);"><i class="bi bi-calendar-week me-2"></i> Số đơn theo tháng</h5>
-      <div class="table-responsive">
-        <table class="table table-dark table-hover text-center align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Tháng</th>
-              <th>Số đơn</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr th:each="month, iStat : ${months}">
-              <td th:text="${month}">Tháng 1</td>
-              <td th:text="${orderCounts[iStat.index]}">0</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+        <div class="container-fluid p-4">
+            
+            <div class="row g-4 mb-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="stats-card">
+                        <div class="icon-box bg-icon-primary">
+                            <i class="bi bi-bag-check-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-info text-uppercase small mb-1">Tổng đơn hàng</h6>
+                            <h3 class="fw-bold text-white m-0" th:text="${totalOrders}">0</h3>
+                            <small class="text-success fw-bold"><i class="bi bi-arrow-up"></i> +5% tuần qua</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="stats-card">
+                        <div class="icon-box bg-icon-success">
+                            <i class="bi bi-box-seam-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-info text-uppercase small mb-1">Tổng sản phẩm</h6>
+                            <h3 class="fw-bold text-white m-0" th:text="${totalProducts}">0</h3>
+                            <small class="text-light opacity-75">Đang kinh doanh</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="stats-card">
+                        <div class="icon-box bg-icon-warning">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-info text-uppercase small mb-1">Khách hàng</h6>
+                            <h3 class="fw-bold text-white m-0" th:text="${totalAccounts}">0</h3>
+                            <small class="text-success fw-bold"><i class="bi bi-arrow-up"></i> +12 user mới</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-<footer class="footer text-center py-4">
-  <small>© 2025 <span style="color: var(--accent-cyan);">MODEL WORLD</span> | Figure & Model Store</small>
-</footer>
+            <div class="row g-4 mb-4">
+                
+                <div class="col-lg-4">
+                    <div class="stats-card flex-column align-items-center text-center h-100 position-relative">
+                        <h6 class="text-info text-uppercase fw-bold w-100 text-start mb-3">
+                            <i class="bi bi-pie-chart-fill me-2"></i>Doanh thu All-Time
+                        </h6>
+                        
+                        <div style="width: 100%; max-width: 250px; position: relative;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top border-secondary w-100">
+                            <small class="text-light opacity-50 text-uppercase">Tổng doanh thu toàn thời gian</small>
+                            <h3 class="fw-bold text-success mt-1">2.540.000.000 đ</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="row g-4 h-100">
+                        <div class="col-md-6">
+                            <div class="stats-card h-100">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box text-danger bg-danger bg-opacity-10 me-3">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-light opacity-50 text-uppercase">Được yêu thích nhất</small>
+                                        <div class="fw-bold text-white fs-5 text-truncate" style="max-width: 200px;" 
+                                             th:text="${topWish != null ? topWish.name : '---'}">Gundam RX-78-2</div>
+                                        <small class="text-danger">Rất hot</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="stats-card h-100">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box text-warning bg-warning bg-opacity-10 me-3">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-light opacity-50 text-uppercase">Bán chạy nhất</small>
+                                        <div class="fw-bold text-white fs-5 text-truncate" style="max-width: 200px;" 
+                                             th:text="${topSold != null ? topSold.name : '---'}">One Piece Luffy</div>
+                                        <small class="text-warning">Best Seller</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary rounded bg-dark h-100 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-info text-uppercase fw-bold">Đơn tháng này</small>
+                                    <h4 class="fw-bold text-white mt-1 mb-0" th:text="${monthOrders}">0</h4>
+                                </div>
+                                <i class="bi bi-calendar-month fs-1 text-info opacity-25"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border border-secondary rounded bg-dark h-100 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-success text-uppercase fw-bold">Đơn cả năm</small>
+                                    <h4 class="fw-bold text-white mt-1 mb-0" th:text="${yearOrders}">0</h4>
+                                </div>
+                                <i class="bi bi-calendar-check fs-1 text-success opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-container">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-white"><i class="bi bi-bar-chart-line me-2 text-info"></i>Thống kê đơn hàng theo tháng</h5>
+                            <button class="btn btn-sm btn-outline-info">Chi tiết</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Tháng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Đơn hàng</th>
+                                        <th>Tiến độ</th>
+                                        <th class="text-end">Xem</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="month, iStat : ${months}">
+                                        <td class="fw-bold" th:text="${month}"></td>
+                                        <td>
+                                            <span th:if="${orderCounts[iStat.index] > 5}" class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">Đạt</span>
+                                            <span th:unless="${orderCounts[iStat.index] > 5}" class="badge bg-secondary bg-opacity-25 text-white border border-light border-opacity-25">Thấp</span>
+                                        </td>
+                                        <td class="fw-bold text-white" th:text="${orderCounts[iStat.index]}"></td>
+                                        <td style="width: 30%;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                                    <div class="progress-bar bg-info" role="progressbar" 
+                                                         th:style="'width: ' + ${orderCounts[iStat.index] * 10} + '%'"></div>
+                                                </div>
+                                                <span class="ms-2 small text-white" th:text="${orderCounts[iStat.index] * 10} + '%'"></span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-dark border-secondary text-light"><i class="bi bi-search"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> 
+        
+        <footer class="text-center py-4 text-light opacity-75 small border-top border-secondary mt-4 bg-dark">
+            © 2025 MODEL WORLD - Admin System
+        </footer>
+
+    </div> 
+</div> 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Tạo mưa
-const rainContainer = document.getElementById('rain');
-const drops = 100; // số lượng giọt
-for(let i=0; i<drops; i++){
-  const drop = document.createElement('div');
-  drop.classList.add('raindrop');
-  drop.style.left = Math.random() * 100 + 'vw';
-  drop.style.animationDuration = (Math.random()*1+0.5) + 's';
-  drop.style.animationDelay = Math.random() * 5 + 's';
-  rainContainer.appendChild(drop);
-}
+    // 1. Sidebar Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const body = document.body;
+    if (menuToggle) {
+        menuToggle.addEventListener('click', e => {
+            e.preventDefault();
+            body.classList.toggle('toggled');
+        });
+    }
+
+    // 2. Rain Effect
+    const rainContainer = document.getElementById('rain');
+    for(let i=0; i<50; i++){
+        const drop = document.createElement('div');
+        drop.classList.add('raindrop');
+        drop.style.left = Math.random() * 100 + 'vw';
+        drop.style.animationDuration = (Math.random()*1+0.5) + 's';
+        drop.style.animationDelay = Math.random() * 5 + 's';
+        rainContainer.appendChild(drop);
+    }
+
+    // 3. CHART JS CONFIGURATION (Biểu đồ tròn Doanh thu)
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Dữ liệu giả lập (Bạn có thể thay bằng Thymeleaf variable sau này)
+    // Ví dụ: [ [${revenueGundam}], [${revenueFigure}], [${revenueTools}] ]
+    const dataRevenue = {
+        labels: ['Gundam', 'Figure', 'Dụng cụ', 'Khác'],
+        datasets: [{
+            data: [45, 30, 15, 10], // % hoặc số tiền
+            backgroundColor: [
+                '#00f2ff', // Cyan
+                '#ff007f', // Pink
+                '#8a2be2', // Purple
+                '#cbd5e1'  // Light Gray
+            ],
+            borderWidth: 0,
+            hoverOffset: 4
+        }]
+    };
+
+    new Chart(ctx, {
+        type: 'doughnut', // Dùng Doughnut cho đẹp hơn Pie truyền thống
+        data: dataRevenue,
+        options: {
+            responsive: true,
+            cutout: '70%', // Độ rộng lỗ tròn
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#e2e8f0', // Màu chữ legend
+                        font: { family: 'Be Vietnam Pro', size: 11 },
+                        usePointStyle: true,
+                        boxWidth: 8
+                    }
+                }
+            }
+        }
+    });
 </script>
 
 </body>

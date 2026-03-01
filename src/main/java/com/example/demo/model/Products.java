@@ -32,9 +32,6 @@ public class Products {
     @Column(columnDefinition = "nvarchar(255)")
     private String name;
 
-    @Column(columnDefinition = "nvarchar(255)")
-    private String image;
-
     // 🔥 SỬA CHUẨN TIỀN TỆ
     @DecimalMin(value = "50000", message = "Giá phải lớn hơn 50000")
     @Column(precision = 15, scale = 2, nullable = false)
