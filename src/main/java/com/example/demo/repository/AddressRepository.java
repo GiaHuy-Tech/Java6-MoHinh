@@ -8,5 +8,5 @@ import com.example.demo.model.Address;
 
 public interface AddressRepository extends JpaRepository<Address, Long> {
 
-    Optional<Address> findFirstByAccount_IdAndIsDefaultTrue(Integer accountId);
+	Optional<Address> findByAccount_IdAndIsDefaultTrue(Integer accountId);
 }

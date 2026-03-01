@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,12 +22,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
-import com.example.demo.repository.OrdersRepository; // Đảm bảo bạn đã có repo này
+import com.example.demo.repository.OrdersRepository;
 
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/account") // Prefix chung cho tất cả các đường dẫn
+@RequestMapping("/account")
 public class AccountController {
 
     @Autowired
@@ -38,150 +39,140 @@ public class AccountController {
     @Autowired
     private HttpSession session;
 
-    // Đường dẫn lưu ảnh (Lưu vào thư mục static để hiển thị được ngay)
     private final String UPLOAD_DIR = "src/main/resources/static/images/avatar/";
 
-    // ================== TRANG PROFILE ==================
+    // ================== PROFILE PAGE ==================
     @GetMapping("")
     public String accountPage(Model model) {
+
         Account sessionAccount = (Account) session.getAttribute("account");
         if (sessionAccount == null) {
             return "redirect:/login";
         }
 
-        // 1. Load lại Account từ DB để có dữ liệu mới nhất (tránh session bị cũ)
         Optional<Account> opt = accountRepo.findById(sessionAccount.getId());
         if (opt.isEmpty()) {
-			return "redirect:/login";
-		}
+            return "redirect:/login";
+        }
+
         Account acc = opt.get();
 
-        // 2. Tính toán thống kê từ OrderRepository
-        // Lưu ý: Account ID là Integer, Repository trả về Long hoặc null
+        // ====== TÍNH THỐNG KÊ ======
         Long totalSpentRaw = ordersRepo.sumTotalSpentByAccountId(acc.getId());
+        BigDecimal totalSpent = (totalSpentRaw != null)
+                ? BigDecimal.valueOf(totalSpentRaw)
+                : BigDecimal.ZERO;
+
         Long totalOrdersRaw = ordersRepo.countByAccountId(acc.getId());
-
-        long totalSpent = (totalSpentRaw != null) ? totalSpentRaw : 0L;
         long orderCount = (totalOrdersRaw != null) ? totalOrdersRaw : 0L;
-        // Giả sử logic tiết kiệm là 10% tổng chi tiêu (hoặc lấy từ DB nếu có)
-        long savedAmount = totalSpent / 10;
 
-        // 3. Cập nhật lại TotalSpending vào bảng Account nếu cần thiết
-        if (!acc.getTotalSpending().equals(totalSpent)) {
+        BigDecimal savedAmount = totalSpent.divide(BigDecimal.TEN);
+
+        // ====== UPDATE totalSpending nếu thay đổi ======
+        if (acc.getTotalSpending() == null ||
+            acc.getTotalSpending().compareTo(totalSpent) != 0) {
+
             acc.setTotalSpending(totalSpent);
             accountRepo.save(acc);
         }
 
-        // 4. Logic phân hạng thành viên & Quyền lợi
-        String currentLevel = "Thành Viên Mới";
-        String nextLevelName = null;
-        long nextLevelThreshold = 0;
-        String currentBenefits = "Ưu đãi thành viên mới";
+        // ====== PHÂN HẠNG (CHỈ HIỂN THỊ, KHÔNG LƯU DB) ======
+        String currentLevel;
+        String currentBenefits;
 
-        if (totalSpent < 5000000) {
+        if (totalSpent.compareTo(BigDecimal.valueOf(5_000_000)) < 0) {
             currentLevel = "Đồng";
-            nextLevelName = "Bạc";
-            nextLevelThreshold = 5000000;
             currentBenefits = "Tích điểm đổi quà";
-        } else if (totalSpent < 10000000) {
+        } else if (totalSpent.compareTo(BigDecimal.valueOf(10_000_000)) < 0) {
             currentLevel = "Bạc";
-            nextLevelName = "Vàng";
-            nextLevelThreshold = 10000000;
             currentBenefits = "Giảm 2% mọi đơn hàng";
-        } else if (totalSpent < 20000000) {
+        } else if (totalSpent.compareTo(BigDecimal.valueOf(20_000_000)) < 0) {
             currentLevel = "Vàng";
-            nextLevelName = "Kim Cương";
-            nextLevelThreshold = 20000000;
             currentBenefits = "Giảm 5% + Freeship";
         } else {
             currentLevel = "Kim Cương";
             currentBenefits = "Giảm 10% + Freeship + Quà sinh nhật";
-            // Không còn cấp cao hơn
         }
 
-        // Cập nhật hạng vào DB nếu khác
-        if (!currentLevel.equals(acc.getMembershipLevel())) {
-            acc.setMembershipLevel(currentLevel);
-            accountRepo.save(acc);
-        }
+        // ====== ĐẨY DATA RA VIEW ======
+        session.setAttribute("account", acc);
 
-        // 5. Tính tiến độ
-        if (nextLevelName != null) {
-            long amountToNextLevel = nextLevelThreshold - totalSpent;
-            // Tính phần trăm: (Tiêu hiện tại / Mốc kế tiếp) * 100
-            int progressPercent = (int) ((totalSpent * 100) / nextLevelThreshold);
-
-            model.addAttribute("nextLevelName", nextLevelName);
-            model.addAttribute("amountToNextLevel", amountToNextLevel);
-            model.addAttribute("progressPercent", progressPercent);
-        }
-
-        // 6. Đẩy dữ liệu ra View
-        session.setAttribute("account", acc); // Cập nhật lại session
         model.addAttribute("totalSpent", totalSpent);
         model.addAttribute("orderCount", orderCount);
         model.addAttribute("savedAmount", savedAmount);
+        model.addAttribute("currentLevel", currentLevel);
         model.addAttribute("currentBenefits", currentBenefits);
 
-        return "client/account"; // Trả về file HTML của bạn
+        return "client/account";
     }
 
-    // ================== CÁC CHỨC NĂNG CẬP NHẬT ==================
-
+    // ================== UPDATE FULLNAME ==================
     @PostMapping("/update-fullname")
-    public String updateFullName(@RequestParam("fullName") String fullName, RedirectAttributes redirect) {
-        return updateAccountField(acc -> acc.setFullName(fullName.trim()), redirect, "Họ tên");
+    public String updateFullName(@RequestParam("fullName") String fullName,
+                                 RedirectAttributes redirect) {
+        return updateAccountField(acc -> acc.setFullName(fullName.trim()),
+                redirect, "Họ tên");
     }
 
+    // ================== UPDATE PHONE ==================
     @PostMapping("/update-phone")
-    public String updatePhone(@RequestParam("phone") String phone, RedirectAttributes redirect) {
-        return updateAccountField(acc -> acc.setPhone(phone.trim()), redirect, "Số điện thoại");
+    public String updatePhone(@RequestParam("phone") String phone,
+                              RedirectAttributes redirect) {
+        return updateAccountField(acc -> acc.setPhone(phone.trim()),
+                redirect, "Số điện thoại");
     }
 
+    // ================== UPDATE EMAIL ==================
     @PostMapping("/update-email")
-    public String updateEmail(@RequestParam("email") String email, RedirectAttributes redirect) {
-        // Thực tế nên check email đã tồn tại hay chưa
-        return updateAccountField(acc -> acc.setEmail(email.trim()), redirect, "Email");
+    public String updateEmail(@RequestParam("email") String email,
+                              RedirectAttributes redirect) {
+        return updateAccountField(acc -> acc.setEmail(email.trim()),
+                redirect, "Email");
     }
 
-    @PostMapping("/update-address")
-    public String updateAddress(@RequestParam("address") String address, RedirectAttributes redirect) {
-        // Cập nhật địa chỉ mặc định trong bảng Account
-        return updateAccountField(acc -> acc.setAddress(address.trim()), redirect, "Địa chỉ");
-    }
-
+    // ================== UPDATE BIRTHDAY ==================
     @PostMapping("/update-birthday")
-    public String updateBirthday(@RequestParam("birthday") String birthdayStr, RedirectAttributes redirect) {
-        // Model dùng LocalDate, View gửi String "yyyy-MM-dd"
+    public String updateBirthday(@RequestParam("birthday") String birthdayStr,
+                                 RedirectAttributes redirect) {
+
         Account acc = getSessionAccount();
         if (acc == null) {
-			return "redirect:/login";
-		}
+            return "redirect:/login";
+        }
 
         try {
             LocalDate birthDay = LocalDate.parse(birthdayStr);
             acc.setBirthDay(birthDay);
             accountRepo.save(acc);
             session.setAttribute("account", acc);
-            redirect.addFlashAttribute("success", "Cập nhật ngày sinh thành công!");
+            redirect.addFlashAttribute("success",
+                    "Cập nhật ngày sinh thành công!");
         } catch (DateTimeParseException e) {
-            redirect.addFlashAttribute("error", "Định dạng ngày không hợp lệ!");
+            redirect.addFlashAttribute("error",
+                    "Định dạng ngày không hợp lệ!");
         }
+
         return "redirect:/account";
     }
 
+    // ================== UPDATE PASSWORD ==================
     @PostMapping("/update-password")
-    public String updatePassword(@RequestParam("password") String password, RedirectAttributes redirect) {
-        // Ở đây nên mã hóa password trước khi lưu (BCrypt)
-        return updateAccountField(acc -> acc.setPassword(password), redirect, "Mật khẩu");
+    public String updatePassword(@RequestParam("password") String password,
+                                 RedirectAttributes redirect) {
+
+        return updateAccountField(acc -> acc.setPassword(password),
+                redirect, "Mật khẩu");
     }
 
+    // ================== UPLOAD AVATAR ==================
     @PostMapping("/upload-avatar")
-    public String uploadAvatar(@RequestParam("avatar") MultipartFile file, RedirectAttributes redirect) {
+    public String uploadAvatar(@RequestParam("avatar") MultipartFile file,
+                               RedirectAttributes redirect) {
+
         Account acc = getSessionAccount();
         if (acc == null) {
-			return "redirect:/login";
-		}
+            return "redirect:/login";
+        }
 
         if (file.isEmpty()) {
             redirect.addFlashAttribute("error", "Vui lòng chọn ảnh!");
@@ -189,64 +180,73 @@ public class AccountController {
         }
 
         try {
-            // Tạo thư mục nếu chưa có
             Path uploadPath = Paths.get(UPLOAD_DIR);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Tạo tên file unique
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String fileName = System.currentTimeMillis()
+                    + "_" + file.getOriginalFilename();
+
             Path filePath = uploadPath.resolve(fileName);
 
-            // Lưu file
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.getInputStream(),
+                    filePath,
+                    StandardCopyOption.REPLACE_EXISTING);
 
-            // Lưu đường dẫn vào DB (dạng web path)
-            acc.setPhoto("/images/avatar/" + fileName);
+            // LƯU AVATAR (KHÔNG PHẢI PHOTO)
+            acc.setAvatar("/images/avatar/" + fileName);
             accountRepo.save(acc);
             session.setAttribute("account", acc);
 
-            redirect.addFlashAttribute("success", "Đổi ảnh đại diện thành công!");
+            redirect.addFlashAttribute("success",
+                    "Đổi ảnh đại diện thành công!");
 
         } catch (IOException e) {
             e.printStackTrace();
-            redirect.addFlashAttribute("error", "Lỗi khi lưu ảnh: " + e.getMessage());
+            redirect.addFlashAttribute("error",
+                    "Lỗi khi lưu ảnh!");
         }
 
         return "redirect:/account";
     }
 
-    // ================== HELPER METHODS ==================
-
-    // Hàm lấy account từ session
+    // ================== HELPER ==================
     private Account getSessionAccount() {
         return (Account) session.getAttribute("account");
     }
 
-    // Interface functional để hỗ trợ hàm update chung
     private interface AccountUpdater {
         void update(Account acc);
     }
 
-    // Hàm update chung để tránh lặp code
-    private String updateAccountField(AccountUpdater updater, RedirectAttributes redirect, String fieldName) {
+    private String updateAccountField(AccountUpdater updater,
+                                      RedirectAttributes redirect,
+                                      String fieldName) {
+
         Account sessionAcc = getSessionAccount();
         if (sessionAcc == null) {
-			return "redirect:/login";
-		}
-
-        // Lấy object từ DB để đảm bảo session không đè dữ liệu cũ
-        Optional<Account> opt = accountRepo.findById(sessionAcc.getId());
-        if (opt.isPresent()) {
-            Account dbAcc = opt.get();
-            updater.update(dbAcc); // Chạy logic setter
-            accountRepo.save(dbAcc); // Lưu DB
-            session.setAttribute("account", dbAcc); // Cập nhật session
-            redirect.addFlashAttribute("success", "Cập nhật " + fieldName + " thành công!");
-        } else {
-            redirect.addFlashAttribute("error", "Tài khoản không tồn tại!");
+            return "redirect:/login";
         }
+
+        Optional<Account> opt =
+                accountRepo.findById(sessionAcc.getId());
+
+        if (opt.isPresent()) {
+
+            Account dbAcc = opt.get();
+            updater.update(dbAcc);
+            accountRepo.save(dbAcc);
+            session.setAttribute("account", dbAcc);
+
+            redirect.addFlashAttribute("success",
+                    "Cập nhật " + fieldName + " thành công!");
+
+        } else {
+            redirect.addFlashAttribute("error",
+                    "Tài khoản không tồn tại!");
+        }
+
         return "redirect:/account";
     }
 }

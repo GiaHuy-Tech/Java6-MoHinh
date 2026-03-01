@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,42 +38,55 @@ public class StatsController {
     @GetMapping("/stats")
     public String dashboard(Model model) {
 
-        //Tổng thống kê
+        // ===== TỔNG THỐNG KÊ =====
         model.addAttribute("totalOrders", ordersRepo.count());
         model.addAttribute("totalProducts", productRepo.count());
         model.addAttribute("totalAccounts", accountRepo.count());
         model.addAttribute("totalCategories", categoryRepo.count());
 
-        //Sản phẩm được yêu thích nhất
+        // ===== SẢN PHẨM ĐƯỢC YÊU THÍCH NHẤT =====
         Products topWish = wishlistRepo.findTopByMostLiked().orElse(null);
         model.addAttribute("topWish", topWish);
 
-        //Sản phẩm bán chạy nhất
-        Products topSold = ordersRepo.findTopSellingProduct().orElse(null);
+        // ===== SẢN PHẨM BÁN CHẠY NHẤT =====
+        List<Products> topSellingList =
+                ordersRepo.findTopSellingProduct(PageRequest.of(0, 1));
+
+        Products topSold = topSellingList.isEmpty()
+                ? null
+                : topSellingList.get(0);
+
         model.addAttribute("topSold", topSold);
 
-        //Số đơn theo tháng (bảng)
+        // ===== SỐ ĐƠN THEO THÁNG =====
         List<Object[]> ordersPerMonth = ordersRepo.countOrdersPerMonth();
+
         List<String> months = ordersPerMonth.stream()
-                .map(r -> "Tháng " + r[0].toString())
+                .map(r -> "Tháng " + r[0])
                 .collect(Collectors.toList());
 
         List<Long> orderCounts = ordersPerMonth.stream()
-                .map(r -> Long.parseLong(r[1].toString()))
+                .map(r -> ((Number) r[1]).longValue())
                 .collect(Collectors.toList());
 
         model.addAttribute("months", months);
         model.addAttribute("orderCounts", orderCounts);
 
-        //Số đơn tháng hiện tại & năm hiện tại
+        // ===== THÁNG HIỆN TẠI & NĂM HIỆN TẠI =====
         YearMonth current = YearMonth.now();
 
-        Long monthOrders = ordersRepo.countOrdersByMonth(current.getMonthValue());
-        Long yearOrders = ordersRepo.countOrdersInYear(current.getYear());
+        Long monthOrders =
+                ordersRepo.countOrdersByMonth(current.getMonthValue());
 
-        model.addAttribute("monthOrders", monthOrders != null ? monthOrders : 0);
-        model.addAttribute("yearOrders", yearOrders != null ? yearOrders : 0);
+        Long yearOrders =
+                ordersRepo.countOrdersInYear(current.getYear());
 
-        return "/admin/stats";
+        model.addAttribute("monthOrders",
+                monthOrders != null ? monthOrders : 0);
+
+        model.addAttribute("yearOrders",
+                yearOrders != null ? yearOrders : 0);
+
+        return "admin/stats";
     }
 }

@@ -45,4 +45,9 @@ public class Address {
 
     @Column(name = "is_default")
     private Boolean isDefault;
+
+	public String getFullAddress() {
+		
+		return null;
+	}
 }

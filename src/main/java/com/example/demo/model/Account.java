@@ -1,103 +1,60 @@
 package com.example.demo.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-<<<<<<< Updated upstream
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-=======
 import java.util.List;
-import jakarta.persistence.*;
->>>>>>> Stashed changes
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import jakarta.persistence.*;
+import lombok.Data;
+
 @Entity
 @Table(name = "accounts")
+@Data
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-<<<<<<< Updated upstream
-    Integer id;
-=======
     private Integer id;
 
-    // Thống nhất dùng active (để khớp với logic Service bên dưới)
     private Boolean active = true;
 
     private LocalDate birthDay;
->>>>>>> Stashed changes
 
-    @NotBlank(message = "Email không được để trống")
     @Column(unique = true)
-    @Email(message = "Email không hợp lệ")
-    String email;
+    private String email;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 6, max = 50, message = "Mật khẩu phải từ 6 đến 50 ký tự")
-    String password;
+    private String fullName;
 
-    @NotBlank(message = "Họ tên không được để trống")
-    @Column(columnDefinition = "nvarchar(255)")
-    @Size(max = 100, message = "Họ tên không vượt quá 100 ký tự")
-    String fullName;
+    private Boolean gender;
 
-    @NotBlank(message = "Địa chỉ không được để trống")
-    @Column(columnDefinition = "nvarchar(255)")
-    @Size(max = 255, message = "Địa chỉ không vượt quá 255 ký tự")
-    String address;
+    private String password;
 
-    @Column(columnDefinition = "nvarchar(255)")
-    String photo;
+    private String phone;
 
-<<<<<<< Updated upstream
-    @NotBlank(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "^(0|\\+84)[0-9]{9,10}$", message = "Số điện thoại không hợp lệ")
-    String phone;
-
-    @NotNull(message = "Giới tính không được để trống")
-    Boolean gender;
-
-    // --- SỬA CHỖ NÀY: birthday -> birthDay (chữ D hoa) ---
-    @NotNull(message = "Ngày sinh không được để trống")
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @Past(message = "Ngày sinh phải là trong quá khứ")
-    @Column(name = "BirthDay")
-    LocalDate birthDay; // <--- Đổi tên biến ở đây để khớp với th:field="*{birthDay}"
-=======
+    // Avatar ảnh đại diện
     private String avatar;
 
-    // true = admin, false = user
+    // true = admin
     private Boolean role = false;
 
-    // Thêm precision/scale để Hibernate không cố gắng alter cột này liên tục
-    @Column(name = "total_spending", precision = 38, scale = 2)
     private BigDecimal totalSpending = BigDecimal.ZERO;
->>>>>>> Stashed changes
 
-    // --- CÁC TRƯỜNG MỚI ---
-    @Column(columnDefinition = "bigint default 0")
-    Long totalSpending = 0L;
+    @ManyToOne
+    @JoinColumn(name = "membership_id")
+    private Membership membership;
 
-    @Column(columnDefinition = "nvarchar(50) default 'Đồng'")
-    String membershipLevel = "Đồng";
+    @OneToMany(mappedBy = "account")
+    private List<Address> addresses;
 
-    Boolean actived;
-    Boolean role;
+    @OneToMany(mappedBy = "account")
+    private List<Orders> orders;
+
+    @OneToMany(mappedBy = "account")
+    private List<CartDetail> cartDetails;
+
+    @OneToMany(mappedBy = "account")
+    private List<Like> likes;
+
+    @OneToMany(mappedBy = "account")
+    private List<Comment> comments;
 }
