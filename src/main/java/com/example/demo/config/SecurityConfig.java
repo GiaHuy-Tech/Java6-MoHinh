@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.demo.filter.JwtFilter;
 import com.example.demo.service.AccountService;
@@ -21,6 +22,9 @@ import com.example.demo.service.CustomOAuth2UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Configuration
 @EnableWebSecurity
@@ -43,7 +47,8 @@ public class SecurityConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); // Chỉ dùng dev
+        // LƯU Ý: Chỉ dùng cho môi trường Dev. Production nên dùng BCryptPasswordEncoder
+        return NoOpPasswordEncoder.getInstance(); 
     }
 
     @Bean
@@ -60,14 +65,17 @@ public class SecurityConfig {
             @Override
             public void onAuthenticationFailure(HttpServletRequest request,
                                                 HttpServletResponse response,
-                                                org.springframework.security.core.AuthenticationException exception)
+                                                AuthenticationException exception)
                     throws IOException, ServletException {
+                
                 String redirectUrl = "/login?error";
-                if (exception instanceof org.springframework.security.authentication.LockedException) {
+                
+                if (exception instanceof LockedException) {
                     redirectUrl = "/login?locked";
-                } else if (exception instanceof org.springframework.security.core.userdetails.UsernameNotFoundException) {
+                } else if (exception instanceof UsernameNotFoundException) {
                     redirectUrl = "/login?notfound";
                 }
+                
                 response.sendRedirect(redirectUrl);
             }
         };
@@ -78,33 +86,38 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public
-                        .requestMatchers("/", "/login", "/register", "/forgot",
-                                "/css/**", "/js/**", "/images/**", "/uploads/**", "/vendor/**")
-                        .permitAll()
+                        // 1. QUAN TRỌNG: Cho phép truy cập trang lỗi để tránh vòng lặp "Response already committed"
+                        .requestMatchers("/error").permitAll()
 
-                        // ✅ VNPay CALLBACK (BẮT BUỘC)
+                        // 2. Tài nguyên tĩnh (CSS, JS, Images...)
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/vendor/**", "/assets/**", "/webjars/**").permitAll()
+
+                        // 3. Các trang công khai (Home, Login, Register, API Search...)
+                        .requestMatchers("/", "/home", "/login", "/register", "/forgot", "/api/products/search").permitAll()
+
+                        // 4. VNPay CALLBACK
                         .requestMatchers("/checkout/vnpay-return").permitAll()
 
-                        // USER & ADMIN
-                        .requestMatchers("/account/**", "/cart/**", "/checkout/**")
-                        .hasAnyRole("USER", "ADMIN")
+                        // 5. Các trang USER & ADMIN
+                        .requestMatchers("/account/**", "/cart/**", "/checkout/**").hasAnyRole("USER", "ADMIN")
 
-                        // ADMIN only
+                        // 6. Các trang chỉ ADMIN
                         .requestMatchers("/stats/**",
-                                "/product-mana/**",
-                                "/admin/cart/**",
-                                "/user-mana/**",
-                                "/cata-mana/**")
-                        .hasRole("ADMIN")
+                                         "/product-mana/**",
+                                         "/orders-mana/**", // Đã thêm trang quản lý đơn hàng
+                                         "/admin/vouchers/**", // Đã thêm trang voucher
+                                         "/admin/cart/**",
+                                         "/user-mana/**",
+                                         "/cata-mana/**").hasRole("ADMIN")
 
+                        // Còn lại bắt buộc đăng nhập
                         .anyRequest().authenticated()
                 )
 
-                // Thêm JwtFilter trước UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+                // Thêm JwtFilter
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // Form login
+                // Cấu hình Form Login
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
@@ -114,21 +127,27 @@ public class SecurityConfig {
                         .permitAll()
                 )
 
-                // Google OAuth2 login
+                // Cấu hình OAuth2 (Google)
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login") // trang login chung
+                        .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserService) // xử lý user Google
+                                .userService(oAuth2UserService)
                         )
-                        .defaultSuccessUrl("/") // redirect sau login Google thành công
+                        .defaultSuccessUrl("/", true) // redirect về trang chủ sau khi login GG
                 )
 
+                // Cấu hình Logout
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true) // Hủy session
+                        .deleteCookies("JSESSIONID") // Xóa cookie
                         .permitAll()
                 )
+
+                // Xử lý lỗi 403 (Không có quyền truy cập)
                 .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
+                
                 .build();
     }
 }

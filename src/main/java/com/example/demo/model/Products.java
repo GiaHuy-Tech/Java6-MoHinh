@@ -32,39 +32,51 @@ public class Products {
     @Column(columnDefinition = "nvarchar(255)")
     private String name;
 
-    // 🔥 SỬA CHUẨN TIỀN TỆ
+    // 🔥 GIÁ SẢN PHẨM
     @DecimalMin(value = "50000", message = "Giá phải lớn hơn 50000")
     @Column(precision = 15, scale = 2, nullable = false)
     private BigDecimal price;
 
-    // ✅ SỐ LƯỢNG
+    // 🔥 SỐ LƯỢNG
     @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer quantity = 0;
 
-    @Temporal(TemporalType.DATE)
-    private Date createdDate;
-
-    private boolean available;
-
-    // 🔥 Quan hệ Category
-    @ManyToOne
-    @JoinColumn(name = "categoryId")
-    @JsonIgnore
-    private Category category;
-
+    // 🔥 MÔ TẢ & TRỌNG LƯỢNG
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
 
     @Column
     private Double weight; // kg
 
-    // 🔥 Danh sách ảnh
-    @OneToMany(mappedBy = "product",
-               cascade = CascadeType.ALL,
-               orphanRemoval = true)
+    // 🔥 NGÀY TẠO & TRẠNG THÁI
+    @Temporal(TemporalType.DATE)
+    private Date createdDate;
+
+    private boolean available;
+    
+    // Thêm trường Discount (Giảm giá) nếu HTML của bạn có dùng ${p.discount}
+    // Nếu trong Database chưa có cột này, bạn có thể thêm @Transient để test, 
+    // hoặc thêm cột thật vào DB. Ở đây tôi để mặc định là 0.
+    @Column(columnDefinition = "int default 0")
+    private Integer discount = 0;
+
+    // ==========================================
+    // CÁC MỐI QUAN HỆ (RELATIONSHIPS)
+    // ==========================================
+
+    @ManyToOne
+    @JoinColumn(name = "categoryId")
+    @JsonIgnore
+    private Category category;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ProductImage> images = new ArrayList<>();
+
+    // ==========================================
+    // CÁC HÀM XỬ LÝ LOGIC (HELPER METHODS)
+    // ==========================================
 
     public void addImage(ProductImage img) {
         images.add(img);
@@ -76,20 +88,39 @@ public class Products {
         img.setProduct(null);
     }
 
-    // --- ĐOẠN CODE MỚI THÊM VÀO ĐỂ SỬA LỖI GỌI p.image ---
- // --- ĐOẠN CODE LẤY ẢNH ĐẠI DIỆN ---
-    public String getImage() {
-        if (this.images != null && !this.images.isEmpty()) {
-            // 1. Ưu tiên tìm ảnh được đánh dấu là ảnh đại diện (thumbnail = true)
-            for (ProductImage img : this.images) {
-                if (Boolean.TRUE.equals(img.getThumbnail())) {
-                    return img.getImage(); // Đã sửa từ getName() thành getImage()
-                }
-            }
-            // 2. Nếu không có ảnh nào set thumbnail = true, lấy tạm ảnh đầu tiên
-            return this.images.get(0).getImage(); 
+    // 1. Logic xác định sản phẩm mới (Dùng cho nhãn NEW)
+    // Thymeleaf gọi bằng: ${p.newProduct}
+    public boolean isNewProduct() {
+        if (createdDate == null) {
+            return false;
         }
-        // Trả về ảnh mặc định nếu sản phẩm chưa có ảnh nào
-        return "default.png"; 
+        long currentTime = new Date().getTime();
+        long createdTime = createdDate.getTime();
+        long diff = currentTime - createdTime;
+        long days = diff / (24 * 60 * 60 * 1000);
+        
+        return days <= 7; // Mới trong vòng 7 ngày
+    }
+
+    // 2. Lấy ảnh đại diện
+    // Thymeleaf gọi bằng: ${p.mainImage}
+    public String getMainImage() {
+        if (images == null || images.isEmpty()) {
+            return "no-image.jpg"; 
+        }
+        // Ưu tiên ảnh thumbnail
+        for (ProductImage img : images) {
+            if (Boolean.TRUE.equals(img.getThumbnail())) {
+                return img.getImage();
+            }
+        }
+        // Nếu không có, lấy ảnh đầu tiên
+        return images.get(0).getImage();
+    }
+
+    // 3. Lấy tên danh mục an toàn (tránh lỗi null)
+    // Thymeleaf gọi bằng: ${p.categoryName}
+    public String getCategoryName() {
+        return category != null ? category.getName() : "Khác";
     }
 }

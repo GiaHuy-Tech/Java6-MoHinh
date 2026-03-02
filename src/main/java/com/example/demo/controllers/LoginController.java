@@ -7,12 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
 import com.example.demo.repository.AccountRepository;
 
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @Controller
@@ -21,12 +27,14 @@ public class LoginController {
     @Autowired
     private AccountRepository accountRepo;
 
-    // ================= LOGIN PAGE =================
+    @Autowired
+    private HttpSession session;
+
+    // Trang login — tự động lấy cookie (nếu có)
     @GetMapping("/login")
     public String showLoginForm(HttpServletRequest request, Model model) {
-
         Account acc = new Account();
-
+        
         String email = getCookieValue(request, "email");
         String password = getCookieValue(request, "password");
 
@@ -43,16 +51,17 @@ public class LoginController {
         return "client/login";
     }
 
-    // ================= PROCESS LOGIN =================
+    // Xử lý login
     @PostMapping("/login")
     public String processLogin(
-            @Valid @ModelAttribute("account") Account account,
-            BindingResult result,
-            @RequestParam(value = "remember", required = false) String remember,
-            Model model,
-            HttpServletResponse response,
-            HttpSession session) {
+             @Valid @ModelAttribute("account") Account account, 
+             BindingResult result,
+             @RequestParam(value = "remember", required = false) String remember, 
+             Model model,
+             HttpServletResponse response) {
 
+        // Lưu ý: Nếu trong Account entity bạn không gắn @NotBlank, @Size... 
+        // thì result.hasErrors() sẽ không bắt được lỗi validation.
         if (result.hasErrors()) {
             return "client/login";
         }
@@ -66,17 +75,23 @@ public class LoginController {
 
         Account dbAccount = optionalAccount.get();
 
+        // Kiểm tra mật khẩu
         if (!account.getPassword().equals(dbAccount.getPassword())) {
             model.addAttribute("errorMessage", "Mật khẩu không đúng!");
             return "client/login";
         }
 
-        // ================= ĐĂNG NHẬP THÀNH CÔNG =================
-        session.setAttribute("user", dbAccount);   // 🔥 QUAN TRỌNG: dùng "user"
+        // BỔ SUNG: Kiểm tra trạng thái hoạt động (Active)
+        // Trong Model: private Boolean active = true;
+        if (Boolean.FALSE.equals(dbAccount.getActive())) {
+            model.addAttribute("errorMessage", "Tài khoản đã bị khóa!");
+            return "client/login";
+        }
 
-        System.out.println("Login thành công với ID: " + dbAccount.getId());
+        // Đăng nhập thành công
+        session.setAttribute("account", dbAccount);
 
-        // ================= REMEMBER ME =================
+        // Xử lý Cookie
         if (remember != null) {
             saveCookie(response, "email", account.getEmail(), 7);
             saveCookie(response, "password", account.getPassword(), 7);
@@ -85,22 +100,25 @@ public class LoginController {
             clearCookie(response, "password");
         }
 
-        return "redirect:/home";
+        // Điều hướng sau khi đăng nhập thành công
+        // Nếu là Admin thì vào trang admin, User thì về trang chủ
+        if (Boolean.TRUE.equals(dbAccount.getRole())) {
+             return "redirect:/admin/dashboard"; // Ví dụ đường dẫn admin
+        }
+        return "redirect:/";
     }
 
-    // ================= LOGOUT =================
+    // Logout
     @GetMapping("/logout")
-    public String logout(HttpServletResponse response, HttpSession session) {
-
+    public String logout(HttpServletResponse response) {
         session.invalidate();
-
         clearCookie(response, "email");
         clearCookie(response, "password");
-
         return "redirect:/login";
     }
 
-    // ================= COOKIE METHODS =================
+    // --- Utility Methods ---
+
     private void saveCookie(HttpServletResponse response, String name, String value, int days) {
         Cookie cookie = new Cookie(name, value);
         cookie.setMaxAge(days * 24 * 60 * 60);
@@ -116,8 +134,9 @@ public class LoginController {
     }
 
     private String getCookieValue(HttpServletRequest request, String name) {
-        if (request.getCookies() == null) return null;
-
+        if (request.getCookies() == null) {
+            return null;
+        }
         return Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equals(name))
                 .map(Cookie::getValue)

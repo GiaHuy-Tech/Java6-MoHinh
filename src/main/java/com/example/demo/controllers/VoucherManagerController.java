@@ -7,16 +7,11 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.model.Account;
+import com.example.demo.model.Membership;
 import com.example.demo.model.Voucher;
-import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.MembershipRepository; // Giả sử bạn đã tạo repo này
 import com.example.demo.repository.VoucherRepository;
 
 @Controller
@@ -27,98 +22,85 @@ public class VoucherManagerController {
     private VoucherRepository voucherRepo;
 
     @Autowired
-    private AccountRepository accountRepo;
+    private MembershipRepository membershipRepo; // Cần thêm Repo này
 
-    // 1. HIỆN DANH SÁCH + FORM (Mode: Thêm mới hoặc Sửa)
+    // 1. HIỆN DANH SÁCH + FORM
     @GetMapping
     public String listVouchers(Model model) {
         return loadPage(model, new Voucher());
     }
 
-    // 2. CHẾ ĐỘ SỬA: Load lại trang nhưng điền dữ liệu cũ vào form
+    // 2. CHẾ ĐỘ SỬA
     @GetMapping("/edit/{id}")
     public String editVoucher(@PathVariable("id") Integer id, Model model) {
-        // Tìm voucher theo Integer id
         Voucher voucher = voucherRepo.findById(id).orElse(new Voucher());
         return loadPage(model, voucher);
     }
 
-    // Hàm phụ để load dữ liệu chung cho cả 2 action trên
     private String loadPage(Model model, Voucher voucher) {
         List<Voucher> list = voucherRepo.findAll();
-        List<Account> accounts = accountRepo.findAll();
+        List<Membership> memberships = membershipRepo.findAll(); // Lấy list hạng thành viên
 
         model.addAttribute("vouchers", list);
-        model.addAttribute("accounts", accounts);
+        model.addAttribute("memberships", memberships);
         model.addAttribute("voucher", voucher);
 
-        return "admin/voucher-list"; // Trả về file HTML
+        return "admin/voucher-list"; 
     }
 
     // 3. LƯU (THÊM HOẶC SỬA)
     @PostMapping("/save")
     public String saveVoucher(@ModelAttribute("voucher") Voucher voucher,
-                              @RequestParam(name = "accountId", required = false) Integer accountId) {
+                              @RequestParam(name = "membershipId", required = false) Integer membershipId) {
 
-        // 1. Xử lý gán Account (ManyToOne)
-        if (accountId != null && accountId > 0) {
-            // Nếu chọn user cụ thể
-            Account acc = accountRepo.findById(accountId).orElse(null);
-            voucher.setAccount(acc);
+        // 1. Xử lý Logic FreeShipping
+        if (Boolean.TRUE.equals(voucher.getIsFreeShipping())) {
+            // Nếu là FreeShip thì reset các giá trị giảm tiền về null/0
+            voucher.setDiscountPercent(null);
+            voucher.setDiscountAmount(null);
+        }
+
+        // 2. Xử lý Membership
+        if (membershipId != null && membershipId > 0) {
+            Membership mem = membershipRepo.findById(membershipId).orElse(null);
+            voucher.setMembership(mem);
         } else {
-            // Nếu chọn "Tất cả" hoặc không chọn -> Voucher chung
-            voucher.setAccount(null);
+            voucher.setMembership(null); // Tất cả thành viên
         }
 
-        // 2. Xử lý logic Active mặc định nếu là thêm mới
+        // 3. Xử lý Active mặc định
         if (voucher.getId() == null) {
-            voucher.setActive(true); // Mặc định voucher mới tạo sẽ active
+            voucher.setActive(true);
+        }
+        
+        // 4. Ngày hết hạn mặc định
+        if (voucher.getExpiredAt() == null) {
+            voucher.setExpiredAt(LocalDateTime.now().plusMonths(1));
         }
 
-        // 3. (Tùy chọn) Kiểm tra ngày hết hạn logic
-        if (voucher.getExpiredAt() == null) {
-            // Ví dụ: Mặc định hết hạn sau 1 tháng nếu không nhập
-             voucher.setExpiredAt(LocalDateTime.now().plusMonths(1));
-        }
+        // 5. Xử lý logic Birthday (đã map tự động qua @ModelAttribute nếu checkbox có name="isBirthday")
 
         voucherRepo.save(voucher);
         return "redirect:/admin/vouchers";
     }
 
-    // 4. XÓA MỀM (ẨN VOUCHER)
+    // 4. ẨN VOUCHER
     @GetMapping("/hide/{id}")
     public String hideVoucher(@PathVariable("id") Integer id) {
-        Optional<Voucher> v = voucherRepo.findById(id);
-        if (v.isPresent()) {
-            Voucher voucher = v.get();
-            voucher.setActive(false);
-            voucherRepo.save(voucher);
-        }
+        voucherRepo.findById(id).ifPresent(v -> {
+            v.setActive(false);
+            voucherRepo.save(v);
+        });
         return "redirect:/admin/vouchers";
     }
 
-    // 5. HIỆN LẠI VOUCHER
+    // 5. HIỆN VOUCHER
     @GetMapping("/show/{id}")
     public String showVoucher(@PathVariable("id") Integer id) {
-        Optional<Voucher> v = voucherRepo.findById(id);
-        if (v.isPresent()) {
-            Voucher voucher = v.get();
-            voucher.setActive(true);
-            voucherRepo.save(voucher);
-        }
-        return "redirect:/admin/vouchers";
-    }
-
-    // 6. (MỞ RỘNG) XÓA CỨNG - Nếu muốn xóa hẳn khỏi database
-    @GetMapping("/delete/{id}")
-    public String deleteVoucher(@PathVariable("id") Integer id) {
-        // Lưu ý: Chỉ xóa được nếu chưa có dữ liệu bên bảng VoucherDetail tham chiếu tới
-        try {
-            voucherRepo.deleteById(id);
-        } catch (Exception e) {
-            // Xử lý lỗi ràng buộc khóa ngoại (nếu voucher đã được dùng trong VoucherDetail)
-            System.out.println("Không thể xóa voucher đã được sử dụng!");
-        }
+        voucherRepo.findById(id).ifPresent(v -> {
+            v.setActive(true);
+            voucherRepo.save(v);
+        });
         return "redirect:/admin/vouchers";
     }
 }

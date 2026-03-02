@@ -5,18 +5,21 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
+import com.example.demo.model.Membership;
 import com.example.demo.model.Products;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.LikeRepository;
+import com.example.demo.repository.MembershipRepository;
 import com.example.demo.repository.OrdersRepository;
 import com.example.demo.repository.ProductRepository;
 
@@ -38,11 +41,14 @@ public class StatsController {
     @Autowired
     private LikeRepository wishlistRepo;
 
+    @Autowired
+    private MembershipRepository membershipRepo; // Đã thêm repo này
+
+    // ===== TRANG DASHBOARD THỐNG KÊ =====
     @GetMapping("/stats")
     public String dashboard(Model model) {
 
         // ===== 1. TỔNG QUAN (TOP CARDS) =====
-        // Sử dụng hàm đếm đơn hoàn tất thay vì count() tất cả
         model.addAttribute("totalOrders", ordersRepo.countCompletedOrders()); 
         model.addAttribute("totalProducts", productRepo.count());
         model.addAttribute("totalAccounts", accountRepo.count());
@@ -118,11 +124,37 @@ public class StatsController {
         model.addAttribute("orderCounts", orderCounts);
         
         // Thêm số liệu đơn tháng này/năm này cho thẻ hiển thị
-        // (Bạn có thể viết thêm hàm countCompletedOrdersByMonth ở Repo để chính xác hơn)
-        YearMonth current = YearMonth.now();
-        model.addAttribute("monthOrders", orderCounts.isEmpty() ? 0 : orderCounts.get(orderCounts.size() -1)); // Lấy tạm tháng cuối
-        model.addAttribute("yearOrders", ordersRepo.countCompletedOrders()); // Lấy tổng năm
+        model.addAttribute("monthOrders", orderCounts.isEmpty() ? 0 : orderCounts.get(orderCounts.size() -1));
+        model.addAttribute("yearOrders", ordersRepo.countCompletedOrders());
+
+
+        // ===== 7. QUẢN LÝ & THỐNG KÊ MEMBERSHIP (MỚI THÊM) =====
+        // a. Lấy danh sách để hiển thị bảng quản lý
+        List<Membership> memberships = membershipRepo.findAll();
+        model.addAttribute("memberships", memberships);
+
+        // b. Lấy thống kê số lượng người dùng theo hạng
+        List<Object[]> memStats = membershipRepo.countUsersByMembership();
+        List<String> memLabels = new ArrayList<>();
+        List<Long> memData = new ArrayList<>();
+        
+        if (memStats != null) {
+            for (Object[] row : memStats) {
+                memLabels.add((String) row[0]); // Tên hạng
+                memData.add(((Number) row[1]).longValue()); // Số lượng user
+            }
+        }
+        model.addAttribute("memLabels", memLabels);
+        model.addAttribute("memData", memData);
 
         return "admin/stats";
+    }
+
+    // ===== METHOD XỬ LÝ CẬP NHẬT MEMBERSHIP TỪ MODAL =====
+    @PostMapping("/admin/membership/update")
+    public String updateMembership(@ModelAttribute Membership membership) {
+        // Lưu lại thông tin (JPA tự hiểu là update nếu ID đã tồn tại)
+        membershipRepo.save(membership);
+        return "redirect:/stats?success=true";
     }
 }
