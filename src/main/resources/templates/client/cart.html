@@ -131,22 +131,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="item : ${cartDetails}" th:if="${item.product != null}">
+                        <tr th:each="item : ${cartDetails}">
                             <td style="text-align: left; padding-left: 30px;">
                                 <div class="d-flex align-items-center gap-3">
-                                    <img th:src="@{${item.product.image != null ? item.product.image : '/images/no-image.jpg'}}" alt="product" class="product-img-thumb">
-                                    <a th:href="@{'/product-detail/' + ${item.product.id}}" class="product-name-link" th:text="${item.product.name}">Tên sản phẩm</a>
+                                    <img th:src="@{${item.product != null and item.product.image != null ? item.product.image : '/images/no-image.jpg'}}" 
+                                         alt="product" class="product-img-thumb">
+                                    <a th:if="${item.product != null}" 
+                                       th:href="@{'/product-detail/' + ${item.product.id}}" 
+                                       class="product-name-link" 
+                                       th:text="${item.product.name}">Tên sản phẩm</a>
+                                    <span th:if="${item.product == null}" class="text-danger">Sản phẩm không còn tồn tại</span>
                                 </div>
                             </td>
                             
-                            <td class="price-text" th:text="${item.product.price != null ? #numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}"></td>
+                            <td class="price-text" 
+                                th:text="${item.product != null ? #numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}"></td>
                             
                             <td class="text-white" th:text="${item.quantity}">1</td>
                             
-                            <td class="price-text" th:text="${item.product.price != null ? #numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}"></td>
+                            <td class="price-text" 
+                                th:text="${item.product != null ? #numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT') + '₫' : '0₫'}"></td>
                             
                             <td>
-                                <a th:href="@{'/cart/delete/' + ${item.id}}" class="btn-remove">
+                                <a th:href="@{'/cart/delete/' + ${item.id}}" class="btn-remove" 
+                                   onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
                                     <i class="bi bi-trash me-1"></i> Xóa
                                 </a>
                             </td>
@@ -164,14 +172,16 @@
             </div>
         </div>
 
-        <div class="cart-summary" th:if="${!#lists.isEmpty(cartDetails)}">
+        <div class="cart-summary" th:if="${not #lists.isEmpty(cartDetails)}">
             <h4 class="text-white mb-2">
-                Tổng cộng: <span class="text-info ms-2" style="font-size: 1.5rem;" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+                Tổng cộng: <span class="text-info ms-2" style="font-size: 1.5rem;" 
+                                th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
             </h4>
             <p class="small text-light mb-4">Phí vận chuyển sẽ được tính khi thanh toán.</p>
             
             <div class="d-flex justify-content-end gap-3">
-                <a href="/products" class="btn btn-outline-secondary text-white border-secondary" style="padding: 10px 20px; border-radius: 6px; text-decoration: none;">
+                <a href="/products" class="btn btn-outline-secondary text-white border-secondary" 
+                   style="padding: 10px 20px; border-radius: 6px; text-decoration: none;">
                     <i class="bi bi-arrow-left me-1"></i> Tiếp tục mua
                 </a>
                 <a th:href="@{/checkout}" class="btn-checkout">
