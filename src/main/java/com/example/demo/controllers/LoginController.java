@@ -24,105 +24,123 @@ import jakarta.validation.Valid;
 @Controller
 public class LoginController {
 
-	@Autowired
-	private AccountRepository accountRepo;
+    @Autowired
+    private AccountRepository accountRepo;
 
-	@Autowired
-	private HttpSession session;
+    @Autowired
+    private HttpSession session;
 
-	// Trang login — tự động lấy cookie (nếu có)
-	@GetMapping("/login")
-	public String showLoginForm(HttpServletRequest request, Model model) {
-		Account acc = new Account();
-		// Lấy cookie email và password nếu tồn tại
-		String email = getCookieValue(request, "email");
-		String password = getCookieValue(request, "password");
+    // Trang login — tự động lấy cookie (nếu có)
+    @GetMapping("/login")
+    public String showLoginForm(HttpServletRequest request, Model model) {
+        Account acc = new Account();
+        
+        String email = getCookieValue(request, "email");
+        String password = getCookieValue(request, "password");
 
-		if (email != null && password != null) {
-			acc.setEmail(email);
-			acc.setPassword(password);
-		}
+        if (email != null && password != null) {
+            acc.setEmail(email);
+            acc.setPassword(password);
+        }
 
-		// Nếu có cả email và password trong cookie thì coi như đã chọn "remember"
-		boolean remember = (email != null && password != null);
+        boolean remember = (email != null && password != null);
 
-		// Gán vào model để Thymeleaf bind form
-		model.addAttribute("account", acc);
-		model.addAttribute("remember", remember);
+        model.addAttribute("account", acc);
+        model.addAttribute("remember", remember);
 
-		return "client/login";
-	}
+        return "client/login";
+    }
 
-	// Xử lý login
-	@PostMapping("/login")
-	public String processLogin(
-			 @Valid @ModelAttribute("account") Account account, BindingResult result,
-			@RequestParam(value = "remember", required = false) String remember, Model model,
-			HttpServletResponse response) {
+    // Xử lý login
+    @PostMapping("/login")
+    public String processLogin(
+             @Valid @ModelAttribute("account") Account account, 
+             BindingResult result,
+             @RequestParam(value = "remember", required = false) String remember, 
+             Model model,
+             HttpServletResponse response) {
 
-		// Nếu có lỗi validate từ entity (email trống, mật khẩu ngắn...)
-		if (result.hasErrors()) {
-			return "client/login";
-		}
+        // Lưu ý: Nếu trong Account entity bạn không gắn @NotBlank, @Size... 
+        // thì result.hasErrors() sẽ không bắt được lỗi validation.
+        if (result.hasErrors()) {
+            return "client/login";
+        }
 
-		Optional<Account> optionalAccount = accountRepo.findByEmail(account.getEmail());
+        Optional<Account> optionalAccount = accountRepo.findByEmail(account.getEmail());
 
-		if (optionalAccount.isEmpty()) {
-			model.addAttribute("errorMessage", "Tài khoản không tồn tại!");
-			return "client/login";
-		}
+        if (optionalAccount.isEmpty()) {
+            model.addAttribute("errorMessage", "Tài khoản không tồn tại!");
+            return "client/login";
+        }
 
-		Account dbAccount = optionalAccount.get();
+        Account dbAccount = optionalAccount.get();
 
-		if (!account.getPassword().equals(dbAccount.getPassword())) {
-			model.addAttribute("errorMessage", "Mật khẩu không đúng!");
-			return "client/login";
-		}
+        // Kiểm tra mật khẩu
+        if (!account.getPassword().equals(dbAccount.getPassword())) {
+            model.addAttribute("errorMessage", "Mật khẩu không đúng!");
+            return "client/login";
+        }
 
-		// Đăng nhập thành công
-		session.setAttribute("account", dbAccount);
+        // BỔ SUNG: Kiểm tra trạng thái hoạt động (Active)
+        // Trong Model: private Boolean active = true;
+        if (Boolean.FALSE.equals(dbAccount.getActive())) {
+            model.addAttribute("errorMessage", "Tài khoản đã bị khóa!");
+            return "client/login";
+        }
 
-		// Nếu chọn “Ghi nhớ đăng nhập” thì lưu cookie 7 ngày
-		if (remember != null) {
-			saveCookie(response, "email", account.getEmail(), 7);
-			saveCookie(response, "password", account.getPassword(), 7);
-		} else {
-			// Nếu không tick thì xóa cookie cũ
-			clearCookie(response, "email");
-clearCookie(response, "password");
-		}
+        // Đăng nhập thành công
+        session.setAttribute("account", dbAccount);
 
-		return "client/login";
-	}
+        // Xử lý Cookie
+        if (remember != null) {
+            saveCookie(response, "email", account.getEmail(), 7);
+            saveCookie(response, "password", account.getPassword(), 7);
+        } else {
+            clearCookie(response, "email");
+            clearCookie(response, "password");
+        }
 
-	// Logout — xóa session + cookie
-	@GetMapping("/logout")
-	public String logout(HttpSession session, HttpServletResponse response) {
-		session.invalidate();
-		clearCookie(response, "email");
-		clearCookie(response, "password");
-		return "redirect:/login";
-	}
+        // Điều hướng sau khi đăng nhập thành công
+        // Nếu là Admin thì vào trang admin, User thì về trang chủ
+        if (Boolean.TRUE.equals(dbAccount.getRole())) {
+             return "redirect:/admin/dashboard"; // Ví dụ đường dẫn admin
+        }
+        return "redirect:/";
+    }
 
-	private void saveCookie(HttpServletResponse response, String name, String value, int days) {
-		Cookie cookie = new Cookie(name, value);
-		cookie.setMaxAge(days * 24 * 60 * 60); // thời hạn tính bằng giây
-		cookie.setPath("/");
-		response.addCookie(cookie);
-	}
+    // Logout
+    @GetMapping("/logout")
+    public String logout(HttpServletResponse response) {
+        session.invalidate();
+        clearCookie(response, "email");
+        clearCookie(response, "password");
+        return "redirect:/login";
+    }
 
-	private void clearCookie(HttpServletResponse response, String name) {
-		Cookie cookie = new Cookie(name, null);
-		cookie.setMaxAge(0);
-		cookie.setPath("/");
-		response.addCookie(cookie);
-	}
+    // --- Utility Methods ---
 
-	private String getCookieValue(HttpServletRequest request, String name) {
-		if (request.getCookies() == null) {
-			return null;
-		}
-		return Arrays.stream(request.getCookies()).filter(c -> c.getName().equals(name)).map(Cookie::getValue)
-				.findFirst().orElse(null);
-	}
+    private void saveCookie(HttpServletResponse response, String name, String value, int days) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setMaxAge(days * 24 * 60 * 60);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
+    private void clearCookie(HttpServletResponse response, String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
+    private String getCookieValue(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) {
+            return null;
+        }
+        return Arrays.stream(request.getCookies())
+                .filter(c -> c.getName().equals(name))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+    }
 }

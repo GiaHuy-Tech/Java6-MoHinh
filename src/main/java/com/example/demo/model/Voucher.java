@@ -40,14 +40,22 @@ public class Voucher {
 
     @Column(name = "min_order_value")
     Double minOrderValue;
+    
+    @Column(name = "is_free_shipping")
+    Boolean isFreeShipping = false; // Mặc định là false
 
+    @Column(name = "is_birthday")
+    Boolean isBirthday = false;     // Voucher dành riêng cho sinh nhật
+    
     @Column(name = "expired_at")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     LocalDateTime expiredAt;
 
     // Biến này rất quan trọng, đừng xóa nhé
     Boolean active;
-
+    @ManyToOne
+    @JoinColumn(name = "membership_id")
+    private Membership membership;
     // --- MỐI QUAN HỆ VỚI ACCOUNT ---
     // Nếu account null -> Ai dùng cũng được (Voucher chung)
     // Nếu account có dữ liệu -> Chỉ người này được dùng

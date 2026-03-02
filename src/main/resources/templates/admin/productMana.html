@@ -321,7 +321,7 @@
 
                                     <input type="file" name="imageFiles" id="imageInput" multiple class="form-control form-control-custom mb-2" 
                                            th:required="${product.id == null}">
-                                    <small class="text-muted d-block fst-italic mb-3" style="font-size: 0.75rem;">Giữ phím <b>Ctrl</b> để chọn nhiều ảnh.</small>
+                                    <small class="text-white d-block fst-italic mb-3" style="font-size: 0.75rem;">Giữ phím <b>Ctrl</b> để chọn nhiều ảnh.</small>
 
                                     <div class="input-group input-group-sm mb-1">
                                         <span class="input-group-text bg-dark text-neon border-secondary" style="border-color: rgba(0,242,255,0.3) !important;">Ảnh đại diện là số:</span>
@@ -364,7 +364,7 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="p : ${list}">
-                                        <td class="text-muted small fw-bold" th:text="${'#' + p.id}"></td>
+                                        <td class="text-white small fw-bold" th:text="${'#' + p.id}"></td>
                                         
                                         <td>
                                             <th:block th:with="thumbList=${p.images.?[thumbnail == true]}">
@@ -403,7 +403,7 @@
                             </table>
                         </div>
                         <div class="text-center mt-3 pt-3" style="border-top: 1px dashed rgba(0,242,255,0.2);">
-                            <small class="text-muted fst-italic">Hiển thị tối đa 50 dòng mới nhất</small>
+                            <small class="text-white fst-italic">Hiển thị tối đa 50 dòng mới nhất</small>
                         </div>
                     </div>
                 </div>
