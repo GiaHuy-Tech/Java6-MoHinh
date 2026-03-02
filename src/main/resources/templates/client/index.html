@@ -117,6 +117,47 @@
             margin-bottom: 8px; font-size: 24px; transition: 0.3s;
             border: 1px solid var(--border-color); color: var(--accent-cyan);
         }
+        /* ================= WISHLIST HEART ================= */
+
+.wishlist-icon {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    z-index: 20;
+}
+
+.wishlist-icon i {
+    color: white;
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.wishlist-icon.active i {
+    color: #ff2e63;
+}
+
+.wishlist-icon:hover {
+    transform: scale(1.1);
+}
+
+@keyframes heartPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+.wishlist-icon.animate {
+    animation: heartPop 0.4s ease;
+}
         .cat-item:hover .cat-icon-circle { 
             background: var(--accent-cyan); color: #0b0c10; 
             box-shadow: 0 0 15px var(--accent-cyan); 
@@ -351,10 +392,13 @@
             <div class="row g-3">
                 <th:block th:each="p : ${latestProducts}">
                     <div class="col-xl-2 col-lg-3 col-md-4 col-6">
-                        <div class="product-card">
-                            <div class="ribbon-new" th:if="${p.newProduct}">
-                                <span>NEW</span>
-                            </div>
+<div class="product-card">
+
+    <div class="wishlist-icon"
+         th:attr="data-id=${p.id}"
+         onclick="toggleWishlist(this)">
+        <i class="bi bi-heart"></i>
+    </div>
 
                             <div class="product-img-wrap">
                                 <a th:href="@{'/product-detail/' + ${p.id}}">
@@ -542,6 +586,58 @@
     function toggleMiniCart() { 
         document.getElementById('mini-cart-panel').classList.toggle('show'); 
     }
+    /* ================= WISHLIST SCRIPT ================= */
+
+ // Load các sản phẩm đã like khi vào trang
+ document.addEventListener("DOMContentLoaded", function () {
+     fetch("/wishlist/my-likes")
+         .then(res => res.json())
+         .then(data => {
+             data.forEach(id => {
+                 const icon = document.querySelector(`.wishlist-icon[data-id='${id}']`);
+                 if (icon) {
+                     icon.classList.add("active");
+                     const iTag = icon.querySelector("i");
+                     iTag.classList.remove("bi-heart");
+                     iTag.classList.add("bi-heart-fill");
+                 }
+             });
+         });
+ });
+
+ // Toggle wishlist
+ function toggleWishlist(element) {
+     const productId = element.getAttribute("data-id");
+
+     fetch(`/wishlist/toggle/${productId}`)
+         .then(res => res.text())
+         .then(result => {
+
+             if (result === "unauthorized") {
+                 window.location.href = "/login";
+                 return;
+             }
+
+             element.classList.add("animate");
+
+             setTimeout(() => {
+                 element.classList.remove("animate");
+             }, 400);
+
+             const icon = element.querySelector("i");
+
+             if (result === "added") {
+                 element.classList.add("active");
+                 icon.classList.remove("bi-heart");
+                 icon.classList.add("bi-heart-fill");
+             } 
+             else if (result === "removed") {
+                 element.classList.remove("active");
+                 icon.classList.remove("bi-heart-fill");
+                 icon.classList.add("bi-heart");
+             }
+         });
+ }
 </script>
 
 </body>
