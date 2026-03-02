@@ -1,8 +1,8 @@
 package com.example.demo.controllers;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,7 +13,7 @@ import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
 import com.example.demo.model.Products;
 import com.example.demo.repository.CartDetailRepository;
-import com.example.demo.repository.ProductRepository; // Đúng tên file của bạn
+import com.example.demo.repository.ProductRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -22,70 +22,123 @@ import jakarta.servlet.http.HttpSession;
 public class CartController {
 
     @Autowired
-    private CartDetailRepository cartDetailRepo;
-    
-    @Autowired
-    private ProductRepository productRepo; 
+    private CartDetailRepository cartRepo;
 
+    @Autowired
+    private ProductRepository productRepo;
+
+    // ================= VIEW CART =================
     @GetMapping
     public String viewCart(HttpSession session, Model model) {
-        // Lấy account từ session (check cả 2 tên phổ biến)
-        Account account = (Account) session.getAttribute("account");
-        if (account == null) account = (Account) session.getAttribute("user");
 
+        Account account = getAccount(session);
         if (account == null) return "redirect:/login";
 
-        // Lấy data trực tiếp từ CartDetailRepo
-        List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
-        
+        List<CartDetail> cartList = cartRepo.findCartWithProduct(account.getId());
+
         BigDecimal total = BigDecimal.ZERO;
+
         for (CartDetail item : cartList) {
-            if (item.getProduct() != null && item.getProduct().getPrice() != null) {
-                BigDecimal price = item.getProduct().getPrice();
-                BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-                total = total.add(price.multiply(qty));
-            }
+            BigDecimal price = item.getProduct().getPrice();
+            BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
+            total = total.add(price.multiply(qty));
         }
 
         model.addAttribute("cartDetails", cartList);
         model.addAttribute("total", total);
-        return "client/cart"; 
+
+        return "client/cart";
     }
 
-    @GetMapping("/add/{productId}")
-    @ResponseBody
-    public String addToCart(@PathVariable Integer productId, HttpSession session) {
-        Account account = (Account) session.getAttribute("account");
-        if (account == null) account = (Account) session.getAttribute("user");
-        
-        if (account == null) return "unauthorized";
+    // ================= ADD TO CART (CHUYỂN TRANG) =================
+    @PostMapping("/add/{productId}")
+    public String addToCart(@PathVariable Integer productId,
+                            HttpSession session) {
 
-        // Tìm món hàng cũ trong giỏ của user này
-        List<CartDetail> existingItems = cartDetailRepo.findByAccount_Id(account.getId());
-        CartDetail cartItem = existingItems.stream()
-                .filter(item -> item.getProduct() != null && item.getProduct().getId().equals(productId))
-                .findFirst().orElse(null);
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
+
+        Products product = productRepo.findById(productId).orElse(null);
+        if (product == null) return "redirect:/products";
+
+        CartDetail cartItem = cartRepo
+                .findByAccountAndProduct(account, product)
+                .orElse(null);
 
         if (cartItem != null) {
             cartItem.setQuantity(cartItem.getQuantity() + 1);
-            cartDetailRepo.save(cartItem);
         } else {
-            Products product = productRepo.findById(productId).orElse(null);
-            if (product != null) {
-                CartDetail newItem = new CartDetail();
-                newItem.setAccount(account);
-                newItem.setProduct(product);
-                newItem.setQuantity(1);
-                newItem.setCreateDate(new Date());
-                cartDetailRepo.save(newItem);
-            }
+            cartItem = new CartDetail();
+            cartItem.setAccount(account);
+            cartItem.setProduct(product);
+            cartItem.setQuantity(1);
+            cartItem.setCreateDate(new Date());
         }
-        return "success";
+
+        cartRepo.save(cartItem);
+
+        return "redirect:/cart"; // 🔥 CHUYỂN QUA GIỎ HÀNG
     }
 
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Integer id) {
-        cartDetailRepo.deleteById(id);
+    // ================= INCREASE =================
+    @GetMapping("/plus/{id}")
+    public String increase(@PathVariable Integer id, HttpSession session) {
+
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
+
+        CartDetail item = cartRepo.findById(id).orElse(null);
+
+        if (item != null && item.getAccount().getId().equals(account.getId())) {
+            item.setQuantity(item.getQuantity() + 1);
+            cartRepo.save(item);
+        }
+
         return "redirect:/cart";
+    }
+
+    // ================= DECREASE =================
+    @GetMapping("/minus/{id}")
+    public String decrease(@PathVariable Integer id, HttpSession session) {
+
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
+
+        CartDetail item = cartRepo.findById(id).orElse(null);
+
+        if (item != null && item.getAccount().getId().equals(account.getId())) {
+
+            if (item.getQuantity() > 1) {
+                item.setQuantity(item.getQuantity() - 1);
+                cartRepo.save(item);
+            } else {
+                cartRepo.delete(item);
+            }
+        }
+
+        return "redirect:/cart";
+    }
+
+    // ================= DELETE =================
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable Integer id, HttpSession session) {
+
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
+
+        CartDetail item = cartRepo.findById(id).orElse(null);
+
+        if (item != null && item.getAccount().getId().equals(account.getId())) {
+            cartRepo.delete(item);
+        }
+
+        return "redirect:/cart";
+    }
+
+    // ================= HELPER =================
+    private Account getAccount(HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null) account = (Account) session.getAttribute("user");
+        return account;
     }
 }
