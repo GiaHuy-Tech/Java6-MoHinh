@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/checkout")
 public class CheckoutController {
@@ -28,47 +30,50 @@ public class CheckoutController {
     private OrdersDetailRepository orderDetailRepo;
 
     @Autowired
-    private AccountRepository accountRepo;
-
-    @Autowired
     private VoucherDetailRepository voucherDetailRepo;
 
-    // ===============================
-    // POST: THANH TOÁN
-    // ===============================
-    @PostMapping("/{accountId}")
-    public String checkout(@PathVariable Integer accountId,
-                           @RequestParam(required = false) String voucherCode) {
+    @Autowired
+    private AccountRepository accountRepo;
 
-        Account account = accountRepo.findById(accountId).orElse(null);
-        if (account == null) {
-            return "redirect:/cart/" + accountId;
-        }
+    // =====================================================
+    // 1️⃣ HIỂN THỊ TRANG CHECKOUT + TÍNH VOUCHER
+    // =====================================================
+    @GetMapping
+    public String viewCheckout(HttpSession session,
+                               @RequestParam(required = false) String voucherCode,
+                               Model model) {
 
-        List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(accountId);
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
 
-        if (cartList.isEmpty()) {
-            return "redirect:/cart/" + accountId;
-        }
+        List<CartDetail> cartList =
+                cartDetailRepo.findByAccount_Id(account.getId());
 
-        // ===== 1. TÍNH TIỀN GỐC =====
+        if (cartList.isEmpty())
+            return "redirect:/cart";
+
+        // ===== TÍNH TIỀN GỐC =====
         BigDecimal rawTotal = BigDecimal.ZERO;
 
         for (CartDetail item : cartList) {
-            BigDecimal price = item.getProduct().getPrice();
-            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
-            rawTotal = rawTotal.add(price.multiply(quantity));
+            rawTotal = rawTotal.add(
+                    item.getProduct().getPrice()
+                            .multiply(BigDecimal.valueOf(item.getQuantity()))
+            );
         }
 
-        BigDecimal moneyDiscounted = BigDecimal.ZERO;
+        BigDecimal discount = BigDecimal.ZERO;
         BigDecimal feeShip = BigDecimal.ZERO;
         VoucherDetail appliedVoucherDetail = null;
 
-        // ===== 2. XỬ LÝ VOUCHER =====
+        // ===== XỬ LÝ VOUCHER =====
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
 
             Optional<VoucherDetail> voucherOpt =
-                    voucherDetailRepo.findValidVoucherForAccount(accountId, voucherCode.trim());
+                    voucherDetailRepo.findValidVoucherForAccount(
+                            account.getId(),
+                            voucherCode.trim()
+                    );
 
             if (voucherOpt.isPresent()) {
 
@@ -87,52 +92,128 @@ public class CheckoutController {
 
                     appliedVoucherDetail = vd;
 
-                    if (v.getDiscountPercent() != null && v.getDiscountPercent() > 0) {
+                    if (v.getDiscountPercent() != null
+                            && v.getDiscountPercent() > 0) {
 
-                        BigDecimal percent =
+                        discount = rawTotal.multiply(
                                 BigDecimal.valueOf(v.getDiscountPercent())
-                                .divide(BigDecimal.valueOf(100));
+                                        .divide(BigDecimal.valueOf(100))
+                        );
 
-                        moneyDiscounted = rawTotal.multiply(percent);
+                    } else if (v.getDiscountAmount() != null
+                            && v.getDiscountAmount() > 0) {
 
-                    } else if (v.getDiscountAmount() != null && v.getDiscountAmount() > 0) {
-
-                        moneyDiscounted = BigDecimal.valueOf(v.getDiscountAmount());
+                        discount = BigDecimal.valueOf(v.getDiscountAmount());
                     }
 
-                    if (moneyDiscounted.compareTo(rawTotal) > 0) {
-                        moneyDiscounted = rawTotal;
-                    }
+                    if (discount.compareTo(rawTotal) > 0)
+                        discount = rawTotal;
 
-                    if (Boolean.TRUE.equals(v.getIsFreeShipping())) {
+                    if (Boolean.TRUE.equals(v.getIsFreeShipping()))
                         feeShip = BigDecimal.ZERO;
-                    }
                 }
             }
         }
 
-        BigDecimal finalTotal = rawTotal.subtract(moneyDiscounted).add(feeShip);
-        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+        BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
+
+        if (finalTotal.compareTo(BigDecimal.ZERO) < 0)
             finalTotal = BigDecimal.ZERO;
+
+        model.addAttribute("cartList", cartList);
+        model.addAttribute("rawTotal", rawTotal);
+        model.addAttribute("discount", discount);
+        model.addAttribute("feeShip", feeShip);
+        model.addAttribute("finalTotal", finalTotal);
+        model.addAttribute("voucherCode", voucherCode);
+
+        return "client/checkout";
+    }
+
+    // =====================================================
+    // 2️⃣ CONFIRM ĐƠN HÀNG (TẠO ORDER)
+    // =====================================================
+    @PostMapping("/confirm")
+    public String confirmOrder(HttpSession session,
+                               @RequestParam(required = false) String voucherCode) {
+
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
+
+        List<CartDetail> cartList =
+                cartDetailRepo.findByAccount_Id(account.getId());
+
+        if (cartList.isEmpty())
+            return "redirect:/cart";
+
+        // ===== TÍNH LẠI TIỀN (BẮT BUỘC) =====
+        BigDecimal rawTotal = BigDecimal.ZERO;
+
+        for (CartDetail item : cartList) {
+            rawTotal = rawTotal.add(
+                    item.getProduct().getPrice()
+                            .multiply(BigDecimal.valueOf(item.getQuantity()))
+            );
         }
 
-        // ===== 3. TẠO ORDER =====
+        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal feeShip = BigDecimal.ZERO;
+        VoucherDetail appliedVoucherDetail = null;
+
+        if (voucherCode != null && !voucherCode.trim().isEmpty()) {
+
+            Optional<VoucherDetail> voucherOpt =
+                    voucherDetailRepo.findValidVoucherForAccount(
+                            account.getId(),
+                            voucherCode.trim()
+                    );
+
+            if (voucherOpt.isPresent()) {
+                VoucherDetail vd = voucherOpt.get();
+                Voucher v = vd.getVoucher();
+
+                appliedVoucherDetail = vd;
+
+                if (v.getDiscountPercent() != null) {
+                    discount = rawTotal.multiply(
+                            BigDecimal.valueOf(v.getDiscountPercent())
+                                    .divide(BigDecimal.valueOf(100))
+                    );
+                } else if (v.getDiscountAmount() != null) {
+                    discount = BigDecimal.valueOf(v.getDiscountAmount());
+                }
+
+                if (discount.compareTo(rawTotal) > 0)
+                    discount = rawTotal;
+
+                if (Boolean.TRUE.equals(v.getIsFreeShipping()))
+                    feeShip = BigDecimal.ZERO;
+            }
+        }
+
+        BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
+        if (finalTotal.compareTo(BigDecimal.ZERO) < 0)
+            finalTotal = BigDecimal.ZERO;
+
+        // ===== TẠO ORDER =====
         Orders order = new Orders();
         order.setAccount(account);
         order.setCreatedDate(new Date());
         order.setTotal(finalTotal);
         order.setFeeship(feeShip);
-        order.setMoneyDiscounted(moneyDiscounted);
+        order.setMoneyDiscounted(discount);
         order.setStatus(0);
         order.setPaymentStatus(false);
 
         if (appliedVoucherDetail != null) {
-            order.setVoucherCode(appliedVoucherDetail.getVoucher().getCode());
+            order.setVoucherCode(
+                    appliedVoucherDetail.getVoucher().getCode()
+            );
         }
 
         ordersRepo.save(order);
 
-        // ===== 4. TẠO ORDER DETAIL =====
+        // ===== TẠO ORDER DETAIL =====
         for (CartDetail item : cartList) {
 
             OrderDetail detail = new OrderDetail();
@@ -144,7 +225,7 @@ public class CheckoutController {
             orderDetailRepo.save(detail);
         }
 
-        // ===== 5. UPDATE VOUCHER =====
+        // ===== UPDATE VOUCHER =====
         if (appliedVoucherDetail != null) {
             appliedVoucherDetail.setIsUsed(true);
             appliedVoucherDetail.setUsedAt(new Date());
@@ -152,7 +233,7 @@ public class CheckoutController {
             voucherDetailRepo.save(appliedVoucherDetail);
         }
 
-        // ===== 6. UPDATE TOTAL SPENDING =====
+        // ===== UPDATE TOTAL SPENDING =====
         BigDecimal current =
                 account.getTotalSpending() == null
                         ? BigDecimal.ZERO
@@ -161,10 +242,19 @@ public class CheckoutController {
         account.setTotalSpending(current.add(finalTotal));
         accountRepo.save(account);
 
-        // ===== 7. XOÁ GIỎ HÀNG =====
+        // ===== XOÁ GIỎ HÀNG =====
         cartDetailRepo.deleteAll(cartList);
 
-        // ===== 8. REDIRECT SANG ORDERS =====
-        return "redirect:/orders/" + accountId;
+        return "redirect:/orders";
+    }
+
+    // =====================================================
+    // LẤY ACCOUNT TỪ SESSION
+    // =====================================================
+    private Account getAccount(HttpSession session) {
+        Account account = (Account) session.getAttribute("account");
+        if (account == null)
+            account = (Account) session.getAttribute("user");
+        return account;
     }
 }

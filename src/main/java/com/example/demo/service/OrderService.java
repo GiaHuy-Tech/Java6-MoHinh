@@ -1,108 +1,65 @@
 package com.example.demo.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.model.Orders;
-import com.example.demo.repository.OrdersRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class OrderService {
 
     @Autowired
-    private OrdersRepository orderRepository;
+    CartRepository cartRepo;
 
-    // ✅ Lấy toàn bộ đơn hàng (không phân trang)
-    public List<Orders> getAllOrders() {
-        return orderRepository.findAll();
-    }
+    @Autowired
+    CartDetailRepository cartDetailRepo;
 
-    // ✅ Lấy đơn hàng có phân trang
-    public Page<Orders> getPagedOrders(Pageable pageable) {
-        return orderRepository.findAll(pageable);
-    }
+    @Autowired
+    OrdersRepository orderRepo;
 
-    // ✅ Đếm tổng số đơn hàng
-    public long countOrders() {
-        return orderRepository.count();
-    }
+    @Autowired
+    OrdersDetailRepository orderDetailRepo;
 
-    // ✅ Tìm đơn hàng theo ID
-    public Orders getOrderById(Integer id) {
-        Optional<Orders> order = orderRepository.findById(id);
-        return order.orElse(null);
-    }
+    public void createOrder(Account acc, String voucherCode) {
 
-    // ✅ Thêm mới đơn hàng
-    @Transactional
-    public Orders createOrder(Orders order) {
-        if (order.getCreatedDate() == null) {
-            order.setCreatedDate(new Date());
+        CartDetail cart = cartRepo.findByAccount(acc);
+        if (cart == null) return;
+
+        List<CartDetail> cartList = cartDetailRepo.findByCart(cart);
+
+        double rawTotal = cartList.stream()
+                .mapToDouble(i -> i.getProduct().getPrice() * i.getQuantity())
+                .sum();
+
+        double discount = 0;
+        if (voucherCode != null && voucherCode.equalsIgnoreCase("SALE10")) {
+            discount = rawTotal * 0.1;
         }
-        order.setStatus(0); // mặc định là "chờ xử lý"
-        return orderRepository.save(order);
-    }
 
-    // ✅ Cập nhật đơn hàng
-    @Transactional
-    public Orders updateOrder(Integer id, Orders updatedOrder) {
-        Orders existing = orderRepository.findById(id).orElse(null);
-        if (existing == null) {
-			return null;
-		}
+        double feeShip = rawTotal > 1_000_000 ? 0 : 30000;
+        double finalTotal = rawTotal - discount + feeShip;
 
-        existing.setAddress(updatedOrder.getAddress());
-        existing.setTotal(updatedOrder.getTotal());
-        existing.setStatus(updatedOrder.getStatus());
-        existing.setFeeship(updatedOrder.getFeeship());
-        existing.setPaymentMethod(updatedOrder.getPaymentMethod());
-        existing.setPaymentStatus(updatedOrder.getPaymentStatus());
-        existing.setPhone(updatedOrder.getPhone());
-        existing.setAccountId(updatedOrder.getAccountId());
+        Order order = new Order();
+        order.setAccount(acc);
+        order.setOrderDate(LocalDateTime.now());
+        order.setTotalAmount(finalTotal);
+        order.setStatus("PENDING");
 
-        return orderRepository.save(existing);
-    }
+        orderRepo.save(order);
 
-    // ✅ Xóa đơn hàng
-    @Transactional
-    public boolean deleteOrder(Integer id) {
-        if (!orderRepository.existsById(id)) {
-			return false;
-		}
-        orderRepository.deleteById(id);
-        return true;
-    }
+        for (CartDetail cd : cartList) {
+            OrderDetail od = new OrderDetail();
+            od.setOrder(order);
+            od.setProduct(cd.getProduct());
+            od.setQuantity(cd.getQuantity());
+            od.setPrice(cd.getProduct().getPrice());
+            orderDetailRepo.save(od);
+        }
 
-    // ✅ Cập nhật trạng thái đơn hàng (VD: từ “chờ xử lý” → “đã xác nhận”)
-    @Transactional
-    public boolean updateStatus(Integer id, int newStatus) {
-        Orders order = orderRepository.findById(id).orElse(null);
-        if (order == null) {
-			return false;
-		}
-        order.setStatus(newStatus);
-        orderRepository.save(order);
-        return true;
-    }
-
-    // ✅ Lấy các đơn hàng gần nhất (VD: 5 đơn mới nhất)
-    public List<Orders> getRecentOrders() {
-        return orderRepository.findTop5ByOrderByCreatedDateDesc();
-    }
-
-    // ✅ Thống kê tổng doanh thu
-    public long getTotalRevenue() {
-        List<Orders> all = orderRepository.findAll();
-        return all.stream()
-                  .filter(o -> o.getStatus() == 3) // chỉ tính đơn hoàn tất
-                  .mapToLong(Orders::getTotal)
-                  .sum();
+        cartDetailRepo.deleteAll(cartList);
     }
 }
