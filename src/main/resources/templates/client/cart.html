@@ -84,7 +84,7 @@
     </div>
 
     <!-- TỔNG TIỀN + CHECKOUT -->
-    <div class="text-end mt-4"
+  <div class="text-end mt-4"
          th:if="${!#lists.isEmpty(cartDetails)}">
 
         <h4>
@@ -94,17 +94,9 @@
             </span>
         </h4>
 
-        <!-- FORM CHECKOUT -->
-        <form th:action="@{'/checkout/' + ${accountId}}"
+        <form th:action="@{/checkout/{id}(id=${cartDetails[0].account.id})}"
               method="post"
               class="mt-3">
-
-            <div class="mb-3 d-flex justify-content-end">
-                <input type="text"
-                       name="voucherCode"
-                       class="form-control w-25 me-2"
-                       placeholder="Nhập mã voucher (nếu có)">
-            </div>
 
             <button type="submit" class="btn-checkout">
                 Thanh toán
@@ -113,7 +105,6 @@
         </form>
 
     </div>
-    
 
 </div>
 
