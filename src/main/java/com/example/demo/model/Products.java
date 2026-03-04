@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,95 +33,77 @@ public class Products {
     @Column(columnDefinition = "nvarchar(255)")
     private String name;
 
-    // 🔥 GIÁ SẢN PHẨM
     @DecimalMin(value = "50000", message = "Giá phải lớn hơn 50000")
     @Column(precision = 15, scale = 2, nullable = false)
     private BigDecimal price;
 
-    // 🔥 SỐ LƯỢNG
     @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer quantity = 0;
 
-    // 🔥 MÔ TẢ & TRỌNG LƯỢNG
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
 
     @Column
-    private Double weight; // kg
+    private Double weight;
 
-    // 🔥 NGÀY TẠO & TRẠNG THÁI
     @Temporal(TemporalType.DATE)
     private Date createdDate;
 
     private boolean available;
-    
-    // Thêm trường Discount (Giảm giá) nếu HTML của bạn có dùng ${p.discount}
-    // Nếu trong Database chưa có cột này, bạn có thể thêm @Transient để test, 
-    // hoặc thêm cột thật vào DB. Ở đây tôi để mặc định là 0.
+
     @Column(columnDefinition = "int default 0")
     private Integer discount = 0;
 
-    // ==========================================
-    // CÁC MỐI QUAN HỆ (RELATIONSHIPS)
-    // ==========================================
+    // =============================
+    // RELATIONSHIPS
+    // =============================
 
     @ManyToOne
     @JoinColumn(name = "categoryId")
     @JsonIgnore
+    @ToString.Exclude
     private Category category;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
     private List<ProductImage> images = new ArrayList<>();
 
-    // ==========================================
-    // CÁC HÀM XỬ LÝ LOGIC (HELPER METHODS)
-    // ==========================================
+    // =============================
+    // HELPER METHODS
+    // =============================
 
-    public void addImage(ProductImage img) {
-        images.add(img);
-        img.setProduct(this);
-    }
-
-    public void removeImage(ProductImage img) {
-        images.remove(img);
-        img.setProduct(null);
-    }
-
-    // 1. Logic xác định sản phẩm mới (Dùng cho nhãn NEW)
-    // Thymeleaf gọi bằng: ${p.newProduct}
-    public boolean isNewProduct() {
-        if (createdDate == null) {
-            return false;
-        }
-        long currentTime = new Date().getTime();
-        long createdTime = createdDate.getTime();
-        long diff = currentTime - createdTime;
-        long days = diff / (24 * 60 * 60 * 1000);
-        
-        return days <= 7; // Mới trong vòng 7 ngày
-    }
-
-    // 2. Lấy ảnh đại diện
-    // Thymeleaf gọi bằng: ${p.mainImage}
+    // ✅ Hàm này để Thymeleaf gọi: like.product.mainImage
     public String getMainImage() {
-        if (images == null || images.isEmpty()) {
-            return "no-image.jpg"; 
-        }
-        // Ưu tiên ảnh thumbnail
-        for (ProductImage img : images) {
-            if (Boolean.TRUE.equals(img.getThumbnail())) {
-                return img.getImage();
+        if (images != null && !images.isEmpty()) {
+
+            // ưu tiên thumbnail trước
+            for (ProductImage img : images) {
+                if (Boolean.TRUE.equals(img.getThumbnail()) && img.getImage() != null) {
+                    return img.getImage();
+                }
+            }
+
+            // nếu không có thumbnail thì lấy ảnh đầu tiên
+            if (images.get(0).getImage() != null) {
+                return images.get(0).getImage();
             }
         }
-        // Nếu không có, lấy ảnh đầu tiên
-        return images.get(0).getImage();
+
+        return "no-image.png";
     }
 
-    // 3. Lấy tên danh mục an toàn (tránh lỗi null)
-    // Thymeleaf gọi bằng: ${p.categoryName}
+    // Nếu bạn cần lấy tên category
     public String getCategoryName() {
-        return category != null ? category.getName() : "Khác";
+        return category != null ? category.getName() : "";
+    }
+
+    // Nếu cần kiểm tra sản phẩm mới
+    public boolean isNewProduct() {
+        if (createdDate == null) return false;
+        long diff = new Date().getTime() - createdDate.getTime();
+        long days = diff / (1000 * 60 * 60 * 24);
+        return days <= 7;
     }
 }
