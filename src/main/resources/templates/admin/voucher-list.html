@@ -3,23 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quản lý Voucher - MODEL WORLD</title>
+    <title>Quản lý Người dùng - MODEL WORLD</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-
+    
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    
     <style>
-        /* (GIỮ NGUYÊN CSS CŨ CỦA BẠN TỪ ĐÂY TRỞ LÊN) */
-        /* ... */
+        /* --- COPY TỪ DASHBOARD --- */
         :root {
             --bg-body: #020609;       
             --bg-sidebar: #05111a;    
             --bg-card: #081a26;       
+            --bg-input: #0f2435;
+
             --text-main: #e0fbfc;     
-            --text-sub: #00f2ff;      
-            --accent-cyan: #00f2ff;
+            --text-sub: #a0b1c5; 
+
+            --accent-cyan: #00f2ff;   
             --accent-green: #00ff9d;
+            --accent-red: #ff4757;
+            --accent-yellow: #ffa502;
+            
             --border-color: #00f2ff;  
             --sidebar-width: 260px;
         }
@@ -31,8 +37,9 @@
             overflow-x: hidden;
         }
 
-        /* --- WRAPPER & SIDEBAR --- */
-        #wrapper { display: flex; width: 100%; transition: all 0.3s; }
+        /* --- WRAPPER & SIDEBAR LAYOUT --- */
+        #wrapper { display: flex; width: 100%; overflow: hidden; }
+
         #sidebar-wrapper {
             min-width: var(--sidebar-width);
             max-width: var(--sidebar-width);
@@ -42,25 +49,36 @@
             position: fixed;
             z-index: 1000;
             height: 100%;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease-out;
         }
+
         #page-content-wrapper {
             width: 100%;
             margin-left: var(--sidebar-width);
-            transition: margin 0.3s ease-out;
+            transition: margin-left 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
+
         body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
         body.toggled #page-content-wrapper { margin-left: 0; }
 
+        /* Sidebar Styling */
         .sidebar-heading {
             padding: 1.5rem 1.25rem;
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
+            font-weight: 900;
+            font-size: 1.5rem;
             color: var(--accent-cyan);
             border-bottom: 1px solid rgba(0, 242, 255, 0.3);
             text-align: center;
             background: rgba(0, 242, 255, 0.1);
             text-shadow: 0 0 10px rgba(0, 242, 255, 0.7); 
+            letter-spacing: 1px;
         }
+
         .list-group-item {
             background-color: transparent;
             color: var(--text-main); 
@@ -69,353 +87,510 @@
             font-weight: 500;
             transition: all 0.2s;
             border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
         }
+
         .list-group-item:hover, .list-group-item.active {
             color: var(--accent-cyan); 
             background-color: rgba(0, 242, 255, 0.1);
             border-left-color: var(--accent-cyan);
             text-shadow: 0 0 5px var(--accent-cyan);
         }
-        .list-group-item i { margin-right: 10px; width: 20px; text-align: center; }
+        .list-group-item i { margin-right: 12px; font-size: 1.2rem; }
 
+        /* Navbar */
         .top-navbar {
             background: rgba(5, 17, 26, 0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(0, 242, 255, 0.3);
             padding: 15px 30px;
-            position: sticky; top: 0; z-index: 999;
+            position: sticky; top: 0; z-index: 990;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
         .btn-toggle {
             background: transparent; border: 1px solid var(--accent-cyan);
             color: var(--accent-cyan); padding: 5px 12px; border-radius: 6px; transition: 0.3s;
             box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
+            cursor: pointer;
         }
         .btn-toggle:hover { 
             background: var(--accent-cyan); color: #000; 
             box-shadow: 0 0 15px var(--accent-cyan);
         }
 
-        .stats-card, .card {
+        .page-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+        }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 15px;
+        }
+        .user-avatar-top {
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 2px solid var(--accent-cyan); padding: 2px;
+            background: #000;
+        }
+
+        /* --- CONTENT STYLING --- */
+        .cyber-card {
             background: var(--bg-card);
             border: 1px solid rgba(0, 242, 255, 0.3);
             border-radius: 8px;
+            padding: 25px;
             box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
-            color: var(--text-main);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
-        .card-header {
-            background: rgba(0, 242, 255, 0.05);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+        .cyber-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        /* Table Styles */
+        .table {
+            color: var(--text-main);
+            vertical-align: middle;
+            margin-bottom: 0;
+            --bs-table-bg: transparent;
+        }
+
+        .table thead th {
+            background-color: rgba(0, 242, 255, 0.05);
             color: var(--accent-cyan);
             font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
             text-transform: uppercase;
+            font-size: 0.8rem;
             letter-spacing: 1px;
-            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+            padding: 15px;
+            border-top: none;
         }
 
-        /* Utilities */
-        .text-neon { color: var(--accent-cyan) !important; text-shadow: 0 0 5px rgba(0,242,255,0.3); }
-        .text-neon-green { color: var(--accent-green) !important; text-shadow: 0 0 5px rgba(0,255,157,0.3); }
-        .text-bright { color: #ffffff !important; }
-        .text-dim { color: #8e9eab !important; }
+        .table tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            font-size: 0.95rem;
+        }
 
-        .form-label { color: var(--accent-cyan); font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 242, 255, 0.05);
+        }
+
+        .user-avatar-table {
+            width: 40px; height: 40px; border-radius: 50%;
+            object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .badge-cyber {
+            padding: 5px 10px; border-radius: 4px;
+            font-weight: 500; font-size: 0.75rem;
+            border: 1px solid currentColor; background: transparent;
+        }
+        .badge-cyan { color: var(--accent-cyan); background: rgba(0, 242, 255, 0.1); }
+        .badge-green { color: var(--accent-green); background: rgba(0, 255, 157, 0.1); }
+        .badge-red { color: var(--accent-red); background: rgba(255, 71, 87, 0.1); }
+        .badge-yellow { color: var(--accent-yellow); background: rgba(255, 165, 2, 0.1); }
+
+        /* Buttons & Inputs */
         .form-control, .form-select {
-            background-color: rgba(0, 0, 0, 0.4) !important;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            color: var(--text-main) !important;
+            background-color: var(--bg-input);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            color: var(--text-main);
         }
         .form-control:focus, .form-select:focus {
-            background-color: rgba(0, 0, 0, 0.6) !important;
+            background-color: var(--bg-input);
+            color: var(--text-main);
             border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+            box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
         }
-        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) hue-rotate(180deg) brightness(200%); cursor: pointer;
+        
+        /* Thay đổi màu input disabled */
+        .form-control:disabled { 
+            background-color: #050d14; 
+            color: var(--text-sub); 
+            border-color: rgba(255,255,255,0.1); 
+            opacity: 1;
         }
 
         .btn-neon {
-            background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
-            font-weight: 600; transition: all 0.3s ease;
+            background: transparent; border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan); font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem; transition: 0.3s;
         }
-        .btn-neon:hover { background: var(--accent-cyan); color: #000; box-shadow: 0 0 15px var(--accent-cyan); }
+        .btn-neon:hover {
+            background: var(--accent-cyan); color: #000;
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
         
-        .btn-action-icon {
-            width: 32px; height: 32px; padding: 0; display: inline-flex;
-            align-items: center; justify-content: center; border-radius: 6px; transition: 0.3s;
+        .btn-icon {
+            width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: var(--text-main); transition: 0.2s;
+        }
+        .btn-icon:hover {
+            color: var(--accent-cyan); border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.1);
         }
 
-        .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); margin-bottom: 0; }
-        .table thead th { 
-            background-color: rgba(0, 242, 255, 0.05); color: var(--accent-cyan); 
-            border-bottom: 2px solid rgba(0, 242, 255, 0.3);
-            text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; vertical-align: middle;
+        /* Modals */
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--accent-cyan);
+            color: var(--text-main);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
-        .table tbody td { border-bottom: 1px solid rgba(0, 242, 255, 0.15); vertical-align: middle; color: var(--text-main); }
-        .table-hover tbody tr:hover { background-color: rgba(0, 242, 255, 0.05); }
+        .modal-header, .modal-footer { border-color: rgba(0, 242, 255, 0.2); }
+        .modal-title { font-family: 'Orbitron', sans-serif; color: var(--accent-cyan); }
+        .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
 
-        .badge-neon-green { background: rgba(0, 255, 127, 0.15); border: 1px solid #00ff7f; color: #00ff7f; }
-        .badge-neon-yellow { background: rgba(255, 215, 0, 0.15); border: 1px solid #ffd700; color: #ffd700; }
-        
-        .code-display {
-            background: rgba(0,0,0,0.5); border: 1px dashed var(--accent-cyan);
-            color: var(--accent-cyan); padding: 4px 10px; border-radius: 4px; letter-spacing: 1px;
-        }
-        
-        /* CSS cho switch */
-        .form-check-input:checked {
-            background-color: var(--accent-cyan);
-            border-color: var(--accent-cyan);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-body); }
+        ::-webkit-scrollbar-thumb { background: #1a3c5a; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
     </style>
 </head>
 
 <body>
 
 <div id="wrapper">
+    
     <div id="sidebar-wrapper">
-        <div class="sidebar-heading"><i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD</div>
-        <div class="list-group list-group-flush mt-3">
-            <a href="/stats" class="list-group-item list-group-item-action"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="/cata-mana" class="list-group-item list-group-item-action"><i class="bi bi-tags"></i> Quản lý Danh mục</a>
-            <a href="/product-mana" class="list-group-item list-group-item-action"><i class="bi bi-box-seam"></i> Quản lý Sản phẩm</a>
-            <a href="/admin/vouchers" class="list-group-item list-group-item-action active"><i class="bi bi-ticket-perforated"></i> Quản lý Voucher</a>
-            <a href="/orders-mana" class="list-group-item list-group-item-action"><i class="bi bi-receipt"></i> Quản lý Đơn hàng</a>
-            <a href="/user-mana" class="list-group-item list-group-item-action"><i class="bi bi-people"></i> Quản lý Người dùng</a>
-            <a href="/admin/cart" class="list-group-item list-group-item-action"><i class="bi bi-cart3"></i> Giỏ hàng Admin</a>
-            <div class="mt-4 px-3"><small class="text-neon fw-bold text-uppercase" style="font-size: 0.7rem;">Hệ thống</small></div>
-            <a href="/logout" class="list-group-item list-group-item-action text-danger fw-bold"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+        <div class="sidebar-heading">
+            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
+        </div>
+        
+        <div class="list-group list-group-flush mt-2">
+            <a href="/stats" class="list-group-item">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <a href="/cata-mana" class="list-group-item">
+                <i class="bi bi-tags"></i> Quản lý Danh mục
+            </a>
+            <a href="/product-mana" class="list-group-item">
+                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/vouchers" class="list-group-item">
+                <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+            </a>
+            <a href="/orders-mana" class="list-group-item">
+                <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/user-mana" class="list-group-item active">
+                <i class="bi bi-people"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/cart" class="list-group-item">
+                <i class="bi bi-cart3"></i> Giỏ hàng Admin
+            </a>
+            
+            <div class="mt-4 px-4 mb-2 text-white-50 text-uppercase small fw-bold" style="letter-spacing: 1px;">Hệ thống</div>
+            <a href="/logout" class="list-group-item text-danger">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
         </div>
     </div>
 
     <div id="page-content-wrapper">
-        <nav class="top-navbar d-flex justify-content-between align-items-center">
+        
+        <nav class="top-navbar">
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-toggle" id="menu-toggle"><i class="bi bi-list fs-5"></i></button>
-                <h5 class="mb-0 text-neon fw-bold d-none d-md-block" style="letter-spacing: 1px;">Quản lý Voucher</h5>
+                <button class="btn btn-toggle" id="menu-toggle">
+                    <i class="bi bi-list"></i>
+                </button>
+                <h4 class="page-title d-none d-md-block">Quản Lý Người Dùng</h4>
             </div>
-            <div class="d-flex align-items-center gap-3">
+
+            <div class="user-profile">
                 <div class="text-end d-none d-sm-block">
-                    <span class="d-block text-bright small">Admin User</span>
-                    <span class="d-block text-neon" style="font-size: 0.75rem;">Super Admin</span>
+                    <div class="fw-bold" style="font-size: 0.9rem;">Admin User</div>
+                    <div style="font-size: 0.75rem; color: var(--accent-cyan);">Super Admin</div>
                 </div>
-                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="rounded-circle border border-info shadow-sm" width="40" height="40" alt="Avatar">
+                <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Avatar" class="user-avatar-top">
             </div>
         </nav>
 
-        <div class="container-fluid p-4">
-            <div class="row g-4">
-                
-                <div class="col-xl-8 col-lg-7">
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-list-ul me-2"></i>DANH SÁCH MÃ GIẢM GIÁ</span>
-                            <span class="badge border border-info text-neon bg-dark" th:text="${vouchers.size()} + ' mã'"></span>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover text-center align-middle">
-                                <thead>
-                                <tr>
-                                    <th>Code</th>
-                                    <th>Loại ưu đãi</th> <th>Đơn tối thiểu</th>
-                                    <th>Đối tượng</th>   <th>Hết hạn</th>
-                                    <th>Trạng thái</th>
-                                    <th>Hành động</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="v : ${vouchers}">
-                                    <td>
-                                        <div class="d-flex flex-column align-items-center">
-                                            <span class="fw-bold font-monospace code-display" th:text="${v.code}">CODE</span>
-                                            <small th:if="${v.isBirthday}" class="text-warning fst-italic mt-1" style="font-size: 0.7rem;">
-                                                <i class="bi bi-cake2-fill me-1"></i>Sinh nhật
-                                            </small>
-                                        </div>
-                                    </td>
+        <div class="container-fluid px-4 pb-4">
+            
+            <div th:if="${param.success}" class="alert alert-success bg-transparent text-success border-success mt-4 mb-0 p-2 d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i> Cập nhật thành công!
+            </div>
 
-                                    <td>
-                                        <div th:if="${v.isFreeShipping}">
-                                            <span class="badge bg-info text-dark rounded-pill px-2 py-1">
-                                                <i class="bi bi-truck me-1"></i>Free Ship
-                                            </span>
-                                        </div>
-                                        <div th:unless="${v.isFreeShipping}">
-                                            <span th:if="${v.discountPercent != null}"
-                                                  class="badge badge-neon-yellow rounded-pill px-2 py-1"
-                                                  th:text="${'-' + v.discountPercent + '%'}"></span>
-
-                                            <span th:if="${v.discountAmount != null}"
-                                                  class="badge badge-neon-green rounded-pill px-2 py-1"
-                                                  th:text="${'-' + #numbers.formatDecimal(v.discountAmount,0,'POINT',0,'NONE') + 'đ'}"></span>
-                                        </div>
-                                    </td>
-
-                                    <td class="small text-bright" th:text="${#numbers.formatDecimal(v.minOrderValue,0,'POINT',0,'NONE') + 'đ'}"></td>
-
-                                    <td>
-                                        <div th:if="${v.membership == null}" class="text-neon small">
-                                            <i class="bi bi-globe me-1"></i>Tất cả
-                                        </div>
-                                        <div th:if="${v.membership != null}" class="badge border border-warning text-warning small">
-                                            <i class="bi bi-star-fill me-1"></i>
-                                            <span th:text="${v.membership.name}">Gold</span>
-                                        </div>
-                                    </td>
-
-                                    <td class="small text-dim" th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy HH:mm')}"></td>
-
-                                    <td>
-                                        <span th:if="${v.active}" class="text-neon-green"><i class="bi bi-check-circle-fill"></i></span>
-                                        <span th:unless="${v.active}" class="text-danger"><i class="bi bi-dash-circle-fill"></i></span>
-                                    </td>
-
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center">
-                                            <a th:href="@{/admin/vouchers/edit/{id}(id=${v.id})}"
-                                               class="btn btn-outline-info btn-action-icon" title="Sửa"><i class="bi bi-pencil-square"></i></a>
-
-                                            <a th:if="${v.active}" th:href="@{/admin/vouchers/hide/{id}(id=${v.id})}"
-                                               class="btn btn-outline-warning btn-action-icon" onclick="return confirm('Ẩn voucher?')" title="Ẩn"><i class="bi bi-eye-slash"></i></a>
-
-                                            <a th:unless="${v.active}" th:href="@{/admin/vouchers/show/{id}(id=${v.id})}"
-                                               class="btn btn-outline-success btn-action-icon" onclick="return confirm('Hiện voucher?')" title="Hiện"><i class="bi bi-eye"></i></a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
+            <div class="cyber-card">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <h5 class="m-0 text-white font-monospace d-flex align-items-center">
+                        <i class="bi bi-list-stars me-2" style="color: var(--accent-cyan)"></i>
+                        DANH SÁCH TÀI KHOẢN
+                    </h5>
+                    
+                    <div class="d-flex gap-2">
+                         <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="width: 250px;">
+                         <button class="btn btn-sm btn-neon"><i class="bi bi-search"></i></button>
                     </div>
                 </div>
 
-                <div class="col-xl-4 col-lg-5">
-                    <div class="card sticky-top" style="top: 90px; z-index: 1;">
-                        <div class="card-header">
-                            <i class="bi bi-pencil-square me-2"></i>
-                            <span th:text="${voucher.id == null ? 'TẠO VOUCHER MỚI' : 'CẬP NHẬT VOUCHER'}">FORM</span>
-                        </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Avatar</th>
+                                <th>Thông tin cá nhân</th>
+                                <th>Vai trò</th>
+                                <th>Hạng TV</th>
+                                <th>Chi tiêu</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="acc : ${accounts}">
+                                <td class="fw-bold" style="color: var(--accent-cyan)" th:text="'#' + ${acc.id}"></td>
 
-                        <div class="card-body">
-                            <form th:action="@{/admin/vouchers/save}" th:object="${voucher}" method="post">
-                                <input type="hidden" th:field="*{id}">
+                                <td>
+                                    <img th:src="${acc.avatar != null && acc.avatar != ''} ? ${acc.avatar} : '/images/user-default.png'"
+                                         class="user-avatar-table" 
+                                         onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
+                                </td>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Mã Voucher <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-dark border-info text-neon"><i class="bi bi-upc-scan"></i></span>
-                                        <input type="text" th:field="*{code}" class="form-control text-uppercase fw-bold" placeholder="VD: SHIPFREE" required>
-                                    </div>
-                                </div>
+                                <td>
+                                    <div class="fw-bold text-white" th:text="${acc.fullName}"></div>
+                                    <div class="small text-white-50" th:text="${acc.email}"></div>
+                                </td>
 
-                                <div class="mb-3 bg-dark border border-secondary rounded p-2">
-                                    <div class="form-check form-switch mb-2">
-                                        <input class="form-check-input" type="checkbox" id="checkFreeShip" th:field="*{isFreeShipping}">
-                                        <label class="form-check-label text-info fw-bold" for="checkFreeShip">
-                                            <i class="bi bi-truck me-2"></i>Voucher Free Ship
-                                        </label>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="checkBirthday" th:field="*{isBirthday}">
-                                        <label class="form-check-label text-warning fw-bold" for="checkBirthday">
-                                            <i class="bi bi-cake2 me-2"></i>Áp dụng Sinh Nhật
-                                        </label>
-                                    </div>
-                                </div>
+                                <td>
+                                    <span th:if="${acc.role}" class="badge badge-cyber badge-yellow">ADMIN</span>
+                                    <span th:unless="${acc.role}" class="badge badge-cyber badge-cyan">USER</span>
+                                </td>
 
-                                <div id="discountSection" class="row g-2 mb-3">
-                                    <div class="col-6">
-                                        <label class="form-label">Giảm %</label>
-                                        <input type="number" id="inputPercent" th:field="*{discountPercent}" class="form-control" placeholder="0-100" min="0" max="100">
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="form-label">Giảm tiền (VNĐ)</label>
-                                        <input type="number" id="inputAmount" th:field="*{discountAmount}" class="form-control" placeholder="VNĐ" step="1000">
-                                    </div>
-                                    <div class="col-12 mt-1">
-                                        <small class="text-dim fst-italic"><i class="bi bi-info-circle me-1"></i>Chỉ nhập 1 trong 2 loại</small>
-                                    </div>
-                                </div>
+                                <td>
+                                    <span th:if="${acc.membership != null}" th:text="${acc.membership.name}" class="text-white small"></span>
+                                    <span th:unless="${acc.membership != null}" class="text-white-50 small">---</span>
+                                </td>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Đơn tối thiểu <span class="text-danger">*</span></label>
-                                    <input type="number" th:field="*{minOrderValue}" class="form-control" value="0" required>
-                                </div>
+                                <td class="fw-bold" style="color: var(--accent-green);" 
+                                    th:text="${acc.totalSpending != null} ? ${#numbers.formatDecimal(acc.totalSpending,0,'COMMA',0,'POINT')} + ' ₫' : '0 ₫'">
+                                </td>
 
-                                <div class="mb-3">
-                                    <label class="form-label">Áp dụng cho Hạng thành viên</label>
-                                    <select name="membershipId" class="form-select">
-                                        <option value="">-- Tất cả thành viên (Công khai) --</option>
-                                        <option th:each="mem : ${memberships}" 
-                                                th:value="${mem.id}" 
-                                                th:text="${mem.name} + ' (Point: ' + ${mem.pointRequired} + ')'"
-                                                th:selected="${voucher.membership != null && voucher.membership.id == mem.id}">
-                                        </option>
-                                    </select>
-                                    <small class="text-dim mt-1 d-block" style="font-size: 0.75rem;">Chỉ thành viên thuộc hạng này mới dùng được.</small>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" th:field="*{expiredAt}" class="form-control" required>
-                                </div>
-
-                                <div class="d-grid gap-2 mt-4">
-                                    <button type="submit" class="btn btn-neon py-2 fw-bold text-uppercase">
-                                        <i class="bi bi-save me-2"></i>
-                                        <span th:text="${voucher.id == null ? 'Thêm mới Voucher' : 'Lưu thay đổi'}">LƯU</span>
+                                <td>
+                                    <button th:if="${acc.addresses != null and !acc.addresses.isEmpty()}"
+                                            class="btn btn-sm btn-icon" style="width: auto; padding: 0 10px;"
+                                            data-bs-toggle="modal"
+                                            th:attr="data-bs-target='#addressModal_' + ${acc.id}">
+                                        <i class="bi bi-geo-alt me-1"></i> <span th:text="${#lists.size(acc.addresses)}"></span>
                                     </button>
-                                    
-                                    <a th:if="${voucher.id != null}" th:href="@{/admin/vouchers}" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-counterclockwise me-2"></i>Hủy bỏ
-                                    </a>
-                                </div>
+                                    <span th:unless="${acc.addresses != null and !acc.addresses.isEmpty()}" class="text-white-50 small">---</span>
 
-                            </form>
-                        </div>
-                    </div>
+                                    <div class="modal fade" th:id="'addressModal_' + ${acc.id}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h6 class="modal-title">Địa chỉ: <span class="text-white" th:text="${acc.fullName}"></span></h6>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item bg-transparent text-secondary border-secondary p-2" 
+                                                            th:each="addr : ${acc.addresses}">
+                                                            <i class="bi bi-pin-map-fill me-2" style="color: var(--accent-cyan)"></i>
+                                                            <span th:text="${addr.fullAddress}" class="text-light"></span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <span th:if="${acc.active}" class="badge badge-cyber badge-green">Active</span>
+                                    <span th:unless="${acc.active}" class="badge badge-cyber badge-red">Locked</span>
+                                </td>
+
+                                <td class="text-end">
+                                    <button class="btn btn-icon me-1" title="Sửa"
+                                            data-bs-toggle="modal" data-bs-target="#editModal"
+                                            th:attr="data-id=${acc.id}, data-fullname=${acc.fullName}, data-email=${acc.email}, 
+                                                     data-phone=${acc.phone}, data-gender=${acc.gender}, data-role=${acc.role}, 
+                                                     data-active=${acc.active}, data-birthday=${acc.birthDay}, 
+                                                     data-avatar=${acc.avatar},
+                                                     data-membership-name=${acc.membership != null ? acc.membership.name : 'Chưa có hạng'},
+                                                     data-total-spending=${acc.totalSpending != null ? #numbers.formatDecimal(acc.totalSpending, 0, 'COMMA', 0, 'POINT') : '0'}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+
+                                    <span th:if="${!acc.role}"> 
+                                        <a th:if="${acc.active}" th:href="@{'/user-mana/lock/' + ${acc.id}}" class="btn btn-icon text-danger" title="Khóa">
+                                            <i class="bi bi-lock"></i>
+                                        </a>
+                                        <a th:unless="${acc.active}" th:href="@{'/user-mana/unlock/' + ${acc.id}}" class="btn btn-icon text-success" title="Mở">
+                                            <i class="bi bi-unlock"></i>
+                                        </a>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="editForm" method="post" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-gear-wide-connected me-2"></i>CẬP NHẬT THÔNG TIN</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="active" id="active">
+                    
+                    <div class="row g-4">
+                        <div class="col-md-4 text-center border-end" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <label class="form-label d-block mb-3">Ảnh Đại Diện</label>
+                            <div class="position-relative d-inline-block mb-3">
+                                <img id="preview" src="/images/user-default.png" 
+                                     class="rounded-circle border border-info shadow" 
+                                     style="width: 140px; height: 140px; object-fit: cover; box-shadow: 0 0 15px var(--accent-cyan);">
+                            </div>
+                            <input type="file" name="file" class="form-control form-control-sm bg-dark text-light" 
+                                   accept="image/*" onchange="document.getElementById('preview').src = window.URL.createObjectURL(this.files[0])">
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" name="fullName" id="fullName" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email (Read-only)</label>
+                                    <input type="email" name="email" id="email" class="form-control" readonly disabled>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="text" name="phone" id="phone" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ngày sinh</label>
+                                    <input type="date" name="birthDay" id="birthDay" class="form-control">
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Hạng thành viên</label>
+                                    <input type="text" id="membershipName" class="form-control fw-bold" 
+                                           style="color: var(--accent-yellow) !important; background-color: rgba(255, 165, 2, 0.05);" readonly disabled>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tổng chi tiêu</label>
+                                    <div class="input-group">
+                                        <input type="text" id="totalSpending" class="form-control text-end fw-bold" 
+                                               style="color: var(--accent-green) !important; background-color: rgba(0, 255, 157, 0.05);" readonly disabled>
+                                        <span class="input-group-text bg-transparent text-secondary border-start-0" 
+                                              style="border-color: rgba(0, 242, 255, 0.2)">₫</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Giới tính</label>
+                                    <div class="d-flex gap-4 pt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="gender" value="true" id="genderMale">
+                                            <label class="form-check-label text-light" for="genderMale">Nam</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="gender" value="false" id="genderFemale">
+                                            <label class="form-check-label text-light" for="genderFemale">Nữ</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label text-warning"><i class="bi bi-shield-lock me-1"></i>Vai trò (Không thể sửa)</label>
+                                    <input type="text" id="roleDisplay" class="form-control text-warning fw-bold" readonly disabled>
+                                    <input type="hidden" name="role" id="roleHidden">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-neon px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Logic Toggle Sidebar
-    document.getElementById("menu-toggle").addEventListener("click", function (e) {
+    // Toggle Sidebar
+    const toggleButton = document.getElementById("menu-toggle");
+    toggleButton.onclick = function (e) {
         e.preventDefault();
         document.body.classList.toggle("toggled");
-    });
+    };
 
-    // === LOGIC XỬ LÝ CHECKBOX FREE SHIP ===
-    const checkFreeShip = document.getElementById('checkFreeShip');
-    const discountSection = document.getElementById('discountSection');
-    const inputPercent = document.getElementById('inputPercent');
-    const inputAmount = document.getElementById('inputAmount');
+    // Modal Edit Logic
+    const editModal = document.getElementById('editModal');
+    editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.getAttribute('data-id');
+        const form = document.getElementById('editForm');
+        form.action = '/user-mana/update/' + id;
 
-    function toggleDiscount() {
-        if (checkFreeShip.checked) {
-            // Nếu chọn FreeShip -> Làm mờ và vô hiệu hóa ô nhập tiền
-            discountSection.style.opacity = '0.3';
-            discountSection.style.pointerEvents = 'none'; // Không cho click
-            
-            // Xóa giá trị cũ để tránh nhầm lẫn (Optional, controller cũng sẽ xử lý)
-            inputPercent.value = '';
-            inputAmount.value = '';
+        // Fill basic data
+        ['fullName', 'email', 'phone', 'birthDay', 'active'].forEach(field => {
+            const val = button.getAttribute('data-' + field.toLowerCase());
+            if(document.getElementById(field)) document.getElementById(field).value = val || '';
+        });
+
+        // Fill Hạng thành viên & Chi tiêu
+        const memName = button.getAttribute('data-membership-name');
+        document.getElementById('membershipName').value = memName;
+
+        const spending = button.getAttribute('data-total-spending');
+        document.getElementById('totalSpending').value = spending;
+
+        // Giới tính
+        const gender = button.getAttribute('data-gender');
+        if (gender === 'true') document.getElementById('genderMale').checked = true;
+        else document.getElementById('genderFemale').checked = true;
+
+        // Vai trò
+        const role = button.getAttribute('data-role');
+        const roleDisplay = document.getElementById('roleDisplay');
+        const roleHidden = document.getElementById('roleHidden');
+        
+        if (role === 'true') {
+            roleDisplay.value = 'QUẢN TRỊ VIÊN (ADMIN)';
+            roleHidden.value = 'true';
         } else {
-            // Bỏ chọn -> Hiện lại bình thường
-            discountSection.style.opacity = '1';
-            discountSection.style.pointerEvents = 'auto';
+            roleDisplay.value = 'NGƯỜI DÙNG (USER)';
+            roleHidden.value = 'false';
         }
-    }
 
-    // Lắng nghe sự kiện change
-    checkFreeShip.addEventListener('change', toggleDiscount);
-    
-    // Chạy 1 lần khi load trang (để xử lý trường hợp đang edit voucher FreeShip)
-    window.addEventListener('DOMContentLoaded', toggleDiscount);
-
+        // Avatar
+        const avatar = button.getAttribute('data-avatar');
+        const preview = document.getElementById('preview');
+        preview.src = (avatar && avatar.trim() !== '') ? avatar : '/images/user-default.png';
+        preview.onerror = function() { this.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; };
+    });
 </script>
+
 </body>
 </html>

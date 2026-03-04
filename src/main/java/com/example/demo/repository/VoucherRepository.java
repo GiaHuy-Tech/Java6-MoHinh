@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.demo.model.Voucher;
+
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
     
     // Tìm các voucher của một user cụ thể
@@ -20,4 +21,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
     
     // Kiểm tra xem user đã lưu mã code này chưa
     boolean existsByAccount_IdAndCode(Integer accountId, String code);
+
+    // ✅ THÊM: dùng cho checkout
+    Optional<Voucher> findByCode(String code);
 }

@@ -16,6 +16,7 @@ public interface CartDetailRepository extends JpaRepository<CartDetail, Integer>
     // 🔥 Load luôn product tránh N+1
     @Query("SELECT c FROM CartDetail c JOIN FETCH c.product WHERE c.account.id = :accountId")
     List<CartDetail> findCartWithProduct(@Param("accountId") Integer accountId);
+    List<CartDetail> findByAccount_Id(Integer accountId);
 
     Optional<CartDetail> findByAccountAndProduct(Account account, Products product);
 }

@@ -559,13 +559,12 @@
             if(document.getElementById(field)) document.getElementById(field).value = val || '';
         });
 
-        // --- CODE MỚI: Fill Hạng thành viên & Chi tiêu ---
+        // Fill Hạng thành viên & Chi tiêu
         const memName = button.getAttribute('data-membership-name');
         document.getElementById('membershipName').value = memName;
 
         const spending = button.getAttribute('data-total-spending');
         document.getElementById('totalSpending').value = spending;
-        // -----------------------------------------------
 
         // Giới tính
         const gender = button.getAttribute('data-gender');
