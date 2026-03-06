@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Products;
-// import com.example.demo.model.Banner; // Nếu sau này có Entity Banner thật thì mở ra
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ProductRepository;
 
@@ -39,15 +38,13 @@ public class HomeController {
         // 2. Active Page (Để Sidebar biết đang ở trang nào mà sáng đèn)
         model.addAttribute("activePage", "home");
 
-        // 3. Banner Slideshow (Dữ liệu giả lập để test giao diện)
-        // Sau này bạn tạo bảng Banner trong DB thì thay đoạn này bằng bannerRepo.findAll()
+        // 3. Banner Slideshow (Dữ liệu giả lập chạy vòng lặp trên HTML)
         List<BannerDTO> banners = new ArrayList<>();
         banners.add(new BannerDTO("Gundam Universe", "Bộ sưu tập Gunpla mới nhất.", "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=1600", "/category/gundam"));
-        banners.add(new BannerDTO("Limited Figures", "Mô hình giới hạn.", "https://images.unsplash.com/photo-1560167016-01dfb00dc948?q=80&w=1600", "/category/figure"));
+        banners.add(new BannerDTO("Limited Figures", "Mô hình giới hạn.", "https://images.unsplash.com/photo-1594787318286-3d835c1d207f?q=80&w=1600", "/category/figure"));
         model.addAttribute("banners", banners);
 
-        // 4. Danh mục nổi bật (Đổi tên biến từ 'categories' -> 'featuredCategories' cho khớp HTML)
-        // Lấy 3-6 danh mục đầu tiên
+        // 4. Danh mục nổi bật (Lấy từ CSDL)
         model.addAttribute("featuredCategories", categoryRepo.findAll()); 
 
         // 5. Sản phẩm mới nhất (Lấy 8 sản phẩm mới nhất theo ID giảm dần)
@@ -56,10 +53,11 @@ public class HomeController {
                 .getContent();
         model.addAttribute("latestProducts", latestProducts);
 
+        // Đảm bảo file HTML nằm đúng đường dẫn src/main/resources/templates/client/index.html
         return "client/index";
     }
 
-    // API Search (Giữ nguyên logic cũ nhưng check kỹ null)
+    // API Search
     @GetMapping("/api/products/search")
     @ResponseBody
     public List<Products> searchProducts(@RequestParam(value = "keyword", required = false) String keyword) {
@@ -82,5 +80,11 @@ public class HomeController {
             this.imageUrl = imageUrl;
             this.linkUrl = linkUrl;
         }
+        
+        // Cần có Getters để Thymeleaf đọc được dữ liệu
+        public String getTitle() { return title; }
+        public String getDescription() { return description; }
+        public String getImageUrl() { return imageUrl; }
+        public String getLinkUrl() { return linkUrl; }
     }
 }

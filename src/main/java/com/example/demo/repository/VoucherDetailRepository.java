@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.example.demo.model.VoucherDetail;
+
+import java.util.List;
 import java.util.Optional;
 
 public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Long> {
@@ -16,4 +18,5 @@ public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Lo
            "AND vd.isUsed = false " +
            "AND v.active = true")
     Optional<VoucherDetail> findValidVoucherForAccount(@Param("accountId") Integer accountId, @Param("code") String code);
+    List<VoucherDetail> findByAccount_Id(Integer accountId);
 }

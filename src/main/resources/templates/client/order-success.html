@@ -60,6 +60,7 @@
             padding: 10px 25px;
             border-radius: 6px;
             transition: 0.3s;
+            text-decoration: none;
         }
         .btn-home:hover {
             background: rgba(0, 242, 255, 0.1);
@@ -73,6 +74,7 @@
             border-radius: 6px;
             font-weight: 600;
             transition: 0.3s;
+            text-decoration: none;
         }
         .btn-orders:hover {
             background: #fff;
@@ -98,16 +100,16 @@
         </p>
 
         <div class="d-flex justify-content-center gap-3 mb-4">
-            <a href="/" class="btn btn-home text-decoration-none">
+            <a href="/" class="btn-home">
                 <i class="bi bi-house"></i> Trang chủ
             </a>
-            <a href="/orders" class="btn btn-orders text-decoration-none">
+            <a href="/orders" class="btn-orders">
                 <i class="bi bi-box-seam"></i> Đơn hàng
             </a>
         </div>
 
         <p class="small text-secondary fst-italic mb-0">
-            Tự động quay về trang chủ sau <span id="countdown" class="text-info fw-bold">10</span> giây...
+            Tự động quay về trang đơn hàng sau <span id="countdown" class="text-info fw-bold">10</span> giây...
         </p>
     </div>
 
@@ -122,8 +124,8 @@
 
             if (seconds <= 0) {
                 clearInterval(timer);
-                // Chuyển hướng về trang chủ ('/') hoặc trang đơn hàng ('/orders')
-                window.location.href = '/'; 
+                // Chuyển hướng về trang đơn hàng ('/orders') sau khi đếm ngược
+                window.location.href = '/orders'; 
             }
         }, 1000);
     </script>

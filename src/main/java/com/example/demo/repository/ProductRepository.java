@@ -27,5 +27,5 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
 
     List<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name);
     
-    
+    List<Products> findTop5ByNameContainingIgnoreCase(String name);
 }
