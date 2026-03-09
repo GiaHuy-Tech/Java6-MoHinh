@@ -2,614 +2,974 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sản phẩm - Model World</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sản phẩm - MODEL WORLD</title>
 
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
 	rel="stylesheet">
 <link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
 	rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link
-	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap"
+	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@500;700;800;900&display=swap"
 	rel="stylesheet">
-
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
-/* --- CẤU HÌNH MÀU SẮC & BIẾN --- */
+/* --- DARK THEME VARIABLES (ĐỒNG BỘ INDEX) --- */
 :root {
-	--bg-dark: #050b14;
-	--bg-card: #0c1525;
-	--text-light: #e1e7ff;
-	--accent-cyan: #00f2ff;
-	--accent-pink: #ff3864; /* Thêm màu hồng cho nút Like */
-	--border-color: rgba(0, 242, 255, 0.2);
-	--font-main: "Be Vietnam Pro", sans-serif;
-	--font-display: "Orbitron", sans-serif;
-	--neon-box-shadow: 0 0 10px rgba(0, 242, 255, 0.3);
+	--bg-body: #0b0c10;
+	--bg-card: #1f2833;
+	--text-main: #66fcf1;
+	--text-light: #c5c6c7;
+	--accent-cyan: #45a29e;
+	--accent-hover: #66fcf1;
+	--accent-red: #ff2e63;
+	--border-color: #2d3238;
+	--sidebar-width: 260px;
+	--font-main: 'Be Vietnam Pro', sans-serif;
+	--font-title: 'Montserrat', sans-serif;
 }
 
 body {
-	background-color: var(--bg-dark);
+	background-color: var(--bg-body);
 	color: var(--text-light);
 	font-family: var(--font-main);
+	overflow-x: hidden;
+	margin: 0;
 }
 
-/* --- TYPOGRAPHY --- */
-.navbar-brand {
-	font-family: var(--font-display);
-	text-transform: uppercase;
-	letter-spacing: 1px;
+#wrapper {
+	display: flex;
+	width: 100%;
+	transition: all 0.3s;
+	flex-grow: 1;
 }
 
-h1, h2, h3 {
-	font-family: var(--font-main);
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
+#sidebar-wrapper {
+	min-width: var(--sidebar-width);
+	max-width: var(--sidebar-width);
+	background: #050505;
+	border-right: 1px solid var(--border-color);
+	min-height: 100vh;
+	position: fixed;
+	z-index: 1000;
+	height: 100%;
+	transition: all 0.3s;
 }
 
-footer h4 {
-	font-family: var(--font-display);
-	text-transform: uppercase;
-	letter-spacing: 1px;
+#page-content-wrapper {
+	width: 100%;
+	margin-left: var(--sidebar-width);
+	transition: margin 0.3s ease-out;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
 }
 
-/* --- NAVBAR --- */
-.navbar {
-	background-color: rgba(12, 21, 37, 0.95);
+body.toggled #sidebar-wrapper {
+	margin-left: calc(-1 * var(--sidebar-width));
+}
+
+body.toggled #page-content-wrapper {
+	margin-left: 0;
+}
+
+.sidebar-heading {
+	padding: 2rem 1.5rem;
+	font-family: var(--font-title);
+	font-size: 1.5rem;
+	font-weight: 900;
+	color: var(--text-main);
+	text-align: center;
+	text-decoration: none;
+	display: block;
+	text-shadow: 0 0 10px rgba(102, 252, 241, 0.3);
+}
+
+.list-group-item {
+	background: transparent !important;
+	color: #888 !important;
+	border: none;
+	padding: 12px 25px;
+	transition: 0.3s;
+	text-decoration: none;
+}
+
+.list-group-item:hover, .list-group-item.active {
+	color: var(--text-main) !important;
+	background: rgba(102, 252, 241, 0.05) !important;
+	border-left: 4px solid var(--text-main);
+}
+
+/* --- TOPBAR CHUẨN INDEX --- */
+.top-navbar {
+	background: rgba(31, 40, 51, 0.95);
 	backdrop-filter: blur(10px);
 	border-bottom: 1px solid var(--border-color);
-	padding: 1rem 0;
+	padding: 15px 30px;
+	position: sticky;
+	top: 0;
+	z-index: 999;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
-.nav-link {
-	color: #aab8c5 !important;
-	transition: 0.3s;
-	font-weight: 500;
-	white-space: nowrap;
+.nav-logo {
+	font-family: var(--font-title);
+	text-decoration: none;
+	font-size: 1.4rem;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
-.nav-link:hover {
-	color: var(--accent-cyan) !important;
-	text-shadow: 0 0 8px var(--accent-cyan);
+.nav-logo i {
+	color: var(--text-main);
+	font-size: 1.6rem;
 }
 
-.navbar-brand span {
-	color: #fff !important;
+.nav-logo span {
+	background: linear-gradient(90deg, var(--text-main), #fff);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
 }
 
-/* SEARCH BAR */
-.search-bar-wrapper {
-	background: rgba(255, 255, 255, 0.05);
-	border: 1px solid var(--border-color);
+.search-box {
+	position: relative;
+	max-width: 600px;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.search-box input {
 	border-radius: 50px;
-	padding: 4px 15px;
-	transition: 0.3s;
-	min-width: 300px;
+	padding: 10px 45px 10px 20px;
+	border: 1px solid var(--border-color);
+	width: 100%;
+	background: #0b0c10;
+	color: #fff;
+	outline: none;
 }
 
-.search-bar-wrapper:focus-within {
+.search-box input:focus {
 	border-color: var(--accent-cyan);
-	box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
 }
 
-.form-control-custom {
-	background: transparent;
+.search-box button {
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	width: 34px;
+	height: 34px;
 	border: none;
-	box-shadow: none;
-	color: var(--accent-cyan) !important;
-	font-weight: 500;
+	background: var(--accent-cyan);
+	color: #0b0c10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
-.form-control-custom::placeholder {
-	color: rgba(0, 242, 255, 0.6) !important;
-}
-
-.form-select-custom {
-	background: transparent;
-	border: none;
-	box-shadow: none;
-	color: var(--accent-cyan);
-	cursor: pointer;
-	width: 100px !important;
-	padding-right: 25px;
-	border-left: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.form-select-custom:focus {
-	background: var(--bg-card);
-	color: var(--accent-cyan);
-	box-shadow: none;
-}
-
-.btn-search {
-	color: var(--text-light);
-	border: none;
-	background: transparent;
-}
-
-.btn-search:hover {
-	color: var(--accent-cyan);
-}
-
-/* --- SIDEBAR FILTER --- */
+/* --- PRODUCT CARD & FILTER --- */
 .filter-box {
 	background: var(--bg-card);
 	border: 1px solid var(--border-color);
 	border-radius: 12px;
 	padding: 20px;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-.filter-title {
-	font-family: var(--font-main);
-	font-weight: 700;
-	color: var(--accent-cyan);
-	margin-bottom: 15px;
-	font-size: 1.1rem;
-	border-bottom: 1px solid var(--border-color);
-	padding-bottom: 10px;
+.section-title {
+	font-family: var(--font-title);
+	font-weight: 800;
+	color: var(--text-main);
+	border-left: 5px solid var(--accent-red);
+	padding-left: 15px;
 }
 
-.form-control-dark, .form-select-dark {
-	background-color: rgba(0, 0, 0, 0.3);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	color: #fff;
-	transition: 0.3s;
-}
-
-.form-control-dark:focus, .form-select-dark:focus {
-	background-color: rgba(0, 0, 0, 0.5);
-	border-color: var(--accent-cyan);
-	box-shadow: 0 0 5px rgba(0, 242, 255, 0.3);
-	color: var(--accent-cyan);
-}
-
-.form-control-dark::placeholder {
-	color: rgba(170, 184, 197, 0.5);
-}
-
-/* --- PRODUCT CARDS --- */
 .product-card {
 	background: var(--bg-card);
-	border: 1px solid rgba(255, 255, 255, 0.05);
-	border-radius: 12px;
-	overflow: hidden;
+	border: 1px solid var(--border-color);
+	border-radius: 8px;
+	transition: 0.3s;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	transition: all 0.3s ease;
-	position: relative;
+	animation: fadeIn 0.5s ease backwards;
 }
 
 .product-card:hover {
-	border-color: var(--accent-cyan);
-	box-shadow: var(--neon-box-shadow);
 	transform: translateY(-5px);
-	z-index: 10;
+	border-color: var(--accent-cyan);
 }
 
-.product-img-box {
+.product-img-wrap {
+	background: #fff;
+	padding-top: 100%;
 	position: relative;
-	height: 250px;
+	border-radius: 8px 8px 0 0;
 	overflow: hidden;
 }
 
-.product-img-box img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+.product-img-wrap img {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 90%;
+	max-height: 90%;
+	object-fit: contain;
+	transition: 0.4s;
 }
 
-.product-card:hover .product-img-box img {
-	transform: scale(1.08);
+.product-card:hover .product-img-wrap img {
+	transform: translate(-50%, -50%) scale(1.1);
 }
 
-.product-body {
-	padding: 20px;
-	flex-grow: 1;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-}
-
-.product-name {
-	font-size: 1.1rem;
-	font-weight: 600;
-	margin-bottom: 10px;
-	color: #fff;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-}
-
-.product-price {
-	color: var(--accent-cyan);
-	font-weight: 700;
-	font-size: 1.2rem;
-	text-shadow: 0 0 5px rgba(0, 242, 255, 0.3);
-}
-
-/* Nút giỏ hàng */
 .btn-add-cart {
-	background: transparent;
-	border: 1px solid var(--accent-cyan);
+	background: rgba(69, 162, 158, 0.1);
 	color: var(--accent-cyan);
-	padding: 8px;
-	border-radius: 6px;
+	border: 1px solid var(--accent-cyan);
+	width: 100%;
+	padding: 10px;
 	font-weight: 600;
-	text-decoration: none;
-	text-align: center;
+	text-transform: uppercase;
 	transition: 0.3s;
-	position: relative;
-	z-index: 5;
-	font-family: var(--font-main);
 }
 
 .btn-add-cart:hover {
 	background: var(--accent-cyan);
-	color: #000;
-	box-shadow: 0 0 15px var(--accent-cyan);
+	color: #0b0c10;
+	box-shadow: 0 0 10px var(--accent-cyan);
 }
 
-/* Nút Like (Trái tim) */
-.btn-like {
-	background: transparent;
-	border: 1px solid var(--accent-pink);
-	color: var(--accent-pink);
-	min-width: 42px; /* Vuông */
+/* --- KEYFRAMES & SOCIALS --- */
+@keyframes fadeIn {from { 
+opacity:0;
+	transform: translateY(10px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+}
+@keyframes pulse { 
+
+0% {
+	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
+}
+
+70%{
+box-shadow:00010px
+rgba(255,46,99,0);
+}
+
+100%{
+box-shadow:0000
+rgba(255,46,99,0);
+}
+
+}
+.floating-socials {
+	position: fixed;
+	right: 20px;
+	bottom: 30px;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.social-btn {
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 6px;
-	transition: 0.3s;
-	text-decoration: none;
-	font-size: 1.1rem;
-	position: relative;
-	z-index: 5;
-}
-
-.btn-like:hover {
-	background: var(--accent-pink);
 	color: #fff;
-	box-shadow: 0 0 15px var(--accent-pink);
-	transform: scale(1.05);
+	font-size: 20px;
+	text-decoration: none;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+	transition: 0.3s;
 }
 
-/* Unavailable State */
-.product-unavailable {
-	opacity: 0.6;
-	pointer-events: none;
-	filter: grayscale(100%);
+.social-btn.phone {
+	background: var(--accent-red);
+	animation: pulse 2s infinite;
 }
 
-.badge-sold-out {
-	position: absolute;
-	top: 10px;
-	right: 10px;
-	background: #dc3545;
-	color: white;
-	padding: 5px 10px;
-	border-radius: 4px;
-	font-weight: 700;
-	z-index: 5;
-	font-family: var(--font-main);
-	font-size: 0.8rem;
+.social-btn.zalo {
+	background: #0068ff;
 }
 
-/* ==== CUSTOM PAGINATION DARK ==== */
-
-.custom-pagination .page-link {
-    background-color: #0f1b2d;
-    border: 1px solid #1e2f4d;
-    color: #00e5ff;
-    margin: 0 4px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+.social-btn.messenger {
+	background: #0084ff;
 }
 
-.custom-pagination .page-link:hover {
-    background-color: #00e5ff;
-    color: #000;
-    box-shadow: 0 0 10px #00e5ff;
+.social-btn:hover {
+	transform: scale(1.1);
+	color: #fff;
 }
-
-.custom-pagination .page-item.active .page-link {
-    background-color: #00e5ff;
-    color: #000;
-    border-color: #00e5ff;
-    box-shadow: 0 0 15px #00e5ff;
-}
-
-.custom-pagination .page-item.disabled .page-link {
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-/* Footer & Dropdown */
 footer {
-	background-color: #020408;
-	border-top: 1px solid var(--border-color);
-	padding: 40px 0;
-	margin-top: 60px;
-	color: #6c757d;
+	background: #050505 !important;
+	border-top: 1px solid var(--border-color) !important;
+	color: #888;
+	margin-top: auto;
+	width: 100%;
 }
 
-.dropdown-menu-dark {
-	background-color: var(--bg-card);
-	border: 1px solid var(--border-color);
+footer h5, footer h6 {
+	color: var(--text-main);
+	font-family: var(--font-title);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	font-weight: 800;
 }
 
-.dropdown-item {
-	color: #aab8c5;
+footer a {
+	color: #888;
+	transition: 0.2s;
 }
 
-.dropdown-item:hover {
-	background-color: rgba(0, 242, 255, 0.1);
+footer a:hover {
 	color: var(--accent-cyan);
+}
+
+.floating-socials {
+	position: fixed;
+	right: 20px;
+	bottom: 100px;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.social-btn {
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 20px;
+	text-decoration: none;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+	transition: 0.3s;
+	position: relative;
+}
+
+.social-btn:hover {
+	transform: scale(1.1);
+	color: #fff;
+}
+
+.social-btn.zalo {
+	background: #0068ff;
+}
+
+.social-btn.messenger {
+	background: #0084ff;
+}
+
+.social-btn.phone {
+	background: var(--accent-red);
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 
+
+0%{
+	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
+}
+
+70%{
+box-shadow:00010px
+rgba(255,46,99,0);
+}
+
+100%{
+box-shadow:0000
+rgba(255,46,99,0);
+}
+
+}
+#floating-cart {
+	position: fixed;
+	bottom: 30px;
+	left: 30px;
+	width: 60px;
+	height: 60px;
+	background: var(--accent-cyan);
+	color: #000;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	cursor: pointer;
+	z-index: 1000;
+	box-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
+	transition: 0.3s;
+}
+
+#floating-cart:hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 30px var(--accent-cyan);
+}
+
+.cart-badge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background: var(--accent-red);
+	color: white;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	font-size: 0.8rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+}
+
+.mini-cart-panel {
+	position: fixed;
+	bottom: 100px;
+	left: 30px;
+	width: 340px;
+	height: 420px;
+	background: var(--bg-card);
+	border-radius: 8px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+	display: none;
+	flex-direction: column;
+	border: 1px solid var(--accent-cyan);
+	color: var(--text-light);
+}
+
+.mini-cart-panel.show {
+	display: flex;
+	animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {from { opacity:0;
+	transform: translateY(20px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
 }
 </style>
 </head>
 <body>
-
-	<nav class="navbar navbar-expand-lg sticky-top">
-		<div class="container">
-			<a class="navbar-brand d-flex align-items-center gap-2" href="/">
-				<i class="bi bi-box-seam-fill fs-3 text-info"></i> <span
-				class="fw-bold fs-4">MODEL WORLD</span>
-			</a>
-
-			<button class="navbar-toggler border-0" type="button"
-				data-bs-toggle="collapse" data-bs-target="#navbarNav">
-				<span class="bi bi-list text-white fs-2"></span>
-			</button>
-
-			<div class="collapse navbar-collapse" id="navbarNav">
-				<ul class="navbar-nav ms-auto align-items-center mb-2 mb-lg-0">
-					<li class="nav-item mx-1"><a class="nav-link text-info"
-						href="/products"><i class="bi bi-grid me-1"></i> Sản phẩm</a></li>
-
-					<th:block th:if="${session.account == null}">
-						<li class="nav-item mx-1"><a class="nav-link" href="/login"><i
-								class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập</a></li>
-					</th:block>
-
-					<th:block th:if="${session.account != null}">
-						<li class="nav-item mx-1"><a class="nav-link" href="/cart"><i
-								class="bi bi-cart3 me-1"></i> Giỏ hàng</a></li>
-						<li class="nav-item mx-1"><a class="nav-link" href="/orders"><i
-								class="bi bi-receipt me-1"></i> Đơn hàng</a></li>
-						<li class="nav-item mx-1"><a class="nav-link"
-							href="/wishlist"><i class="bi bi-heart me-1"></i> Yêu thích</a></li>
-
-						<li class="nav-item dropdown mx-2"><a
-							class="nav-link dropdown-toggle p-0 d-flex align-items-center"
-							href="#" id="userDropdown" role="button"
-							data-bs-toggle="dropdown"> <img
-								th:if="${session.account.photo != null}"
-								th:src="@{${session.account.photo}}" alt="avatar"
-								class="rounded-circle border border-info"
-								style="width: 38px; height: 38px; object-fit: cover;"> <i
-								th:if="${session.account.photo == null}"
-								class="bi bi-person-circle fs-3 text-info"></i>
-						</a>
-							<ul
-								class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow"
-								aria-labelledby="userDropdown">
-								<li><a
-									class="dropdown-item d-flex align-items-center gap-2"
-									href="/account"><i class="bi bi-person-gear"></i> Tài khoản</a></li>
-								<li><hr class="dropdown-divider border-secondary"></li>
-								<li><a
-									class="dropdown-item d-flex align-items-center gap-2 text-danger"
-									href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng
-										xuất</a></li>
-							</ul></li>
-					</th:block>
-				</ul>
-
-				<form action="/products" method="get"
-					class="d-flex align-items-center ms-lg-4 mt-3 mt-lg-0 w-auto">
-					<div class="search-bar-wrapper d-flex align-items-center">
-						<input type="text" class="form-control form-control-custom"
-							placeholder="Tìm kiếm..." name="keyword" th:value="${keyword}">
-						<div
-							style="width: 1px; height: 20px; background: rgba(255, 255, 255, 0.2); margin: 0 10px;"></div>
-						<select class="form-select form-select-custom w-auto"
-							name="categoryId">
-							<option value="">Tất cả</option>
-							<option th:each="cate : ${categories}" th:value="${cate.id}"
-								th:text="${cate.name}"
-								th:selected="${cate.id != null && cate.id.toString() == selectedCategory}"></option>
-						</select>
-						<button type="submit" class="btn-search ps-2">
-							<i class="bi bi-search"></i>
-						</button>
-					</div>
-				</form>
+	<div id="wrapper">
+		<div id="sidebar-wrapper">
+			<a href="/" class="sidebar-heading">MODEL WORLD</a>
+			<div class="list-group list-group-flush px-2 mt-3">
+				<a href="/" class="list-group-item"><i class="bi bi-grid-fill me-2"></i> Trang chủ</a> 
+				<a href="/products" class="list-group-item active"><i class="bi bi-collection-play me-2"></i> Sản phẩm</a> 
+				<a href="/wishlist" class="list-group-item"><i class="bi bi-heart me-2"></i> Yêu thích</a> 
+				<a href="/cart" class="list-group-item"><i class="bi bi-cart3 me-2"></i> Giỏ hàng</a> 
+				<a href="/orders" class="list-group-item"><i class="bi bi-receipt me-2"></i> Đơn hàng</a>
+				<hr class="border-secondary mx-3">
+				<a href="/account" class="list-group-item"><i class="bi bi-person-gear me-2"></i> Tài khoản</a>
 			</div>
 		</div>
-	</nav>
 
-	<div class="container py-5">
-
-		<div class="text-center mb-5">
-			<h2 class="text-white">
-				DANH SÁCH <span class="text-info">SẢN PHẨM</span>
-			</h2>
-			<div
-				style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
-		</div>
-
-		<div class="row g-4">
-			<div class="col-lg-3">
-				<div class="filter-box sticky-top" style="top: 100px; z-index: 1;">
-					<h5 class="filter-title">
-						<i class="bi bi-funnel-fill me-2"></i>BỘ LỌC
-					</h5>
-					<form method="get" action="/products">
-						<input type="hidden" name="keyword" th:value="${keyword}">
-
-						<div class="mb-3">
-							<label class="form-label text-light small">Danh mục</label> <select
-								name="categoryId" class="form-select form-select-dark">
-								<option value="">Tất cả danh mục</option>
-								<option th:each="c : ${categories}" th:value="${c.id}"
-									th:selected="${c.id != null && c.id.toString() == selectedCategory}"
-									th:text="${c.name}"></option>
-							</select>
-						</div>
-
-						<div class="mb-3">
-							<label class="form-label text-light small">Sắp xếp theo</label> <select
-								name="sort" class="form-select form-select-dark">
-								<option value="">Mặc định</option>
-								<option value="asc" th:selected="${selectedSort == 'asc'}">Giá
-									tăng dần</option>
-								<option value="desc" th:selected="${selectedSort == 'desc'}">Giá
-									giảm dần</option>
-							</select>
-						</div>
-
-						<div class="mb-3">
-							<label class="form-label text-light small">Khoảng giá</label> <input
-								type="number" class="form-control form-control-dark mb-2"
-								name="minPrice" placeholder="Giá từ..." th:value="${minPrice}">
-							<input type="number" class="form-control form-control-dark"
-								name="maxPrice" placeholder="Giá đến..." th:value="${maxPrice}">
-						</div>
-
-						<button type="submit" class="btn-add-cart mt-2 w-100">ÁP
-							DỤNG</button>
+		<div id="page-content-wrapper">
+			<nav class="top-navbar d-flex justify-content-between align-items-center">
+				<div class="d-flex align-items-center gap-2 w-100 me-3">
+					<button class="btn btn-outline-info border-0" id="menu-toggle">
+						<i class="bi bi-list fs-4"></i>
+					</button>
+					<a href="/" class="nav-logo d-none d-sm-flex"> 
+						<i class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span>
+					</a>
+					<form action="/products" method="get" class="search-box d-none d-md-block ms-md-4">
+						<input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm Gunpla, Figure, Tool...">
+						<button type="submit"><i class="bi bi-search"></i></button>
 					</form>
 				</div>
-			</div>
 
-			<div class="col-lg-9">
+				<div class="d-flex align-items-center gap-3">
+					<th:block th:if="${user == null}">
+						<a href="/login" class="text-decoration-none fw-bold text-nowrap" style="color: var(--text-main);">Đăng nhập</a>
+						<a href="/register" class="btn btn-sm rounded-pill px-3 text-nowrap" style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng ký</a>
+					</th:block>
+					<th:block th:if="${user != null}">
+						<div class="dropdown">
+							<a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" style="color: var(--text-light);">
+								<img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle me-2 border border-secondary" width="35" height="35" style="object-fit: cover;"> 
+								<span class="d-none d-sm-block fw-bold small" th:text="${user.fullName ?: user.username}">User</span>
+							</a>
+							<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
+								<li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Hồ sơ</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+							</ul>
+						</div>
+					</th:block>
+				</div>
+			</nav>
+
+			<div class="container-fluid px-4 py-4 flex-grow-1">
 				<div class="row g-4">
-					<div class="col-md-4 col-sm-6" th:each="p : ${products}">
-						<div th:classappend="${!p.available} ? 'product-unavailable' : ''"
-							class="product-card">
-
-							<div th:if="${!p.available}" class="badge-sold-out">HẾT
-								HÀNG</div>
-
-							<div class="product-img-box">
-								<a th:if="${p.available}"
-									th:href="@{'/product-detail/' + ${p.id}}"> <img
-									th:src="${p.image != null ? p.image : '/images/no-image.jpg'}"
-									alt="Product">
-								</a> <img th:if="${!p.available}"
-									th:src="${p.image != null ? p.image : '/images/no-image.jpg'}"
-									alt="Product">
-							</div>
-
-							<div class="product-body">
-								<div>
-									<a th:href="@{'/product-detail/' + ${p.id}}"
-										class="text-decoration-none">
-										<div class="product-name" th:text="${p.name}">Tên sản phẩm</div>
-									</a>
-									<div class="product-price"
-										th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}">0
-										₫</div>
-									<div class="small text-light mt-1"
-										th:text="${p.category != null ? p.category.name : 'Chưa phân loại'}"></div>
-								</div>
-
-								<div class="mt-2">
-									<div th:if="${p.available}" class="d-flex gap-2">
-										<a th:href="@{'/cart/add/' + ${p.id}}"
-											class="btn-add-cart flex-grow-1"> <i
-											class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-										</a> <a th:href="@{'/wishlist/add/' + ${p.id}}" class="btn-like"
-											title="Yêu thích"> <i class="bi bi-heart-fill"></i>
-										</a>
-									</div>
-
-									<button th:if="${!p.available}"
-										class="btn-add-cart border-secondary text-secondary w-100"
-										disabled>
-										<i class="bi bi-x-circle me-1"></i> Hết hàng
-									</button>
-								</div>
-
-							</div>
+					<div class="col-lg-3">
+						<div class="filter-box p-3 rounded-3" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+							<form method="get" action="/products">
+								<h6 class="fw-bold mb-3" style="color: var(--text-main)">DANH MỤC</h6>
+								<select name="categoryId" class="form-select bg-dark text-white border-secondary mb-4 shadow-none">
+									<option value="">Tất cả danh mục</option>
+									<option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${c.id == selectedCategory}"></option>
+								</select>
+								<button type="submit" class="btn btn-add-cart w-100">LỌC NGAY</button>
+							</form>
 						</div>
 					</div>
 
-					<div th:if="${#lists.isEmpty(products)}"
-						class="col-12 text-center py-5">
-						<i class="bi bi-box2 text-secondary" style="font-size: 3rem;"></i>
-						<p class="text-secondary mt-3">Không tìm thấy sản phẩm nào phù
-							hợp.</p>
+					<div class="col-lg-9">
+						<div class="d-flex justify-content-between align-items-center mb-4">
+							<h4 class="section-title m-0">TẤT CẢ SẢN PHẨM</h4>
+							<span class="small text-muted" th:text="${#lists.size(products)} + ' sản phẩm'">0 sản phẩm</span>
+						</div>
+
+						<div class="row g-3" th:if="${not #lists.isEmpty(products)}">
+							<div class="col-xl-4 col-md-6 col-sm-6" th:each="p, iter : ${products}">
+								<div class="product-card" th:style="'animation-delay: ' + ${iter.index * 0.1} + 's'">
+									<div class="product-img-wrap">
+										<a th:href="@{'/product-detail/' + ${p.id}}"> 
+											<img th:src="${p.mainImage != null ? (p.mainImage.startsWith('http') ? p.mainImage : '/uploads/' + p.mainImage) : 'https://via.placeholder.com/300'}"
+												 onerror="this.src='https://via.placeholder.com/300'">
+										</a>
+									</div>
+									<div class="p-3 d-flex flex-column flex-grow-1">
+										<div class="product-brand small fw-bold" style="color: var(--accent-cyan)" th:text="${p.category?.name}">CATEGORY</div>
+										<h6 class="text-white my-2 text-truncate" th:text="${p.name}">Product Name</h6>
+										<div class="text-danger fw-bold fs-5 mt-auto" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' ₫'}"></div>
+										<button class="btn btn-add-cart mt-3" th:onclick="'animateAddToCart(event, this, ' + ${p.id} + ')'">
+											<i class="bi bi-cart-plus me-2"></i>THÊM GIỎ HÀNG
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div th:if="${#lists.isEmpty(products)}" class="text-center py-5 my-5 text-muted">
+							<i class="bi bi-box-seam fs-1 d-block mb-3" style="opacity: 0.3;"></i>
+							<p class="fs-5">Hiện chưa có sản phẩm nào phù hợp.</p>
+							<a href="/products" class="btn btn-outline-info btn-sm rounded-pill px-4 mt-2">Xem tất cả</a>
+						</div>
 					</div>
 				</div>
 			</div>
+			
+			<footer class="py-5 mt-5">
+				<div class="container-fluid px-4">
+					<div class="row g-4">
+						<div class="col-lg-4 col-md-6">
+							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
+							<p class="small" style="color: #aaa;">Hệ thống phân phối mô hình chính hãng hàng đầu Việt Nam.</p>
+							<div class="d-flex gap-3 mt-3">
+								<a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a> 
+								<a href="#" class="text-light fs-5"><i class="bi bi-youtube"></i></a> 
+								<a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
+								<li><a href="#" class="text-decoration-none">Hệ thống cửa hàng</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Chính sách</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Chính sách đổi trả</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách bảo hành</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-4 col-md-12">
+							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
+							<div class="input-group">
+								<input type="text" class="form-control" placeholder="Nhập email của bạn..." style="background: #111; border: 1px solid #333; color: #fff;">
+								<button class="btn" style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng ký</button>
+							</div>
+						</div>
+					</div>
+					<div class="text-center mt-5 pt-3 border-top border-secondary small">© 2026 Model World. All rights reserved.</div>
+				</div>
+			</footer>
 		</div>
-		<nav class="mt-5">
-			<ul class="pagination justify-content-center custom-pagination">
-
-				<!-- Previous -->
-				<li class="page-item"
-					th:classappend="${productPage.first}? 'disabled'"><a
-					class="page-link"
-					th:href="@{/products(page=${productPage.number - 1},
-                                    categoryId=${selectedCategory},
-                                    keyword=${keyword},
-                                    sort=${selectedSort})}">‹</a></li>
-
-				<!-- Số trang -->
-				<li class="page-item"
-					th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}"
-					th:classappend="${i == productPage.number}? 'active'"><a
-					class="page-link"
-					th:href="@{/products(page=${i},
-                                    categoryId=${selectedCategory},
-                                    keyword=${keyword},
-                                    sort=${selectedSort})}"
-					th:text="${i + 1}"> </a></li>
-
-				<!-- Next -->
-				<li class="page-item"
-					th:classappend="${productPage.last}? 'disabled'"><a
-					class="page-link"
-					th:href="@{/products(page=${productPage.number + 1},
-                                    categoryId=${selectedCategory},
-                                    keyword=${keyword},
-                                    sort=${selectedSort})}">›</a></li>
-			</ul>
-		</nav>
 	</div>
 
-	<footer class="text-center">
-		<div class="container">
-			<div class="row justify-content-center">
-				<div class="col-md-6">
-					<h4 class="text-white mb-3">MODEL WORLD</h4>
-					<p class="small">Chuyên cung cấp mô hình tĩnh cao cấp. Nơi thỏa
-						mãn đam mê sưu tầm của bạn.</p>
-					<div class="d-flex justify-content-center gap-3 mt-4 mb-4">
-						<a href="#" class="text-secondary fs-5"><i
-							class="bi bi-facebook"></i></a> <a href="#"
-							class="text-secondary fs-5"><i class="bi bi-instagram"></i></a> <a
-							href="#" class="text-secondary fs-5"><i class="bi bi-youtube"></i></a>
-					</div>
-					<p class="mb-0 small text-secondary">&copy; 2025 Model World —
-						Luxury Boutique</p>
-				</div>
-			</div>
-		</div>
-	</footer>
+	<div class="floating-socials">
+		<a href="tel:0909123456" class="social-btn phone"><i class="bi bi-telephone-fill"></i></a> 
+		<a href="https://zalo.me/0909123456" class="social-btn zalo"><i class="bi bi-chat-dots-fill"></i></a> 
+		<a href="https://m.me/modelworld" class="social-btn messenger"><i class="bi bi-messenger"></i></a>
+	</div>
+	
+	<div class="floating-socials">
+        <a href="tel:0909123456" class="social-btn phone"><i class="bi bi-telephone-fill"></i></a> 
+        <a href="https://zalo.me/0909123456" class="social-btn zalo"><i class="bi bi-chat-dots-fill"></i></a> 
+        <a href="https://m.me/modelworld" class="social-btn messenger"><i class="bi bi-messenger"></i></a>
+    </div>
 
+    <div id="floating-cart" onclick="toggleMiniCart()">
+        <i class="bi bi-cart3"></i>
+        <span id="floating-cart-count" class="cart-badge" style="display: none;">0</span>
+    </div>
+
+    <div id="mini-cart-panel" class="mini-cart-panel">
+        <div class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+            <span class="fw-bold" style="color: var(--text-main); font-family: 'Montserrat';">GIỎ HÀNG NHANH</span>
+            <button onclick="toggleMiniCart()" class="btn-close btn-close-white"></button>
+        </div>
+        <div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1">
+            <div class="text-center text-muted py-5">Đang tải...</div>
+        </div>
+        <div class="p-3 border-top border-secondary bg-dark">
+            <div class="d-flex justify-content-between mb-3 fw-bold">
+                <span>TỔNG CỘNG:</span>
+                <span id="mini-cart-total" class="text-info">0₫</span>
+            </div>
+            <a href="/cart" class="btn btn-info w-100 fw-bold" style="background: var(--accent-cyan); color: #000;">XEM CHI TIẾT</a>
+        </div>
+    </div>
+	
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+
+/* SIDEBAR */
+
+const menuBtn=document.getElementById("menu-toggle");
+
+if(menuBtn){
+menuBtn.onclick=function(e){
+e.preventDefault();
+document.body.classList.toggle("toggled");
+};
+}
+
+
+/* MINI CART */
+window.toggleMiniCart=function(){
+document.getElementById("mini-cart-panel").classList.toggle("show");
+};
+
+
+/* WISHLIST */
+
+window.toggleWishlist=function(el){
+
+el.classList.toggle("active");
+
+let icon=el.querySelector("i");
+
+if(el.classList.contains("active")){
+icon.classList.replace("bi-heart","bi-heart-fill");
+}else{
+icon.classList.replace("bi-heart-fill","bi-heart");
+}
+
+};
+
+
+/* ADD TO CART */
+
+window.animateAddToCart=function(event,button){
+
+event.preventDefault();
+
+const id=button.dataset.id;
+
+const card=button.closest(".product-card");
+const img=card.querySelector("img");
+
+const cart=document.getElementById("floating-cart");
+
+if(img && cart){
+
+const rect=img.getBoundingClientRect();
+const cartRect=cart.getBoundingClientRect();
+
+const fly=img.cloneNode(true);
+
+fly.style.position="fixed";
+fly.style.left=rect.left+"px";
+fly.style.top=rect.top+"px";
+fly.style.width="60px";
+fly.style.height="60px";
+fly.style.objectFit="cover";
+fly.style.zIndex="9999";
+fly.style.transition="all 0.6s ease";
+
+document.body.appendChild(fly);
+
+setTimeout(()=>{
+
+fly.style.left=cartRect.left+"px";
+fly.style.top=cartRect.top+"px";
+fly.style.width="20px";
+fly.style.height="20px";
+fly.style.opacity="0.2";
+
+},50);
+
+setTimeout(()=>fly.remove(),600);
+
+}
+
+
+/* CALL API */
+
+fetch("/cart/add/"+id,{
+method:"POST"
+})
+.then(res=>res.text())
+.then(text=>{
+
+if(text==="success"){
+updateMiniCart();
+}
+
+});
+
+};
+
+
+
+/* UPDATE MINI CART */
+
+function updateMiniCart(){
+
+fetch("/cart/api/mini-cart")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+const body=document.getElementById("mini-cart-body");
+const badge=document.getElementById("floating-cart-count");
+const totalText=document.getElementById("mini-cart-total");
+
+if(!data || data.length===0){
+
+body.innerHTML=`
+<div class="text-center text-muted py-5">
+<i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
+Chưa có sản phẩm
+</div>
+`;
+
+badge.style.display="none";
+totalText.innerText="0₫";
+return;
+
+}
+
+let html="";
+let total=0;
+let count=0;
+
+data.forEach(item=>{
+
+let price=item.product.price;
+let qty=item.quantity;
+
+total+=price*qty;
+count+=qty;
+
+let img=item.product.mainImage
+? "/uploads/"+item.product.mainImage
+: "https://via.placeholder.com/50";
+
+html+=`
+
+<div class="d-flex align-items-center mb-3 pb-3 border-bottom border-secondary">
+
+<img src="${img}" width="50" height="50"
+style="object-fit:cover"
+class="rounded me-2">
+
+<div class="flex-grow-1">
+
+<div class="small fw-bold">${item.product.name}</div>
+
+<div class="small text-danger">
+${price.toLocaleString()}₫
+</div>
+
+<div class="d-flex align-items-center gap-2 mt-1">
+
+<button data-id="${item.id}" class="minus-btn"
+style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">-</button>
+
+<span>${qty}</span>
+
+<button data-id="${item.id}" class="plus-btn"
+style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">+</button>
+
+</div>
+
+</div>
+
+<button data-id="${item.id}" class="delete-btn"
+style="background:none;border:none;color:#ff2e63">
+<i class="bi bi-x-lg"></i>
+</button>
+
+</div>
+
+`;
+
+});
+
+body.innerHTML=html;
+
+badge.innerText=count;
+badge.style.display="flex";
+
+totalText.innerText=total.toLocaleString()+"₫";
+
+
+/* CART BUTTON EVENTS */
+
+document.querySelectorAll(".plus-btn").forEach(btn=>{
+btn.onclick=()=>{
+
+fetch("/cart/plus/"+btn.dataset.id)
+.then(()=>updateMiniCart());
+
+};
+});
+
+document.querySelectorAll(".minus-btn").forEach(btn=>{
+btn.onclick=()=>{
+
+fetch("/cart/minus/"+btn.dataset.id)
+.then(()=>updateMiniCart());
+
+};
+});
+
+document.querySelectorAll(".delete-btn").forEach(btn=>{
+btn.onclick=()=>{
+
+fetch("/cart/delete/"+btn.dataset.id)
+.then(()=>updateMiniCart());
+
+};
+});
+
+
+});
+
+}
+
+
+
+/* LIVE SEARCH */
+
+const input=document.getElementById("liveSearchInput");
+const searchBox=document.getElementById("searchBox");
+
+if(input && searchBox){
+
+const results=document.createElement("div");
+
+results.style.cssText=
+"position:absolute;top:100%;left:0;right:0;background:#1f2833;border:1px solid #45a29e;border-radius:8px;margin-top:5px;display:none;max-height:400px;overflow-y:auto;";
+
+searchBox.appendChild(results);
+
+let timeout;
+
+input.addEventListener("input",function(){
+
+clearTimeout(timeout);
+
+const keyword=this.value.trim();
+
+if(keyword.length<2){
+results.style.display="none";
+return;
+}
+
+timeout=setTimeout(()=>{
+
+fetch("/cart/api/search?keyword="+encodeURIComponent(keyword))
+
+.then(res=>res.json())
+
+.then(data=>{
+
+if(!data.length){
+
+results.innerHTML=
+'<div class="p-3 text-center text-muted">Không tìm thấy</div>';
+
+}else{
+
+let html="";
+
+data.forEach(p=>{
+
+html+=`
+
+<a href="/product-detail/${p.id}"
+class="d-flex align-items-center p-2 border-bottom text-decoration-none">
+<img src="/uploads/${p.mainImage}"width="40"height="40"
+class="rounded me-2">
+
+<div>
+
+<div class="small fw-bold">${p.name}</div>
+
+<div class="small text-danger">
+${p.price.toLocaleString()}₫
+</div>
+
+</div>
+
+</a>
+
+`;
+
+});
+
+results.innerHTML=html;
+
+}
+
+results.style.display="block";
+
+});
+
+},400);
+
+});
+
+}
+
+
+/* LOAD CART */
+
+updateMiniCart();
+
+});
+
+</script>
 </body>
 </html>
