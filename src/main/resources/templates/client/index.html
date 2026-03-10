@@ -712,8 +712,12 @@ footer a:hover {
 }
 
 @keyframes pulse { 
+<<<<<<< Updated upstream
 
 0%{
+=======
+0% {
+>>>>>>> Stashed changes
 	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
 }
 
@@ -721,7 +725,10 @@ footer a:hover {
 box-shadow:00010px
 rgba(255,46,99,0);
 }
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 100%{
 box-shadow:0000
 rgba(255,46,99,0);
@@ -848,8 +855,7 @@ to {
 							style="color: var(--text-main);">Đăng nhập</a>
 						<a href="/register"
 							class="btn btn-sm rounded-pill px-3 text-nowrap"
-							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
-							ký</a>
+							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng ký</a>
 					</th:block>
 					<th:block th:if="${user != null}">
 						<div class="dropdown">
@@ -1129,328 +1135,340 @@ to {
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+	document.addEventListener("DOMContentLoaded",function(){
 
-document.addEventListener("DOMContentLoaded",function(){
+		/* SIDEBAR */
 
-/* SIDEBAR */
+		const menuBtn=document.getElementById("menu-toggle");
 
-const menuBtn=document.getElementById("menu-toggle");
-
-if(menuBtn){
-menuBtn.onclick=function(e){
-e.preventDefault();
-document.body.classList.toggle("toggled");
-};
-}
+		if(menuBtn){
+		menuBtn.onclick=function(e){
+		e.preventDefault();
+		document.body.classList.toggle("toggled");
+		};
+		}
 
 
+		/* MINI CART */
+		window.toggleMiniCart=function(){
+		document.getElementById("mini-cart-panel").classList.toggle("show");
+		};
+
+<<<<<<< Updated upstream
 /* MINI CART */
 window.toggleMiniCart=function(){
 document.getElementById("mini-cart-panel").classList.toggle("show");
 };
+=======
 
+		/* WISHLIST */
+>>>>>>> Stashed changes
 
-/* WISHLIST */
+		window.toggleWishlist=function(el){
 
-window.toggleWishlist=function(el){
+		el.classList.toggle("active");
 
-el.classList.toggle("active");
+		let icon=el.querySelector("i");
 
-let icon=el.querySelector("i");
+		if(el.classList.contains("active")){
+		icon.classList.replace("bi-heart","bi-heart-fill");
+		}else{
+		icon.classList.replace("bi-heart-fill","bi-heart");
+		}
 
-if(el.classList.contains("active")){
-icon.classList.replace("bi-heart","bi-heart-fill");
-}else{
-icon.classList.replace("bi-heart-fill","bi-heart");
-}
+		};
 
-};
 
+		/* ADD TO CART */
 
-/* ADD TO CART */
+		window.animateAddToCart=function(event,button){
 
-window.animateAddToCart=function(event,button){
+		event.preventDefault();
 
-event.preventDefault();
+		const id=button.dataset.id;
 
-const id=button.dataset.id;
+		const card=button.closest(".product-card");
+		const img=card.querySelector("img");
 
-const card=button.closest(".product-card");
-const img=card.querySelector("img");
+		const cart=document.getElementById("floating-cart");
 
-const cart=document.getElementById("floating-cart");
+		if(img && cart){
 
-if(img && cart){
+		const rect=img.getBoundingClientRect();
+		const cartRect=cart.getBoundingClientRect();
 
-const rect=img.getBoundingClientRect();
-const cartRect=cart.getBoundingClientRect();
+		const fly=img.cloneNode(true);
 
-const fly=img.cloneNode(true);
+		fly.style.position="fixed";
+		fly.style.left=rect.left+"px";
+		fly.style.top=rect.top+"px";
+		fly.style.width="60px";
+		fly.style.height="60px";
+		fly.style.objectFit="cover";
+		fly.style.zIndex="9999";
+		fly.style.transition="all 0.6s ease";
 
-fly.style.position="fixed";
-fly.style.left=rect.left+"px";
-fly.style.top=rect.top+"px";
-fly.style.width="60px";
-fly.style.height="60px";
-fly.style.objectFit="cover";
-fly.style.zIndex="9999";
-fly.style.transition="all 0.6s ease";
+		document.body.appendChild(fly);
 
-document.body.appendChild(fly);
+		setTimeout(()=>{
 
-setTimeout(()=>{
+		fly.style.left=cartRect.left+"px";
+		fly.style.top=cartRect.top+"px";
+		fly.style.width="20px";
+		fly.style.height="20px";
+		fly.style.opacity="0.2";
 
-fly.style.left=cartRect.left+"px";
-fly.style.top=cartRect.top+"px";
-fly.style.width="20px";
-fly.style.height="20px";
-fly.style.opacity="0.2";
+		},50);
 
-},50);
+		setTimeout(()=>fly.remove(),600);
 
-setTimeout(()=>fly.remove(),600);
+		}
 
-}
 
+		/* CALL API */
 
-/* CALL API */
+		fetch("/cart/add/"+id,{
+		method:"POST"
+		})
+		.then(res=>res.text())
+		.then(text=>{
 
-fetch("/cart/add/"+id,{
-method:"POST"
-})
-.then(res=>res.text())
-.then(text=>{
+		if(text==="success"){
+		updateMiniCart();
+		}
 
-if(text==="success"){
-updateMiniCart();
-}
+		});
 
-});
+		};
 
-};
 
 
+		/* UPDATE MINI CART */
 
-/* UPDATE MINI CART */
+		function updateMiniCart(){
 
-function updateMiniCart(){
+		fetch("/cart/api/mini-cart")
 
-fetch("/cart/api/mini-cart")
+		.then(res=>res.json())
 
-.then(res=>res.json())
+		.then(data=>{
 
-.then(data=>{
+		const body=document.getElementById("mini-cart-body");
+		const badge=document.getElementById("floating-cart-count");
+		const totalText=document.getElementById("mini-cart-total");
 
-const body=document.getElementById("mini-cart-body");
-const badge=document.getElementById("floating-cart-count");
-const totalText=document.getElementById("mini-cart-total");
+		if(!data || data.length===0){
 
-if(!data || data.length===0){
+		body.innerHTML=`
+		<div class="text-center text-muted py-5">
+		<i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
+		Chưa có sản phẩm
+		</div>
+		`;
 
-body.innerHTML=`
-<div class="text-center text-muted py-5">
-<i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
-Chưa có sản phẩm
-</div>
-`;
+		badge.style.display="none";
+		totalText.innerText="0₫";
+		return;
 
-badge.style.display="none";
-totalText.innerText="0₫";
-return;
+		}
 
-}
+		let html="";
+		let total=0;
+		let count=0;
 
-let html="";
-let total=0;
-let count=0;
+		data.forEach(item=>{
 
-data.forEach(item=>{
+		let price=item.product.price;
+		let qty=item.quantity;
 
-let price=item.product.price;
-let qty=item.quantity;
+		total+=price*qty;
+		count+=qty;
 
-total+=price*qty;
-count+=qty;
+		let img=item.product.mainImage
+		? "/uploads/"+item.product.mainImage
+		: "https://via.placeholder.com/50";
 
-let img=item.product.mainImage
-? "/uploads/"+item.product.mainImage
-: "https://via.placeholder.com/50";
+		html+=`
 
-html+=`
+		<div class="d-flex align-items-center mb-3 pb-3 border-bottom border-secondary">
 
-<div class="d-flex align-items-center mb-3 pb-3 border-bottom border-secondary">
+		<img src="${img}" width="50" height="50"
+		style="object-fit:cover"
+		class="rounded me-2">
 
-<img src="${img}" width="50" height="50"
-style="object-fit:cover"
-class="rounded me-2">
+		<div class="flex-grow-1">
 
-<div class="flex-grow-1">
+		<div class="small fw-bold">${item.product.name}</div>
 
-<div class="small fw-bold">${item.product.name}</div>
+		<div class="small text-danger">
+		${price.toLocaleString()}₫
+		</div>
 
-<div class="small text-danger">
-${price.toLocaleString()}₫
-</div>
+		<div class="d-flex align-items-center gap-2 mt-1">
 
-<div class="d-flex align-items-center gap-2 mt-1">
+		<button data-id="${item.id}" class="minus-btn"
+		style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">-</button>
 
-<button data-id="${item.id}" class="minus-btn"
-style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">-</button>
+		<span>${qty}</span>
 
-<span>${qty}</span>
+		<button data-id="${item.id}" class="plus-btn"
+		style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">+</button>
 
-<button data-id="${item.id}" class="plus-btn"
-style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">+</button>
+		</div>
 
-</div>
+		</div>
 
-</div>
+		<button data-id="${item.id}" class="delete-btn"
+		style="background:none;border:none;color:#ff2e63">
+		<i class="bi bi-x-lg"></i>
+		</button>
 
-<button data-id="${item.id}" class="delete-btn"
-style="background:none;border:none;color:#ff2e63">
-<i class="bi bi-x-lg"></i>
-</button>
+		</div>
 
-</div>
+		`;
 
-`;
+		});
 
-});
+		body.innerHTML=html;
 
-body.innerHTML=html;
+		badge.innerText=count;
+		badge.style.display="flex";
 
-badge.innerText=count;
-badge.style.display="flex";
+		totalText.innerText=total.toLocaleString()+"₫";
 
-totalText.innerText=total.toLocaleString()+"₫";
 
+		/* CART BUTTON EVENTS */
 
-/* CART BUTTON EVENTS */
+		document.querySelectorAll(".plus-btn").forEach(btn=>{
+		btn.onclick=()=>{
 
-document.querySelectorAll(".plus-btn").forEach(btn=>{
-btn.onclick=()=>{
+		fetch("/cart/plus/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
 
-fetch("/cart/plus/"+btn.dataset.id)
-.then(()=>updateMiniCart());
+		};
+		});
 
-};
-});
+		document.querySelectorAll(".minus-btn").forEach(btn=>{
+		btn.onclick=()=>{
 
-document.querySelectorAll(".minus-btn").forEach(btn=>{
-btn.onclick=()=>{
+		fetch("/cart/minus/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
 
-fetch("/cart/minus/"+btn.dataset.id)
-.then(()=>updateMiniCart());
+		};
+		});
 
-};
-});
+		document.querySelectorAll(".delete-btn").forEach(btn=>{
+		btn.onclick=()=>{
 
-document.querySelectorAll(".delete-btn").forEach(btn=>{
-btn.onclick=()=>{
+		fetch("/cart/delete/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
 
-fetch("/cart/delete/"+btn.dataset.id)
-.then(()=>updateMiniCart());
+		};
+		});
 
-};
-});
 
+		});
 
-});
+		}
 
-}
 
 
+		/* LIVE SEARCH */
 
-/* LIVE SEARCH */
+		const input=document.getElementById("liveSearchInput");
+		const searchBox=document.getElementById("searchBox");
 
-const input=document.getElementById("liveSearchInput");
-const searchBox=document.getElementById("searchBox");
+		if(input && searchBox){
 
-if(input && searchBox){
+		const results=document.createElement("div");
 
-const results=document.createElement("div");
+		results.style.cssText=
+		"position:absolute;top:100%;left:0;right:0;background:#1f2833;border:1px solid #45a29e;border-radius:8px;margin-top:5px;display:none;max-height:400px;overflow-y:auto;";
 
-results.style.cssText=
-"position:absolute;top:100%;left:0;right:0;background:#1f2833;border:1px solid #45a29e;border-radius:8px;margin-top:5px;display:none;max-height:400px;overflow-y:auto;";
+		searchBox.appendChild(results);
 
-searchBox.appendChild(results);
+		let timeout;
 
-let timeout;
+		input.addEventListener("input",function(){
 
-input.addEventListener("input",function(){
+		clearTimeout(timeout);
 
-clearTimeout(timeout);
+		const keyword=this.value.trim();
 
-const keyword=this.value.trim();
+		if(keyword.length<2){
+		results.style.display="none";
+		return;
+		}
 
-if(keyword.length<2){
-results.style.display="none";
-return;
-}
+		timeout=setTimeout(()=>{
 
-timeout=setTimeout(()=>{
+		fetch("/cart/api/search?keyword="+encodeURIComponent(keyword))
 
-fetch("/cart/api/search?keyword="+encodeURIComponent(keyword))
+		.then(res=>res.json())
 
-.then(res=>res.json())
+		.then(data=>{
 
-.then(data=>{
+		if(!data.length){
 
-if(!data.length){
+		results.innerHTML=
+		'<div class="p-3 text-center text-muted">Không tìm thấy</div>';
 
-results.innerHTML=
-'<div class="p-3 text-center text-muted">Không tìm thấy</div>';
+		}else{
 
-}else{
+		let html="";
 
-let html="";
+		data.forEach(p=>{
 
-data.forEach(p=>{
+		html+=`
 
-html+=`
+		<a href="/product-detail/${p.id}"
+		class="d-flex align-items-center p-2 border-bottom text-decoration-none">
+		<img src="/uploads/${p.mainImage}"width="40"height="40"
+		class="rounded me-2">
 
+		<div>
+
+<<<<<<< Updated upstream
 <a href="/product-detail/${p.id}"
 class="d-flex align-items-center p-2 border-bottom text-decoration-none">
 <img src="/uploads/${p.mainImage}"width="40"height="40"
 class="rounded me-2">
+=======
+		<div class="small fw-bold">${p.name}</div>
 
-<div>
+		<div class="small text-danger">
+		${p.price.toLocaleString()}₫
+		</div>
+>>>>>>> Stashed changes
 
-<div class="small fw-bold">${p.name}</div>
+		</div>
 
-<div class="small text-danger">
-${p.price.toLocaleString()}₫
-</div>
+		</a>
 
-</div>
+		`;
 
-</a>
+		});
 
-`;
+		results.innerHTML=html;
 
-});
+		}
 
-results.innerHTML=html;
+		results.style.display="block";
 
-}
+		});
 
-results.style.display="block";
+		},400);
 
-});
+		});
 
-},400);
-
-});
-
-}
+		}
 
 
-/* LOAD CART */
+		/* LOAD CART */
 
-updateMiniCart();
+		updateMiniCart();
 
-});
-
-</script>
+		});
+    </script>
 </body>
 </html>
