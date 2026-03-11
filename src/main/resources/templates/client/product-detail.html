@@ -274,6 +274,25 @@ body.toggled #page-content-wrapper {
 	font-weight: bold;
 }
 
+<<<<<<< Updated upstream
+=======
+/* --- TAB & COMMENT CUSTOMS --- */
+.detail-tabs-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 25px;
+}
+.nav-tabs { border-bottom: 1px solid var(--border-color); }
+.nav-tabs .nav-link { 
+    color: #888; border: none; font-weight: 700; padding: 12px 25px; 
+}
+.nav-tabs .nav-link.active { 
+    background: transparent; color: var(--text-main); border-bottom: 3px solid var(--text-main); 
+}
+.comment-form { background: rgba(255,255,255,0.02); padding: 20px; border-radius: 10px; border: 1px solid var(--border-color); }
+
+>>>>>>> Stashed changes
 footer {
 	background: #050505 !important;
 	border-top: 1px solid var(--border-color) !important;
@@ -567,6 +586,7 @@ to {
 					</div>
 				</div>
 
+<<<<<<< Updated upstream
 				<div class="row mt-5 g-4 text-center">
 					<div class="col-md-4">
 						<div class="p-4 rounded-3"
@@ -682,6 +702,188 @@ to {
 			style="background: #ff2e63;"><i class="bi bi-telephone-fill"></i></a>
 	</div>
 
+=======
+                <div class="detail-tabs-wrapper mt-5">
+                    <ul class="nav nav-tabs mb-3" id="productTabs">
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#desc">MÔ TẢ</button></li>
+                        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rev">ĐÁNH GIÁ (<span th:text="${comments.size()}">0</span>)</button></li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="desc">
+                            <p th:text="${product.description}" style="white-space: pre-line;" class="text-light"></p>
+                        </div>
+
+                        <div class="tab-pane fade" id="rev">
+                            <div th:if="${canComment}" class="comment-form mb-4">
+                                <h6 class="text-info mb-3">Gửi đánh giá của bạn</h6>
+                                <form th:action="@{'/product-detail/comment/' + ${product.id}}" method="post" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label class="small text-secondary">Xếp hạng:</label>
+                                        <select name="rating" class="form-select bg-dark text-warning border-secondary w-auto">
+                                            <option value="5">⭐⭐⭐⭐⭐ (5 sao)</option>
+                                            <option value="4">⭐⭐⭐⭐ (4 sao)</option>
+                                            <option value="3">⭐⭐⭐ (3 sao)</option>
+                                            <option value="2">⭐⭐ (2 sao)</option>
+                                            <option value="1">⭐ (1 sao)</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <textarea name="content" class="form-control bg-dark text-white border-secondary" rows="3" placeholder="Nhập cảm nhận của bạn về sản phẩm..." required></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small text-secondary d-block">Hình ảnh thực tế (nếu có):</label>
+                                        <input type="file" name="imageFile" class="form-control bg-dark text-secondary border-secondary">
+                                    </div>
+                                    <button type="submit" class="btn btn-outline-info">GỬI ĐÁNH GIÁ</button>
+                                </form>
+                            </div>
+
+                            <div th:unless="${canComment}" class="alert alert-dark border-secondary text-secondary small text-center">
+                                <i class="bi bi-info-circle"></i> Bạn cần mua sản phẩm và hoàn tất đơn hàng để có thể gửi đánh giá.
+                            </div>
+
+                            <hr class="border-secondary opacity-25">
+
+                            <div class="comment-list">
+                                <div th:if="${#lists.isEmpty(comments)}" class="text-center text-secondary py-3">Chưa có đánh giá nào.</div>
+                                <div th:each="cmt : ${comments}" class="d-flex gap-3 mb-4 pb-3 border-bottom border-secondary" style="border-color: rgba(255,255,255,0.05) !important;">
+                                    <img th:src="${cmt.account.photo != null ? cmt.account.photo : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle" style="width: 45px; height: 45px; object-fit: cover;">
+                                    <div class="w-100">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-0 text-white" th:text="${cmt.account.fullName}">User</h6>
+                                            <small class="text-secondary" th:text="${#temporals.format(cmt.createdAt, 'dd/MM/yyyy')}"></small>
+                                        </div>
+                                        <div class="text-warning small my-1">
+                                            <i class="bi bi-star-fill" th:each="i : ${#numbers.sequence(1, cmt.rating)}"></i>
+                                        </div>
+                                        <p class="mb-2 text-light" th:text="${cmt.content}"></p>
+                                        <div th:if="${cmt.image != null}">
+                                            <img th:src="@{'/uploads/comments/' + ${cmt.image}}" class="rounded border border-secondary" style="max-height: 100px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+
+				<div class="row mt-5 g-4 text-center">
+					<div class="col-md-4">
+						<div class="p-4 rounded-3"
+							style="background: rgba(102, 252, 241, 0.05); border: 1px solid var(--border-color);">
+							<i class="bi bi-shield-check fs-1 text-main mb-3"></i>
+							<h5 class="text-info fw-bold">Chính Hãng 100%</h5>
+							<p class="small text-light mb-0">Hoàn tiền 200% nếu phát hiện
+								hàng giả.</p>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="p-4 rounded-3"
+							style="background: rgba(102, 252, 241, 0.05); border: 1px solid var(--border-color);">
+							<i class="bi bi-truck fs-1 text-main mb-3"></i>
+							<h5 class="text-info fw-bold">Giao Hàng Siêu Tốc</h5>
+							<p class="small text-light mb-0">Đóng gói kỹ lưỡng, giao
+								trong 24h.</p>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="p-4 rounded-3"
+							style="background: rgba(102, 252, 241, 0.05); border: 1px solid var(--border-color);">
+							<i class="bi bi-box-seam fs-1 text-main mb-3"></i>
+							<h5 class="text-info fw-bold">Bảo Hành Gãy Vỡ</h5>
+							<p class="small text-light mb-0">Hỗ trợ phụ kiện khi có sự cố
+								lắp ráp.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<footer class="py-5">
+				<div class="container-fluid px-4">
+					<div class="row g-4">
+						<div class="col-lg-4 col-md-6">
+							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
+							<p class="small" style="color: #aaa;">Hệ thống phân phối mô
+								hình chính hãng hàng đầu Việt Nam. Đam mê của bạn là sứ mệnh của
+								chúng tôi.</p>
+							<div class="d-flex gap-3 mt-3">
+								<a href="#" class="text-light fs-5"><i
+									class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-instagram"></i></a>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
+								<li><a href="#" class="text-decoration-none">Hệ thống
+										cửa hàng</a></li>
+								<li><a href="#" class="text-decoration-none">Tuyển dụng</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Chính sách</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Chính sách
+										đổi trả</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách
+										bảo hành</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách
+										bảo mật</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-4 col-md-12">
+							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									placeholder="Nhập email của bạn..."
+									style="background: #111; border: 1px solid #333; color: #fff;">
+								<button class="btn"
+									style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
+									ký</button>
+							</div>
+						</div>
+					</div>
+					<div
+						class="text-center mt-5 pt-3 border-top border-secondary small">
+						© 2026 Model World. All rights reserved.</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+
+	<div id="floating-cart" onclick="toggleMiniCart()">
+		<i class="bi bi-cart3"></i> <span id="floating-cart-count"
+			class="badge bg-danger position-absolute top-0 start-100 translate-middle rounded-circle">0</span>
+	</div>
+
+	<div id="mini-cart-panel" class="mini-cart-panel shadow-lg">
+		<div
+			class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+			<span class="fw-bold text-info">GIỎ HÀNG NHANH</span>
+			<button onclick="toggleMiniCart()" class="btn-close btn-close-white"></button>
+		</div>
+		<div id="mini-cart-body"
+			class="p-3 overflow-auto flex-grow-1 text-center">
+			<div class="py-5 text-muted small">Chưa có sản phẩm nào...</div>
+		</div>
+		<div class="p-3 border-top border-secondary">
+			<a href="/cart" class="btn btn-info w-100 fw-bold text-dark">XEM
+				CHI TIẾT</a>
+		</div>
+	</div>
+
+	<div class="floating-socials">
+		<a href="#" class="social-btn" style="background: #0084ff;"><i
+			class="bi bi-messenger"></i></a> <a href="#" class="social-btn"
+			style="background: #0068ff;"><i class="bi bi-chat-dots-fill"></i></a>
+		<a href="tel:0123456789" class="social-btn"
+			style="background: #ff2e63;"><i class="bi bi-telephone-fill"></i></a>
+	</div>
+
+>>>>>>> Stashed changes
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>

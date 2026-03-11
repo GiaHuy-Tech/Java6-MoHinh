@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Long> {
 
 	// Tìm voucher chi tiết của account dựa vào mã voucher, đảm bảo chưa sử dụng
+<<<<<<< Updated upstream
 	@Query("SELECT vd FROM VoucherDetail vd " + "JOIN FETCH vd.voucher v " + "WHERE vd.account.id = :accountId "
 			+ "AND v.code = :code " + "AND vd.isUsed = false " + "AND v.active = true")
 	Optional<VoucherDetail> findValidVoucherForAccount(@Param("accountId") Integer accountId,
@@ -28,4 +29,23 @@ public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Lo
 			AND v.expiredAt > :now
 			""")
 	List<VoucherDetail> findAvailableVouchers(@Param("accountId") Integer accountId, @Param("now") LocalDateTime now);
+=======
+	// Lấy các voucher khả dụng của user
+	@Query("""
+			    SELECT vd FROM VoucherDetail vd
+			    JOIN FETCH vd.voucher v
+			    WHERE vd.account.id = :accountId
+			    AND vd.isUsed = false
+			    AND v.active = true
+			    AND v.expiredAt > :now
+			""")
+	List<VoucherDetail> findAvailableVouchers(@Param("accountId") Integer accountId, @Param("now") LocalDateTime now);
+
+	// Lấy toàn bộ voucher của user
+	List<VoucherDetail> findByAccountId(Integer accountId);
+
+	// Lấy voucher chưa dùng
+	List<VoucherDetail> findByAccountIdAndIsUsedFalse(Integer accountId);
+
+>>>>>>> Stashed changes
 }
