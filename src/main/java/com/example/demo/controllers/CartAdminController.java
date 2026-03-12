@@ -17,13 +17,13 @@ public class CartAdminController {
 
     @GetMapping
     public String stats(Model model) {
-        // Lấy danh sách thống kê sản phẩm trong giỏ hàng
+
         model.addAttribute("cartStats", cartDetailRepo.getTopProductsInCarts());
-        
-        // Tính tổng số lượng item đang nằm trong các giỏ hàng (để hiển thị con số tổng quan)
+
         long totalItems = cartDetailRepo.findAll().stream()
-                            .mapToInt(c -> c.getQuantity())
-                            .sum();
+                .mapToInt(c -> c.getQuantity())
+                .sum();
+
         model.addAttribute("totalItemsInCarts", totalItems);
 
         return "admin/cart-list";
