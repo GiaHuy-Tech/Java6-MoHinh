@@ -37,6 +37,7 @@ public class Account {
     // true = admin	
     private Boolean role = false;
 
+    @Column(name = "total_spending", precision = 18, scale = 2)
     private BigDecimal totalSpending = BigDecimal.ZERO;
 
     @ManyToOne
