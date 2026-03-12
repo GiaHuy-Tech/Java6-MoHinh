@@ -27,80 +27,82 @@ public class ProductManaController {
     @Autowired
     private CategoryRepository categoryRepo;
 
-    public static String UPLOAD_DIRECTORY = System.getProperty("user.dir") + "/uploads/products";
+    // Lưu ảnh vào ./uploads/products
+    public static final String UPLOAD_DIRECTORY =
+            System.getProperty("user.dir") + "/uploads/products";
 
-    // ================= LIST =================
     @GetMapping
     public String list(Model model) {
+
         model.addAttribute("list", productRepo.findAll());
         model.addAttribute("product", new Products());
         model.addAttribute("categories", categoryRepo.findAll());
+
         return "admin/productMana";
     }
 
-    // ================= ADD (ĐÃ CHỈNH SỬA) =================
     @PostMapping("/add")
     public String add(
-            @ModelAttribute("product") Products product, // Đặt tên attribute để giữ dữ liệu khi lỗi
+            @ModelAttribute("product") Products product,
             @RequestParam("imageFiles") MultipartFile[] files,
             @RequestParam(defaultValue = "0") int thumbnailIndex,
-            Model model // Thêm Model để đẩy thông báo lỗi
+            Model model
     ) throws IOException {
 
-        // 1. KIỂM TRA SỐ LƯỢNG ẢNH (TỐI THIỂU 2)
-        long fileCount = Arrays.stream(files).filter(f -> !f.isEmpty()).count();
+        long fileCount = Arrays.stream(files)
+                .filter(f -> !f.isEmpty())
+                .count();
 
         if (fileCount < 2) {
-            model.addAttribute("message", "Vui lòng chọn tối thiểu 2 hình ảnh cho sản phẩm!");
-            model.addAttribute("messageType", "danger"); // Để CSS màu đỏ (nếu dùng Bootstrap)
-            
-            // Load lại dữ liệu cần thiết cho trang view
+
+            model.addAttribute("message", "Vui lòng chọn tối thiểu 2 hình ảnh!");
+            model.addAttribute("messageType", "danger");
+
             model.addAttribute("list", productRepo.findAll());
             model.addAttribute("categories", categoryRepo.findAll());
-            return "admin/productMana"; // Trả về trang cũ thay vì redirect
+
+            return "admin/productMana";
         }
 
-        // 2. LOGIC TẠO SẢN PHẨM
         product.setCreatedDate(new Date());
 
-        // Fix Quantity
         Integer qty = product.getQuantity() == null ? 0 : product.getQuantity();
         product.setQuantity(qty);
-
-        // Auto Available
         product.setAvailable(qty > 0);
 
-        // Default Weight
         if (product.getWeight() == null || product.getWeight() <= 0) {
             product.setWeight(0.5);
         }
 
-        // Set Category
-        if (product.getCategory() != null && product.getCategory().getId() != null) {
-            Category c = categoryRepo.findById(product.getCategory().getId()).orElse(null);
+        if (product.getCategory() != null &&
+                product.getCategory().getId() != null) {
+
+            Category c = categoryRepo
+                    .findById(product.getCategory().getId())
+                    .orElse(null);
+
             product.setCategory(c);
         }
 
-        // 3. LƯU ẢNH
         saveImages(product, files, thumbnailIndex);
 
-        // 4. LƯU PRODUCT (Cascade sẽ tự lưu ảnh sang bảng products_image)
         productRepo.save(product);
 
         return "redirect:/product-mana";
     }
 
-    // ================= EDIT =================
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable Integer id, Model model) {
+
         Products p = productRepo.findById(id).orElse(null);
+
         model.addAttribute("product", p);
         model.addAttribute("list", productRepo.findAll());
         model.addAttribute("categories", categoryRepo.findAll());
+
         return "admin/productMana";
     }
 
-    // ================= UPDATE =================
     @PostMapping("/update")
     public String update(
             @ModelAttribute Products product,
@@ -109,13 +111,15 @@ public class ProductManaController {
     ) throws IOException {
 
         Products old = productRepo.findById(product.getId()).orElse(null);
-        if (old == null) return "redirect:/product-mana";
 
-        // Cập nhật thông tin cơ bản
+        if (old == null) {
+            return "redirect:/product-mana";
+        }
+
         old.setName(product.getName());
         old.setPrice(product.getPrice());
         old.setDescription(product.getDescription());
-        
+
         Integer qty = product.getQuantity() == null ? 0 : product.getQuantity();
         old.setQuantity(qty);
         old.setAvailable(qty > 0);
@@ -124,63 +128,75 @@ public class ProductManaController {
             old.setWeight(product.getWeight());
         }
 
-        if (product.getCategory() != null && product.getCategory().getId() != null) {
-            Category c = categoryRepo.findById(product.getCategory().getId()).orElse(null);
+        if (product.getCategory() != null &&
+                product.getCategory().getId() != null) {
+
+            Category c = categoryRepo
+                    .findById(product.getCategory().getId())
+                    .orElse(null);
+
             old.setCategory(c);
         }
 
-        // Xử lý ảnh khi update (Nếu user có chọn ảnh mới)
-        if (imageFiles != null && imageFiles.length > 0 && !imageFiles[0].isEmpty()) {
-            
-            // Nếu muốn update là thay thế toàn bộ ảnh cũ:
-            // old.getImages().clear(); 
-            
-            // Hoặc chỉ reset thumbnail cũ
-            if (thumbnailIndex >= 0 && old.getImages() != null) {
-                old.getImages().forEach(i -> i.setThumbnail(false));
-            }
+        if (imageFiles != null && imageFiles.length > 0) {
 
-            saveImages(old, imageFiles, thumbnailIndex);
+            boolean hasFile = Arrays.stream(imageFiles)
+                    .anyMatch(f -> !f.isEmpty());
+
+            if (hasFile) {
+
+                if (thumbnailIndex >= 0 && old.getImages() != null) {
+                    old.getImages().forEach(i -> i.setThumbnail(false));
+                }
+
+                saveImages(old, imageFiles, thumbnailIndex);
+            }
         }
 
         productRepo.save(old);
+
         return "redirect:/product-mana";
     }
 
-    // ================= HANDLE IMAGE (ĐÃ SỬA) =================
-    private void saveImages(Products product,
-                            MultipartFile[] files,
-                            int thumbnailIndex) throws IOException {
+    private void saveImages(
+            Products product,
+            MultipartFile[] files,
+            int thumbnailIndex
+    ) throws IOException {
 
         Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
+
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Duyệt qua file, dùng biến đếm riêng j để xác định thumbnail chính xác
-        // vì file[i] có thể bị rỗng
         for (int i = 0; i < files.length; i++) {
-            MultipartFile f = files[i];
-            if (!f.isEmpty()) {
-                
-                String fileName = System.currentTimeMillis() + "_" + f.getOriginalFilename();
-                
-                // Copy file vào thư mục
-                try (var inputStream = f.getInputStream()) {
-                    Files.copy(inputStream, uploadPath.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
-                }
 
-                // Tạo đối tượng ProductImage
+            MultipartFile f = files[i];
+
+            if (!f.isEmpty()) {
+
+                String fileName =
+                        System.currentTimeMillis() + "_" + f.getOriginalFilename();
+
+                Path filePath = uploadPath.resolve(fileName);
+
+                Files.copy(
+                        f.getInputStream(),
+                        filePath,
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+
                 ProductImage img = new ProductImage();
-                img.setImage("/uploads/products/" + fileName); // Đường dẫn lưu trong DB
-                
-                // Logic thumbnail: Nếu index file hiện tại khớp với lựa chọn của user
+
+                // Đường dẫn hiển thị trên web
+                img.setImage("/images/products/" + fileName);
+
                 img.setThumbnail(i == thumbnailIndex);
 
-                // Thêm vào list images của Product (Dùng helper method trong Model Products)
-                product.addImage(img);
-                
-                // LƯU Ý: Đã xóa dòng product.setImage(...) vì Entity Products không có cột này
+                img.setProduct(product);
+
+                product.getImages().add(img);
             }
         }
     }

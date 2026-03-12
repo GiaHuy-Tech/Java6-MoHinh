@@ -34,7 +34,7 @@ public class Account {
     // Avatar ảnh đại diện
     private String avatar;
 
-    // true = admin
+    // true = admin	
     private Boolean role = false;
 
     private BigDecimal totalSpending = BigDecimal.ZERO;

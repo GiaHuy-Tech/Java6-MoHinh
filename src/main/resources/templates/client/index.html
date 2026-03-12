@@ -1,1662 +1,484 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trang chủ - MODEL WORLD</title>
-
 <th:block th:if="${_csrf != null}">
-	<meta name="_csrf" th:content="${_csrf.token}" />
-	<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+	<meta name="_csrf" th:content="${_csrf.token}" /><meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </th:block>
-
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-	rel="stylesheet">
-<link
-	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@500;700;800;900&display=swap"
-	rel="stylesheet">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
 <style>
-/* --- DARK THEME VARIABLES --- */
-:root {
-	--bg-body: #0b0c10;
-	--bg-card: #1f2833;
-	--text-main: #66fcf1;
-	--text-light: #c5c6c7;
-	--accent-cyan: #45a29e;
-	--accent-hover: #66fcf1;
-	--accent-red: #ff2e63;
-	--border-color: #2d3238;
-	--sidebar-width: 260px;
-	--font-main: 'Be Vietnam Pro', sans-serif;
-	--font-title: 'Montserrat', sans-serif;
-}
-
-body {
-	background-color: var(--bg-body);
-	color: var(--text-light);
-	font-family: var(--font-main);
-	overflow-x: hidden;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-	margin: 0;
-	padding: 0;
-}
-
-::-webkit-scrollbar {
-	width: 8px;
-}
-
-::-webkit-scrollbar-track {
-	background: var(--bg-body);
-}
-
-::-webkit-scrollbar-thumb {
-	background: var(--accent-cyan);
-	border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: var(--accent-hover);
-}
-
-/* --- SIDEBAR --- */
-#wrapper {
-	display: flex;
-	width: 100%;
-	transition: all 0.3s;
-	flex-grow: 1;
-}
-
-#sidebar-wrapper {
-	min-width: var(--sidebar-width);
-	max-width: var(--sidebar-width);
-	background: #050505;
-	border-right: 1px solid var(--border-color);
-	min-height: 100vh;
-	position: fixed;
-	z-index: 1000;
-	height: 100%;
-	transition: all 0.3s;
-}
-
-#page-content-wrapper {
-	width: 100%;
-	margin-left: var(--sidebar-width);
-	transition: margin 0.3s ease-out;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-}
-
-body.toggled #sidebar-wrapper {
-	margin-left: calc(-1 * var(--sidebar-width));
-}
-
-body.toggled #page-content-wrapper {
-	margin-left: 0;
-	width: 100%;
-}
-
-.sidebar-heading {
-	padding: 2rem 1.5rem;
-	font-family: var(--font-title);
-	font-size: 1.5rem;
-	font-weight: 900;
-	color: var(--text-main);
-	text-align: center;
-	text-decoration: none;
-	display: block;
-	text-shadow: 0 0 10px rgba(102, 252, 241, 0.3);
-	letter-spacing: 1px;
-}
-
-.list-group-item {
-	background: transparent;
-	color: #888;
-	border: none;
-	padding: 12px 25px;
-	font-weight: 500;
-	transition: 0.3s;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.list-group-item:hover, .list-group-item.active {
-	color: var(--text-main);
-	background: rgba(102, 252, 241, 0.05);
-	border-left: 4px solid var(--text-main);
-	padding-left: 30px;
-}
-
-/* --- TOP HEADER --- */
-.top-navbar {
-	background: rgba(31, 40, 51, 0.95);
-	backdrop-filter: blur(10px);
-	border-bottom: 1px solid var(--border-color);
-	padding: 15px 30px;
-	position: sticky;
-	top: 0;
-	z-index: 999;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-	width: 100%;
-}
-
-#menu-toggle {
-	color: var(--text-main);
-	border-color: var(--accent-cyan);
-	background: transparent;
-}
-
-#menu-toggle:hover {
-	background: var(--accent-cyan);
-	color: #000;
-}
-
-.nav-logo {
-	font-family: var(--font-title);
-	text-decoration: none;
-	font-size: 1.4rem;
-	font-weight: 900;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	letter-spacing: 1px;
-	margin-left: 15px;
-}
-
-.nav-logo i {
-	color: var(--text-main);
-	font-size: 1.6rem;
-}
-
-.nav-logo span {
-	background: linear-gradient(90deg, var(--text-main), #fff);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-}
-
-.search-box {
-	position: relative;
-	max-width: 600px;
-	width: 100%;
-	margin: 0 auto;
-	flex-grow: 1;
-}
-
-.search-box input {
-	border-radius: 50px;
-	padding: 10px 45px 10px 20px;
-	border: 1px solid var(--border-color);
-	width: 100%;
-	background: #0b0c10;
-	color: #fff;
-}
-
-.search-box input:focus {
-	outline: none;
-	border-color: var(--accent-cyan);
-	box-shadow: 0 0 0 2px rgba(102, 252, 241, 0.2);
-}
-
-.search-box button {
-	position: absolute;
-	right: 5px;
-	top: 50%;
-	transform: translateY(-50%);
-	border-radius: 50%;
-	width: 34px;
-	height: 34px;
-	border: none;
-	background: var(--accent-cyan);
-	color: #0b0c10;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.search-box button:hover {
-	background: var(--accent-hover);
-}
-
-/* --- HERO BANNER TRÀN VIỀN --- */
-#heroCarousel {
-	width: 100%;
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-}
-
-.carousel-inner {
-	width: 100%;
-}
-
-.carousel-item {
-	height: 60vh;
-	min-height: 500px;
-	position: relative;
-	width: 100%;
-}
-
-.carousel-item img {
-	object-fit: cover;
-	height: 100%;
-	width: 100%;
-	display: block;
-	filter: brightness(0.55);
-}
-
-.carousel-caption-custom {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background: rgba(11, 12, 16, 0.65);
-	backdrop-filter: blur(8px);
-	padding: 40px 50px;
-	border-radius: 15px;
-	border-top: 3px solid var(--accent-cyan);
-	border-bottom: 3px solid var(--accent-red);
-	text-align: center;
-	max-width: 750px;
-	width: 90%;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-}
-
-.carousel-caption-custom h2 {
-	font-family: var(--font-title);
-	color: var(--text-main);
-	font-size: 2.5rem;
-	font-weight: 900;
-	margin-bottom: 15px;
-	text-shadow: 0 2px 10px rgba(102, 252, 241, 0.5);
-	text-transform: uppercase;
-	letter-spacing: 2px;
-}
-
-.carousel-caption-custom p {
-	font-size: 1.1rem;
-	color: #ddd;
-	margin-bottom: 20px;
-	line-height: 1.6;
-}
-
-/* --- BANNER VOUCHER --- */
-.voucher-banner {
-	background: linear-gradient(135deg, #1f2833 0%, #0b0c10 100%);
-	border: 1px solid var(--accent-red);
-	border-radius: 10px;
-	padding: 20px 30px;
-	margin: 20px 0;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	box-shadow: 0 0 20px rgba(255, 46, 99, 0.1);
-	position: relative;
-	overflow: hidden;
-	text-decoration: none;
-	transition: 0.3s;
-	width: 100%;
-}
-
-.voucher-banner:hover {
-	transform: translateY(-3px);
-	box-shadow: 0 0 30px rgba(255, 46, 99, 0.3);
-	border-color: var(--accent-hover);
-}
-
-.voucher-banner::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: -100%;
-	width: 50%;
-	height: 100%;
-	background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1),
-		transparent);
-	transform: skewX(-20deg);
-	animation: shine 3s infinite;
-}
-
-@
-keyframes shine { 100% {
-	left: 200%;
-}
-
-}
-.voucher-content h4 {
-	color: var(--accent-red);
-	font-family: var(--font-title);
-	margin: 0;
-	font-weight: 900;
-	text-transform: uppercase;
-}
-
-.voucher-content p {
-	color: var(--text-light);
-	margin: 5px 0 0;
-	font-size: 0.95rem;
-}
-
-.voucher-btn {
-	background: var(--accent-red);
-	color: #fff;
-	padding: 10px 25px;
-	border-radius: 5px;
-	font-weight: bold;
-	font-family: var(--font-title);
-	border: none;
-	transition: 0.3s;
-	position: relative;
-	z-index: 2;
-	white-space: nowrap;
-}
-
-.voucher-banner:hover .voucher-btn {
-	background: var(--accent-hover);
-	color: #000;
-}
-
-/* --- QUICK CATEGORY BAR --- */
-.category-wrapper {
-	margin-top: 30px;
-	margin-bottom: 40px;
-}
-
-.title-line {
-	height: 2px;
-	background: linear-gradient(90deg, var(--accent-cyan) 0%, transparent
-		100%);
-	opacity: 0.6;
-}
-
-.quick-cat-bar {
-	background: rgba(31, 40, 51, 0.4);
-	border: 1px solid rgba(102, 252, 241, 0.15);
-	backdrop-filter: blur(5px);
-	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5), inset 0 0 15px
-		rgba(102, 252, 241, 0.05);
-}
-
-.deco-corner {
-	position: absolute;
-	width: 25px;
-	height: 25px;
-	border: 2px solid var(--text-main);
-	box-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
-}
-
-.deco-corner.top-left {
-	top: -2px;
-	left: -2px;
-	border-right: none;
-	border-bottom: none;
-}
-
-.deco-corner.top-right {
-	top: -2px;
-	right: -2px;
-	border-left: none;
-	border-bottom: none;
-}
-
-.deco-corner.bottom-left {
-	bottom: -2px;
-	left: -2px;
-	border-right: none;
-	border-top: none;
-}
-
-.deco-corner.bottom-right {
-	bottom: -2px;
-	right: -2px;
-	border-left: none;
-	border-top: none;
-}
-
-.cat-item {
-	display: inline-flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	width: 120px;
-	cursor: pointer;
-	transition: 0.3s;
-	text-decoration: none;
-	color: var(--text-light);
-}
-
-.cat-item:hover {
-	transform: translateY(-8px);
-	color: var(--text-main);
-}
-
-.cat-icon-circle {
-	width: 75px;
-	height: 75px;
-	background: #0b0c10;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin-bottom: 12px;
-	transition: 0.3s;
-	border: 2px solid var(--border-color);
-	overflow: hidden;
-	padding: 10px;
-}
-
-.cat-icon-circle img {
-	width: 100%;
-	height: 100%;
-	object-fit: contain;
-	filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
-}
-
-.cat-item:hover .cat-icon-circle {
-	border-color: var(--accent-cyan);
-	box-shadow: 0 0 20px rgba(102, 252, 241, 0.4);
-	background: rgba(102, 252, 241, 0.1);
-}
-
-.cat-name {
-	font-size: 0.9rem;
-	font-weight: 700;
-	text-align: center;
-	text-shadow: 2px 3px 6px rgba(0, 0, 0, 0.9);
-	transition: 0.3s;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
-	line-height: 1.3;
-}
-
-.cat-item:hover .cat-name {
-	text-shadow: 0 0 12px var(--accent-cyan);
-}
-
-/* --- PRODUCT CARD --- */
-.section-title {
-	font-family: var(--font-title);
-	font-weight: 800;
-	color: var(--text-main);
-	border-left: 5px solid var(--accent-red);
-	padding-left: 15px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-}
-
-.product-card {
-	background: var(--bg-card);
-	border: 1px solid var(--border-color);
-	border-radius: 8px;
-	transition: all 0.3s ease;
-	position: relative;
-	overflow: hidden;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-}
-
-.product-card:hover {
-	box-shadow: 0 0 20px rgba(102, 252, 241, 0.15);
-	transform: translateY(-5px);
-	border-color: var(--accent-cyan);
-}
-
-.wishlist-icon {
-	position: absolute;
-	top: 10px;
-	left: 10px;
-	width: 36px;
-	height: 36px;
-	background: rgba(0, 0, 0, 0.6);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	transition: 0.3s;
-	z-index: 20;
-	border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.wishlist-icon i {
-	color: white;
-	font-size: 16px;
-	transition: 0.3s;
-}
-
-.wishlist-icon.active i {
-	color: var(--accent-red);
-}
-
-.wishlist-icon:hover {
-	transform: scale(1.1);
-	background: rgba(0, 0, 0, 0.8);
-}
-
-.product-img-wrap {
-	position: relative;
-	padding-top: 100%;
-	overflow: hidden;
-	background: #fff;
-	border-bottom: 1px solid var(--border-color);
-}
-
-.product-img-wrap img {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	max-width: 90%;
-	max-height: 90%;
-	transition: 0.4s;
-	object-fit: contain;
-}
-
-.product-card:hover .product-img-wrap img {
-	transform: translate(-50%, -50%) scale(1.08);
-}
-
-.product-details {
-	padding: 15px;
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-}
-
-.product-brand {
-	font-size: 0.75rem;
-	color: var(--accent-cyan);
-	text-transform: uppercase;
-	font-weight: 700;
-	margin-bottom: 5px;
-}
-
-.product-name {
-	font-size: 0.95rem;
-	font-weight: 600;
-	line-height: 1.4;
-	height: 40px;
-	overflow: hidden;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	margin-bottom: auto;
-}
-
-.product-name a {
-	color: var(--text-light);
-	text-decoration: none;
-	transition: 0.2s;
-}
-
-.product-name a:hover {
-	color: var(--text-main);
-}
-
-.price-box {
-	margin: 10px 0;
-	display: flex;
-	align-items: baseline;
-	gap: 8px;
-	flex-wrap: wrap;
-}
-
-.product-price {
-	color: var(--accent-red);
-	font-size: 1.25rem;
-	font-weight: 800;
-	text-shadow: 0 0 5px rgba(255, 46, 99, 0.3);
-}
-
-.product-old-price {
-	color: #777;
-	font-size: 0.9rem;
-	text-decoration: line-through;
-}
-
-.btn-add-cart {
-	width: 100%;
-	border-radius: 4px;
-	font-weight: 600;
-	font-size: 0.9rem;
-	background: rgba(69, 162, 158, 0.1);
-	color: var(--accent-cyan);
-	border: 1px solid var(--accent-cyan);
-	padding: 10px;
-	transition: 0.3s;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-	margin-top: auto;
-}
-
-.btn-add-cart:hover:not(:disabled) {
-	background: var(--accent-cyan);
-	color: #0b0c10;
-	box-shadow: 0 0 10px var(--accent-cyan);
-}
-
-/* --- FOOTER & ORTHERS --- */
-footer {
-	background: #050505 !important;
-	border-top: 1px solid var(--border-color) !important;
-	color: #888;
-	margin-top: auto;
-	width: 100%;
-}
-
-footer h5, footer h6 {
-	color: var(--text-main);
-	font-family: var(--font-title);
-	letter-spacing: 1px;
-	text-transform: uppercase;
-	font-weight: 800;
-}
-
-footer a {
-	color: #888;
-	transition: 0.2s;
-}
-
-footer a:hover {
-	color: var(--accent-cyan);
-}
-
-.floating-socials {
-	position: fixed;
-	right: 20px;
-	bottom: 100px;
-	z-index: 9999;
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-}
-
-.social-btn {
-	width: 45px;
-	height: 45px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #fff;
-	font-size: 20px;
-	text-decoration: none;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-	transition: 0.3s;
-	position: relative;
-}
-
-.social-btn:hover {
-	transform: scale(1.1);
-	color: #fff;
-}
-
-.social-btn.zalo {
-	background: #0068ff;
-}
-
-.social-btn.messenger {
-	background: #0084ff;
-}
-
-.social-btn.phone {
-	background: var(--accent-red);
-	animation: pulse 2s infinite;
-}
-
-@
-keyframes pulse { 0% {
-	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
-}
-
-70
-
-
-
-
-
-
-
-
-%
-{
-box-shadow
-
-
-
-
-
-
-
-
-:
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-10px
-
-
-
-
-
-
-
-
-rgba
-
-
-
-
-
-
-(
-
-
-
-
-
-
-
-
-255
-,
-46
-,
-99
-,
-0
-
-
-
-
-
-
-
-
-)
-
-
-
-
-
-
-;
-}
-100
-
-
-
-
-
-
-
-
-%
-{
-box-shadow
-
-
-
-
-
-
-
-
-:
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-0
-
-
-
-
-
-
-
-
-rgba
-
-
-
-
-
-
-(
-
-
-
-
-
-
-
-
-255
-,
-46
-,
-99
-,
-0
-
-
-
-
-
-
-
-
-)
-
-
-
-
-
-
-;
-}
-}
-#floating-cart {
-	position: fixed;
-	bottom: 30px;
-	left: 30px;
-	width: 60px;
-	height: 60px;
-	background: var(--accent-cyan);
-	color: #000;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 1.5rem;
-	cursor: pointer;
-	z-index: 1000;
-	box-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
-	transition: 0.3s;
-}
-
-#floating-cart:hover {
-	transform: scale(1.1);
-	box-shadow: 0 0 30px var(--accent-cyan);
-}
-
-.cart-badge {
-	position: absolute;
-	top: -5px;
-	right: -5px;
-	background: var(--accent-red);
-	color: white;
-	width: 24px;
-	height: 24px;
-	border-radius: 50%;
-	font-size: 0.8rem;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: bold;
-}
-
-.mini-cart-panel {
-	position: fixed;
-	bottom: 100px;
-	left: 30px;
-	width: 340px;
-	height: 420px;
-	background: var(--bg-card);
-	border-radius: 8px;
-	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-	z-index: 1000;
-	display: none;
-	flex-direction: column;
-	border: 1px solid var(--accent-cyan);
-	color: var(--text-light);
-}
-
-.mini-cart-panel.show {
-	display: flex;
-	animation: slideUp 0.3s ease;
-}
-
-@
-keyframes slideUp {from { opacity:0;
-	transform: translateY(20px);
-}
-
-to {
-	opacity: 1;
-	transform: translateY(0);
-}
-}
+:root { --bg-body: #0b0c10; --bg-card: #1f2833; --text-main: #66fcf1; --text-light: #c5c6c7; --accent-cyan: #45a29e; --accent-hover: #66fcf1; --accent-red: #ff2e63; --border-color: #2d3238; --sidebar-width: 260px; --font-main: 'Be Vietnam Pro', sans-serif; --font-title: 'Montserrat', sans-serif; }
+body { background-color: var(--bg-body); color: var(--text-light); font-family: var(--font-main); overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; margin: 0; padding: 0; }
+::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--bg-body); } ::-webkit-scrollbar-thumb { background: var(--accent-cyan); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: var(--accent-hover); }
+#wrapper { display: flex; width: 100%; transition: all 0.3s; flex-grow: 1; }
+#sidebar-wrapper { min-width: var(--sidebar-width); max-width: var(--sidebar-width); background: #050505; border-right: 1px solid var(--border-color); min-height: 100vh; position: fixed; z-index: 1000; height: 100%; transition: all 0.3s; }
+#page-content-wrapper { width: 100%; margin-left: var(--sidebar-width); transition: margin 0.3s ease-out; display: flex; flex-direction: column; min-height: 100vh; }
+body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); } body.toggled #page-content-wrapper { margin-left: 0; width: 100%; }
+.sidebar-heading { padding: 2rem 1.5rem; font-family: var(--font-title); font-size: 1.5rem; font-weight: 900; color: var(--text-main); text-align: center; text-decoration: none; display: block; text-shadow: 0 0 10px rgba(102,252,241,0.3); letter-spacing: 1px; }
+.list-group-item { background: transparent; color: #888; border: none; padding: 12px 25px; font-weight: 500; transition: 0.3s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.list-group-item:hover, .list-group-item.active { color: var(--text-main); background: rgba(102,252,241,0.05); border-left: 4px solid var(--text-main); padding-left: 30px; }
+.top-navbar { background: rgba(31,40,51,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); padding: 15px 30px; position: sticky; top: 0; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.5); width: 100%; }
+#menu-toggle { color: var(--text-main); border-color: var(--accent-cyan); background: transparent; } #menu-toggle:hover { background: var(--accent-cyan); color: #000; }
+.nav-logo { font-family: var(--font-title); text-decoration: none; font-size: 1.4rem; font-weight: 900; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; margin-left: 15px; } .nav-logo i { color: var(--text-main); font-size: 1.6rem; } .nav-logo span { background: linear-gradient(90deg, var(--text-main), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.search-box { position: relative; max-width: 600px; width: 100%; margin: 0 auto; flex-grow: 1; } .search-box input { border-radius: 50px; padding: 10px 45px 10px 20px; border: 1px solid var(--border-color); width: 100%; background: #0b0c10; color: #fff; } .search-box input:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(102,252,241,0.2); } .search-box button { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); border-radius: 50%; width: 34px; height: 34px; border: none; background: var(--accent-cyan); color: #0b0c10; display: flex; align-items: center; justify-content: center; } .search-box button:hover { background: var(--accent-hover); }
+#heroCarousel { width: 100%; margin: 0; padding: 0; overflow: hidden; } .carousel-inner { width: 100%; } .carousel-item { height: 60vh; min-height: 500px; position: relative; width: 100%; } .carousel-item img { object-fit: cover; height: 100%; width: 100%; display: block; filter: brightness(0.55); }
+.carousel-caption-custom { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(11,12,16,0.65); backdrop-filter: blur(8px); padding: 40px 50px; border-radius: 15px; border-top: 3px solid var(--accent-cyan); border-bottom: 3px solid var(--accent-red); text-align: center; max-width: 750px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.8); } .carousel-caption-custom h2 { font-family: var(--font-title); color: var(--text-main); font-size: 2.5rem; font-weight: 900; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(102,252,241,0.5); text-transform: uppercase; letter-spacing: 2px; } .carousel-caption-custom p { font-size: 1.1rem; color: #ddd; margin-bottom: 20px; line-height: 1.6; }
+.voucher-banner { background: linear-gradient(135deg, #1f2833 0%, #0b0c10 100%); border: 1px solid var(--accent-red); border-radius: 10px; padding: 20px 30px; margin: 20px 0; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 0 20px rgba(255,46,99,0.1); position: relative; overflow: hidden; text-decoration: none; transition: 0.3s; width: 100%; } .voucher-banner:hover { transform: translateY(-3px); box-shadow: 0 0 30px rgba(255,46,99,0.3); border-color: var(--accent-hover); } .voucher-banner::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent); transform: skewX(-20deg); animation: shine 3s infinite; } @keyframes shine { 100% { left: 200%; } }
+.voucher-content h4 { color: var(--accent-red); font-family: var(--font-title); margin: 0; font-weight: 900; text-transform: uppercase; } .voucher-content p { color: var(--text-light); margin: 5px 0 0; font-size: 0.95rem; } .voucher-btn { background: var(--accent-red); color: #fff; padding: 10px 25px; border-radius: 5px; font-weight: bold; font-family: var(--font-title); border: none; transition: 0.3s; position: relative; z-index: 2; white-space: nowrap; } .voucher-banner:hover .voucher-btn { background: var(--accent-hover); color: #000; }
+.category-wrapper { margin-top: 30px; margin-bottom: 40px; } .title-line { height: 2px; background: linear-gradient(90deg, var(--accent-cyan) 0%, transparent 100%); opacity: 0.6; }
+.quick-cat-bar { background: rgba(31,40,51,0.4); border: 1px solid rgba(102,252,241,0.15); backdrop-filter: blur(5px); box-shadow: 0 5px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(102,252,241,0.05); }
+.deco-corner { position: absolute; width: 25px; height: 25px; border: 2px solid var(--text-main); box-shadow: 0 0 10px rgba(102,252,241,0.5); } .deco-corner.top-left { top: -2px; left: -2px; border-right: none; border-bottom: none; } .deco-corner.top-right { top: -2px; right: -2px; border-left: none; border-bottom: none; } .deco-corner.bottom-left { bottom: -2px; left: -2px; border-right: none; border-top: none; } .deco-corner.bottom-right { bottom: -2px; right: -2px; border-left: none; border-top: none; }
+.cat-item { display: inline-flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 120px; cursor: pointer; transition: 0.3s; text-decoration: none; color: var(--text-light); } .cat-item:hover { transform: translateY(-8px); color: var(--text-main); }
+.cat-icon-circle { width: 75px; height: 75px; background: #0b0c10; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; transition: 0.3s; border: 2px solid var(--border-color); overflow: hidden; padding: 10px; } .cat-icon-circle img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); } .cat-item:hover .cat-icon-circle { border-color: var(--accent-cyan); box-shadow: 0 0 20px rgba(102,252,241,0.4); background: rgba(102,252,241,0.1); }
+.cat-name { font-size: 0.9rem; font-weight: 700; text-align: center; text-shadow: 2px 3px 6px rgba(0,0,0,0.9); transition: 0.3s; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; } .cat-item:hover .cat-name { text-shadow: 0 0 12px var(--accent-cyan); }
+.section-title { font-family: var(--font-title); font-weight: 800; color: var(--text-main); border-left: 5px solid var(--accent-red); padding-left: 15px; text-transform: uppercase; letter-spacing: 1px; }
+.product-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; transition: all 0.3s ease; position: relative; overflow: hidden; height: 100%; display: flex; flex-direction: column; } .product-card:hover { box-shadow: 0 0 20px rgba(102,252,241,0.15); transform: translateY(-5px); border-color: var(--accent-cyan); }
+.wishlist-icon { position: absolute; top: 10px; left: 10px; width: 36px; height: 36px; background: rgba(0,0,0,0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; z-index: 20; border: 1px solid rgba(255,255,255,0.2); } .wishlist-icon i { color: white; font-size: 16px; transition: 0.3s; } .wishlist-icon.active i { color: var(--accent-red); } .wishlist-icon:hover { transform: scale(1.1); background: rgba(0,0,0,0.8); }
+.product-img-wrap { position: relative; padding-top: 100%; overflow: hidden; background: #fff; border-bottom: 1px solid var(--border-color); } .product-img-wrap img { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 90%; max-height: 90%; transition: 0.4s; object-fit: contain; } .product-card:hover .product-img-wrap img { transform: translate(-50%, -50%) scale(1.08); }
+.product-details { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; } .product-brand { font-size: 0.75rem; color: var(--accent-cyan); text-transform: uppercase; font-weight: 700; margin-bottom: 5px; } .product-name { font-size: 0.95rem; font-weight: 600; line-height: 1.4; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; margin-bottom: auto; } .product-name a { color: var(--text-light); text-decoration: none; transition: 0.2s; } .product-name a:hover { color: var(--text-main); }
+.price-box { margin: 10px 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; } .product-price { color: var(--accent-red); font-size: 1.25rem; font-weight: 800; text-shadow: 0 0 5px rgba(255,46,99,0.3); } .product-old-price { color: #777; font-size: 0.9rem; text-decoration: line-through; }
+.btn-add-cart { width: 100%; border-radius: 4px; font-weight: 600; font-size: 0.9rem; background: rgba(69,162,158,0.1); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 0.5px; margin-top: auto; } .btn-add-cart:hover:not(:disabled) { background: var(--accent-cyan); color: #0b0c10; box-shadow: 0 0 10px var(--accent-cyan); }
+footer { background: #050505 !important; border-top: 1px solid var(--border-color) !important; color: #888; margin-top: auto; width: 100%; } footer h5, footer h6 { color: var(--text-main); font-family: var(--font-title); letter-spacing: 1px; text-transform: uppercase; font-weight: 800; } footer a { color: #888; transition: 0.2s; } footer a:hover { color: var(--accent-cyan); }
+.floating-socials { position: fixed; right: 20px; bottom: 100px; z-index: 9999; display: flex; flex-direction: column; gap: 15px; } .social-btn { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: 0.3s; position: relative; } .social-btn:hover { transform: scale(1.1); color: #fff; } .social-btn.zalo { background: #0068ff; } .social-btn.messenger { background: #0084ff; } .social-btn.phone { background: var(--accent-red); animation: pulse 2s infinite; } @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,46,99,0.7); } 70% { box-shadow: 0 0 0 10px rgba(255,46,99,0); } 100% { box-shadow: 0 0 0 0 rgba(255,46,99,0); } }
+#floating-cart { position: fixed; bottom: 30px; left: 30px; width: 60px; height: 60px; background: var(--accent-cyan); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; z-index: 1000; box-shadow: 0 0 20px rgba(102,252,241,0.5); transition: 0.3s; } #floating-cart:hover { transform: scale(1.1); box-shadow: 0 0 30px var(--accent-cyan); } .cart-badge { position: absolute; top: -5px; right: -5px; background: var(--accent-red); color: white; width: 24px; height: 24px; border-radius: 50%; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.mini-cart-panel { position: fixed; bottom: 100px; left: 30px; width: 340px; height: 420px; background: var(--bg-card); border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 1000; display: none; flex-direction: column; border: 1px solid var(--accent-cyan); color: var(--text-light); } .mini-cart-panel.show { display: flex; animation: slideUp 0.3s ease; } @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
-
 <body>
-
-	<div id="wrapper">
-		<div id="sidebar-wrapper">
-			<a href="/" class="sidebar-heading">MODEL WORLD</a>
-			<div class="list-group list-group-flush px-2 mt-3">
-				<a href="/" class="list-group-item active"><i
-					class="bi bi-grid-fill me-2"></i> Trang chủ</a> <a href="/products"
-					class="list-group-item"><i class="bi bi-collection-play me-2"></i>
-					Sản phẩm</a> <a href="/wishlist" class="list-group-item"><i
-					class="bi bi-heart me-2"></i> Yêu thích</a> <a href="/cart"
-					class="list-group-item"><i class="bi bi-cart3 me-2"></i> Giỏ
-					hàng</a> <a href="/orders" class="list-group-item"><i
-					class="bi bi-receipt me-2"></i> Đơn hàng</a>
-				<hr class="border-secondary mx-3">
-				<a href="/account" class="list-group-item"><i
-					class="bi bi-person-gear me-2"></i> Tài khoản</a>
-			</div>
-		</div>
-
-		<div id="page-content-wrapper">
-
-			<nav
-				class="top-navbar d-flex justify-content-between align-items-center">
-				<div class="d-flex align-items-center gap-2 w-100 me-3">
-					<button class="btn btn-outline-secondary border-0" id="menu-toggle">
-						<i class="bi bi-list fs-4"></i>
-					</button>
-
-					<a href="/" class="nav-logo d-none d-sm-flex"> <i
-						class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span>
-					</a>
-
-					<div class="search-box d-none d-md-block ms-md-4" id="searchBox">
-						<input type="text" id="liveSearchInput"
-							placeholder="Tìm kiếm Gunpla, Figure, Tool...">
-						<button>
-							<i class="bi bi-search"></i>
-						</button>
-					</div>
-				</div>
-
-				<div class="d-flex align-items-center gap-3">
-					<th:block th:if="${user == null}">
-						<a href="/login" class="text-decoration-none fw-bold text-nowrap"
-							style="color: var(--text-main);">Đăng nhập</a>
-						<a href="/register"
-							class="btn btn-sm rounded-pill px-3 text-nowrap"
-							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
-							ký</a>
-					</th:block>
-					<th:block th:if="${user != null}">
-						<div class="dropdown">
-							<a href="#"
-								class="d-flex align-items-center text-decoration-none dropdown-toggle"
-								data-bs-toggle="dropdown" style="color: var(--text-light);">
-								<img
-								th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-								class="rounded-circle me-2 border border-secondary" width="35"
-								height="35" style="object-fit: cover;"> <span
-								class="d-none d-sm-block fw-bold small"
-								th:text="${user.fullName ?: user.username}">User</span>
-							</a>
-							<ul
-								class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
-								<li><a class="dropdown-item" href="/profile"><i
-										class="bi bi-person me-2"></i>Hồ sơ</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item text-danger" href="/logout"><i
-										class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
-							</ul>
-						</div>
-					</th:block>
-				</div>
-			</nav>
-
-			<div id="heroCarousel" class="carousel slide carousel-fade"
-				data-bs-ride="carousel">
-				<div class="carousel-indicators">
-					<th:block th:each="cat, iterStat : ${featuredCategories}">
-						<button type="button" data-bs-target="#heroCarousel"
-							th:data-bs-slide-to="${iterStat.index}"
-							th:class="${iterStat.index == 0} ? 'active' : ''"></button>
-					</th:block>
-				</div>
-
-				<div class="carousel-inner">
-					<th:block th:each="cat, iterStat : ${featuredCategories}">
-						<div class="carousel-item"
-							th:classappend="${iterStat.index == 0} ? ' active' : ''">
-							<img
-								th:src="${cat.image != null ? (cat.image.startsWith('/') or cat.image.startsWith('http') ? cat.image : '/uploads/' + cat.image) : 'https://via.placeholder.com/1920x800/1f2833/66fcf1?text=' + cat.name}"
-								onerror="this.src='https://via.placeholder.com/1920x800/1f2833/66fcf1?text=MODEL+WORLD'"
-								th:alt="${cat.name}">
-							<div class="carousel-caption-custom">
-								<h2 th:text="${cat.name}">Tên danh mục</h2>
-								<p>
-									Khám phá ngay bộ sưu tập <strong th:text="${cat.name}"
-										style="color: var(--accent-hover);"></strong> mới nhất với
-									hàng ngàn ưu đãi vô cùng hấp dẫn!
-								</p>
-								<a th:href="@{'/category/' + ${cat.id}}"
-									class="btn btn-outline-info rounded-pill px-4 fw-bold mt-2">XEM
-									NGAY</a>
-							</div>
-						</div>
-					</th:block>
-
-					<div th:if="${#lists.isEmpty(featuredCategories)}"
-						class="carousel-item active">
-						<img
-							src="https://via.placeholder.com/1920x800/1f2833/66fcf1?text=CHÀO+MỪNG+ĐẾN+VỚI+MODEL+WORLD"
-							alt="Default Banner">
-						<div class="carousel-caption-custom">
-							<h2>MODEL WORLD</h2>
-							<p>Thế giới mô hình chính hãng dành cho bạn. Hãy khám phá
-								ngay các sản phẩm mới nhất!</p>
-							<a href="/products"
-								class="btn btn-outline-info rounded-pill px-4 fw-bold mt-2">XEM
-								NGAY</a>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="container-fluid px-4 pb-5 flex-grow-1 mt-4">
-
-				<a href="/vouchers" class="voucher-banner">
-					<div class="voucher-content">
-						<h4>
-							<i class="bi bi-ticket-perforated-fill me-2"></i>KHO VOUCHER
-							KHỦNG
-						</h4>
-						<p>Săn mã giảm giá lên đến 50% & Freeship toàn quốc mỗi ngày.</p>
-					</div>
-					<button class="voucher-btn">LƯU MÃ NGAY</button>
-				</a>
-
-				<div class="category-wrapper">
-					<div class="d-flex align-items-center mb-4">
-						<h4 class="section-title m-0">DANH MỤC NỔI BẬT</h4>
-						<div class="title-line flex-grow-1 ms-3"></div>
-					</div>
-
-					<div class="quick-cat-bar p-4 rounded-3 position-relative">
-						<div class="deco-corner top-left"></div>
-						<div class="deco-corner top-right"></div>
-						<div class="deco-corner bottom-left"></div>
-						<div class="deco-corner bottom-right"></div>
-
-						<div
-							class="d-flex justify-content-center align-items-start flex-wrap gap-4">
-
-							<th:block th:each="cat : ${featuredCategories}">
-								<a th:href="@{'/category/' + ${cat.id}}" class="cat-item">
-									<div class="cat-icon-circle">
-										<img
-											th:src="${cat.image != null ? (cat.image.startsWith('/') or cat.image.startsWith('http') ? cat.image : '/uploads/' + cat.image) : ''}"
-											onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'"
-											th:alt="${cat.name}">
-									</div> <span class="cat-name" th:text="${cat.name}"
-									th:title="${cat.name}">Tên DM</span>
-								</a>
-							</th:block>
-
-							<div th:if="${#lists.isEmpty(featuredCategories)}"
-								class="text-muted w-100 text-center">
-								<i class="bi bi-inbox fs-4 d-block mb-2"></i> Chưa có danh mục
-								nào!
-							</div>
-
-						</div>
-					</div>
-				</div>
-
-				<div
-					class="d-flex justify-content-between align-items-center mb-4 mt-5">
-					<h4 class="section-title m-0">SẢN PHẨM MỚI NHẤT</h4>
-					<a href="/products" class="text-decoration-none fw-bold small"
-						style="color: var(--text-main); transition: 0.3s;">Xem tất cả
-						<i class="bi bi-chevron-right"></i>
-					</a>
-				</div>
-
-				<div class="row g-4">
-					<th:block th:each="p : ${latestProducts}">
-						<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
-							<div class="product-card">
-								<div class="wishlist-icon" th:attr="data-id=${p.id}"
-									onclick="toggleWishlist(this)">
-									<i class="bi bi-heart"></i>
-								</div>
-
-								<div class="product-img-wrap">
-									<a th:href="@{'/product-detail/' + ${p.id}}"> <img
-										th:src="${p.mainImage != null ? (p.mainImage.startsWith('/') or p.mainImage.startsWith('http') ? p.mainImage : '/uploads/' + p.mainImage) : ''}"
-										onerror="this.src='https://via.placeholder.com/300?text=No+Image'"
-										alt="Product">
-									</a>
-								</div>
-
-								<div class="product-details">
-									<div class="product-brand"
-										th:text="${p.category?.name ?: 'BANDAI'}">BRAND</div>
-									<div class="product-name">
-										<a th:href="@{'/product-detail/' + ${p.id}}"
-											th:text="${p.name}">Tên SP</a>
-									</div>
-									<div class="price-box">
-										<span class="product-price"
-											th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-									</div>
-									<button class="btn-add-cart mt-auto" th:data-id="${p.id}"
-										th:data-name="${p.name}" th:data-price="${p.price}"
-										th:data-image="${p.mainImage}"
-										onclick="animateAddToCart(event, this)">
-										<i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ
-									</button>
-								</div>
-							</div>
-						</div>
-					</th:block>
-
-					<div th:if="${#lists.isEmpty(latestProducts)}"
-						class="col-12 text-center py-5 text-muted">
-						<i class="bi bi-box-seam fs-1 d-block mb-3"></i>
-						<p>Hiện chưa có sản phẩm nào. Vui lòng quay lại sau!</p>
-					</div>
-				</div>
-			</div>
-
-			<footer class="py-5">
-				<div class="container-fluid px-4">
-					<div class="row g-4">
-						<div class="col-lg-4 col-md-6">
-							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
-							<p class="small" style="color: #aaa;">Hệ thống phân phối mô
-								hình chính hãng hàng đầu Việt Nam. Đam mê của bạn là sứ mệnh của
-								chúng tôi.</p>
-							<div class="d-flex gap-3 mt-3">
-								<a href="#" class="text-light fs-5"><i
-									class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i
-									class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i
-									class="bi bi-instagram"></i></a>
-							</div>
-						</div>
-						<div class="col-lg-2 col-md-3 col-6">
-							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
-							<ul class="list-unstyled small lh-lg">
-								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
-								<li><a href="#" class="text-decoration-none">Hệ thống
-										cửa hàng</a></li>
-								<li><a href="#" class="text-decoration-none">Tuyển dụng</a></li>
-							</ul>
-						</div>
-						<div class="col-lg-2 col-md-3 col-6">
-							<h6 class="fw-bold mb-3">Chính sách</h6>
-							<ul class="list-unstyled small lh-lg">
-								<li><a href="#" class="text-decoration-none">Chính sách
-										đổi trả</a></li>
-								<li><a href="#" class="text-decoration-none">Chính sách
-										bảo hành</a></li>
-								<li><a href="#" class="text-decoration-none">Chính sách
-										bảo mật</a></li>
-							</ul>
-						</div>
-						<div class="col-lg-4 col-md-12">
-							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
-							<div class="input-group">
-								<input type="text" class="form-control"
-									placeholder="Nhập email của bạn..."
-									style="background: #111; border: 1px solid #333; color: #fff;">
-								<button class="btn"
-									style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
-									ký</button>
-							</div>
-						</div>
-					</div>
-					<div
-						class="text-center mt-5 pt-3 border-top border-secondary small">
-						© 2026 Model World. All rights reserved.</div>
-				</div>
-			</footer>
+<div id="wrapper">
+	<div id="sidebar-wrapper">
+		<a href="/" class="sidebar-heading">MODEL WORLD</a>
+		<div class="list-group list-group-flush px-2 mt-3">
+			<a href="/" class="list-group-item active"><i class="bi bi-grid-fill me-2"></i> Trang chủ</a> <a href="/products" class="list-group-item"><i class="bi bi-collection-play me-2"></i> Sản phẩm</a> <a href="/wishlist" class="list-group-item"><i class="bi bi-heart me-2"></i> Yêu thích</a> <a href="/cart" class="list-group-item"><i class="bi bi-cart3 me-2"></i> Giỏ hàng</a> <a href="/orders" class="list-group-item"><i class="bi bi-receipt me-2"></i> Đơn hàng</a><hr class="border-secondary mx-3"><a href="/account" class="list-group-item"><i class="bi bi-person-gear me-2"></i> Tài khoản</a>
 		</div>
 	</div>
-
-	<div class="floating-socials">
-		<a href="tel:0909123456" class="social-btn phone"><i
-			class="bi bi-telephone-fill"></i></a> <a
-			href="https://zalo.me/0909123456" class="social-btn zalo"><i
-			class="bi bi-chat-dots-fill"></i></a> <a href="https://m.me/modelworld"
-			class="social-btn messenger"><i class="bi bi-messenger"></i></a>
-	</div>
-
-	<div id="floating-cart" onclick="toggleMiniCart()">
-		<i class="bi bi-cart3"></i> <span id="floating-cart-count"
-			class="cart-badge" style="display: none;">0</span>
-	</div>
-
-	<div id="mini-cart-panel" class="mini-cart-panel">
-		<div
-			class="p-3 border-bottom d-flex justify-content-between align-items-center"
-			style="border-color: var(--border-color) !important;">
-			<span class="fw-bold"
-				style="color: var(--accent-cyan); font-family: var(--font-title);"><i
-				class="bi bi-bag me-1"></i> GIỎ HÀNG</span>
-			<button onclick="toggleMiniCart()"
-				class="btn-close btn-close-white small"></button>
-		</div>
-		<div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1">
-			<div class="text-center text-muted py-5">
-				<i class="bi bi-cart-x fs-1 mb-2 d-block"></i>Chưa có sản phẩm
+	<div id="page-content-wrapper">
+		<nav class="top-navbar d-flex justify-content-between align-items-center">
+			<div class="d-flex align-items-center gap-2 w-100 me-3">
+				<button class="btn btn-outline-secondary border-0" id="menu-toggle"><i class="bi bi-list fs-4"></i></button>
+				<a href="/" class="nav-logo d-none d-sm-flex"><i class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span></a>
+				<div class="search-box d-none d-md-block ms-md-4" id="searchBox"><input type="text" id="liveSearchInput" placeholder="Tìm kiếm Gunpla, Figure, Tool..."><button><i class="bi bi-search"></i></button></div>
+			</div>
+			<div class="d-flex align-items-center gap-3">
+				<th:block th:if="${user == null}">
+					<a href="/login" class="text-decoration-none fw-bold text-nowrap" style="color: var(--text-main);">Đăng nhập</a> <a href="/register" class="btn btn-sm rounded-pill px-3 text-nowrap" style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng ký</a>
+				</th:block>
+				<th:block th:if="${user != null}">
+					<div class="dropdown">
+						<a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" style="color: var(--text-light);"><img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle me-2 border border-secondary" width="35" height="35" style="object-fit: cover;"> <span class="d-none d-sm-block fw-bold small" th:text="${user.fullName ?: user.username}">User</span></a>
+						<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary"><li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Hồ sơ</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li></ul>
+					</div>
+				</th:block>
+			</div>
+		</nav>
+		<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+			<div class="carousel-indicators"><th:block th:each="cat, i : ${featuredCategories}"><button type="button" data-bs-target="#heroCarousel" th:data-bs-slide-to="${i.index}" th:class="${i.index == 0} ? 'active' : ''"></button></th:block></div>
+			<div class="carousel-inner">
+				<th:block th:each="cat, i : ${featuredCategories}">
+					<div class="carousel-item" th:classappend="${i.index == 0} ? ' active' : ''">
+						<img th:src="${cat.image != null ? (cat.image.startsWith('/') or cat.image.startsWith('http') ? cat.image : '/uploads/' + cat.image) : 'https://via.placeholder.com/1920x800?text=' + cat.name}" onerror="this.src='https://via.placeholder.com/1920x800?text=MODEL+WORLD'" th:alt="${cat.name}">
+						<div class="carousel-caption-custom"><h2 th:text="${cat.name}">Tên danh mục</h2><p>Khám phá ngay bộ sưu tập <strong th:text="${cat.name}" style="color: var(--accent-hover);"></strong> mới nhất với hàng ngàn ưu đãi!</p><a th:href="@{'/category/' + ${cat.id}}" class="btn btn-outline-info rounded-pill px-4 fw-bold mt-2">XEM NGAY</a></div>
+					</div>
+				</th:block>
+				<div th:if="${#lists.isEmpty(featuredCategories)}" class="carousel-item active">
+					<img src="https://via.placeholder.com/1920x800/1f2833/66fcf1?text=CHÀO+MỪNG+ĐẾN+VỚI+MODEL+WORLD" alt="Default Banner">
+					<div class="carousel-caption-custom"><h2>MODEL WORLD</h2><p>Thế giới mô hình chính hãng dành cho bạn. Khám phá ngay!</p><a href="/products" class="btn btn-outline-info rounded-pill px-4 fw-bold mt-2">XEM NGAY</a></div>
+				</div>
 			</div>
 		</div>
-		<div class="p-3 border-top"
-			style="border-color: var(--border-color) !important; background: rgba(0, 0, 0, 0.3);">
-			<div class="d-flex justify-content-between mb-2 small fw-bold">
-				<span style="color: var(--text-light);">Tổng cộng:</span> <span
-					id="mini-cart-total"
-					style="color: var(--accent-red); font-size: 1.1rem;">0₫</span>
+		<div class="container-fluid px-4 pb-5 flex-grow-1 mt-4">
+			<a href="/vouchers" class="voucher-banner">
+				<div class="voucher-content"><h4><i class="bi bi-ticket-perforated-fill me-2"></i>KHO VOUCHER KHỦNG</h4><p>Săn mã giảm giá lên đến 50% & Freeship toàn quốc mỗi ngày.</p></div><button class="voucher-btn">LƯU MÃ NGAY</button>
+			</a>
+			<div class="category-wrapper">
+				<div class="d-flex align-items-center mb-4"><h4 class="section-title m-0">DANH MỤC NỔI BẬT</h4><div class="title-line flex-grow-1 ms-3"></div></div>
+				<div class="quick-cat-bar p-4 rounded-3 position-relative"><div class="deco-corner top-left"></div><div class="deco-corner top-right"></div><div class="deco-corner bottom-left"></div><div class="deco-corner bottom-right"></div>
+					<div class="d-flex justify-content-center align-items-start flex-wrap gap-4">
+						<th:block th:each="cat : ${featuredCategories}">
+							<a th:href="@{'/category/' + ${cat.id}}" class="cat-item"><div class="cat-icon-circle"><img th:src="${cat.image != null ? (cat.image.startsWith('/') or cat.image.startsWith('http') ? cat.image : '/uploads/' + cat.image) : ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'" th:alt="${cat.name}"></div><span class="cat-name" th:text="${cat.name}">Tên DM</span></a>
+						</th:block>
+						<div th:if="${#lists.isEmpty(featuredCategories)}" class="text-muted w-100 text-center"><i class="bi bi-inbox fs-4 d-block mb-2"></i> Chưa có danh mục nào!</div>
+					</div>
+				</div>
 			</div>
-			<a href="/cart" class="btn w-100 btn-sm"
-				style="background: var(--accent-cyan); color: #000; font-weight: bold; padding: 10px; font-family: var(--font-title);">THANH
-				TOÁN NGAY</a>
+			<div class="d-flex justify-content-between align-items-center mb-4 mt-5"><h4 class="section-title m-0">SẢN PHẨM MỚI NHẤT</h4><a href="/products" class="text-decoration-none fw-bold small" style="color: var(--text-main);">Xem tất cả <i class="bi bi-chevron-right"></i></a></div>
+			<div class="row g-4">
+				<th:block th:each="p : ${latestProducts}">
+					<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
+						<div class="product-card">
+							<div class="wishlist-icon" th:attr="data-id=${p.id}" onclick="toggleWishlist(this)"><i class="bi bi-heart"></i></div>
+							<div class="product-img-wrap"><a th:href="@{'/product-detail/' + ${p.id}}"><img th:src="${p.mainImage != null ? (p.mainImage.startsWith('/') or p.mainImage.startsWith('http') ? p.mainImage : '/uploads/' + p.mainImage) : ''}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" alt="Product"></a></div>
+							<div class="product-details">
+								<div class="product-brand" th:text="${p.category?.name ?: 'BANDAI'}">BRAND</div><div class="product-name"><a th:href="@{'/product-detail/' + ${p.id}}" th:text="${p.name}">Tên SP</a></div><div class="price-box"><span class="product-price" th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span></div>
+								<button class="btn-add-cart mt-auto" th:data-id="${p.id}" onclick="animateAddToCart(event, this)"><i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ</button>
+							</div>
+						</div>
+					</div>
+				</th:block>
+				<div th:if="${#lists.isEmpty(latestProducts)}" class="col-12 text-center py-5 text-muted"><i class="bi bi-box-seam fs-1 d-block mb-3"></i><p>Hiện chưa có sản phẩm nào!</p></div>
+			</div>
 		</div>
+		<footer class="py-5"><div class="container-fluid px-4"><div class="row g-4"><div class="col-lg-4 col-md-6"><h5 class="fw-bold mb-3">MODEL WORLD</h5><p class="small" style="color: #aaa;">Hệ thống phân phối mô hình chính hãng hàng đầu Việt Nam.</p><div class="d-flex gap-3 mt-3"><a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a></div></div><div class="col-lg-2 col-md-3 col-6"><h6 class="fw-bold mb-3">Về chúng tôi</h6><ul class="list-unstyled small lh-lg"><li><a href="#" class="text-decoration-none">Giới thiệu</a></li><li><a href="#" class="text-decoration-none">Cửa hàng</a></li></ul></div><div class="col-lg-2 col-md-3 col-6"><h6 class="fw-bold mb-3">Chính sách</h6><ul class="list-unstyled small lh-lg"><li><a href="#" class="text-decoration-none">Đổi trả</a></li><li><a href="#" class="text-decoration-none">Bảo hành</a></li></ul></div><div class="col-lg-4 col-md-12"><h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6><div class="input-group"><input type="text" class="form-control" placeholder="Nhập email..." style="background: #111; border: 1px solid #333; color: #fff;"><button class="btn" style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng ký</button></div></div></div><div class="text-center mt-5 pt-3 border-top border-secondary small">© 2026 Model World. All rights reserved.</div></div></footer>
 	</div>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+<div class="floating-socials"><a href="tel:0909123456" class="social-btn phone"><i class="bi bi-telephone-fill"></i></a> <a href="https://zalo.me/0909123456" class="social-btn zalo"><i class="bi bi-chat-dots-fill"></i></a> <a href="https://m.me/modelworld" class="social-btn messenger"><i class="bi bi-messenger"></i></a></div>
+<div id="floating-cart" onclick="toggleMiniCart()"><i class="bi bi-cart3"></i> <span id="floating-cart-count" class="cart-badge" style="display: none;">0</span></div>
+<div id="mini-cart-panel" class="mini-cart-panel"><div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--border-color) !important;"><span class="fw-bold" style="color: var(--accent-cyan); font-family: var(--font-title);"><i class="bi bi-bag me-1"></i> GIỎ HÀNG</span><button onclick="toggleMiniCart()" class="btn-close btn-close-white small"></button></div><div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1"><div class="text-center text-muted py-5"><i class="bi bi-cart-x fs-1 mb-2 d-block"></i>Chưa có sản phẩm</div></div><div class="p-3 border-top" style="border-color: var(--border-color) !important; background: rgba(0,0,0,0.3);"><div class="d-flex justify-content-between mb-2 small fw-bold"><span style="color: var(--text-light);">Tổng cộng:</span> <span id="mini-cart-total" style="color: var(--accent-red); font-size: 1.1rem;">0₫</span></div><a href="/cart" class="btn w-100 btn-sm" style="background: var(--accent-cyan); color: #000; font-weight: bold; padding: 10px; font-family: var(--font-title);">THANH TOÁN NGAY</a></div></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
+document.addEventListener("DOMContentLoaded", function(){
 
-document.addEventListener("DOMContentLoaded",function(){
+let m=document.getElementById("menu-toggle");
+if(m)m.onclick=e=>{e.preventDefault();document.body.classList.toggle("toggled")};
 
-/* SIDEBAR */
-
-const menuBtn=document.getElementById("menu-toggle");
-
-if(menuBtn){
-menuBtn.onclick=function(e){
-e.preventDefault();
-document.body.classList.toggle("toggled");
-};
+window.toggleMiniCart=()=>{
+document.getElementById("mini-cart-panel").classList.toggle("show")
 }
 
-
-/* MINI CART */
-
-window.toggleMiniCart=function(){
-document.getElementById("mini-cart-panel").classList.toggle("show");
-};
-
-
-/* WISHLIST */
-
-window.toggleWishlist=function(el){
-
-el.classList.toggle("active");
-
-let icon=el.querySelector("i");
-
-if(el.classList.contains("active")){
-icon.classList.replace("bi-heart","bi-heart-fill");
-}else{
-icon.classList.replace("bi-heart-fill","bi-heart");
+window.toggleWishlist=el=>{
+el.classList.toggle("active")
+let i=el.querySelector("i")
+i.className=el.classList.contains("active")?"bi bi-heart-fill":"bi bi-heart"
 }
 
-};
+/* ===============================
+   HIỆU ỨNG THÊM VÀO GIỎ HÀNG
+================================*/
+window.animateAddToCart=(e,btn)=>{
 
+e.preventDefault()
 
-/* ADD TO CART */
+const id=btn.dataset.id
+const img=btn.closest(".product-card").querySelector("img")
+const cart=document.getElementById("floating-cart")
 
-window.animateAddToCart=function(event,button){
+const token=document.querySelector('meta[name="_csrf"]')?.content
+const head=document.querySelector('meta[name="_csrf_header"]')?.content
+const headers={'Content-Type':'application/json'}
+if(head&&token)headers[head]=token
 
-event.preventDefault();
+const old=btn.innerHTML
+btn.innerHTML='<span class="spinner-border spinner-border-sm"></span>'
+btn.disabled=true
 
-const id=button.dataset.id;
+fetch(`/cart/add/${id}`,{method:'POST',headers})
+.then(r=>r.text())
+.then(t=>{
 
-const card=button.closest(".product-card");
-const img=card.querySelector("img");
+if(t==="unauthorized"){
+window.location="/login"
+return
+}
 
-const cart=document.getElementById("floating-cart");
+if(t==="success"){
+
+/* animation bay vào cart */
 
 if(img && cart){
 
-const rect=img.getBoundingClientRect();
-const cartRect=cart.getBoundingClientRect();
+let r=img.getBoundingClientRect()
+let c=cart.getBoundingClientRect()
 
-const fly=img.cloneNode(true);
+let fly=img.cloneNode(true)
 
-fly.style.position="fixed";
-fly.style.left=rect.left+"px";
-fly.style.top=rect.top+"px";
-fly.style.width="60px";
-fly.style.height="60px";
-fly.style.objectFit="cover";
-fly.style.zIndex="9999";
-fly.style.transition="all 0.6s ease";
+fly.style.position="fixed"
+fly.style.left=r.left+"px"
+fly.style.top=r.top+"px"
+fly.style.width=img.offsetWidth+"px"
+fly.style.height=img.offsetHeight+"px"
+fly.style.zIndex="9999"
+fly.style.transition="all .7s cubic-bezier(.25,.8,.25,1)"
+fly.style.borderRadius="50%"
+fly.style.objectFit="contain"
 
-document.body.appendChild(fly);
+document.body.appendChild(fly)
 
 setTimeout(()=>{
+fly.style.left=(c.left+20)+"px"
+fly.style.top=(c.top+20)+"px"
+fly.style.width="20px"
+fly.style.height="20px"
+fly.style.opacity="0.2"
+},50)
 
-fly.style.left=cartRect.left+"px";
-fly.style.top=cartRect.top+"px";
-fly.style.width="20px";
-fly.style.height="20px";
-fly.style.opacity="0.2";
-
-},50);
-
-setTimeout(()=>fly.remove(),600);
+setTimeout(()=>{
+fly.remove()
+cart.style.transform="scale(1.2)"
+setTimeout(()=>cart.style.transform="scale(1)",200)
+},700)
 
 }
 
+/* button effect */
 
-/* CALL API */
+btn.innerHTML='<i class="bi bi-check-lg"></i> Đã thêm'
+btn.classList.replace("btn-add-cart","btn-success")
 
-fetch("/cart/add/"+id,{
-method:"POST"
+updateMiniCart()
+
+setTimeout(()=>{
+btn.innerHTML=old
+btn.classList.replace("btn-success","btn-add-cart")
+btn.disabled=false
+},1500)
+
+}else{
+
+btn.innerHTML=old
+btn.disabled=false
+
+}
+
 })
-.then(res=>res.text())
-.then(text=>{
+.catch(()=>{
+btn.innerHTML=old
+btn.disabled=false
+})
 
-if(text==="success"){
-updateMiniCart();
 }
 
-});
 
-};
+/* ===============================
+   MINI CART
+================================*/
 
-
-
-/* UPDATE MINI CART */
-
-function updateMiniCart(){
+window.updateMiniCart=()=>{
 
 fetch("/cart/api/mini-cart")
-
-.then(res=>res.json())
-
+.then(r=>r.status===401?[]:r.json())
 .then(data=>{
 
-const body=document.getElementById("mini-cart-body");
-const badge=document.getElementById("floating-cart-count");
-const totalText=document.getElementById("mini-cart-total");
+let body=document.getElementById("mini-cart-body")
+let badge=document.getElementById("floating-cart-count")
+let totalText=document.getElementById("mini-cart-total")
 
 if(!data || data.length===0){
 
-body.innerHTML=`
-<div class="text-center text-muted py-5">
+body.innerHTML=`<div class="text-center text-muted py-5">
 <i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
 Chưa có sản phẩm
-</div>
-`;
+</div>`
 
-badge.style.display="none";
-totalText.innerText="0₫";
-return;
+badge.style.display="none"
+totalText.innerText="0₫"
 
+return
 }
 
-let html="";
-let total=0;
-let count=0;
+let html=""
+let total=0
+let count=0
 
-data.forEach(item=>{
+data.forEach(i=>{
 
-let price=item.product.price;
-let qty=item.quantity;
+let price=i.product.price
+let qty=i.quantity
 
-total+=price*qty;
-count+=qty;
+total+=price*qty
+count+=qty
 
-let img=item.product.mainImage
-? "/uploads/"+item.product.mainImage
-: "https://via.placeholder.com/50";
+let img=i.product.mainImage?.startsWith("http")
+? i.product.mainImage
+: "/uploads/"+i.product.mainImage
 
 html+=`
 
 <div class="d-flex align-items-center mb-3 pb-3 border-bottom border-secondary">
 
-<img src="${img}" width="50" height="50"
-style="object-fit:cover"
-class="rounded me-2">
+<img src="${img}"
+onerror="this.src='https://via.placeholder.com/50'"
+width="50"
+height="50"
+class="rounded me-2"
+style="object-fit:cover">
 
-<div class="flex-grow-1">
+<div class="flex-grow-1 overflow-hidden">
 
-<div class="small fw-bold">${item.product.name}</div>
-
-<div class="small text-danger">
-${price.toLocaleString()}₫
+<div class="small fw-bold text-truncate" title="${i.product.name}">
+${i.product.name}
 </div>
 
-<div class="d-flex align-items-center gap-2 mt-1">
+<div class="small text-danger mb-1">
+${new Intl.NumberFormat('vi-VN').format(price)}₫
+</div>
 
-<button data-id="${item.id}" class="minus-btn"
-style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">-</button>
+<div class="d-flex align-items-center gap-2">
 
-<span>${qty}</span>
+<button class="mini-btn" data-action="minus" data-id="${i.id}"
+style="width:22px;height:22px;border:none;background:#45a29e;border-radius:4px">-</button>
+<span class="small fw-bold">${qty}</span>
 
-<button data-id="${item.id}" class="plus-btn"
-style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">+</button>
+<button class="mini-btn" data-action="plus" data-id="${i.id}"
+style="width:22px;height:22px;border:none;background:#45a29e;border-radius:4px">+</button>
 
 </div>
 
 </div>
 
-<button data-id="${item.id}" class="delete-btn"
-style="background:none;border:none;color:#ff2e63">
-<i class="bi bi-x-lg"></i>
+<button class="mini-btn ms-2"
+data-action="delete"
+data-id="${i.id}"
+style="background:none;border:none;color:#ff2e63;font-size:1.2rem">
+
+<i class="bi bi-x-circle-fill"></i>
+
 </button>
 
 </div>
 
-`;
+`
 
-});
+})
 
-body.innerHTML=html;
+body.innerHTML=html
 
-badge.innerText=count;
-badge.style.display="flex";
+badge.innerText=count
+badge.style.display="flex"
 
-totalText.innerText=total.toLocaleString()+"₫";
+totalText.innerText=new Intl.NumberFormat("vi-VN").format(total)+"₫"
 
+/* actions */
 
-/* CART BUTTON EVENTS */
+document.querySelectorAll(".mini-btn").forEach(btn=>{
 
-document.querySelectorAll(".plus-btn").forEach(btn=>{
 btn.onclick=()=>{
 
-fetch("/cart/plus/"+btn.dataset.id)
-.then(()=>updateMiniCart());
+let id=btn.dataset.id
+let action=btn.dataset.action
 
-};
-});
+fetch(`/cart/${action}/${id}`)
+.then(()=>updateMiniCart())
 
-document.querySelectorAll(".minus-btn").forEach(btn=>{
-btn.onclick=()=>{
+}
 
-fetch("/cart/minus/"+btn.dataset.id)
-.then(()=>updateMiniCart());
+})
 
-};
-});
-
-document.querySelectorAll(".delete-btn").forEach(btn=>{
-btn.onclick=()=>{
-
-fetch("/cart/delete/"+btn.dataset.id)
-.then(()=>updateMiniCart());
-
-};
-});
-
-
-});
+})
 
 }
 
 
+/* ===============================
+   LIVE SEARCH
+================================*/
 
-/* LIVE SEARCH */
+let inp=document.getElementById("liveSearchInput")
+let box=document.querySelector(".search-box")
 
-const input=document.getElementById("liveSearchInput");
-const searchBox=document.getElementById("searchBox");
+if(inp && box){
 
-if(input && searchBox){
+let rs=document.createElement("div")
 
-const results=document.createElement("div");
+rs.style.cssText=`
+position:absolute;
+top:100%;
+left:0;
+right:0;
+background:#1f2833;
+border:1px solid #45a29e;
+border-radius:8px;
+margin-top:5px;
+box-shadow:0 10px 30px rgba(0,0,0,.8);
+z-index:1001;
+display:none;
+max-height:400px;
+overflow-y:auto;
+`
 
-results.style.cssText=
-"position:absolute;top:100%;left:0;right:0;background:#1f2833;border:1px solid #45a29e;border-radius:8px;margin-top:5px;display:none;max-height:400px;overflow-y:auto;";
+box.appendChild(rs)
 
-searchBox.appendChild(results);
+let timeout
 
-let timeout;
+inp.oninput=function(){
 
-input.addEventListener("input",function(){
+clearTimeout(timeout)
 
-clearTimeout(timeout);
+let k=this.value.trim()
 
-const keyword=this.value.trim();
-
-if(keyword.length<2){
-results.style.display="none";
-return;
+if(k.length<2){
+rs.style.display="none"
+return
 }
 
 timeout=setTimeout(()=>{
 
-fetch("/cart/api/search?keyword="+encodeURIComponent(keyword))
-
-.then(res=>res.json())
-
+fetch(`/cart/api/search?keyword=${encodeURIComponent(k)}`)
+.then(r=>r.json())
 .then(data=>{
 
-if(!data.length){
+if(!data || data.length===0){
 
-results.innerHTML=
-'<div class="p-3 text-center text-muted">Không tìm thấy</div>';
+rs.innerHTML=`<div class="p-3 text-center text-muted small">
+Không tìm thấy sản phẩm nào
+</div>`
 
 }else{
 
-let html="";
+let h=""
 
 data.forEach(p=>{
 
-html+=`
+let img=p.mainImage?.startsWith("http")
+? p.mainImage
+: "/uploads/"+p.mainImage
+
+h+=`
 
 <a href="/product-detail/${p.id}"
-class="d-flex align-items-center p-2 border-bottom text-decoration-none">
+class="d-flex align-items-center p-2 border-bottom border-secondary text-decoration-none">
 
-<img src="/uploads/${p.mainImage}"
+<img src="${img}"
+onerror="this.src='https://via.placeholder.com/40'"
 width="40"
 height="40"
-class="rounded me-2">
+class="rounded me-3"
+style="object-fit:cover">
 
-<div>
+<div class="flex-grow-1 overflow-hidden">
 
-<div class="small fw-bold">${p.name}</div>
+<div class="small fw-bold text-truncate text-light">
+${p.name}
+</div>
 
 <div class="small text-danger">
-${p.price.toLocaleString()}₫
+${new Intl.NumberFormat('vi-VN').format(p.price)}₫
 </div>
 
 </div>
 
 </a>
 
-`;
+`
 
-});
+})
 
-results.innerHTML=html;
-
-}
-
-results.style.display="block";
-
-});
-
-},400);
-
-});
+rs.innerHTML=h
 
 }
 
+rs.style.display="block"
 
-/* LOAD CART */
+})
 
-updateMiniCart();
+},400)
 
-});
+}
 
+document.onclick=e=>{
+if(!box.contains(e.target))rs.style.display="none"
+}
+
+}
+
+/* load mini cart */
+
+updateMiniCart()
+
+})
 </script>
 </body>
 </html>
