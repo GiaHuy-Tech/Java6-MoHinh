@@ -1,14 +1,10 @@
 package com.example.demo.repository;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.example.demo.model.Address;
+import java.util.List;
 
-public interface AddressRepository extends JpaRepository<Address, Long> {
-
-	Optional<Address> findByAccount_IdAndIsDefaultTrue(Integer accountId);
-	List<Address> findByAccount_Id(Integer accountId);
+public interface AddressRepository extends JpaRepository<Address, Integer> {
+    List<Address> findByAccountId(Integer accountId);
+    Address findByAccountIdAndIsDefaultTrue(Integer accountId);
 }

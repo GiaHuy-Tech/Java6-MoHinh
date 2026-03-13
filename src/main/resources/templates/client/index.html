@@ -129,59 +129,37 @@ footer { background: #050505 !important; border-top: 1px solid var(--border-colo
 <div id="mini-cart-panel" class="mini-cart-panel"><div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color: var(--border-color) !important;"><span class="fw-bold" style="color: var(--accent-cyan); font-family: var(--font-title);"><i class="bi bi-bag me-1"></i> GIỎ HÀNG</span><button onclick="toggleMiniCart()" class="btn-close btn-close-white small"></button></div><div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1"><div class="text-center text-muted py-5"><i class="bi bi-cart-x fs-1 mb-2 d-block"></i>Chưa có sản phẩm</div></div><div class="p-3 border-top" style="border-color: var(--border-color) !important; background: rgba(0,0,0,0.3);"><div class="d-flex justify-content-between mb-2 small fw-bold"><span style="color: var(--text-light);">Tổng cộng:</span> <span id="mini-cart-total" style="color: var(--accent-red); font-size: 1.1rem;">0₫</span></div><a href="/cart" class="btn w-100 btn-sm" style="background: var(--accent-cyan); color: #000; font-weight: bold; padding: 10px; font-family: var(--font-title);">THANH TOÁN NGAY</a></div></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function(){
 
-/* ===============================
-   SIDEBAR TOGGLE
-================================*/
-
 let m=document.getElementById("menu-toggle");
-if(m)m.onclick=e=>{
-e.preventDefault();
-document.body.classList.toggle("toggled")
-}
-
-/* ===============================
-   MINI CART TOGGLE
-================================*/
+if(m)m.onclick=e=>{e.preventDefault();document.body.classList.toggle("toggled")};
 
 window.toggleMiniCart=()=>{
 document.getElementById("mini-cart-panel").classList.toggle("show")
 }
 
-/* ===============================
-   WISHLIST
-================================*/
-
 window.toggleWishlist=el=>{
 el.classList.toggle("active")
 let i=el.querySelector("i")
-i.className=el.classList.contains("active")
-? "bi bi-heart-fill"
-: "bi bi-heart"
+i.className=el.classList.contains("active")?"bi bi-heart-fill":"bi bi-heart"
 }
 
 /* ===============================
-   ADD TO CART ANIMATION
+   HIỆU ỨNG THÊM VÀO GIỎ HÀNG
 ================================*/
-
 window.animateAddToCart=(e,btn)=>{
 
 e.preventDefault()
 
 const id=btn.dataset.id
-const img=btn.closest(".product-card")
-.querySelector(".product-img-wrap img")
-
+const img=btn.closest(".product-card").querySelector("img")
 const cart=document.getElementById("floating-cart")
 
 const token=document.querySelector('meta[name="_csrf"]')?.content
 const head=document.querySelector('meta[name="_csrf_header"]')?.content
-
 const headers={'Content-Type':'application/json'}
-if(head && token) headers[head]=token
+if(head&&token)headers[head]=token
 
 const old=btn.innerHTML
 btn.innerHTML='<span class="spinner-border spinner-border-sm"></span>'
@@ -198,67 +176,50 @@ return
 
 if(t==="success"){
 
-/* ===============================
-   IMAGE FLY TO CART
-================================*/
+/* animation bay vào cart */
 
 if(img && cart){
 
-const imgRect=img.getBoundingClientRect()
-const cartRect=cart.getBoundingClientRect()
+let r=img.getBoundingClientRect()
+let c=cart.getBoundingClientRect()
 
-const fly=img.cloneNode(true)
+let fly=img.cloneNode(true)
 
 fly.style.position="fixed"
-fly.style.left=imgRect.left+"px"
-fly.style.top=imgRect.top+"px"
-fly.style.width=imgRect.width+"px"
-fly.style.height=imgRect.height+"px"
-fly.style.transition="all .8s cubic-bezier(.2,.8,.2,1)"
+fly.style.left=r.left+"px"
+fly.style.top=r.top+"px"
+fly.style.width=img.offsetWidth+"px"
+fly.style.height=img.offsetHeight+"px"
 fly.style.zIndex="9999"
-fly.style.pointerEvents="none"
+fly.style.transition="all .7s cubic-bezier(.25,.8,.25,1)"
 fly.style.borderRadius="50%"
 fly.style.objectFit="contain"
 
 document.body.appendChild(fly)
 
-requestAnimationFrame(()=>{
-
-fly.style.left=(cartRect.left + cartRect.width/2 - 10)+"px"
-fly.style.top=(cartRect.top + cartRect.height/2 - 10)+"px"
+setTimeout(()=>{
+fly.style.left=(c.left+20)+"px"
+fly.style.top=(c.top+20)+"px"
 fly.style.width="20px"
 fly.style.height="20px"
-fly.style.opacity="0.3"
-fly.style.transform="scale(.3)"
-
-})
+fly.style.opacity="0.2"
+},50)
 
 setTimeout(()=>{
-
 fly.remove()
-
-cart.style.transform="scale(1.25)"
-cart.style.transition="transform .2s"
-
-setTimeout(()=>{
-cart.style.transform="scale(1)"
-},200)
-
-},800)
+cart.style.transform="scale(1.2)"
+setTimeout(()=>cart.style.transform="scale(1)",200)
+},700)
 
 }
 
-/* ===============================
-   BUTTON EFFECT
-================================*/
+/* button effect */
 
 btn.innerHTML='<i class="bi bi-check-lg"></i> Đã thêm'
-	btn.classList.replace("btn-add-cart","btn-success")
+btn.classList.replace("btn-add-cart","btn-success")
 
-	setTimeout(()=>{
-	updateMiniCart()
-	},300)
-	
+updateMiniCart()
+
 setTimeout(()=>{
 btn.innerHTML=old
 btn.classList.replace("btn-success","btn-add-cart")
@@ -280,18 +241,16 @@ btn.disabled=false
 
 }
 
+
 /* ===============================
-   MINI CART UPDATE
+   MINI CART
 ================================*/
 
 window.updateMiniCart=()=>{
 
-	fetch("/cart/api/mini-cart")
-	.then(r=>{
-	if(r.status===401) return []
-	return r.json()
-	})
-	.then(data=>{
+fetch("/cart/api/mini-cart")
+.then(r=>r.status===401?[]:r.json())
+.then(data=>{
 
 let body=document.getElementById("mini-cart-body")
 let badge=document.getElementById("floating-cart-count")
@@ -299,15 +258,14 @@ let totalText=document.getElementById("mini-cart-total")
 
 if(!data || data.length===0){
 
-body.innerHTML=`
-<div class="text-center text-muted py-5">
+body.innerHTML=`<div class="text-center text-muted py-5">
 <i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
 Chưa có sản phẩm
-</div>
-`
+</div>`
 
 badge.style.display="none"
 totalText.innerText="0₫"
+
 return
 }
 
@@ -323,21 +281,9 @@ let qty=i.quantity
 total+=price*qty
 count+=qty
 
-/* ===============================
-   FIX IMAGE PATH
-================================*/
-
-let img="https://via.placeholder.com/50"
-
-if(i.product.mainImage){
-img=i.product.mainImage.startsWith("http")
+let img=i.product.mainImage?.startsWith("http")
 ? i.product.mainImage
 : "/uploads/"+i.product.mainImage
-}
-
-/* ===============================
-   MINI CART ITEM
-================================*/
 
 html+=`
 
@@ -362,16 +308,11 @@ ${new Intl.NumberFormat('vi-VN').format(price)}₫
 
 <div class="d-flex align-items-center gap-2">
 
-<button class="mini-btn"
-data-action="minus"
-data-id="${i.id}"
+<button class="mini-btn" data-action="minus" data-id="${i.id}"
 style="width:22px;height:22px;border:none;background:#45a29e;border-radius:4px">-</button>
-
 <span class="small fw-bold">${qty}</span>
 
-<button class="mini-btn"
-data-action="plus"
-data-id="${i.id}"
+<button class="mini-btn" data-action="plus" data-id="${i.id}"
 style="width:22px;height:22px;border:none;background:#45a29e;border-radius:4px">+</button>
 
 </div>
@@ -400,7 +341,136 @@ badge.style.display="flex"
 
 totalText.innerText=new Intl.NumberFormat("vi-VN").format(total)+"₫"
 
+/* actions */
+
+document.querySelectorAll(".mini-btn").forEach(btn=>{
+
+btn.onclick=()=>{
+
+let id=btn.dataset.id
+let action=btn.dataset.action
+
+fetch(`/cart/${action}/${id}`)
+.then(()=>updateMiniCart())
+
+}
+
 })
+
+})
+
+}
+
+
+/* ===============================
+   LIVE SEARCH
+================================*/
+
+let inp=document.getElementById("liveSearchInput")
+let box=document.querySelector(".search-box")
+
+if(inp && box){
+
+let rs=document.createElement("div")
+
+rs.style.cssText=`
+position:absolute;
+top:100%;
+left:0;
+right:0;
+background:#1f2833;
+border:1px solid #45a29e;
+border-radius:8px;
+margin-top:5px;
+box-shadow:0 10px 30px rgba(0,0,0,.8);
+z-index:1001;
+display:none;
+max-height:400px;
+overflow-y:auto;
+`
+
+box.appendChild(rs)
+
+let timeout
+
+inp.oninput=function(){
+
+clearTimeout(timeout)
+
+let k=this.value.trim()
+
+if(k.length<2){
+rs.style.display="none"
+return
+}
+
+timeout=setTimeout(()=>{
+
+fetch(`/cart/api/search?keyword=${encodeURIComponent(k)}`)
+.then(r=>r.json())
+.then(data=>{
+
+if(!data || data.length===0){
+
+rs.innerHTML=`<div class="p-3 text-center text-muted small">
+Không tìm thấy sản phẩm nào
+</div>`
+
+}else{
+
+let h=""
+
+data.forEach(p=>{
+
+let img=p.mainImage?.startsWith("http")
+? p.mainImage
+: "/uploads/"+p.mainImage
+
+h+=`
+
+<a href="/product-detail/${p.id}"
+class="d-flex align-items-center p-2 border-bottom border-secondary text-decoration-none">
+
+<img src="${img}"
+onerror="this.src='https://via.placeholder.com/40'"
+width="40"
+height="40"
+class="rounded me-3"
+style="object-fit:cover">
+
+<div class="flex-grow-1 overflow-hidden">
+
+<div class="small fw-bold text-truncate text-light">
+${p.name}
+</div>
+
+<div class="small text-danger">
+${new Intl.NumberFormat('vi-VN').format(p.price)}₫
+</div>
+
+</div>
+
+</a>
+
+`
+
+})
+
+rs.innerHTML=h
+
+}
+
+rs.style.display="block"
+
+})
+
+},400)
+
+}
+
+document.onclick=e=>{
+if(!box.contains(e.target))rs.style.display="none"
+}
 
 }
 

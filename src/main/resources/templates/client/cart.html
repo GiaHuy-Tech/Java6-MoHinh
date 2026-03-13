@@ -1,127 +1,958 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Giỏ hàng - Model World</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giỏ hàng - MODEL WORLD</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+	rel="stylesheet">
+<link
+	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&display=swap"
+	rel="stylesheet">
 
-    <style>
-        body {
-            background: #050b14;
-            color: #fff;
-            font-family: sans-serif;
-        }
+<style>
+/* --- BIẾN HỆ THỐNG --- */
+:root {
+	--bg-body: #0b0c10;
+	--bg-card: #1f2833;
+	--text-main: #66fcf1;
+	--text-light: #c5c6c7;
+	--accent-cyan: #45a29e;
+	--accent-hover: #66fcf1;
+	--accent-red: #ff2e63;
+	--border-color: #2d3238;
+	--sidebar-width: 260px;
+}
 
-        .table-container {
-            background: #0c1525;
-            border-radius: 10px;
-            padding: 20px;
-        }
+body {
+	background-color: var(--bg-body);
+	color: var(--text-light);
+	font-family: 'Be Vietnam Pro', sans-serif;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
 
-        .price {
-            color: #00f2ff;
-            font-weight: 700;
-        }
+#wrapper {
+	display: flex;
+	width: 100%;
+	transition: all 0.3s;
+	flex-grow: 1;
+}
 
-        .btn-remove {
-            border: 1px solid red;
-            color: red;
-            padding: 5px 10px;
-            text-decoration: none;
-            border-radius: 5px;
-        }
+#sidebar-wrapper {
+	min-width: var(--sidebar-width);
+	max-width: var(--sidebar-width);
+	background: #050505;
+	border-right: 1px solid var(--border-color);
+	min-height: 100vh;
+	position: fixed;
+	z-index: 1000;
+	height: 100%;
+	transition: all 0.3s;
+}
 
-        .btn-remove:hover {
-            background: red;
-            color: white;
-        }
+#page-content-wrapper {
+	width: 100%;
+	margin-left: var(--sidebar-width);
+	transition: margin 0.3s ease-out;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
 
-        .btn-checkout {
-            border: 1px solid #00f2ff;
-            color: #00f2ff;
-            padding: 8px 25px;
-            border-radius: 5px;
-            background: none;
-            text-decoration: none;
-            display: inline-block;
-        }
+body.toggled #sidebar-wrapper {
+	margin-left: calc(-1 * var(--sidebar-width));
+}
 
-        .btn-checkout:hover {
-            background: #00f2ff;
-            color: black;
-        }
-    </style>
+body.toggled #page-content-wrapper {
+	margin-left: 0;
+}
+
+.sidebar-heading {
+	padding: 2rem 1.5rem;
+	font-family: 'Montserrat';
+	font-size: 1.5rem;
+	font-weight: 900;
+	color: var(--text-main);
+	text-decoration: none;
+	display: block;
+	text-align: center;
+}
+
+.list-group-item {
+	background: transparent;
+	color: #888;
+	border: none;
+	padding: 12px 25px;
+	transition: 0.3s;
+	border-left: 4px solid transparent;
+}
+
+.list-group-item:hover, .list-group-item.active {
+	color: var(--text-main);
+	background: rgba(102, 252, 241, 0.05);
+	border-left: 4px solid var(--text-main);
+}
+
+.top-navbar {
+	background: rgba(31, 40, 51, 0.95);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid var(--border-color);
+	padding: 15px 30px;
+	position: sticky;
+	top: 0;
+	z-index: 999;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.nav-logo {
+	font-family: var(--font-title);
+	text-decoration: none;
+	font-size: 1.4rem;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.nav-logo i {
+	color: var(--text-main);
+	font-size: 1.6rem;
+}
+
+.nav-logo span {
+	background: linear-gradient(90deg, var(--text-main), #fff);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.search-box {
+	position: relative;
+	max-width: 600px;
+	width: 100%;
+	margin: 0 auto;
+}
+
+.search-box input {
+	border-radius: 50px;
+	padding: 10px 45px 10px 20px;
+	border: 1px solid var(--border-color);
+	width: 100%;
+	background: #0b0c10;
+	color: #fff;
+	outline: none;
+}
+
+.search-box input:focus {
+	border-color: var(--accent-cyan);
+}
+
+.search-box button {
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	width: 34px;
+	height: 34px;
+	border: none;
+	background: var(--accent-cyan);
+	color: #0b0c10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* --- CART CONTENT --- */
+.cart-container {
+	background: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.section-title {
+	font-family: 'Montserrat';
+	font-weight: 800;
+	color: var(--text-main);
+	border-left: 5px solid var(--accent-red);
+	padding-left: 15px;
+	text-transform: uppercase;
+}
+
+.summary-card {
+	background: #141b26;
+	border: 1px solid var(--accent-cyan);
+	border-radius: 12px;
+	padding: 25px;
+	position: sticky;
+	top: 100px;
+}
+
+.btn-checkout {
+	background: var(--text-main);
+	color: #000;
+	font-weight: 800;
+	width: 100%;
+	padding: 12px;
+	border-radius: 8px;
+	border: none;
+	text-transform: uppercase;
+	transition: 0.3s;
+}
+
+.btn-checkout:hover {
+	background: #fff;
+	transform: translateY(-2px);
+}
+
+footer {
+	background: #050505 !important;
+	border-top: 1px solid var(--border-color) !important;
+	color: #888;
+	margin-top: auto;
+	width: 100%;
+}
+
+footer h5, footer h6 {
+	color: var(--text-main);
+	font-family: var(--font-title);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	font-weight: 800;
+}
+
+footer a {
+	color: #888;
+	transition: 0.2s;
+}
+
+footer a:hover {
+	color: var(--accent-cyan);
+}
+
+.floating-socials {
+	position: fixed;
+	right: 20px;
+	bottom: 100px;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.social-btn {
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 20px;
+	text-decoration: none;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+	transition: 0.3s;
+	position: relative;
+}
+
+.social-btn:hover {
+	transform: scale(1.1);
+	color: #fff;
+}
+
+.social-btn.zalo {
+	background: #0068ff;
+}
+
+.social-btn.messenger {
+	background: #0084ff;
+}
+
+.social-btn.phone {
+	background: var(--accent-red);
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 
+
+0%{
+	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
+}
+
+70%{
+box-shadow:00010px
+rgba(255,46,99,0);
+}
+
+100%{
+box-shadow:0000
+rgba(255,46,99,0);
+}
+
+}
+#floating-cart {
+	position: fixed;
+	bottom: 30px;
+	left: 30px;
+	width: 60px;
+	height: 60px;
+	background: var(--accent-cyan);
+	color: #000;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	cursor: pointer;
+	z-index: 1000;
+	box-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
+	transition: 0.3s;
+}
+
+#floating-cart:hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 30px var(--accent-cyan);
+}
+
+.cart-badge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background: var(--accent-red);
+	color: white;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	font-size: 0.8rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+}
+
+.mini-cart-panel {
+	position: fixed;
+	bottom: 100px;
+	left: 30px;
+	width: 340px;
+	height: 420px;
+	background: var(--bg-card);
+	border-radius: 8px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+	display: none;
+	flex-direction: column;
+	border: 1px solid var(--accent-cyan);
+	color: var(--text-light);
+}
+
+.mini-cart-panel.show {
+	display: flex;
+	animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {from { opacity:0;
+	transform: translateY(20px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+}
+</style>
 </head>
+
 <body>
+	<div id="wrapper">
+		<div id="sidebar-wrapper">
+			<a href="/" class="sidebar-heading">MODEL WORLD</a>
+			<div class="list-group list-group-flush px-2 mt-3">
+				<a href="/" class="list-group-item"><i
+					class="bi bi-grid-fill me-2"></i> Trang chủ</a> <a href="/products"
+					class="list-group-item"><i class="bi bi-collection-play me-2"></i>
+					Sản phẩm</a> <a href="/wishlist" class="list-group-item"><i
+					class="bi bi-heart me-2"></i> Yêu thích</a> <a href="/cart"
+					class="list-group-item active"><i class="bi bi-cart3 me-2"></i>
+					Giỏ hàng</a> <a href="/orders" class="list-group-item"><i
+					class="bi bi-receipt me-2"></i> Đơn hàng</a>
+				<hr class="border-secondary mx-3">
+				<a href="/account" class="list-group-item"><i
+					class="bi bi-person-gear me-2"></i> Tài khoản</a>
+			</div>
+		</div>
 
-    <div class="container py-5">
+		<div id="page-content-wrapper">
+			<nav
+				class="top-navbar d-flex justify-content-between align-items-center">
+				<div class="d-flex align-items-center gap-2 w-100 me-3">
+					<button class="btn btn-outline-info border-0" id="menu-toggle">
+						<i class="bi bi-list fs-4"></i>
+					</button>
+					<a href="/" class="nav-logo d-none d-sm-flex"> <i
+						class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span>
+					</a>
+					<form action="/products" method="get"
+						class="search-box d-none d-md-block ms-md-4">
+						<input type="text" name="keyword" th:value="${keyword}"
+							placeholder="Tìm kiếm Gunpla, Figure, Tool...">
+						<button type="submit">
+							<i class="bi bi-search"></i>
+						</button>
+					</form>
+				</div>
 
-        <h2 class="text-center mb-4">GIỎ HÀNG CỦA BẠN</h2>
+				<div class="d-flex align-items-center gap-3">
+					<th:block th:if="${user == null}">
+						<a href="/login" class="text-decoration-none fw-bold text-nowrap"
+							style="color: var(--text-main);">Đăng nhập</a>
+						<a href="/register"
+							class="btn btn-sm rounded-pill px-3 text-nowrap"
+							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
+							ký</a>
+					</th:block>
+					<th:block th:if="${user != null}">
+						<div class="dropdown">
+							<a href="#"
+								class="d-flex align-items-center text-decoration-none dropdown-toggle"
+								data-bs-toggle="dropdown" style="color: var(--text-light);">
+								<img
+								th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+								class="rounded-circle me-2 border border-secondary" width="35"
+								height="35" style="object-fit: cover;"> <span
+								class="d-none d-sm-block fw-bold small"
+								th:text="${user.fullName ?: user.username}">User</span>
+							</a>
+							<ul
+								class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
+								<li><a class="dropdown-item" href="/profile"><i
+										class="bi bi-person me-2"></i>Hồ sơ</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item text-danger" href="/logout"><i
+										class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+							</ul>
+						</div>
+					</th:block>
+				</div>
+			</nav>
 
-        <div class="table-container">
+			<div class="container-fluid py-5 flex-grow-1">
+				<h4 class="section-title mb-4">GIỎ HÀNG CỦA BẠN</h4>
+				<div class="row g-4">
+					<div class="col-xl-9 col-lg-8">
+						<div class="cart-container">
+							<div class="table-responsive">
+								<table class="table table-dark align-middle mb-0">
+									<thead>
+										<tr>
+											<th style="width: 45%;">SẢN PHẨM</th>
+											<th class="text-center">ĐƠN GIÁ</th>
+											<th class="text-center">SỐ LƯỢNG</th>
+											<th class="text-center">THÀNH TIỀN</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr th:each="item : ${cartDetails}">
+											<td>
+												<div class="d-flex align-items-center gap-3">
+													<img
+														th:src="${item.product.mainImage != null ? '/uploads/' + item.product.mainImage : 'https://via.placeholder.com/60'}"
+														style="width: 60px; height: 60px; object-fit: contain; background: #fff; border-radius: 5px; padding: 3px;">
+													<div>
+														<div class="fw-bold text-white small"
+															th:text="${item.product.name}">Tên SP</div>
+														<div class="text-muted" style="font-size: 0.7rem;"
+															th:text="${item.product.category?.name}">Category</div>
+													</div>
+												</div>
+											</td>
+											<td class="text-center text-info fw-bold"
+												th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT')} + '₫'"></td>
+											<td class="text-center">
+												<div
+													class="d-flex align-items-center justify-content-center gap-2">
+													<a th:href="@{'/cart/minus/' + ${item.id}}"
+														class="btn btn-sm btn-outline-secondary p-1"
+														style="width: 25px;">-</a> <span class="fw-bold"
+														th:text="${item.quantity}">1</span> <a
+														th:href="@{'/cart/plus/' + ${item.id}}"
+														class="btn btn-sm btn-outline-info p-1"
+														style="width: 25px;">+</a>
+												</div>
+											</td>
+											<td class="text-center text-danger fw-bold"
+												th:text="${#numbers.formatDecimal(item.product.price * item.quantity,0,'COMMA',0,'POINT')} + '₫'"></td>
+											<td class="text-end"><a
+												th:href="@{'/cart/delete/' + ${item.id}}"
+												class="text-secondary"
+												onclick="return confirm('Xóa khỏi giỏ hàng?');"><i
+													class="bi bi-trash"></i></a></td>
+										</tr>
+										<tr th:if="${#lists.isEmpty(cartDetails)}">
+											<td colspan="5" class="text-center py-5"><i
+												class="bi bi-cart-x fs-1 d-block mb-3 opacity-25"></i>
+												<p>Giỏ hàng của bạn đang trống.</p> <a href="/products"
+												class="btn btn-outline-info rounded-pill px-4 mt-2">MUA
+													SẮM NGAY</a></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
 
-            <table class="table table-dark text-center align-middle">
-                <thead>
-                    <tr>
-                        <th style="width: 40%">Sản phẩm</th>
-                        <th>Đơn giá</th>
-                        <th>Số lượng</th>
-                        <th>Thành tiền</th>
-                        <th></th>
-                    </tr>
-                </thead>
+					<div class="col-xl-3 col-lg-4">
+						<div class="summary-card text-white">
+							<h6 class="fw-bold mb-4">TÓM TẮT ĐƠN HÀNG</h6>
+							<div class="d-flex justify-content-between mb-3 small opacity-75">
+								<span>Tạm tính:</span> <span
+									th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + '₫'"></span>
+							</div>
+							<div class="d-flex justify-content-between mb-3 small opacity-75">
+								<span>Vận chuyển:</span> <span class="text-success">Miễn
+									phí</span>
+							</div>
+							<hr class="border-secondary">
+							<div
+								class="d-flex justify-content-between align-items-center mb-4">
+								<span class="fw-bold">TỔNG CỘNG:</span> <span
+									class="fs-4 fw-bold text-info"
+									th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + '₫'"></span>
+							</div>
+							<a th:href="@{/checkout}"
+								class="btn-checkout d-block text-center text-decoration-none">Thanh
+								toán ngay</a>
+						</div>
+					</div>
+				</div>
+			</div>
 
-                <tbody>
+			<footer class="py-5 mt-5">
+				<div class="container-fluid px-4">
+					<div class="row g-4">
+						<div class="col-lg-4 col-md-6">
+							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
+							<p class="small" style="color: #aaa;">Hệ thống phân phối mô
+								hình chính hãng hàng đầu Việt Nam.</p>
+							<div class="d-flex gap-3 mt-3">
+								<a href="#" class="text-light fs-5"><i
+									class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-instagram"></i></a>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
+								<li><a href="#" class="text-decoration-none">Hệ thống
+										cửa hàng</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Chính sách</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Chính sách
+										đổi trả</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách
+										bảo hành</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-4 col-md-12">
+							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									placeholder="Nhập email của bạn..."
+									style="background: #111; border: 1px solid #333; color: #fff;">
+								<button class="btn"
+									style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
+									ký</button>
+							</div>
+						</div>
+					</div>
+					<div
+						class="text-center mt-5 pt-3 border-top border-secondary small">©
+						2026 Model World. All rights reserved.</div>
+				</div>
+			</footer>
+		</div>
+	</div>
 
-                    <tr th:each="item : ${cartDetails}">
-                        <td th:text="${item.product.name}"></td>
+	<div class="floating-socials">
+		<a href="tel:0909123456" class="social-btn phone"><i
+			class="bi bi-telephone-fill"></i></a> <a
+			href="https://zalo.me/0909123456" class="social-btn zalo"><i
+			class="bi bi-chat-dots-fill"></i></a> <a href="https://m.me/modelworld"
+			class="social-btn messenger"><i class="bi bi-messenger"></i></a>
+	</div>
 
-                        <td class="price"
-                            th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT')} + '₫'">
-                        </td>
+	<div id="floating-cart" onclick="toggleMiniCart()">
+		<i class="bi bi-cart3"></i> <span id="floating-cart-count"
+			class="cart-badge" th:text="${#lists.size(cartDetails)}">0</span>
+	</div>
 
-                        <td>
-                            <a th:href="@{'/cart/minus/' + ${item.id}}" class="btn btn-sm btn-outline-light">-</a> 
-                            <span class="mx-2" th:text="${item.quantity}"></span> 
-                            <a th:href="@{'/cart/plus/' + ${item.id}}" class="btn btn-sm btn-outline-info">+</a>
-                        </td>
+	<div id="mini-cart-panel" class="mini-cart-panel">
+		<div
+			class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+			<span class="fw-bold"
+				style="color: var(--text-main); font-family: 'Montserrat';">GIỎ
+				HÀNG NHANH</span>
+			<button onclick="toggleMiniCart()" class="btn-close btn-close-white"></button>
+		</div>
+		<div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1">
+			<div th:if="${#lists.isEmpty(cartDetails)}"
+				class="text-center py-5 text-muted">Chưa có sản phẩm</div>
+			<div th:each="item : ${cartDetails}"
+				class="d-flex gap-2 mb-3 border-bottom border-secondary pb-2">
+				<img
+					th:src="${item.product.mainImage != null ? '/uploads/' + item.product.mainImage : 'https://via.placeholder.com/50'}"
+					style="width: 50px; height: 50px; object-fit: contain; background: #fff; border-radius: 4px;">
+				<div class="flex-grow-1">
+					<div class="small fw-bold text-white text-truncate"
+						style="max-width: 180px;" th:text="${item.product.name}">Tên
+						SP</div>
+					<div class="small text-info"
+						th:text="${item.quantity} + ' x ' + ${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT')} + '₫'"></div>
+				</div>
+			</div>
+		</div>
+		<div class="p-3 border-top border-secondary">
+			<a href="/cart" class="btn btn-info w-100 fw-bold">XEM CHI TIẾT</a>
+		</div>
+	</div>
 
-                        <td class="price"
-                            th:text="${#numbers.formatDecimal(item.product.price * item.quantity,0,'COMMA',0,'POINT')} + '₫'">
-                        </td>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+	document.addEventListener("DOMContentLoaded",function(){
 
-                        <td>
-                            <a th:href="@{'/cart/delete/' + ${item.id}}" class="btn-remove"> Xóa </a>
-                        </td>
-                    </tr>
+		/* SIDEBAR */
 
-                    <tr th:if="${#lists.isEmpty(cartDetails)}">
-                        <td colspan="5">Giỏ hàng đang trống <br><br> 
-                            <a href="/products" class="btn-checkout"> Mua ngay </a>
-                        </td>
-                    </tr>
+		const menuBtn=document.getElementById("menu-toggle");
 
-                </tbody>
-            </table>
-        </div>
+		if(menuBtn){
+		menuBtn.onclick=function(e){
+		e.preventDefault();
+		document.body.classList.toggle("toggled");
+		};
+		}
 
-        <div class="text-end mt-4" th:if="${!#lists.isEmpty(cartDetails)}">
 
-            <h4>
-                Tổng cộng: <span class="price"
-                    th:text="${#numbers.formatDecimal(total,0,'COMMA',0,'POINT')} + '₫'">
-                </span>
-            </h4>
+		/* MINI CART */
+		window.toggleMiniCart=function(){
+		document.getElementById("mini-cart-panel").classList.toggle("show");
+		};
 
-            <div class="mt-3">
-                <a th:href="@{/checkout}" class="btn-checkout">Thanh toán</a>
-            </div>
 
-        </div>
+		/* WISHLIST */
 
-    </div>
+		window.toggleWishlist=function(el){
 
+		el.classList.toggle("active");
+
+		let icon=el.querySelector("i");
+
+		if(el.classList.contains("active")){
+		icon.classList.replace("bi-heart","bi-heart-fill");
+		}else{
+		icon.classList.replace("bi-heart-fill","bi-heart");
+		}
+
+		};
+
+
+		/* ADD TO CART */
+
+		window.animateAddToCart=function(event,button){
+
+		event.preventDefault();
+
+		const id=button.dataset.id;
+
+		const card=button.closest(".product-card");
+		const img=card.querySelector("img");
+
+		const cart=document.getElementById("floating-cart");
+
+		if(img && cart){
+
+		const rect=img.getBoundingClientRect();
+		const cartRect=cart.getBoundingClientRect();
+
+		const fly=img.cloneNode(true);
+
+		fly.style.position="fixed";
+		fly.style.left=rect.left+"px";
+		fly.style.top=rect.top+"px";
+		fly.style.width="60px";
+		fly.style.height="60px";
+		fly.style.objectFit="cover";
+		fly.style.zIndex="9999";
+		fly.style.transition="all 0.6s ease";
+
+		document.body.appendChild(fly);
+
+		setTimeout(()=>{
+
+		fly.style.left=cartRect.left+"px";
+		fly.style.top=cartRect.top+"px";
+		fly.style.width="20px";
+		fly.style.height="20px";
+		fly.style.opacity="0.2";
+
+		},50);
+
+		setTimeout(()=>fly.remove(),600);
+
+		}
+
+
+		/* CALL API */
+
+		fetch("/cart/add/"+id,{
+		method:"POST"
+		})
+		.then(res=>res.text())
+		.then(text=>{
+
+		if(text==="success"){
+		updateMiniCart();
+		}
+
+		});
+
+		};
+
+
+
+		/* UPDATE MINI CART */
+
+		function updateMiniCart(){
+
+		fetch("/cart/api/mini-cart")
+
+		.then(res=>res.json())
+
+		.then(data=>{
+
+		const body=document.getElementById("mini-cart-body");
+		const badge=document.getElementById("floating-cart-count");
+		const totalText=document.getElementById("mini-cart-total");
+
+		if(!data || data.length===0){
+
+		body.innerHTML=`
+		<div class="text-center text-muted py-5">
+		<i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
+		Chưa có sản phẩm
+		</div>
+		`;
+
+		badge.style.display="none";
+		totalText.innerText="0₫";
+		return;
+
+		}
+
+		let html="";
+		let total=0;
+		let count=0;
+
+		data.forEach(item=>{
+
+		let price=item.product.price;
+		let qty=item.quantity;
+
+		total+=price*qty;
+		count+=qty;
+
+		let img=item.product.mainImage
+		? "/uploads/"+item.product.mainImage
+		: "https://via.placeholder.com/50";
+
+		html+=`
+
+		<div class="d-flex align-items-center mb-3 pb-3 border-bottom border-secondary">
+
+		<img src="${img}" width="50" height="50"
+		style="object-fit:cover"
+		class="rounded me-2">
+
+		<div class="flex-grow-1">
+
+		<div class="small fw-bold">${item.product.name}</div>
+
+		<div class="small text-danger">
+		${price.toLocaleString()}₫
+		</div>
+
+		<div class="d-flex align-items-center gap-2 mt-1">
+
+		<button data-id="${item.id}" class="minus-btn"
+		style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">-</button>
+
+		<span>${qty}</span>
+
+		<button data-id="${item.id}" class="plus-btn"
+		style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">+</button>
+
+		</div>
+
+		</div>
+
+		<button data-id="${item.id}" class="delete-btn"
+		style="background:none;border:none;color:#ff2e63">
+		<i class="bi bi-x-lg"></i>
+		</button>
+
+		</div>
+
+		`;
+
+		});
+
+		body.innerHTML=html;
+
+		badge.innerText=count;
+		badge.style.display="flex";
+
+		totalText.innerText=total.toLocaleString()+"₫";
+
+
+		/* CART BUTTON EVENTS */
+
+		document.querySelectorAll(".plus-btn").forEach(btn=>{
+		btn.onclick=()=>{
+
+		fetch("/cart/plus/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
+
+		};
+		});
+
+		document.querySelectorAll(".minus-btn").forEach(btn=>{
+		btn.onclick=()=>{
+
+		fetch("/cart/minus/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
+
+		};
+		});
+
+		document.querySelectorAll(".delete-btn").forEach(btn=>{
+		btn.onclick=()=>{
+
+		fetch("/cart/delete/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
+
+		};
+		});
+
+
+		});
+
+		}
+
+
+
+		/* LIVE SEARCH */
+
+		const input=document.getElementById("liveSearchInput");
+		const searchBox=document.getElementById("searchBox");
+
+		if(input && searchBox){
+
+		const results=document.createElement("div");
+
+		results.style.cssText=
+		"position:absolute;top:100%;left:0;right:0;background:#1f2833;border:1px solid #45a29e;border-radius:8px;margin-top:5px;display:none;max-height:400px;overflow-y:auto;";
+
+		searchBox.appendChild(results);
+
+		let timeout;
+
+		input.addEventListener("input",function(){
+
+		clearTimeout(timeout);
+
+		const keyword=this.value.trim();
+
+		if(keyword.length<2){
+		results.style.display="none";
+		return;
+		}
+
+		timeout=setTimeout(()=>{
+
+		fetch("/cart/api/search?keyword="+encodeURIComponent(keyword))
+
+		.then(res=>res.json())
+
+		.then(data=>{
+
+		if(!data.length){
+
+		results.innerHTML=
+		'<div class="p-3 text-center text-muted">Không tìm thấy</div>';
+
+		}else{
+
+		let html="";
+
+		data.forEach(p=>{
+
+		html+=`
+
+		<a href="/product-detail/${p.id}"
+		class="d-flex align-items-center p-2 border-bottom text-decoration-none">
+		<img src="/uploads/${p.mainImage}"width="40"height="40"
+		class="rounded me-2">
+
+		<div>
+
+		<div class="small fw-bold">${p.name}</div>
+
+		<div class="small text-danger">
+		${p.price.toLocaleString()}₫
+		</div>
+
+		</div>
+
+		</a>
+
+		`;
+
+		});
+
+		results.innerHTML=html;
+
+		}
+
+		results.style.display="block";
+
+		});
+
+		},400);
+
+		});
+
+		}
+
+
+		/* LOAD CART */
+
+		updateMiniCart();
+
+		});
+    </script>
 </body>
 </html>

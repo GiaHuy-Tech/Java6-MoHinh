@@ -1,20 +1,13 @@
 package com.example.demo.controllers;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.model.Category;
-import com.example.demo.model.Products;
-import com.example.demo.repository.CategoryRepository;
-import com.example.demo.repository.ProductRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 
 @Controller
 public class ProductsController {
@@ -28,60 +21,56 @@ public class ProductsController {
     @GetMapping("/products")
     public String productPage(
             @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) String sort,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
             Model model) {
 
-        List<Products> products = new ArrayList<>();
+        //Xử lý sort
+        Sort sorting = Sort.unsorted();
 
-        // ✅ 1. TÌM THEO KEYWORD + DANH MỤC
-        if (keyword != null && !keyword.isBlank() && categoryId != null) {
-            products = productRepo.findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword);
-        }
-        else if (keyword != null && !keyword.isBlank()) {
-            products = productRepo.findByNameContainingIgnoreCase(keyword);
-        }
-        else if (categoryId != null) {
-            products = productRepo.findByCategoryId(categoryId);
-        }
-        else {
-            products = productRepo.findByAvailableTrue();
-        }
-
-        // ✅ 2. LỌC THEO GIÁ (BigDecimal fix)
-        if (minPrice != null && maxPrice != null) {
-
-            BigDecimal min = BigDecimal.valueOf(minPrice);
-            BigDecimal max = BigDecimal.valueOf(maxPrice);
-
-            products = products.stream()
-                    .filter(p -> 
-                        p.getPrice().compareTo(min) >= 0 &&
-                        p.getPrice().compareTo(max) <= 0
-                    )
-                    .toList();
-        }
-
-        // ✅ 3. SẮP XẾP THEO GIÁ (BigDecimal fix)
         if ("asc".equalsIgnoreCase(sort)) {
-            products.sort(Comparator.comparing(Products::getPrice));
-        } 
-        else if ("desc".equalsIgnoreCase(sort)) {
-            products.sort(Comparator.comparing(Products::getPrice).reversed());
+            sorting = Sort.by("price").ascending();
+        } else if ("desc".equalsIgnoreCase(sort)) {
+            sorting = Sort.by("price").descending();
         }
 
-        // ✅ 4. TRUYỀN DỮ LIỆU RA VIEW
-        List<Category> categories = categoryRepo.findAll();
+        if (page < 0) {
+            page = 0;
+        }
+        
+        Pageable pageable = PageRequest.of(page, size, sorting);
 
-        model.addAttribute("products", products);
-        model.addAttribute("categories", categories);
+        Page<Products> productPage;
+
+        //Filter logic (PHÂN TRANG TẠI DATABASE)
+        if (keyword != null && !keyword.isBlank() && categoryId != null) {
+            productPage = productRepo
+                    .findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword, pageable);
+        } 
+        else if (keyword != null && !keyword.isBlank()) {
+            productPage = productRepo
+                    .findByNameContainingIgnoreCase(keyword, pageable);
+        } 
+        else if (categoryId != null) {
+            productPage = productRepo
+                    .findByCategoryId(categoryId, pageable);
+        } 
+        else {
+            productPage = productRepo
+                    .findByAvailableTrue(pageable);
+        }
+
+        //Truyền dữ liệu ra view
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("productPage", productPage);
+        model.addAttribute("categories", categoryRepo.findAll());
+
+        // giữ lại filter khi chuyển trang
         model.addAttribute("selectedCategory", categoryId);
-        model.addAttribute("selectedSort", sort);
-        model.addAttribute("minPrice", minPrice);
-        model.addAttribute("maxPrice", maxPrice);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedSort", sort);
 
         return "client/products";
     }

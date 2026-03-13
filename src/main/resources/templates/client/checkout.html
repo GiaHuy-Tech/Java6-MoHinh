@@ -3,349 +3,536 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Thanh toán - Model World</title>
+<title>Thanh toán - MODEL WORLD</title>
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-	rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap"
-	rel="stylesheet">
-
-<script
-	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-	--bg-dark: #050b14;
-	--bg-card: #0c1525;
-	--text-light: #e1e7ff;
-	--accent-cyan: #00f2ff;
-	--border-color: rgba(0, 242, 255, 0.2);
-	--font-main: "Be Vietnam Pro", sans-serif;
-	--font-logo: "Orbitron", sans-serif;
+	--bg-body: #0b0c10;
+	--bg-card: #141b26;
+	--text-main: #66fcf1;
+	--text-light: #c5c6c7;
+	--accent-cyan: #45a29e;
+	--border-color: #2d3238;
+	--sidebar-width: 260px;
+	--accent-red: #ff2e63;
 }
 
 body {
-	background-color: var(--bg-dark);
+	background-color: var(--bg-body);
 	color: var(--text-light);
-	font-family: var(--font-main);
+	font-family: 'Be Vietnam Pro', sans-serif;
+	margin: 0;
+	overflow-x: hidden;
+}
+
+/* --- LAYOUT STRUCTURE --- */
+#wrapper {
+	display: flex;
+	width: 100%;
+	transition: all 0.3s;
+	flex-grow: 1;
+}
+
+#sidebar-wrapper {
+	min-width: var(--sidebar-width);
+	max-width: var(--sidebar-width);
+	background: #050505;
+	border-right: 1px solid var(--border-color);
+	min-height: 100vh;
+	position: fixed;
+	z-index: 1000;
+	height: 100%;
+	transition: all 0.3s;
+}
+
+#page-content-wrapper {
+	width: 100%;
+	margin-left: var(--sidebar-width);
+	transition: margin 0.3s ease-out;
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
 }
 
-.navbar-brand {
-	font-family: var(--font-logo);
-	text-transform: uppercase;
-	letter-spacing: 1px;
+body.toggled #sidebar-wrapper {
+	margin-left: calc(-1 * var(--sidebar-width));
 }
 
-h1, h2, h3, h4 {
-	font-family: var(--font-main);
-	font-weight: 700;
-	text-transform: uppercase;
+body.toggled #page-content-wrapper {
+	margin-left: 0;
+	width: 100%;
 }
 
-.price-text {
-	font-family: var(--font-logo);
-	letter-spacing: 1px;
-}
+/* --- SIDEBAR --- */
+.sidebar-heading { padding: 2.5rem 1.5rem; font-family: 'Orbitron'; font-size: 1.4rem; font-weight: 900; color: var(--text-main); text-decoration: none; display: block; text-align: center; letter-spacing: 2px; }
+.list-group-item { background: transparent; color: #888; border: none; padding: 15px 25px; transition: 0.3s; border-left: 4px solid transparent; font-weight: 500; }
+.list-group-item:hover, .list-group-item.active { color: var(--text-main); background: rgba(102, 252, 241, 0.05); border-left: 4px solid var(--text-main); }
 
-.navbar {
-	background-color: rgba(12, 21, 37, 0.95);
+.top-navbar {
+	background: rgba(31, 40, 51, 0.95);
 	backdrop-filter: blur(10px);
 	border-bottom: 1px solid var(--border-color);
-	padding: 1rem 0;
+	padding: 15px 30px;
+	position: sticky;
+	top: 0;
+	z-index: 999;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	width: 100%;
 }
 
-.nav-link {
-	color: #aab8c5 !important;
-	transition: 0.3s;
-	font-weight: 500;
-}
-
-.nav-link:hover {
-	color: var(--accent-cyan) !important;
-	text-shadow: 0 0 8px var(--accent-cyan);
-}
-
-.navbar-brand i {
-	color: var(--accent-cyan) !important;
-}
-
-.checkout-card {
-	background: var(--bg-card);
-	border: 1px solid var(--border-color);
-	border-radius: 12px;
-	overflow: hidden;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-	height: 100%;
-}
-
-.card-header-custom {
-	background: rgba(0, 242, 255, 0.1);
-	padding: 15px 20px;
-	border-bottom: 1px solid var(--border-color);
-	font-weight: 700;
-	color: var(--accent-cyan);
-	font-family: var(--font-main);
-	text-transform: uppercase;
-}
-
-.card-body-custom {
-	padding: 25px;
-}
-
-.form-label {
-	color: #aab8c5;
-	font-size: 0.9rem;
-	margin-bottom: 6px;
-}
-
-.form-control-dark, .form-select-dark {
-	background-color: rgba(0, 0, 0, 0.3);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	color: #fff;
-	transition: 0.3s;
-	padding: 10px 15px;
-}
-
-.form-control-dark:focus, .form-select-dark:focus {
-	background-color: rgba(0, 0, 0, 0.5);
+#menu-toggle {
+	color: var(--text-main);
 	border-color: var(--accent-cyan);
-	box-shadow: 0 0 8px rgba(0, 242, 255, 0.2);
-	color: #fff;
+	background: transparent;
 }
 
-.form-select-dark option {
-	background-color: #050b14;
-	color: #fff;
-}
-
-.list-group-item-custom {
-	background-color: transparent;
-	border: none;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	color: var(--text-light);
-	padding: 15px 0;
-}
-
-.list-group-item-custom:last-child {
-	border-bottom: none;
-}
-
-.btn-checkout-confirm {
+#menu-toggle:hover {
 	background: var(--accent-cyan);
 	color: #000;
-	border: none;
-	padding: 12px;
-	border-radius: 6px;
-	font-weight: 700;
-	width: 100%;
-	text-transform: uppercase;
+}
+
+.nav-logo {
+	font-family: var(--font-title);
+	text-decoration: none;
+	font-size: 1.4rem;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	gap: 10px;
 	letter-spacing: 1px;
-	transition: 0.3s;
-	margin-top: 10px;
+	margin-left: 15px;
 }
 
-.btn-checkout-confirm:hover {
-	background: #fff;
-	box-shadow: 0 0 20px var(--accent-cyan);
-	transform: translateY(-2px);
+.nav-logo i {
+	color: var(--text-main);
+	font-size: 1.6rem;
 }
 
+.nav-logo span {
+	background: linear-gradient(90deg, var(--text-main), #fff);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.search-box {
+	position: relative;
+	max-width: 600px;
+	width: 100%;
+	margin: 0 auto;
+	flex-grow: 1;
+}
+
+.search-box input {
+	border-radius: 50px;
+	padding: 10px 45px 10px 20px;
+	border: 1px solid var(--border-color);
+	width: 100%;
+	background: #0b0c10;
+	color: #fff;
+}
+
+.search-box input:focus {
+	outline: none;
+	border-color: var(--accent-cyan);
+	box-shadow: 0 0 0 2px rgba(102, 252, 241, 0.2);
+}
+
+.search-box button {
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	width: 34px;
+	height: 34px;
+	border: none;
+	background: var(--accent-cyan);
+	color: #0b0c10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.search-box button:hover {
+	background: var(--accent-hover);
+}
+
+/* --- CHECKOUT CARDS --- */
+.checkout-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.card-header-custom { background: rgba(102, 252, 241, 0.03); padding: 18px 25px; border-bottom: 1px solid var(--border-color); font-weight: 800; color: var(--text-main); font-family: 'Orbitron'; text-transform: uppercase; font-size: 0.9rem; }
+
+.form-select-dark {
+    background-color: #363636 !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+    padding: 12px;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2366fcf1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+.alert-black {border: 1px solid rgba(255,193,7,0.3) !important; color: #ffc107 !important; }
+
+.price-text { font-family: 'Orbitron'; font-weight: 700; color: var(--text-main); }
+.btn-confirm { background: var(--text-main); color: #000; font-weight: 800; border: none; padding: 15px; border-radius: 8px; transition: 0.3s; text-transform: uppercase; }
+.btn-confirm:hover:not(:disabled) { background: #fff; box-shadow: 0 0 20px var(--text-main); transform: translateY(-2px); }
+
+/* --- FOOTER & SOCIALS --- */
 footer {
-	background-color: #020408;
-	border-top: 1px solid var(--border-color);
-	padding: 40px 0;
+	background: #050505 !important;
+	border-top: 1px solid var(--border-color) !important;
+	color: #888;
 	margin-top: auto;
-	color: #6c757d;
+	width: 100%;
 }
 
-footer h4 {
-	font-family: var(--font-logo);
+footer h5, footer h6 {
+	color: var(--text-main);
+	font-family: var(--font-title);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	font-weight: 800;
+}
+
+footer a {
+	color: #888;
+	transition: 0.2s;
+}
+
+footer a:hover {
+	color: var(--accent-cyan);
+}
+
+.floating-socials {
+	position: fixed;
+	right: 20px;
+	bottom: 100px;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.social-btn {
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 20px;
+	text-decoration: none;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+	transition: 0.3s;
+	position: relative;
+}
+
+.social-btn:hover {
+	transform: scale(1.1);
+	color: #fff;
+}
+
+.social-btn.zalo {
+	background: #0068ff;
+}
+
+.social-btn.messenger {
+	background: #0084ff;
+}
+
+.social-btn.phone {
+	background: var(--accent-red);
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 
+0% {
+	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
+}
+
+70%{
+box-shadow:00010px
+rgba(255,46,99,0);
+}
+100%{
+box-shadow:0000
+rgba(255,46,99,0);
 }
 </style>
 </head>
 <body>
 
-	<nav class="navbar navbar-expand-lg sticky-top">
-		<div class="container">
-			<a class="navbar-brand d-flex align-items-center gap-2" href="/">
-				<i class="bi bi-box-seam-fill fs-3 text-info"></i> <span
-				class="fw-bold fs-4 text-white">MODEL WORLD</span>
-			</a>
-		</div>
-	</nav>
+<div id="wrapper">
+    <div id="sidebar-wrapper">
+        <a href="/" class="sidebar-heading">MODEL WORLD</a>
+        <div class="list-group list-group-flush px-2">
+            <a href="/" class="list-group-item"><i class="bi bi-house-door me-3"></i>Trang chủ</a> 
+            <a href="/products" class="list-group-item"><i class="bi bi-box me-3"></i>Sản phẩm</a> 
+            <a href="/cart" class="list-group-item active"><i class="bi bi-cart3 me-3"></i>Giỏ hàng</a> 
+            <a href="/orders" class="list-group-item"><i class="bi bi-bag-check me-3"></i>Đơn hàng</a>
+            <hr class="border-secondary mx-3">
+            <a href="/account" class="list-group-item"><i class="bi bi-person me-3"></i>Tài khoản</a>
+        </div>
+    </div>
 
-	<section class="py-5">
-		<div class="container">
+    <div id="page-content-wrapper">
+        <nav
+				class="top-navbar d-flex justify-content-between align-items-center">
+				<div class="d-flex align-items-center gap-2 w-100 me-3">
+					<button class="btn btn-outline-secondary border-0" id="menu-toggle">
+						<i class="bi bi-list fs-4"></i>
+					</button>
 
-			<div class="text-center mb-5">
-				<h2 class="text-white">
-					THANH TOÁN <span class="text-info">ĐƠN HÀNG</span>
-				</h2>
-				<div
-					style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
-			</div>
+					<a href="/" class="nav-logo d-none d-sm-flex"> <i
+						class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span>
+					</a>
 
-			<div class="row g-4">
-				<div class="col-lg-7">
-					<div class="checkout-card">
-						<div class="card-header-custom">
-							<i class="bi bi-truck me-2"></i> Thông tin giao hàng
-						</div>
-						<div class="card-body-custom">
-							<form th:action="@{/checkout/confirm}" method="post">
-
-								<input type="hidden" name="voucherCode"
-									th:value="${voucherCode}" />
-
-								<div class="mb-4">
-									<label class="form-label fw-bold text-white"><i
-										class="bi bi-geo-alt-fill text-danger"></i> Chọn địa chỉ nhận
-										hàng</label>
-
-									<div th:if="${addresses.isEmpty()}"
-										class="alert alert-warning py-2 small" role="alert">
-										Bạn chưa có địa chỉ giao hàng nào. Vui lòng thêm địa chỉ trong
-										<a href="/account" class="fw-bold text-dark">Quản lý tài
-											khoản</a>.
-									</div>
-
-									<select class="form-select form-select-dark" name="addressId"
-										required th:unless="${addresses.isEmpty()}">
-										<option value="" disabled selected>-- Chọn địa chỉ
-											của bạn --</option>
-										<option th:each="addr : ${addresses}" th:value="${addr.id}"
-											th:text="${addr.recipientName + ' | ' + addr.recipientPhone + ' | ' + addr.getFullAddress()}"
-											th:selected="${addr.isDefault}"></option>
-									</select>
-								</div>
-
-								<div class="mb-4">
-									<label class="form-label">Phương thức thanh toán</label> <select
-										class="form-select form-select-dark" name="paymentMethod">
-										<option value="VNPAY" selected>Thanh toán qua VNPAY
-											(ATM/Visa/QR)</option>
-										<option value="COD">Thanh toán khi nhận hàng (COD)</option>
-									</select>
-								</div>
-
-								<button type="submit" class="btn-checkout-confirm"
-									th:disabled="${addresses.isEmpty()}">
-									XÁC NHẬN ĐẶT HÀNG <i class="bi bi-arrow-right ms-1"></i>
-								</button>
-							</form>
-						</div>
+					<div class="search-box d-none d-md-block ms-md-4" id="searchBox">
+						<input type="text" id="liveSearchInput"
+							placeholder="Tìm kiếm Gunpla, Figure, Tool...">
+						<button>
+							<i class="bi bi-search"></i>
+						</button>
 					</div>
 				</div>
 
-				<div class="col-lg-5">
-					<div class="checkout-card mb-4">
-						<div class="card-header-custom">
-							<i class="bi bi-bag-check me-2"></i> Đơn hàng của bạn
-						</div>
-						<div class="card-body-custom">
-
-							<ul class="list-group list-group-flush mb-3">
-								<li
-									class="list-group-item-custom d-flex justify-content-between align-items-center"
-									th:each="item : ${cartList}">
-									<div>
-										<span class="fw-semibold" th:text="${item.product.name}">Tên
-											SP</span>
-										<div class="small text-light">
-											x<span th:text="${item.quantity}">1</span>
-										</div>
-									</div> <span class="price-text text-info"
-									th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
-								</li>
+				<div class="d-flex align-items-center gap-3">
+					<th:block th:if="${user == null}">
+						<a href="/login" class="text-decoration-none fw-bold text-nowrap"
+							style="color: var(--text-main);">Đăng nhập</a>
+						<a href="/register"
+							class="btn btn-sm rounded-pill px-3 text-nowrap"
+							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng ký</a>
+					</th:block>
+					<th:block th:if="${user != null}">
+						<div class="dropdown">
+							<a href="#"
+								class="d-flex align-items-center text-decoration-none dropdown-toggle"
+								data-bs-toggle="dropdown" style="color: var(--text-light);">
+								<img
+								th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+								class="rounded-circle me-2 border border-secondary" width="35"
+								height="35" style="object-fit: cover;"> <span
+								class="d-none d-sm-block fw-bold small"
+								th:text="${user.fullName ?: user.username}">User</span>
+							</a>
+							<ul
+								class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
+								<li><a class="dropdown-item" href="/profile"><i
+										class="bi bi-person me-2"></i>Hồ sơ</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item text-danger" href="/logout"><i
+										class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
 							</ul>
+						</div>
+					</th:block>
+				</div>
+			</nav>
 
-							<div class="border-top border-bottom border-secondary py-3 my-3">
-								<label class="form-label fw-bold text-white"><i
-									class="bi bi-ticket-perforated text-warning"></i> Mã Giảm Giá /
-									Voucher</label>
+			<div class="container-fluid py-5 px-4">
+				<div class="row g-4">
+					<div class="col-lg-7">
+						<div class="checkout-card mb-4">
+							<div class="card-header-custom">
+								<i class="bi bi-truck me-2"></i> Thông tin giao hàng
+							</div>
+							<div class="card-body p-4">
+								<form th:action="@{/checkout/confirm}" method="post"
+									id="checkoutForm">
+									<input type="hidden" name="voucherCode"
+										th:value="${voucherCode}" />
+									<div class="mb-4">
+										<label class="form-label text-info fw-bold small">ĐỊA
+											CHỈ NHẬN HÀNG</label>
+										<div th:if="${addresses.isEmpty()}"
+											class="alert alert-black small d-flex align-items-center">
+											<i class="bi bi-exclamation-triangle me-2"></i> <span>Bạn
+												chưa có địa chỉ. <a href="/account"
+												class="fw-bold text-decoration-none">Thêm ngay</a>
+											</span>
+										</div>
 
-								<form action="/checkout" method="get" class="d-flex gap-2">
-									<select class="form-select form-select-dark" name="voucherCode"
-										required>
-										<option value="">-- Chọn Voucher của bạn --</option>
-										<option th:each="vd : ${savedVouchers}"
-											th:value="${vd.voucher.code}"
-											th:text="${vd.voucher.code + ' - Giảm ' + (vd.voucher.discountPercent != null ? vd.voucher.discountPercent + '%' : #numbers.formatDecimal(vd.voucher.discountAmount, 0, 'COMMA', 0, 'POINT') + '₫')}"
-											th:selected="${voucherCode == vd.voucher.code}"></option>
-									</select>
-									<button type="submit" class="btn btn-outline-info text-nowrap">Áp
-										dụng</button>
+										<select class="form-select form-select-dark" name="addressId"
+											required th:unless="${addresses.isEmpty()}">
+											<option value="" disabled selected>-- Chọn địa chỉ
+												nhận hàng --</option>
+											<option th:each="addr : ${addresses}" th:value="${addr.id}"
+												th:text="${addr.recipientName + ' | ' + addr.recipientPhone + ' | ' + addr.getFullAddress()}"
+												th:selected="${addr.isDefault}"></option>
+										</select>
+									</div>
+									<div class="mb-4">
+										<label
+											class="form-label text-info fw-bold small text-uppercase">Phương
+											thức thanh toán</label>
+										<div class="d-grid gap-2">
+											<input type="radio" class="btn-check" name="paymentMethod"
+												id="payVNPAY" value="VNPAY" checked autocomplete="off">
+											<label class="btn btn-outline-info text-start p-3"
+												for="payVNPAY"> <i class="bi bi-qr-code-scan me-2"></i>
+												Chuyển khoản VNPAY (ATM/Visa/QR)
+											</label> <input type="radio" class="btn-check" name="paymentMethod"
+												id="payCOD" value="COD" autocomplete="off"> <label
+												class="btn btn-outline-info text-start p-3" for="payCOD">
+												<i class="bi bi-cash-stack me-2"></i> Thanh toán khi nhận
+												hàng (COD)
+											</label>
+										</div>
+									</div>
+									<button type="submit" class="btn btn-confirm w-100"
+										th:disabled="${addresses.isEmpty()}">
+										TIẾN HÀNH ĐẶT HÀNG <i class="bi bi-chevron-right ms-2"></i>
+									</button>
 								</form>
-
-								<div th:if="${discount > 0}"
-									class="text-success small mt-2 fw-semibold">
-									<i class="bi bi-check-circle-fill"></i> Áp dụng Voucher thành
-									công!
-								</div>
-								<div
-									th:if="${voucherCode != null && discount == 0 && feeShip != 0}"
-									class="text-danger small mt-2">
-									<i class="bi bi-x-circle-fill"></i> Voucher không hợp lệ hoặc
-									chưa đủ điều kiện!
-								</div>
 							</div>
-
-							<div class="mt-4">
-								<div class="d-flex justify-content-between mb-2">
-									<span class="text-secondary">Tạm tính:</span> <span
-										class="text-light"
-										th:text="${#numbers.formatDecimal(rawTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-								</div>
-
-								<div class="d-flex justify-content-between mb-2"
-									th:if="${discount > 0}">
-									<span class="text-secondary">Giảm giá Voucher:</span> <span
-										class="text-success"
-										th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-								</div>
-
-								<div class="d-flex justify-content-between mb-3">
-									<span class="text-secondary">Phí vận chuyển:</span> <span
-										th:if="${feeShip == 0}"
-										class="text-success fw-bold text-uppercase">Miễn phí</span> <span
-										th:unless="${feeShip == 0}" class="text-light"
-										th:text="${#numbers.formatDecimal(feeShip, 0, 'COMMA', 0, 'POINT')} + '₫'">
-									</span>
-								</div>
+						</div>
+					</div>
+					<div class="col-lg-5">
+						<div class="checkout-card">
+							<div class="card-header-custom">
+								<i class="bi bi-bag-check me-2"></i> Tóm tắt đơn hàng
 							</div>
+							<div class="card-body p-4">
+								<div class="mb-4 overflow-auto" style="max-height: 300px;">
+									<div th:each="item : ${cartList}"
+										class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-secondary">
+										<img
+											th:src="${item.product.mainImage != null ? '/uploads/' + item.product.mainImage : 'https://via.placeholder.com/60'}"
+											class="cart-item-img">
+										<div class="flex-grow-1">
+											<div class="fw-bold small text-white"
+												th:text="${item.product.name}">Tên SP</div>
+											<div class="small text-info">
+												SL: <span th:text="${item.quantity}">1</span>
+											</div>
+										</div>
+										<div class="price-text small"
+											th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></div>
+									</div>
+								</div>
 
-							<div class="border-top border-secondary pt-3">
-								<div class="d-flex justify-content-between align-items-center">
-									<span class="text-white fs-5 fw-bold">TỔNG CỘNG</span> <span
-										class="price-text text-info fs-4 fw-bold"
-										th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')} + '₫'">
-										0₫ </span>
+								<div class="p-3 rounded mb-4"
+									style="background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color);">
+									<label class="form-label text-white small fw-bold">MÃ
+										GIẢM GIÁ</label>
+									<form action="/checkout" method="get" class="input-group">
+										<select class="form-select form-select-dark shadow-none"
+											name="voucherCode">
+											<option value="" class="text-muted">Chọn Voucher của
+												bạn</option>
+											<option th:each="vd : ${savedVouchers}"
+												th:value="${vd.voucher.code}"
+												th:text="${vd.voucher.code + ' (-' + (vd.voucher.discountPercent != null ? vd.voucher.discountPercent + '%' : #numbers.formatDecimal(vd.voucher.discountAmount, 0, 'COMMA', 0, 'POINT') + '₫') + ')'}"
+												th:selected="${voucherCode == vd.voucher.code}"></option>
+										</select>
+										<button class="btn btn-info px-3" type="submit">Áp
+											dụng</button>
+									</form>
+
+									<div th:if="${discount > 0}" class="text-main small mt-2">
+										<i class="bi bi-patch-check-fill"></i> Đã giảm thành công!
+									</div>
+								</div>
+								<div class="small">
+									<div class="d-flex justify-content-between mb-2">
+										<span class="text-info">Tạm tính:</span> <span
+											class="text-white"
+											th:text="${#numbers.formatDecimal(rawTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+									</div>
+									<div class="d-flex justify-content-between mb-2"
+										th:if="${discount > 0}">
+
+										<span class="text-info">Giảm giá:</span> <span
+											class="text-danger fw-bold"
+											th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+									</div>
+									<div class="d-flex justify-content-between mb-3">
+										<span class="text-success">Phí giao hàng:</span> <span
+											class="text-success fw-bold"
+											th:text="${feeShip == 0 ? 'MIỄN PHÍ' : #numbers.formatDecimal(feeShip, 0, 'COMMA', 0, 'POINT') + '₫'}"></span>
+									</div>
+									<hr class="border-secondary">
+									<div class="d-flex justify-content-between align-items-center">
+										<span class="fw-bold text-white fs-5">TỔNG CỘNG:</span> <span
+											class="price-text fs-4"
+											th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</span>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-	</section>
 
-	<footer class="text-center">
-		<div class="container">
-			<p class="mb-0 small text-secondary">&copy; 2026 Model World —
-				Luxury Boutique</p>
-		</div>
-	</footer>
+			<footer class="py-5">
+				<div class="container-fluid px-4">
+					<div class="row g-4">
+						<div class="col-lg-4 col-md-6">
+							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
+							<p class="small" style="color: #aaa;">Hệ thống phân phối mô
+								hình chính hãng hàng đầu Việt Nam. Đam mê của bạn là sứ mệnh của
+								chúng tôi.</p>
+							<div class="d-flex gap-3 mt-3">
+								<a href="#" class="text-light fs-5"><i
+									class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-instagram"></i></a>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
+								<li><a href="#" class="text-decoration-none">Hệ thống
+										cửa hàng</a></li>
+								<li><a href="#" class="text-decoration-none">Tuyển dụng</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Chính sách</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Chính sách
+										đổi trả</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách
+										bảo hành</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách
+										bảo mật</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-4 col-md-12">
+							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									placeholder="Nhập email của bạn..."
+									style="background: #111; border: 1px solid #333; color: #fff;">
+								<button class="btn"
+									style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
+									ký</button>
+							</div>
+						</div>
+					</div>
+					<div
+						class="text-center mt-5 pt-3 border-top border-secondary small">
+						© 2026 Model World. All rights reserved.</div>
+				</div>
+			</footer>
+    </div>
+</div>
 
+<div class="floating-socials">
+    <a href="tel:0909123456" class="social-btn phone"><i class="bi bi-telephone-fill"></i></a> 
+    <a href="#" class="social-btn zalo"><i class="bi bi-chat-dots-fill"></i></a> 
+    <a href="#" class="social-btn messenger"><i class="bi bi-messenger"></i></a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById("menu-toggle").onclick = function(e) {
+        e.preventDefault();
+        document.body.classList.toggle("toggled");
+    };
+</script>
 </body>
 </html>

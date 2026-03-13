@@ -1,232 +1,1033 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hồ sơ cá nhân - Model World</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tài khoản của tôi - MODEL WORLD</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+	rel="stylesheet">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+	rel="stylesheet">
+<link
+	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&family=Orbitron:wght@700&display=swap"
+	rel="stylesheet">
 
+<style>
+:root {
+	--bg-body: #0b0c10;
+	--bg-card: #141b26;
+	--text-main: #66fcf1;
+	--text-light: #c5c6c7;
+	--accent-cyan: #45a29e;
+	--accent-red: #ff2e63;
+	--accent-yellow: #ffcc00;
+	--border-color: #2d3238;
+	--sidebar-width: 260px;
+}
+
+body {
+	background-color: var(--bg-body);
+	color: var(--text-light);
+	font-family: 'Be Vietnam Pro', sans-serif;
+	margin: 0;
+	overflow-x: hidden;
+}
+
+/* --- WRAPPER & SIDEBAR --- */
+#wrapper {
+	display: flex;
+	width: 100%;
+	transition: all 0.3s;
+	flex-grow: 1;
+}
+
+#sidebar-wrapper {
+	min-width: var(--sidebar-width);
+	max-width: var(--sidebar-width);
+	background: #050505;
+	border-right: 1px solid var(--border-color);
+	min-height: 100vh;
+	position: fixed;
+	z-index: 1000;
+	height: 100%;
+	transition: all 0.3s;
+}
+
+#page-content-wrapper {
+	width: 100%;
+	margin-left: var(--sidebar-width);
+	transition: margin 0.3s ease-out;
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+body.toggled #sidebar-wrapper {
+	margin-left: calc(-1 * var(--sidebar-width));
+}
+
+body.toggled #page-content-wrapper {
+	margin-left: 0;
+}
+
+.sidebar-heading {
+	padding: 2rem 1.5rem;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 1.5rem;
+	font-weight: 900;
+	color: var(--text-main);
+	text-align: center;
+	text-decoration: none;
+	display: block;
+}
+
+.list-group-item {
+	background: transparent;
+	color: #888;
+	border: none;
+	padding: 12px 25px;
+	transition: 0.3s;
+	border-left: 4px solid transparent;
+}
+
+.list-group-item:hover, .list-group-item.active {
+	color: var(--text-main);
+	background: rgba(102, 252, 241, 0.05);
+	border-left: 4px solid var(--text-main);
+}
+
+/* --- HEADER --- */
+.top-navbar {
+	background: rgba(31, 40, 51, 0.95);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid var(--border-color);
+	padding: 15px 30px;
+	position: sticky;
+	top: 0;
+	z-index: 999;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+	width: 100%;
+}
+
+#menu-toggle {
+	color: var(--text-main);
+	border-color: var(--accent-cyan);
+	background: transparent;
+}
+
+#menu-toggle:hover {
+	background: var(--accent-cyan);
+	color: #000;
+}
+
+.nav-logo {
+	font-family: var(--font-title);
+	text-decoration: none;
+	font-size: 1.4rem;
+	font-weight: 900;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	letter-spacing: 1px;
+	margin-left: 15px;
+}
+
+.nav-logo i {
+	color: var(--text-main);
+	font-size: 1.6rem;
+}
+
+.nav-logo span {
+	background: linear-gradient(90deg, var(--text-main), #fff);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.search-box {
+	position: relative;
+	max-width: 600px;
+	width: 100%;
+	margin: 0 auto;
+	flex-grow: 1;
+}
+
+.search-box input {
+	border-radius: 50px;
+	padding: 10px 45px 10px 20px;
+	border: 1px solid var(--border-color);
+	width: 100%;
+	background: #0b0c10;
+	color: #fff;
+}
+
+.search-box input:focus {
+	outline: none;
+	border-color: var(--accent-cyan);
+	box-shadow: 0 0 0 2px rgba(102, 252, 241, 0.2);
+}
+
+.search-box button {
+	position: absolute;
+	right: 5px;
+	top: 50%;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	width: 34px;
+	height: 34px;
+	border: none;
+	background: var(--accent-cyan);
+	color: #0b0c10;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.search-box button:hover {
+	background: var(--accent-hover);
+}
+/* --- PROFILE COMPONENTS --- */
+.profile-card {
+	background: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: 15px;
+	padding: 30px;
+	height: 100%;
+}
+
+.avatar-wrapper {
+	position: relative;
+	width: 150px;
+	margin: 0 auto 20px;
+}
+
+.avatar-img {
+	width: 150px;
+	height: 150px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 3px solid var(--text-main);
+	padding: 5px;
+}
+
+.upload-btn {
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+	background: var(--text-main);
+	color: #000;
+	width: 35px;
+	height: 35px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border: 2px solid var(--bg-card);
+}
+
+.stat-box {
+	background: rgba(255, 255, 255, 0.03);
+	border-radius: 10px;
+	padding: 15px;
+	text-align: center;
+	border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-label {
+	color: var(--text-main);
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.form-control {
+	background: #0b0c10;
+	border: 1px solid var(--border-color);
+	color: #ffffff !important;
+	padding: 10px 15px;
+}
+
+.form-control:focus {
+	border-color: var(--text-main) !important;
+	box-shadow: 0 0 10px rgba(102, 252, 241, 0.2);
+}
+
+.btn-update {
+	background: var(--text-main);
+	color: #000;
+	font-weight: 700;
+	border: none;
+	padding: 8px 20px;
+	border-radius: 5px;
+	transition: 0.3s;
+}
+
+.btn-update:hover {
+	background: #fff;
+	box-shadow: 0 0 15px var(--text-main);
+}
+
+.section-title {
+	font-family: 'Montserrat';
+	font-weight: 800;
+	color: var(--text-main);
+	border-left: 5px solid var(--accent-red);
+	padding-left: 15px;
+}
+
+footer {
+	background: #050505 !important;
+	border-top: 1px solid var(--border-color) !important;
+	color: #888;
+	margin-top: auto;
+	width: 100%;
+}
+
+footer h5, footer h6 {
+	color: var(--text-main);
+	font-family: var(--font-title);
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	font-weight: 800;
+}
+
+footer a {
+	color: #888;
+	transition: 0.2s;
+}
+
+footer a:hover {
+	color: var(--accent-cyan);
+}
+
+.floating-socials {
+	position: fixed;
+	right: 20px;
+	bottom: 100px;
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+
+.social-btn {
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-size: 20px;
+	text-decoration: none;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+	transition: 0.3s;
+	position: relative;
+}
+
+.social-btn:hover {
+	transform: scale(1.1);
+	color: #fff;
+}
+
+.social-btn.zalo {
+	background: #0068ff;
+}
+
+.social-btn.messenger {
+	background: #0084ff;
+}
+
+.social-btn.phone {
+	background: var(--accent-red);
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse { 
+
+0%{
+	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
+}
+
+70%{
+box-shadow:00010px
+rgba(255,46,99,0);
+}
+
+100%{
+box-shadow:0000
+rgba(255,46,99,0);
+}
+
+}
+#floating-cart {
+	position: fixed;
+	bottom: 30px;
+	left: 30px;
+	width: 60px;
+	height: 60px;
+	background: var(--accent-cyan);
+	color: #000;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	cursor: pointer;
+	z-index: 1000;
+	box-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
+	transition: 0.3s;
+}
+
+#floating-cart:hover {
+	transform: scale(1.1);
+	box-shadow: 0 0 30px var(--accent-cyan);
+}
+
+.cart-badge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background: var(--accent-red);
+	color: white;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	font-size: 0.8rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: bold;
+}
+
+.mini-cart-panel {
+	position: fixed;
+	bottom: 100px;
+	left: 30px;
+	width: 340px;
+	height: 420px;
+	background: var(--bg-card);
+	border-radius: 8px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+	display: none;
+	flex-direction: column;
+	border: 1px solid var(--accent-cyan);
+	color: var(--text-light);
+}
+
+.mini-cart-panel.show {
+	display: flex;
+	animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {from { opacity:0;
+	transform: translateY(20px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+}
+</style>
 </head>
 
-<body class="bg-dark text-light">
+<body>
+
+	<div id="wrapper">
+		<div id="sidebar-wrapper">
+			<a href="/" class="sidebar-heading">MODEL WORLD</a>
+			<div class="list-group list-group-flush px-2 mt-3">
+				<a href="/" class="list-group-item"><i class="bi bi-grid-fill me-2"></i> Trang chủ</a> 
+				<a href="/products"class="list-group-item"><i class="bi bi-collection-play me-2"></i> Sản phẩm</a> 
+					<a href="/wishlist" class="list-group-item"><i
+					class="bi bi-heart me-2"></i> Yêu thích</a> 
+					<a href="/cart" class="list-group-item"><i class="bi bi-cart3 me-2"></i> Giỏ hàng</a> 
+					<a href="/orders" class="list-group-item"><i class="bi bi-receipt me-2"></i> Đơn hàng</a>
+				<hr class="border-secondary mx-3">
+				<a href="/account" class="list-group-item active"><i class="bi bi-person-gear me-2"></i> Tài khoản</a>
+			</div>
+		</div>
+
+		<div id="page-content-wrapper">
+
+			<nav
+				class="top-navbar d-flex justify-content-between align-items-center">
+				<div class="d-flex align-items-center gap-2 w-100 me-3">
+					<button class="btn btn-outline-secondary border-0" id="menu-toggle">
+						<i class="bi bi-list fs-4"></i>
+					</button>
+
+					<a href="/" class="nav-logo d-none d-sm-flex"> <i
+						class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span>
+					</a>
+
+					<div class="search-box d-none d-md-block ms-md-4" id="searchBox">
+						<input type="text" id="liveSearchInput"
+							placeholder="Tìm kiếm Gunpla, Figure, Tool...">
+						<button>
+							<i class="bi bi-search"></i>
+						</button>
+					</div>
+				</div>
+
+				<div class="d-flex align-items-center gap-3">
+					<th:block th:if="${user == null}">
+						<a href="/login" class="text-decoration-none fw-bold text-nowrap"
+							style="color: var(--text-main);">Đăng nhập</a>
+						<a href="/register"
+							class="btn btn-sm rounded-pill px-3 text-nowrap"
+							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
+							ký</a>
+					</th:block>
+					<th:block th:if="${user != null}">
+						<div class="dropdown">
+							<a href="#"
+								class="d-flex align-items-center text-decoration-none dropdown-toggle"
+								data-bs-toggle="dropdown" style="color: var(--text-light);">
+								<img
+								th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+								class="rounded-circle me-2 border border-secondary" width="35"
+								height="35" style="object-fit: cover;"> <span
+								class="d-none d-sm-block fw-bold small"
+								th:text="${user.fullName ?: user.username}">User</span>
+							</a>
+							<ul
+								class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
+								<li><a class="dropdown-item" href="/profile"><i
+										class="bi bi-person me-2"></i>Hồ sơ</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item text-danger" href="/logout"><i
+										class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
+							</ul>
+						</div>
+					</th:block>
+				</div>
+			</nav>
+
+			<div class="container-fluid py-4 px-4">
+				<h4 class="section-title mb-4">HỒ SƠ CÁ NHÂN</h4>
+
+				<div th:if="${success}"
+					class="alert alert-success bg-dark text-success border-success"
+					th:text="${success}"></div>
+				<div th:if="${error}"
+					class="alert alert-danger bg-dark text-danger border-danger"
+					th:text="${error}"></div>
+
+				<div class="row g-4">
+					<div class="col-xl-4 col-lg-5">
+						<div class="profile-card text-center">
+							<form th:action="@{/account/upload-avatar}" method="post"
+								enctype="multipart/form-data" id="avatarForm">
+								<div class="avatar-wrapper">
+									<img
+										th:src="${session.account.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+										class="avatar-img"> <label for="avatarInput"
+										class="upload-btn"> <i class="bi bi-camera-fill"></i>
+									</label> <input type="file" id="avatarInput" name="avatar" hidden
+										onchange="document.getElementById('avatarForm').submit()">
+								</div>
+							</form>
+
+							<h4 class="fw-bold text-white mb-1"
+								th:text="${session.account.fullName}">Họ và Tên</h4>
+							<p class="fw-light text-white small mb-3"
+								th:text="${session.account.email}">email@example.com</p>
+
+							<div class="badge bg-warning text-dark px-3 py-2 mb-4"
+								th:text="${currentLevel}">Hạng Vàng</div>
+
+							<div class="row g-2">
+								<div class="col-6">
+									<div class="stat-box">
+										<div class="fw-light text-white small">Đơn hàng</div>
+										<div class="fw-bold text-info fs-5" th:text="${orderCount}">0</div>
+									</div>
+								</div>
+								<div class="col-6">
+									<div class="stat-box">
+										<div class="fw-light text-white small">Chi tiêu</div>
+										<div class="fw-bold text-warning fs-5"
+											th:text="${#numbers.formatDecimal(totalSpent, 0, 'POINT', 0, 'POINT')} + 'đ'">0đ</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-xl-8 col-lg-7">
+						<div class="profile-card">
+							<h5 class="text-main mb-4">
+								<i class="bi bi-pencil-square me-2"></i>Chỉnh sửa thông tin
+							</h5>
+
+							<div class="row g-3">
+								<form th:action="@{/account/update-fullname}" method="post"
+									class="col-md-6">
+									<label class="form-label">Họ và tên</label>
+									<div class="input-group">
+										<input type="text" name="fullName"
+											th:value="${session.account.fullName}" class="form-control">
+										<button class="btn btn-update">Lưu</button>
+									</div>
+								</form>
+
+								<form th:action="@{/account/update-phone}" method="post"
+									class="col-md-6">
+									<label class="form-label">Số điện thoại</label>
+									<div class="input-group">
+										<input type="text" name="phone"
+											th:value="${session.account.phone}" class="form-control">
+										<button class="btn btn-update">Lưu</button>
+									</div>
+								</form>
+
+								<form th:action="@{/account/update-birthday}" method="post"
+									class="col-md-6">
+									<label class="form-label">Ngày sinh</label>
+									<div class="input-group">
+										<input type="date" name="birthday"
+											th:value="${session.account.birthDay}" class="form-control">
+										<button class="btn btn-update">Lưu</button>
+									</div>
+								</form>
+
+								<form th:action="@{/account/update-address}" method="post"
+									class="col-md-6">
+									<label class="form-label">Địa chỉ mặc định</label>
+									<div class="input-group">
+										<input type="text" name="address"
+											th:value="${session.account.addresses != null and !#lists.isEmpty(session.account.addresses) ? session.account.addresses[0].fullAddress : ''}"
+											class="form-control " placeholder="Nhập địa chỉ nhận hàng">
+										<button class="btn btn-update">Lưu</button>
+									</div>
+								</form>
+
+								<hr class="border-secondary my-4">
+
+								<form th:action="@{/account/update-password}" method="post"
+									class="col-12">
+									<label class="form-label">Đổi mật khẩu mới</label>
+									<div class="row g-2">
+										<div class="col-md-8">
+											<input type="password" name="password" class="form-control"
+												placeholder="Để trống nếu không muốn đổi">
+										</div>
+										<div class="col-md-4">
+											<button class="btn btn-danger w-100 fw-bold">XÁC
+												NHẬN ĐỔI</button>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<footer class="py-5 mt-5">
+				<div class="container-fluid px-4">
+					<div class="row g-4">
+						<div class="col-lg-4 col-md-6">
+							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
+							<p class="small" style="color: #aaa;">Hệ thống phân phối mô
+								hình chính hãng hàng đầu Việt Nam.</p>
+							<div class="d-flex gap-3 mt-3">
+								<a href="#" class="text-light fs-5"><i
+									class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i
+									class="bi bi-instagram"></i></a>
+							</div>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
+								<li><a href="#" class="text-decoration-none">Hệ thống
+										cửa hàng</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-2 col-md-3 col-6">
+							<h6 class="fw-bold mb-3">Chính sách</h6>
+							<ul class="list-unstyled small lh-lg">
+								<li><a href="#" class="text-decoration-none">Chính sách
+										đổi trả</a></li>
+								<li><a href="#" class="text-decoration-none">Chính sách
+										bảo hành</a></li>
+							</ul>
+						</div>
+						<div class="col-lg-4 col-md-12">
+							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
+							<div class="input-group">
+								<input type="text" class="form-control"
+									placeholder="Nhập email của bạn..."
+									style="background: #111; border: 1px solid #333; color: #fff;">
+								<button class="btn"
+									style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
+									ký</button>
+							</div>
+						</div>
+					</div>
+					<div
+						class="text-center mt-5 pt-3 border-top border-secondary small">©
+						2026 Model World. All rights reserved.</div>
+				</div>
+			</footer>
+		</div>
+	</div>
+	
+	<div class="floating-socials">
+		<a href="tel:0909123456" class="social-btn phone"><i class="bi bi-telephone-fill"></i></a>
+		<a href="#" class="social-btn zalo"><i class="bi bi-chat-dots-fill"></i></a>
+		<a href="#" class="social-btn messenger"><i class="bi bi-messenger"></i></a>
+	</div>
+
+	<div id="floating-cart" onclick="toggleMiniCart()">
+		<i class="bi bi-cart3"></i> <span id="floating-cart-count"
+			class="cart-badge">0</span>
+	</div>
+
+	<div id="mini-cart-panel" class="mini-cart-panel">
+		<div
+			class="p-3 border-bottom border-secondary d-flex justify-content-between align-items-center">
+			<span class="fw-bold text-info">GIỎ HÀNG NHANH</span>
+			<button onclick="toggleMiniCart()" class="btn-close btn-close-white"></button>
+		</div>
+		<div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1">
+			<div class="text-center text-muted py-5">Đang cập nhật...</div>
+		</div>
+		<div class="p-3 border-top border-secondary">
+			<a href="/cart" class="btn btn-info w-100 fw-bold">XEM GIỎ HÀNG</a>
+		</div>
+	</div>
+
+
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+	document.addEventListener("DOMContentLoaded",function(){
+
+		/* SIDEBAR */
+
+		const menuBtn=document.getElementById("menu-toggle");
+
+		if(menuBtn){
+		menuBtn.onclick=function(e){
+		e.preventDefault();
+		document.body.classList.toggle("toggled");
+		};
+		}
+
+
+		/* MINI CART */
+		window.toggleMiniCart=function(){
+		document.getElementById("mini-cart-panel").classList.toggle("show");
+		};
+
+
+		/* WISHLIST */
+
+		window.toggleWishlist=function(el){
+
+		el.classList.toggle("active");
+
+		let icon=el.querySelector("i");
+
+		if(el.classList.contains("active")){
+		icon.classList.replace("bi-heart","bi-heart-fill");
+		}else{
+		icon.classList.replace("bi-heart-fill","bi-heart");
+		}
+
+		};
+
+
+		/* ADD TO CART */
+
+		window.animateAddToCart=function(event,button){
+
+		event.preventDefault();
+
+		const id=button.dataset.id;
+
+		const card=button.closest(".product-card");
+		const img=card.querySelector("img");
+
+		const cart=document.getElementById("floating-cart");
+
+		if(img && cart){
+
+		const rect=img.getBoundingClientRect();
+		const cartRect=cart.getBoundingClientRect();
+
+		const fly=img.cloneNode(true);
+
+		fly.style.position="fixed";
+		fly.style.left=rect.left+"px";
+		fly.style.top=rect.top+"px";
+		fly.style.width="60px";
+		fly.style.height="60px";
+		fly.style.objectFit="cover";
+		fly.style.zIndex="9999";
+		fly.style.transition="all 0.6s ease";
+
+		document.body.appendChild(fly);
+
+		setTimeout(()=>{
+
+		fly.style.left=cartRect.left+"px";
+		fly.style.top=cartRect.top+"px";
+		fly.style.width="20px";
+		fly.style.height="20px";
+		fly.style.opacity="0.2";
+
+		},50);
+
+		setTimeout(()=>fly.remove(),600);
+
+		}
+
+
+		/* CALL API */
+
+		fetch("/cart/add/"+id,{
+		method:"POST"
+		})
+		.then(res=>res.text())
+		.then(text=>{
+
+		if(text==="success"){
+		updateMiniCart();
+		}
+
+		});
+
+		};
+
+
+
+		/* UPDATE MINI CART */
+
+		function updateMiniCart(){
+
+		fetch("/cart/api/mini-cart")
+
+		.then(res=>res.json())
+
+		.then(data=>{
+
+		const body=document.getElementById("mini-cart-body");
+		const badge=document.getElementById("floating-cart-count");
+		const totalText=document.getElementById("mini-cart-total");
+
+		if(!data || data.length===0){
+
+		body.innerHTML=`
+		<div class="text-center text-muted py-5">
+		<i class="bi bi-cart-x fs-1 mb-2 d-block"></i>
+		Chưa có sản phẩm
+		</div>
+		`;
+
+		badge.style.display="none";
+		totalText.innerText="0₫";
+		return;
+
+		}
+
+		let html="";
+		let total=0;
+		let count=0;
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-info">
-    <div class="container">
+		data.forEach(item=>{
 
-        <a class="navbar-brand fw-bold" href="/">MODEL WORLD</a>
+		let price=item.product.price;
+		let qty=item.quantity;
 
-        <div class="ms-auto d-flex align-items-center">
+		total+=price*qty;
+		count+=qty;
 
-            <div th:if="${account != null}" class="dropdown">
+		let img=item.product.mainImage
+		? "/uploads/"+item.product.mainImage
+		: "https://via.placeholder.com/50";
 
-                <a class="nav-link dropdown-toggle d-flex align-items-center"
-                   href="#" data-bs-toggle="dropdown">
+		html+=`
 
-                    <img th:src="${account.avatar != null 
-                                  ? account.avatar 
-                                  : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-                         style="width:40px;height:40px;border-radius:50%;object-fit:cover"
-                         class="me-2 border border-info">
+		<div class="d-flex align-items-center mb-3 pb-3 border-bottom border-secondary">
 
-                    <span th:text="${account.fullName}"></span>
+		<img src="${img}" width="50" height="50"
+		style="object-fit:cover"
+		class="rounded me-2">
 
-                </a>
+		<div class="flex-grow-1">
 
-                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+		<div class="small fw-bold">${item.product.name}</div>
 
-                    <li>
-                        <a class="dropdown-item" href="/account">Tài khoản</a>
-                    </li>
+		<div class="small text-danger">
+		${price.toLocaleString()}₫
+		</div>
 
-                    <li>
-                        <a class="dropdown-item text-danger" href="/logout">Đăng xuất</a>
-                    </li>
+		<div class="d-flex align-items-center gap-2 mt-1">
 
-                </ul>
+		<button data-id="${item.id}" class="minus-btn"
+		style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">-</button>
 
-            </div>
+		<span>${qty}</span>
 
-        </div>
+		<button data-id="${item.id}" class="plus-btn"
+		style="width:22px;height:22px;border:none;background:#45a29e;color:black;border-radius:4px">+</button>
 
-    </div>
-</nav>
+		</div>
 
-<div class="container py-5">
+		</div>
 
-    <div th:if="${success}" class="alert alert-success text-center" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-danger text-center" th:text="${error}"></div>
+		<button data-id="${item.id}" class="delete-btn"
+		style="background:none;border:none;color:#ff2e63">
+		<i class="bi bi-x-lg"></i>
+		</button>
 
-    <div class="row g-4">
+		</div>
 
-        <!-- LEFT -->
-        <div class="col-md-4">
+		`;
 
-            <div class="card bg-black border-info text-center p-4">
+		});
 
-                <form th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data">
+		body.innerHTML=html;
 
-                    <img th:src="${account.avatar != null 
-                                  ? account.avatar 
-                                  : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-                         style="width:150px;height:150px;border-radius:50%;object-fit:cover"
-                         class="mb-3 border border-info">
+		badge.innerText=count;
+		badge.style.display="flex";
 
-                    <input type="file"
-                           name="avatar"
-                           class="form-control mb-3"
-                           onchange="this.form.submit()">
+		totalText.innerText=total.toLocaleString()+"₫";
 
-                </form>
 
-                <h5 th:text="${account.fullName}"></h5>
+		/* CART BUTTON EVENTS */
 
-                <p class="text-muted" th:text="${account.email}"></p>
+		document.querySelectorAll(".plus-btn").forEach(btn=>{
+		btn.onclick=()=>{
 
-                <span class="badge bg-warning text-dark mb-3"
-                      th:text="${membershipName}">
-                </span>
+		fetch("/cart/plus/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
 
-                <hr>
+		};
+		});
 
-                <div>
-                    <p class="mb-1">Số đơn hàng</p>
-                    <h5 class="text-info" th:text="${orderCount}">0</h5>
-                </div>
+		document.querySelectorAll(".minus-btn").forEach(btn=>{
+		btn.onclick=()=>{
 
-                <div>
-                    <p class="mb-1">Tổng chi tiêu</p>
-                    <h5 class="text-warning"
-                        th:text="${#numbers.formatDecimal(account.totalSpending,0,'POINT',0,'POINT')} + ' đ'">
-                    </h5>
-                </div>
+		fetch("/cart/minus/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
 
-            </div>
+		};
+		});
 
-        </div>
+		document.querySelectorAll(".delete-btn").forEach(btn=>{
+		btn.onclick=()=>{
 
-        <!-- RIGHT -->
-        <div class="col-md-8">
+		fetch("/cart/delete/"+btn.dataset.id)
+		.then(()=>updateMiniCart());
 
-            <div class="card bg-black border-info p-4">
+		};
+		});
 
-                <h5 class="mb-4 border-bottom border-secondary pb-2">
-                    Thông tin cá nhân
-                </h5>
 
-                <!-- FULL NAME -->
-                <form th:action="@{/account/update-fullname}" method="post" class="mb-3">
+		});
 
-                    <label>Họ tên</label>
+		}
 
-                    <div class="input-group">
 
-                        <input type="text"
-                               name="fullName"
-                               th:value="${account.fullName}"
-                               class="form-control bg-dark text-light border-secondary">
 
-                        <button class="btn btn-info">
-                            Lưu
-                        </button>
+		/* LIVE SEARCH */
 
-                    </div>
+		const input=document.getElementById("liveSearchInput");
+		const searchBox=document.getElementById("searchBox");
 
-                </form>
+		if(input && searchBox){
 
-                <!-- PHONE -->
-                <form th:action="@{/account/update-phone}" method="post" class="mb-3">
+		const results=document.createElement("div");
 
-                    <label>Số điện thoại</label>
+		results.style.cssText=
+		"position:absolute;top:100%;left:0;right:0;background:#1f2833;border:1px solid #45a29e;border-radius:8px;margin-top:5px;display:none;max-height:400px;overflow-y:auto;";
 
-                    <div class="input-group">
+		searchBox.appendChild(results);
 
-                        <input type="text"
-                               name="phone"
-                               th:value="${account.phone}"
-                               class="form-control bg-dark text-light border-secondary">
+		let timeout;
 
-                        <button class="btn btn-info">
-                            Lưu
-                        </button>
+		input.addEventListener("input",function(){
 
-                    </div>
+		clearTimeout(timeout);
 
-                </form>
+		const keyword=this.value.trim();
 
-                <!-- BIRTHDAY -->
-                <form th:action="@{/account/update-birthday}" method="post" class="mb-3">
+		if(keyword.length<2){
+		results.style.display="none";
+		return;
+		}
 
-                    <label>Ngày sinh</label>
+		timeout=setTimeout(()=>{
 
-                    <div class="input-group">
+		fetch("/cart/api/search?keyword="+encodeURIComponent(keyword))
 
-                        <input type="date"
-                               name="birthday"
-                               th:value="${account.birthDay}"
-                               class="form-control bg-dark text-light border-secondary">
+		.then(res=>res.json())
 
-                        <button class="btn btn-info">
-                            Lưu
-                        </button>
+		.then(data=>{
 
-                    </div>
+		if(!data.length){
 
-                </form>
+		results.innerHTML=
+		'<div class="p-3 text-center text-muted">Không tìm thấy</div>';
 
-                <!-- ADDRESS (SAFE VERSION) -->
-                <form th:action="@{/account/update-address}" method="post" class="mb-3">
+		}else{
 
-                    <label>Địa chỉ</label>
+		let html="";
 
-                    <div class="input-group">
+		data.forEach(p=>{
 
-                        <input type="text"
-                               name="address"
-                               th:value="${account.addresses != null and account.addresses.size() > 0 
-                                          ? account.addresses[0].detail 
-                                          : ''}"
-                               class="form-control bg-dark text-light border-secondary"
-                               placeholder="Chưa có địa chỉ">
+		html+=`
 
-                        <button class="btn btn-info">
-                            Lưu
-                        </button>
+		<a href="/product-detail/${p.id}"
+		class="d-flex align-items-center p-2 border-bottom text-decoration-none">
+		<img src="/uploads/${p.mainImage}"width="40"height="40"
+		class="rounded me-2">
 
-                    </div>
+		<div>
 
-                </form>
+		<div class="small fw-bold">${p.name}</div>
 
-                <!-- PASSWORD -->
-                <form th:action="@{/account/update-password}" method="post">
+		<div class="small text-danger">
+		${p.price.toLocaleString()}₫
+		</div>
 
-                    <label>Đổi mật khẩu</label>
+		</div>
 
-                    <div class="input-group">
+		</a>
 
-                        <input type="password"
-                               name="password"
-                               class="form-control bg-dark text-light border-secondary"
-                               placeholder="Nhập mật khẩu mới">
+		`;
 
-                        <button class="btn btn-danger">
-                            Đổi
-                        </button>
+		});
 
-                    </div>
+		results.innerHTML=html;
 
-                </form>
+		}
 
-            </div>
+		results.style.display="block";
 
-        </div>
+		});
 
-    </div>
+		},400);
 
-</div>
+		});
 
+		}
+
+
+		/* LOAD CART */
+
+		updateMiniCart();
+
+		});
+    </script>
 </body>
 </html>
