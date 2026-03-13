@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +19,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Address;
-import com.example.demo.model.Orders;
+import com.example.demo.model.Membership;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.AddressRepository;
+import com.example.demo.repository.MembershipRepository;
 import com.example.demo.repository.OrdersRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -41,80 +41,71 @@ public class AccountController {
     private AddressRepository addressRepo;
 
     @Autowired
+    private MembershipRepository membershipRepo;
+
+    @Autowired
     private HttpSession session;
 
-    private final String UPLOAD_DIR =
-            "src/main/resources/static/images/avatar/";
+    private final String UPLOAD_DIR = "src/main/resources/static/images/avatar/";
 
     // =====================================================
-    // ================= PROFILE PAGE ======================
+    // PROFILE PAGE
     // =====================================================
 
-    @GetMapping("")
+    @GetMapping
     public String accountPage(Model model) {
 
-        Account sessionAcc =
-                (Account) session.getAttribute("account");
-
-        if (sessionAcc == null) {
-            return "redirect:/login";
-        }
-
-        Account acc =
-                accountRepo.findById(sessionAcc.getId()).orElse(null);
+        Account acc = (Account) session.getAttribute("account");
 
         if (acc == null) {
             return "redirect:/login";
         }
 
-        // ============================
-        // LẤY DANH SÁCH ĐƠN HÀNG USER
-        // ============================
-        List<Orders> orders =
-                ordersRepo.findByAccount_IdOrderByCreatedDateDesc(acc.getId());
+        Account account =
+                accountRepo.findById(acc.getId()).orElse(null);
 
-        long orderCount = orders.size();
+        if (account == null) {
+            return "redirect:/login";
+        }
 
-        // ============================
-        // TÍNH TỔNG CHI TIÊU
-        // ============================
-        BigDecimal totalSpent = BigDecimal.ZERO;
+        BigDecimal totalSpent = account.getTotalSpending();
 
-        for (Orders o : orders) {
-            if (o.getStatus() == 3 && o.getTotal() != null) {
-                totalSpent = totalSpent.add(o.getTotal());
+        String membershipName = "Đồng";
+
+        if (totalSpent != null) {
+
+            if (totalSpent.compareTo(new BigDecimal("1000000000")) >= 0) {
+                membershipName = "Kim Cương";
+            }
+            else if (totalSpent.compareTo(new BigDecimal("500000000")) >= 0) {
+                membershipName = "Bạch Kim";
+            }
+            else if (totalSpent.compareTo(new BigDecimal("100000000")) >= 0) {
+                membershipName = "Vàng";
+            }
+            else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) {
+                membershipName = "Bạc";
             }
         }
 
-        acc.setTotalSpending(totalSpent);
-        accountRepo.save(acc);
+        Membership membership =
+                membershipRepo.findByName(membershipName).orElse(null);
 
-        // ============================
-        // PHÂN HẠNG
-        // ============================
-        String currentLevel;
+        if (membership != null) {
 
-        if (totalSpent.compareTo(BigDecimal.valueOf(5_000_000)) < 0) {
-            currentLevel = "Đồng";
-        } else if (totalSpent.compareTo(BigDecimal.valueOf(10_000_000)) < 0) {
-            currentLevel = "Bạc";
-        } else if (totalSpent.compareTo(BigDecimal.valueOf(20_000_000)) < 0) {
-            currentLevel = "Vàng";
-        } else {
-            currentLevel = "Kim Cương";
+            account.setMembership(membership);
+
+            accountRepo.save(account);
         }
 
-        session.setAttribute("account", acc);
-
-        model.addAttribute("totalSpent", totalSpent);
-        model.addAttribute("orderCount", orderCount);
-        model.addAttribute("currentLevel", currentLevel);
+        model.addAttribute("account", account);
+        model.addAttribute("membershipName", membershipName);
 
         return "client/account";
     }
 
     // =====================================================
-    // ================= UPDATE INFO =======================
+    // UPDATE FULL NAME
     // =====================================================
 
     @PostMapping("/update-fullname")
@@ -128,6 +119,10 @@ public class AccountController {
                 "Họ tên");
     }
 
+    // =====================================================
+    // UPDATE PHONE
+    // =====================================================
+
     @PostMapping("/update-phone")
     public String updatePhone(
             @RequestParam("phone") String phone,
@@ -138,6 +133,10 @@ public class AccountController {
                 redirect,
                 "Số điện thoại");
     }
+
+    // =====================================================
+    // UPDATE BIRTHDAY
+    // =====================================================
 
     @PostMapping("/update-birthday")
     public String updateBirthday(
@@ -150,19 +149,28 @@ public class AccountController {
             return "redirect:/login";
 
         try {
+
             acc.setBirthDay(LocalDate.parse(birthdayStr));
+
             accountRepo.save(acc);
+
             session.setAttribute("account", acc);
 
             redirect.addFlashAttribute("success",
                     "Cập nhật ngày sinh thành công!");
+
         } catch (DateTimeParseException e) {
+
             redirect.addFlashAttribute("error",
                     "Định dạng ngày không hợp lệ!");
         }
 
         return "redirect:/account";
     }
+
+    // =====================================================
+    // UPDATE PASSWORD
+    // =====================================================
 
     @PostMapping("/update-password")
     public String updatePassword(
@@ -176,7 +184,7 @@ public class AccountController {
     }
 
     // =====================================================
-    // ================= UPDATE ADDRESS ====================
+    // UPDATE ADDRESS
     // =====================================================
 
     @PostMapping("/update-address")
@@ -195,12 +203,19 @@ public class AccountController {
         Address address;
 
         if (optionalAddress.isPresent()) {
+
             address = optionalAddress.get();
+
             address.setDetail(addressDetail);
+
         } else {
+
             address = new Address();
+
             address.setAccount(acc);
+
             address.setDetail(addressDetail);
+
             address.setIsDefault(true);
         }
 
@@ -213,7 +228,7 @@ public class AccountController {
     }
 
     // =====================================================
-    // ================= UPLOAD AVATAR =====================
+    // UPLOAD AVATAR
     // =====================================================
 
     @PostMapping("/upload-avatar")
@@ -227,8 +242,10 @@ public class AccountController {
             return "redirect:/login";
 
         if (file.isEmpty()) {
+
             redirect.addFlashAttribute("error",
                     "Vui lòng chọn ảnh!");
+
             return "redirect:/account";
         }
 
@@ -253,12 +270,14 @@ public class AccountController {
             acc.setAvatar("/images/avatar/" + fileName);
 
             accountRepo.save(acc);
+
             session.setAttribute("account", acc);
 
             redirect.addFlashAttribute("success",
                     "Đổi ảnh đại diện thành công!");
 
         } catch (IOException e) {
+
             redirect.addFlashAttribute("error",
                     "Lỗi khi lưu ảnh!");
         }
@@ -267,10 +286,11 @@ public class AccountController {
     }
 
     // =====================================================
-    // ================= HELPER ============================
+    // HELPER
     // =====================================================
 
     private Account getSessionAccount() {
+
         return (Account) session.getAttribute("account");
     }
 
@@ -294,7 +314,9 @@ public class AccountController {
         if (dbAcc != null) {
 
             updater.update(dbAcc);
+
             accountRepo.save(dbAcc);
+
             session.setAttribute("account", dbAcc);
 
             redirect.addFlashAttribute("success",

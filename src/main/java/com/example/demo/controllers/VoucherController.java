@@ -1,134 +1,125 @@
 package com.example.demo.controllers;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Voucher;
 import com.example.demo.repository.VoucherRepository;
 
 import jakarta.servlet.http.HttpSession;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/voucher")
 public class VoucherController {
-//cc
+
     @Autowired
     VoucherRepository voucherRepo;
 
+    // ===============================
+    // HIỂN THỊ TRANG VOUCHER
+    // ===============================
     @GetMapping
-    public String getVoucherPage(Model model, HttpSession session) {
-        // 1. Kiểm tra đăng nhập
+    public String voucherPage(Model model, HttpSession session) {
+
         Account account = (Account) session.getAttribute("account");
+
         if (account == null) {
             return "redirect:/login";
         }
 
-        // 2. Lấy thời gian thực
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate today = LocalDate.now();
+        List<Voucher> availableVouchers = new ArrayList<>();
 
-        // 3. Lấy danh sách Voucher của tôi
-        // SỬA: Gọi hàm có dấu gạch dưới Account_Id
-        List<Voucher> myVouchers = voucherRepo.findByAccount_IdOrderByIdDesc(account.getId());
+        // 1. voucher chung
+        List<Voucher> publicVouchers = voucherRepo.findByAccountIsNull();
 
-        // 4. Lấy danh sách Voucher chung (để săn)
-        List<Voucher> allPublicVouchers = voucherRepo.findByAccountIsNullAndActiveTrueAndExpiredAtAfter(now);
+        // 2. voucher membership
+        List<Voucher> membershipVouchers = new ArrayList<>();
 
-        // --- LOGIC PHÂN LOẠI HIỂN THỊ (Sinh nhật vs Thường) ---
-        List<Voucher> birthdayVouchers = new ArrayList<>();
-        boolean isBirthdayMonth = false;
-
-        // Kiểm tra nếu user có ngày sinh nhật
-        if (account.getBirthDay() != null) {
-            LocalDate birthDate = account.getBirthDay();
-
-            // Nếu tháng hiện tại trùng tháng sinh
-            if (birthDate.getMonth() == today.getMonth()) {
-                isBirthdayMonth = true;
-                // Lọc voucher có code bắt đầu bằng HPBD hoặc BIRTHDAY
-                birthdayVouchers = allPublicVouchers.stream()
-                        .filter(v -> v.getCode().toUpperCase().startsWith("HPBD")
-                                  || v.getCode().toUpperCase().startsWith("BIRTHDAY"))
-                        .collect(Collectors.toList());
-            }
+        if (account.getMembership() != null) {
+            membershipVouchers = voucherRepo.findByMembership_IdAndAccountIsNull(
+                    account.getMembership().getId()
+            );
         }
 
-        // Lọc voucher thường (Không phải sinh nhật)
-        List<Voucher> availableVouchers = allPublicVouchers.stream()
-                .filter(v -> !v.getCode().toUpperCase().startsWith("HPBD")
-                          && !v.getCode().toUpperCase().startsWith("BIRTHDAY"))
-                .collect(Collectors.toList());
+        // gộp tất cả lại
+        availableVouchers.addAll(publicVouchers);
+        availableVouchers.addAll(membershipVouchers);
 
-        // Đẩy dữ liệu ra view
-        model.addAttribute("myVouchers", myVouchers);
         model.addAttribute("availableVouchers", availableVouchers);
-        model.addAttribute("birthdayVouchers", birthdayVouchers);
-        model.addAttribute("isBirthdayMonth", isBirthdayMonth);
 
         return "client/voucher";
     }
 
+    // ===============================
+    // LƯU VOUCHER
+    // ===============================
     @PostMapping("/claim")
     public String claimVoucher(@RequestParam("voucherId") Integer originalVoucherId,
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
 
         Account account = (Account) session.getAttribute("account");
+
         if (account == null) {
             return "redirect:/login";
         }
 
         try {
-            // Tìm voucher gốc
-            Voucher originalVoucher = voucherRepo.findByIdAndAccountIsNull(originalVoucherId)
-                    .orElseThrow(() -> new Exception("Voucher không tồn tại hoặc đã hết hạn!"));
 
-            // Kiểm tra xem đã lưu mã này chưa
-            // SỬA: Gọi hàm có dấu gạch dưới Account_Id
-            boolean alreadyHas = voucherRepo.existsByAccount_IdAndCode(account.getId(), originalVoucher.getCode());
+            Optional<Voucher> optionalVoucher = voucherRepo.findById(originalVoucherId);
 
-            if (alreadyHas) {
-                redirectAttributes.addFlashAttribute("error", "Bạn đã lưu mã này rồi!");
+            if (optionalVoucher.isEmpty()) {
+
+                redirectAttributes.addFlashAttribute("error", "Voucher không tồn tại");
                 return "redirect:/voucher";
             }
 
-            // Tạo bản sao voucher cho user
+            Voucher originalVoucher = optionalVoucher.get();
+
+            // kiểm tra đã lưu chưa
+            boolean alreadyHas = voucherRepo.existsByAccount_IdAndCode(
+                    account.getId(),
+                    originalVoucher.getCode()
+            );
+
+            if (alreadyHas) {
+
+                redirectAttributes.addFlashAttribute("error", "Bạn đã lưu voucher này rồi!");
+                return "redirect:/voucher";
+            }
+
+            // tạo voucher mới cho user
             Voucher newVoucher = Voucher.builder()
-                    .code(originalVoucher.getCode()) // Giữ nguyên code
+                    .code(originalVoucher.getCode())
                     .discountPercent(originalVoucher.getDiscountPercent())
                     .discountAmount(originalVoucher.getDiscountAmount())
                     .minOrderValue(originalVoucher.getMinOrderValue())
                     .expiredAt(originalVoucher.getExpiredAt())
                     .active(true)
-                    .account(account) // Gán cho user hiện tại
+                    .isFreeShipping(originalVoucher.getIsFreeShipping())
+                    .isBirthday(originalVoucher.getIsBirthday())
+                    .membership(originalVoucher.getMembership())
+                    .account(account)
                     .build();
 
             voucherRepo.save(newVoucher);
+
             redirectAttributes.addFlashAttribute("success", "Lưu voucher thành công!");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            // Nếu lỗi do trùng code (Duplicate entry) thì thông báo khéo
-            if(e.getMessage().contains("Duplicate entry")) {
-                redirectAttributes.addFlashAttribute("error", "Bạn đã sở hữu mã này rồi (Lỗi trùng lặp).");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            }
+
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra");
         }
 
         return "redirect:/voucher";
     }
+
 }

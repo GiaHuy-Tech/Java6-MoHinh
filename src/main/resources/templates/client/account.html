@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,36 +9,49 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
 
 <body class="bg-dark text-light">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-info">
     <div class="container">
+
         <a class="navbar-brand fw-bold" href="/">MODEL WORLD</a>
 
         <div class="ms-auto d-flex align-items-center">
 
-            <div th:if="${session.account != null}" class="dropdown">
+            <div th:if="${account != null}" class="dropdown">
+
                 <a class="nav-link dropdown-toggle d-flex align-items-center"
                    href="#" data-bs-toggle="dropdown">
 
-                    <img th:src="${session.account.avatar != null 
-                                  ? session.account.avatar 
+                    <img th:src="${account.avatar != null 
+                                  ? account.avatar 
                                   : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
                          style="width:40px;height:40px;border-radius:50%;object-fit:cover"
                          class="me-2 border border-info">
 
-                    <span th:text="${session.account.fullName}"></span>
+                    <span th:text="${account.fullName}"></span>
+
                 </a>
 
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                    <li><a class="dropdown-item" href="/account">Tài khoản</a></li>
-                    <li><a class="dropdown-item text-danger" href="/logout">Đăng xuất</a></li>
+
+                    <li>
+                        <a class="dropdown-item" href="/account">Tài khoản</a>
+                    </li>
+
+                    <li>
+                        <a class="dropdown-item text-danger" href="/logout">Đăng xuất</a>
+                    </li>
+
                 </ul>
+
             </div>
 
         </div>
+
     </div>
 </nav>
 
@@ -50,23 +64,30 @@
 
         <!-- LEFT -->
         <div class="col-md-4">
+
             <div class="card bg-black border-info text-center p-4">
 
                 <form th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data">
-                    <img th:src="${session.account.avatar != null 
-                                  ? session.account.avatar 
+
+                    <img th:src="${account.avatar != null 
+                                  ? account.avatar 
                                   : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
                          style="width:150px;height:150px;border-radius:50%;object-fit:cover"
                          class="mb-3 border border-info">
 
-                    <input type="file" name="avatar" class="form-control mb-3" onchange="this.form.submit()">
+                    <input type="file"
+                           name="avatar"
+                           class="form-control mb-3"
+                           onchange="this.form.submit()">
+
                 </form>
 
-                <h5 th:text="${session.account.fullName}"></h5>
-                <p class="text-muted" th:text="${session.account.email}"></p>
+                <h5 th:text="${account.fullName}"></h5>
+
+                <p class="text-muted" th:text="${account.email}"></p>
 
                 <span class="badge bg-warning text-dark mb-3"
-                      th:text="${currentLevel}">
+                      th:text="${membershipName}">
                 </span>
 
                 <hr>
@@ -79,82 +100,132 @@
                 <div>
                     <p class="mb-1">Tổng chi tiêu</p>
                     <h5 class="text-warning"
-                        th:text="${#numbers.formatDecimal(totalSpent, 0, 'POINT', 0, 'POINT')} + ' đ'">
+                        th:text="${#numbers.formatDecimal(account.totalSpending,0,'POINT',0,'POINT')} + ' đ'">
                     </h5>
                 </div>
 
             </div>
+
         </div>
 
         <!-- RIGHT -->
         <div class="col-md-8">
+
             <div class="card bg-black border-info p-4">
 
-                <h5 class="mb-4 border-bottom border-secondary pb-2">Thông tin cá nhân</h5>
+                <h5 class="mb-4 border-bottom border-secondary pb-2">
+                    Thông tin cá nhân
+                </h5>
 
                 <!-- FULL NAME -->
                 <form th:action="@{/account/update-fullname}" method="post" class="mb-3">
+
                     <label>Họ tên</label>
+
                     <div class="input-group">
-                        <input type="text" name="fullName"
-                               th:value="${session.account.fullName}"
+
+                        <input type="text"
+                               name="fullName"
+                               th:value="${account.fullName}"
                                class="form-control bg-dark text-light border-secondary">
-                        <button class="btn btn-info">Lưu</button>
+
+                        <button class="btn btn-info">
+                            Lưu
+                        </button>
+
                     </div>
+
                 </form>
 
                 <!-- PHONE -->
                 <form th:action="@{/account/update-phone}" method="post" class="mb-3">
+
                     <label>Số điện thoại</label>
+
                     <div class="input-group">
-                        <input type="text" name="phone"
-                               th:value="${session.account.phone}"
+
+                        <input type="text"
+                               name="phone"
+                               th:value="${account.phone}"
                                class="form-control bg-dark text-light border-secondary">
-                        <button class="btn btn-info">Lưu</button>
+
+                        <button class="btn btn-info">
+                            Lưu
+                        </button>
+
                     </div>
+
                 </form>
 
                 <!-- BIRTHDAY -->
                 <form th:action="@{/account/update-birthday}" method="post" class="mb-3">
+
                     <label>Ngày sinh</label>
+
                     <div class="input-group">
-                        <input type="date" name="birthday"
-                               th:value="${session.account.birthDay}"
+
+                        <input type="date"
+                               name="birthday"
+                               th:value="${account.birthDay}"
                                class="form-control bg-dark text-light border-secondary">
-                        <button class="btn btn-info">Lưu</button>
+
+                        <button class="btn btn-info">
+                            Lưu
+                        </button>
+
                     </div>
+
                 </form>
 
-                <!-- ADDRESS (FIXED) -->
+                <!-- ADDRESS (SAFE VERSION) -->
                 <form th:action="@{/account/update-address}" method="post" class="mb-3">
+
                     <label>Địa chỉ</label>
+
                     <div class="input-group">
-                        <input type="text" name="address"
-                               th:value="${session.account.addresses != null 
-                                          and !#lists.isEmpty(session.account.addresses) 
-                                          ? session.account.addresses[0].fullAddress 
+
+                        <input type="text"
+                               name="address"
+                               th:value="${account.addresses != null and account.addresses.size() > 0 
+                                          ? account.addresses[0].detail 
                                           : ''}"
                                class="form-control bg-dark text-light border-secondary"
                                placeholder="Chưa có địa chỉ">
-                        <button class="btn btn-info">Lưu</button>
+
+                        <button class="btn btn-info">
+                            Lưu
+                        </button>
+
                     </div>
+
                 </form>
 
                 <!-- PASSWORD -->
                 <form th:action="@{/account/update-password}" method="post">
+
                     <label>Đổi mật khẩu</label>
+
                     <div class="input-group">
-                        <input type="password" name="password"
+
+                        <input type="password"
+                               name="password"
                                class="form-control bg-dark text-light border-secondary"
                                placeholder="Nhập mật khẩu mới">
-                        <button class="btn btn-danger">Đổi</button>
+
+                        <button class="btn btn-danger">
+                            Đổi
+                        </button>
+
                     </div>
+
                 </form>
 
             </div>
+
         </div>
 
     </div>
+
 </div>
 
 </body>
