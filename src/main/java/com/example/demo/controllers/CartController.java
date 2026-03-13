@@ -28,30 +28,39 @@ public class CartController {
     @Autowired
     private ProductRepository productRepo;
 
-    // ================= 1. TRANG GIỎ HÀNG CHÍNH (TRẢ VỀ GIAO DIỆN HTML) =================
+    // ================= 1. TRANG GIỎ HÀNG =================
     @GetMapping
     public String viewCart(HttpSession session, Model model) {
+
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
 
         List<CartDetail> cartList = cartRepo.findCartWithProduct(account.getId());
 
         BigDecimal total = BigDecimal.ZERO;
+
         for (CartDetail item : cartList) {
             BigDecimal price = item.getPrice() != null ? item.getPrice() : BigDecimal.ZERO;
             BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
             total = total.add(price.multiply(qty));
         }
 
+        // ===== TRANG CART =====
         model.addAttribute("cartDetails", cartList);
         model.addAttribute("total", total);
+
+        // ===== MINI CART =====
+        model.addAttribute("cart", cartList);
+        model.addAttribute("cartSize", cartList.size());
+
         return "client/cart";
     }
 
-    // ================= 2. API: THÊM VÀO GIỎ HÀNG (DÙNG CHO FETCH JS) =================
+    // ================= 2. THÊM SẢN PHẨM =================
     @PostMapping("/add/{productId}")
     @ResponseBody
     public String addToCart(@PathVariable Integer productId, HttpSession session) {
+
         Account account = getAccount(session);
         if (account == null) return "unauthorized";
 
@@ -68,7 +77,7 @@ public class CartController {
             cartItem.setProduct(product);
             cartItem.setQuantity(1);
             cartItem.setCreateDate(new Date());
-            cartItem.setPrice(product.getPrice()); 
+            cartItem.setPrice(product.getPrice());
         }
 
         try {
@@ -76,54 +85,65 @@ public class CartController {
             return "success";
         } catch (Exception e) {
             e.printStackTrace();
-            return "error: " + e.getMessage();
+            return "error";
         }
     }
 
-    // ================= 3. API: LẤY DATA CHO MINI CART (TRẢ VỀ JSON) =================
+    // ================= 3. MINI CART API =================
     @GetMapping("/api/mini-cart")
     @ResponseBody
     public ResponseEntity<List<CartDetail>> getMiniCartData(HttpSession session) {
+
         Account account = getAccount(session);
         if (account == null) return ResponseEntity.status(401).build();
 
-        // Lấy danh sách cart từ DB và trả thẳng về dạng JSON cho JS đọc
         List<CartDetail> cartList = cartRepo.findCartWithProduct(account.getId());
+
         return ResponseEntity.ok(cartList);
     }
 
-    // ================= 4. API: LIVE SEARCH THẬT TỪ CSDL (TRẢ VỀ JSON) =================
+    // ================= 4. LIVE SEARCH =================
     @GetMapping("/api/search")
     @ResponseBody
     public ResponseEntity<List<Products>> liveSearch(@RequestParam("keyword") String keyword) {
+
         if (keyword == null || keyword.trim().length() < 2) {
-            return ResponseEntity.badRequest().build(); // Không search nếu gõ quá ngắn
+            return ResponseEntity.badRequest().build();
         }
-        
-        // Trả về top 5 sản phẩm khớp tên (từ Repository vừa thêm)
+
         List<Products> results = productRepo.findTop5ByNameContainingIgnoreCase(keyword.trim());
+
         return ResponseEntity.ok(results);
     }
 
-    // ================= CÁC HÀM XỬ LÝ NÚT TĂNG/GIẢM/XÓA TRONG TRANG CART =================
+    // ================= TĂNG SỐ LƯỢNG =================
     @GetMapping("/plus/{id}")
     public String increase(@PathVariable Integer id, HttpSession session) {
+
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
+
         CartDetail item = cartRepo.findById(id).orElse(null);
+
         if (item != null && item.getAccount().getId().equals(account.getId())) {
             item.setQuantity(item.getQuantity() + 1);
             cartRepo.save(item);
         }
+
         return "redirect:/cart";
     }
 
+    // ================= GIẢM SỐ LƯỢNG =================
     @GetMapping("/minus/{id}")
     public String decrease(@PathVariable Integer id, HttpSession session) {
+
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
+
         CartDetail item = cartRepo.findById(id).orElse(null);
+
         if (item != null && item.getAccount().getId().equals(account.getId())) {
+
             if (item.getQuantity() > 1) {
                 item.setQuantity(item.getQuantity() - 1);
                 cartRepo.save(item);
@@ -131,24 +151,35 @@ public class CartController {
                 cartRepo.delete(item);
             }
         }
+
         return "redirect:/cart";
     }
 
+    // ================= XOÁ SẢN PHẨM =================
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id, HttpSession session) {
+
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
+
         CartDetail item = cartRepo.findById(id).orElse(null);
+
         if (item != null && item.getAccount().getId().equals(account.getId())) {
             cartRepo.delete(item);
         }
+
         return "redirect:/cart";
     }
 
-    // Hàm tiện ích lấy User hiện tại
+    // ================= LẤY USER =================
     private Account getAccount(HttpSession session) {
+
         Account account = (Account) session.getAttribute("account");
-        if (account == null) account = (Account) session.getAttribute("user");
+
+        if (account == null) {
+            account = (Account) session.getAttribute("user");
+        }
+
         return account;
     }
 }
