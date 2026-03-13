@@ -6,9 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -35,10 +33,7 @@ public class DetailController {
     private CommentRepository commentRepo;
 
     @Autowired
-    private OrdersDetailRepository orderDetailRepo; // ✅ sửa tên đúng
-
-    @Autowired
-    private VoucherDetailRepository voucherDetailRepo; // ✅ dùng đúng repo
+    private OrdersDetailRepository orderDetailRepo;
 
     @Autowired
     private CartDetailRepository cartDetailRepo;
@@ -48,76 +43,17 @@ public class DetailController {
 
     // ================= PRODUCT DETAIL =================
     @GetMapping("/product-detail/{id}")
-    public String productDetail(@PathVariable Integer id,
-                                @RequestParam(required = false) Integer voucherId,
-                                Model model) {
+    public String productDetail(@PathVariable Integer id, Model model) {
 
         Account account = (Account) session.getAttribute("account");
+
         Products product = productRepo.findById(id).orElse(null);
         if (product == null) return "redirect:/products";
 
+        model.addAttribute("product", product);
+
         model.addAttribute("extraImages",
                 productImageRepo.findByProduct_Id(id));
-
-        // ===== LẤY VOUCHER THEO ACCOUNT =====
-        List<Voucher> vouchers = List.of();
-
-        if (account != null) {
-            List<VoucherDetail> voucherDetails =
-                    voucherDetailRepo.findAvailableVouchers(
-                            account.getId(),
-                            LocalDateTime.now());
-
-            vouchers = voucherDetails.stream()
-                    .map(VoucherDetail::getVoucher)
-                    .collect(Collectors.toList());
-        }
-
-        model.addAttribute("vouchers", vouchers);
-
-        // ===== PRICE LOGIC =====
-        BigDecimal finalPrice = product.getPrice();
-        Voucher selectedVoucher = null;
-        String voucherError = null;
-
-        if (voucherId != null && account != null) {
-
-            boolean isOwner = vouchers.stream()
-                    .anyMatch(v -> v.getId().equals(voucherId));
-
-            if (isOwner) {
-
-                selectedVoucher = vouchers.stream()
-                        .filter(v -> v.getId().equals(voucherId))
-                        .findFirst()
-                        .orElse(null);
-
-                if (selectedVoucher != null) {
-
-                    if (selectedVoucher.getDiscountPercent() != null) {
-
-                        BigDecimal percent =
-                                BigDecimal.valueOf(
-                                        selectedVoucher.getDiscountPercent())
-                                        .divide(BigDecimal.valueOf(100));
-
-                        finalPrice = finalPrice.subtract(
-                                finalPrice.multiply(percent));
-                    }
-                    else if (selectedVoucher.getDiscountAmount() != null) {
-
-                        finalPrice = finalPrice.subtract(
-                                BigDecimal.valueOf(
-                                        selectedVoucher.getDiscountAmount()));
-                    }
-                }
-            } else {
-                voucherError = "Mã không hợp lệ.";
-            }
-        }
-
-        if (finalPrice.compareTo(BigDecimal.ZERO) < 0)
-            finalPrice = BigDecimal.ZERO;
 
         // ===== COMMENT PERMISSION =====
         boolean canComment = false;
@@ -135,16 +71,14 @@ public class DetailController {
             canComment = hasCompletedOrder && !hasCommented;
         }
 
-        model.addAttribute("product", product);
         model.addAttribute("canComment", canComment);
-        model.addAttribute("finalPrice", finalPrice);
-        model.addAttribute("selectedVoucher", selectedVoucher);
-        model.addAttribute("voucherError", voucherError);
+
         model.addAttribute("comments",
                 commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
 
         return "client/product-detail";
     }
+
 
     // ================= ADD TO CART =================
     @PostMapping("/cart/add")
@@ -189,6 +123,7 @@ public class DetailController {
         return "redirect:/cart";
     }
 
+
     // ================= POST COMMENT =================
     @PostMapping("/product-detail/comment/{productId}")
     public String postComment(@PathVariable Integer productId,
@@ -225,6 +160,7 @@ public class DetailController {
 
             if (imageFile != null && !imageFile.isEmpty()) {
                 try {
+
                     String fileName =
                             System.currentTimeMillis()
                                     + "_" + imageFile.getOriginalFilename();
