@@ -1,5 +1,7 @@
 package com.example.demo.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,8 @@ public interface OrdersDetailRepository extends JpaRepository<OrderDetail, Integ
            """)
     boolean hasCompletedOrder(@Param("accountId") Integer accountId,
                               @Param("productId") Integer productId);
+    List<OrderDetail> findByOrder_Account_IdAndProduct_Id(
+            Integer accountId,
+            Integer productId
+    );
 }

@@ -1,11 +1,11 @@
 package com.example.demo.controllers;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,23 +52,33 @@ public class DetailController {
 
         model.addAttribute("product", product);
 
-        model.addAttribute("extraImages",
-                productImageRepo.findByProduct_Id(id));
+        // load images
+        List<ProductImage> images = productImageRepo.findByProduct_Id(id);
+        model.addAttribute("extraImages", images);
 
         // ===== COMMENT PERMISSION =====
         boolean canComment = false;
 
         if (account != null) {
 
-            boolean hasCompletedOrder =
-                    orderDetailRepo.hasCompletedOrder(
+            List<OrderDetail> details =
+                    orderDetailRepo.findByOrder_Account_IdAndProduct_Id(
                             account.getId(), id);
 
-            boolean hasCommented =
-                    commentRepo.existsByAccount_IdAndProduct_Id(
-                            account.getId(), id);
+            for (OrderDetail d : details) {
 
-            canComment = hasCompletedOrder && !hasCommented;
+                if (d.getOrder().getStatus() == 3) {
+
+                    boolean commented =
+                            commentRepo.existsByAccount_IdAndProduct_Id(
+                                    account.getId(), id);
+
+                    if (!commented) {
+                        canComment = true;
+                        break;
+                    }
+                }
+            }
         }
 
         model.addAttribute("canComment", canComment);
@@ -86,8 +96,7 @@ public class DetailController {
                             @RequestParam Integer quantity,
                             RedirectAttributes redirectAttributes) {
 
-        Account account =
-                (Account) session.getAttribute("account");
+        Account account = (Account) session.getAttribute("account");
 
         if (account == null)
             return "redirect:/login";
@@ -129,8 +138,7 @@ public class DetailController {
     public String postComment(@PathVariable Integer productId,
                               @RequestParam String content,
                               @RequestParam Integer rating,
-                              @RequestParam(required = false)
-                              MultipartFile imageFile) {
+                              @RequestParam(required = false) MultipartFile imageFile) {
 
         Account account =
                 (Account) session.getAttribute("account");
@@ -141,48 +149,66 @@ public class DetailController {
         Products product =
                 productRepo.findById(productId).orElse(null);
 
-        boolean hasCompletedOrder =
-                orderDetailRepo.hasCompletedOrder(
+        if (product == null)
+            return "redirect:/products";
+
+        boolean canComment = false;
+
+        List<OrderDetail> details =
+                orderDetailRepo.findByOrder_Account_IdAndProduct_Id(
                         account.getId(), productId);
 
-        boolean hasCommented =
-                commentRepo.existsByAccount_IdAndProduct_Id(
-                        account.getId(), productId);
+        for (OrderDetail d : details) {
 
-        if (hasCompletedOrder && !hasCommented && product != null) {
+            if (d.getOrder().getStatus() == 3) {
 
-            Comment comment = new Comment();
-            comment.setAccount(account);
-            comment.setProduct(product);
-            comment.setContent(content);
-            comment.setRating(rating);
-            comment.setCreatedAt(LocalDateTime.now());
+                boolean commented =
+                        commentRepo.existsByAccount_IdAndProduct_Id(
+                                account.getId(), productId);
 
-            if (imageFile != null && !imageFile.isEmpty()) {
-                try {
-
-                    String fileName =
-                            System.currentTimeMillis()
-                                    + "_" + imageFile.getOriginalFilename();
-
-                    Path uploadPath =
-                            Paths.get("uploads/comments");
-
-                    if (!Files.exists(uploadPath))
-                        Files.createDirectories(uploadPath);
-
-                    Files.write(uploadPath.resolve(fileName),
-                            imageFile.getBytes());
-
-                    comment.setImage(fileName);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (!commented) {
+                    canComment = true;
+                    break;
                 }
             }
-
-            commentRepo.save(comment);
         }
+
+        if (!canComment)
+            return "redirect:/product-detail/" + productId;
+
+        Comment comment = new Comment();
+        comment.setAccount(account);
+        comment.setProduct(product);
+        comment.setContent(content);
+        comment.setRating(rating);
+        comment.setCreatedAt(LocalDateTime.now());
+
+        // ===== Upload image =====
+        if (imageFile != null && !imageFile.isEmpty()) {
+
+            try {
+
+                String fileName =
+                        System.currentTimeMillis()
+                                + "_" + imageFile.getOriginalFilename();
+
+                Path uploadPath =
+                        Paths.get("uploads/comments");
+
+                if (!Files.exists(uploadPath))
+                    Files.createDirectories(uploadPath);
+
+                Files.write(uploadPath.resolve(fileName),
+                        imageFile.getBytes());
+
+                comment.setImage(fileName);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        commentRepo.save(comment);
 
         return "redirect:/product-detail/" + productId;
     }

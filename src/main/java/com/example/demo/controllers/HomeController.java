@@ -9,19 +9,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
-import com.example.demo.model.ProductImage;
 import com.example.demo.model.Products;
 import com.example.demo.repository.CartDetailRepository;
 import com.example.demo.repository.CategoryRepository;
 import com.example.demo.repository.ProductRepository;
 
 import jakarta.servlet.http.HttpSession;
-
 
 @Controller
 public class HomeController {
@@ -68,35 +64,3 @@ public class HomeController {
         return "client/index";
     }
 }
-    // BANNER DTO
-//    public static class BannerDTO {
-//
-//        public String title;
-//        public String description;
-//        public String imageUrl;
-//        public String linkUrl;
-//
-//        public BannerDTO(String title, String description, String imageUrl, String linkUrl) {
-//            this.title = title;
-//            this.description = description;
-//            this.imageUrl = imageUrl;
-//            this.linkUrl = linkUrl;
-//        }
-//
-//        public String getTitle() {
-//            return title;
-//        }
-//
-//        public String getDescription() {
-//            return description;
-//        }
-//
-//        public String getImageUrl() {
-//            return imageUrl;
-//        }
-//
-//        public String getLinkUrl() {
-//            return linkUrl;
-//        }
-//    }
-//}
