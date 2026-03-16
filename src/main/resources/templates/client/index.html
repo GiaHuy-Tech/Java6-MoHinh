@@ -890,7 +890,7 @@ rgba
 	animation: slideUp 0.3s ease;
 }
 
-@
+
 keyframes slideUp {from { opacity:0;
 	transform: translateY(20px);
 }
@@ -899,6 +899,25 @@ to {
 	opacity: 1;
 	transform: translateY(0);
 }
+}
+/* Style cho nút cộng trừ số lượng */
+.qty-ctrl {
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-light);
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+    border-radius: 4px;
+}
+.qty-ctrl:hover {
+    background: var(--accent-cyan);
+    color: #000;
+    border-color: var(--accent-cyan);
 }
 </style>
 </head>
@@ -1185,23 +1204,30 @@ to {
 					<div style="font-size: 0.9rem" th:text="${item.product.name}">
 					</div>
 
-					<div class="small text-muted">
-						SL: <span th:text="${item.quantity}"></span>
+					<div class="d-flex align-items-center gap-2 mt-1">
+                        <button class="qty-ctrl" th:onclick="'updateQty(' + ${item.product.id} + ', -1)'">
+                            <i class="bi bi-dash"></i>
+                        </button>
+                        <span class="small fw-bold text-white px-1" th:text="${item.quantity}"></span>
+                        <button class="qty-ctrl" th:onclick="'updateQty(' + ${item.product.id} + ', 1)'">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                        
+                        <button class="btn btn-sm text-danger ms-auto p-0" 
+                                th:onclick="'updateQty(' + ${item.product.id} + ', -' + ${item.quantity} + ')'">
+                            <i class="bi bi-trash small"></i>
+                        </button>
 					</div>
 
-					<div style="color: var(--accent-red); font-weight: bold">
-
+					<div style="color: var(--accent-red); font-weight: bold" class="mt-1 small">
 						<span
 							th:text="${#numbers.formatDecimal(item.price,0,'COMMA',0,'POINT')}"></span>₫
 						× <span th:text="${item.quantity}"></span>
-
 					</div>
 
-					<div class="small">
-
+					<div class="small" style="font-size: 0.75rem; opacity: 0.7;">
 						= <span
 							th:text="${#numbers.formatDecimal(item.price * item.quantity,0,'COMMA',0,'POINT')}"></span>₫
-
 					</div>
 
 				</div>
@@ -1258,8 +1284,30 @@ i.className=el.classList.contains("active")
 : "bi bi-heart"
 }
 
+/* ========================================================
+UPDATE QUANTITY TRONG MINI CART (FIX CÀNG BẤM CÀNG TĂNG)
+=========================================================*/
+window.updateQty = (id, delta) => {
+    const token = document.querySelector('meta[name="_csrf"]')?.content;
+    const head = document.querySelector('meta[name="_csrf_header"]')?.content;
+    const headers = { 'Content-Type': 'application/json' };
+    if (head && token) headers[head] = token;
+
+    fetch(`/cart/add/${id}?quantity=${delta}`, {
+        method: "POST",
+        headers: headers
+    })
+    .then(r => r.text())
+    .then(t => {
+        if(t === "success") {
+            sessionStorage.setItem("openMiniCart","1");
+            location.reload();
+        }
+    })
+}
+
 /* ===============================
-ADD TO CART (KHÔNG DÙNG API)
+ADD TO CART (HÀM BAY VÀO GIỎ)
 ================================*/
 
 window.animateAddToCart=(e,btn)=>{
@@ -1278,7 +1326,7 @@ window.animateAddToCart=(e,btn)=>{
 	const headers={'Content-Type':'application/json'}
 	if(head && token) headers[head]=token
 
-	/* IMAGE FLY */
+	/* IMAGE FLY EFFECT */
 
 	if(img && cart){
 
@@ -1326,7 +1374,7 @@ window.animateAddToCart=(e,btn)=>{
 
 	}
 
-	/* CALL CONTROLLER */
+	/* GỌI SERVER THÊM 1 SẢN PHẨM MẶC ĐỊNH */
 
 	fetch("/cart/add/"+id,{
 	method:"POST",
