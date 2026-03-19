@@ -59,7 +59,10 @@ public class CartController {
     // ================= 2. THÊM SẢN PHẨM =================
     @PostMapping("/add/{productId}")
     @ResponseBody
-    public String addToCart(@PathVariable Integer productId, HttpSession session) {
+    public String addToCart(
+            @PathVariable Integer productId,
+            @RequestParam(defaultValue = "1") int quantity,
+            HttpSession session) {
 
         Account account = getAccount(session);
         if (account == null) return "unauthorized";
@@ -69,26 +72,41 @@ public class CartController {
 
         CartDetail cartItem = cartRepo.findByAccountAndProduct(account, product).orElse(null);
 
-        if (cartItem != null) {
-            cartItem.setQuantity(cartItem.getQuantity() + 1);
-        } else {
-            cartItem = new CartDetail();
-            cartItem.setAccount(account);
-            cartItem.setProduct(product);
-            cartItem.setQuantity(1);
-            cartItem.setCreateDate(new Date());
-            cartItem.setPrice(product.getPrice());
-        }
-
         try {
-            cartRepo.save(cartItem);
+
+            if (cartItem != null) {
+
+                int newQty = cartItem.getQuantity() + quantity;
+
+                if (newQty <= 0) {
+                    cartRepo.delete(cartItem); // xoá khỏi giỏ
+                } else {
+                    cartItem.setQuantity(newQty);
+                    cartRepo.save(cartItem);
+                }
+
+            } else {
+
+                if (quantity > 0) {
+                    cartItem = new CartDetail();
+                    cartItem.setAccount(account);
+                    cartItem.setProduct(product);
+                    cartItem.setQuantity(quantity);
+                    cartItem.setCreateDate(new Date());
+                    cartItem.setPrice(product.getPrice());
+
+                    cartRepo.save(cartItem);
+                }
+
+            }
+
             return "success";
+
         } catch (Exception e) {
             e.printStackTrace();
             return "error";
         }
     }
-
     // ================= 3. MINI CART API =================
     @GetMapping("/api/mini-cart")
     @ResponseBody

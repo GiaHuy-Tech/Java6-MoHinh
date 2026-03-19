@@ -33,7 +33,6 @@
             margin: 0;
         }
 
-        /* NAVBAR */
         .navbar { 
             background-color: rgba(12, 21, 37, 0.95); 
             backdrop-filter: blur(10px); 
@@ -45,7 +44,6 @@
         .nav-link { color: #aab8c5 !important; transition: 0.3s; font-weight: 500; }
         .nav-link:hover, .nav-link.active { color: var(--accent-cyan) !important; text-shadow: 0 0 8px var(--accent-cyan); }
 
-        /* PRODUCT CARD (CẢI TIẾN TỪ TABLE) */
         .product-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
@@ -53,6 +51,7 @@
             overflow: hidden;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            position: relative;
         }
         .product-card:hover {
             border-color: var(--accent-cyan);
@@ -60,79 +59,72 @@
             box-shadow: 0 8px 25px rgba(0, 242, 255, 0.15);
         }
         .product-img-box {
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: #fff; /* Đổi sang nền trắng để nổi bật mô hình */
             padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            height: 220px;
         }
         .product-thumb {
-            height: 180px;
-            width: 100%;
+            max-height: 100%;
+            max-width: 100%;
             object-fit: contain;
             transition: transform 0.3s;
-        }
-        .product-card:hover .product-thumb {
-            transform: scale(1.05);
         }
         .product-name-link {
             color: #fff;
             text-decoration: none;
             font-weight: 600;
-            font-size: 1.05rem;
+            font-size: 1rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.4;
+            height: 2.8rem;
             transition: 0.3s;
         }
         .product-name-link:hover { color: var(--accent-cyan); }
-        .price-text { color: var(--accent-cyan); font-weight: 700; font-size: 1.2rem; }
-        .date-text { font-size: 0.8rem; color: #6c757d; }
+        .price-text { color: var(--accent-red); font-weight: 700; font-size: 1.1rem; }
+        .date-text { font-size: 0.75rem; color: #6c757d; }
 
-        /* BUTTONS TRONG CARD */
         .btn-remove-card {
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 35px;
-            height: 35px;
-            background-color: rgba(255, 77, 77, 0.1);
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255, 255, 255, 0.9);
             color: var(--accent-red);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
-            transition: all 0.3s;
             z-index: 10;
-            border: 1px solid transparent;
+            transition: 0.3s;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         .btn-remove-card:hover {
             background-color: var(--accent-red);
             color: #fff;
-            box-shadow: 0 0 10px var(--accent-red);
+            transform: scale(1.1);
         }
         .btn-cart { 
             color: var(--accent-cyan); 
             border: 1px solid var(--accent-cyan); 
             background: transparent; 
             font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
+            font-size: 0.8rem;
             transition: 0.3s;
         }
         .btn-cart:hover { 
             background: var(--accent-cyan); 
             color: #000; 
-            box-shadow: 0 0 15px var(--accent-cyan); 
         }
 
-        .empty-state-icon { font-size: 5rem; color: rgba(0, 242, 255, 0.2); }
+        .empty-state-icon { font-size: 5rem; color: rgba(0, 242, 255, 0.1); }
         footer { background: #020408; border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: auto; }
     </style>
 </head>
@@ -144,103 +136,74 @@
             <i class="bi bi-box-seam-fill fs-3"></i>
             <span class="fw-bold fs-4">MODEL WORLD</span>
         </a>
-        
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="bi bi-list text-white fs-2"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item"><a class="nav-link" th:href="@{/products}">Sản phẩm</a></li>
-                <th:block th:if="${session.account == null and session.user == null}">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/login}">Đăng nhập</a></li>
-                </th:block>
-                <th:block th:if="${session.account != null or session.user != null}">
-                    <li class="nav-item"><a class="nav-link" th:href="@{/cart}">Giỏ hàng</a></li>
-                    <li class="nav-item"><a class="nav-link active" th:href="@{/wishlist}">Yêu thích</a></li>
-                    <li class="nav-item dropdown ms-lg-3">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle fs-4 text-info"></i>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-info">
-                            <li><a class="dropdown-item" th:href="@{/account}">Tài khoản</a></li>
-                            <li><hr class="dropdown-divider border-secondary"></li>
-                            <li><a class="dropdown-item text-danger" th:href="@{/logout}">Đăng xuất</a></li>
-                        </ul>
-                    </li>
-                </th:block>
-            </ul>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <a class="nav-link" th:href="@{/products}">Sản phẩm</a>
+            <a class="nav-link" th:href="@{/cart}"><i class="bi bi-cart3"></i></a>
+            <a class="nav-link active" th:href="@{/wishlist}"><i class="bi bi-heart-fill text-danger"></i></a>
+            <a class="nav-link" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i></a>
         </div>
     </div>
 </nav>
 
-<div th:if="${message != null}" class="container mt-4">
-    <div class="alert alert-info alert-dismissible fade show text-center bg-transparent border-info text-info" role="alert">
-        <i class="bi bi-info-circle-fill me-2"></i> <strong th:text="${message}"></strong>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
-    </div>
-</div>
-
 <section class="py-5 flex-grow-1">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="text-white">DANH SÁCH <span class="text-info">YÊU THÍCH</span></h2>
-            <div style="height: 2px; width: 60px; background: var(--accent-cyan); margin: 10px auto;"></div>
+        <div class="mb-5">
+            <h2 class="text-white fw-bold">DANH SÁCH <span class="text-info">YÊU THÍCH</span></h2>
+            <p class="text-secondary">Lưu trữ những mô hình bạn đang quan tâm</p>
         </div>
 
-        <div th:if="${not #lists.isEmpty(likes)}">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                
-                <div class="col" th:each="like : ${likes}">
-                    <th:block th:if="${like.product != null}">
-                        <div class="product-card h-100 position-relative d-flex flex-column">
-                            
-                            <a th:href="@{'/wishlist/remove/' + ${like.id}}" class="btn-remove-card" 
-                               onclick="return confirm('Xóa sản phẩm này khỏi mục yêu thích?')" title="Xóa khỏi yêu thích">
-                                <i class="bi bi-trash-fill"></i>
-                            </a>
+        <div th:if="${message != null}" class="alert alert-success bg-dark border-info text-info alert-dismissible fade show mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${message}"></span>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+        </div>
 
-                            <a th:href="@{'/product-detail/' + ${like.product.id}}" class="product-img-box text-decoration-none">
-                                <img th:src="@{'/assets/images/' + ${like.product.mainImage}}" class="product-thumb" alt="Product Image">
-                            </a>
+        <div th:if="${not #lists.isEmpty(likes)}" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">
+            <div class="col" th:each="like : ${likes}">
+                <div class="product-card h-100 d-flex flex-column" th:if="${like.product != null}">
+                    
+                    <a th:href="@{'/wishlist/remove/' + ${like.id}}" class="btn-remove-card" 
+                       onclick="return confirm('Xóa khỏi danh sách yêu thích?')" title="Xóa">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
 
-                            <div class="p-3 d-flex flex-column flex-grow-1">
-                                <div class="date-text mb-1" th:text="${like.likedAt != null ? 'Đã thêm: ' + #dates.format(like.likedAt, 'dd/MM/yyyy') : 'Đã thêm gần đây'}"></div>
-                                
-                                <a th:href="@{'/product-detail/' + ${like.product.id}}" class="product-name-link mb-2" th:text="${like.product.name}">
-                                    Tên sản phẩm
-                                </a>
-                                
-                                <div class="price-text mb-3 mt-auto" th:text="${#numbers.formatDecimal(like.product.price ?: 0, 0, 'POINT', 0, 'POINT')} + ' ₫'">
-                                </div>
-                                
-                                <a th:href="@{'/cart/add/' + ${like.product.id}}" class="btn btn-cart w-100 rounded-pill py-2">
-                                    <i class="bi bi-cart-plus me-1"></i> Thêm giỏ hàng
-                                </a>
-                            </div>
+                    <a th:href="@{'/product-detail/' + ${like.product.id}}" class="product-img-box">
+                        <img th:src="${like.product.mainImage}" class="product-thumb" alt="Product">
+                    </a>
 
+                    <div class="p-3 d-flex flex-column flex-grow-1">
+                        <div class="date-text mb-2">
+                            <i class="bi bi-clock me-1"></i>
+                            <span th:text="${like.likedAt != null ? #dates.format(like.likedAt, 'dd/MM/yyyy') : 'Gần đây'}"></span>
                         </div>
-                    </th:block>
+                        
+                        <a th:href="@{'/product-detail/' + ${like.product.id}}" class="product-name-link mb-2" th:text="${like.product.name}"></a>
+                        
+                        <div class="price-text mb-3 mt-auto" th:text="${#numbers.formatDecimal(like.product.price ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></div>
+                        
+                        <form th:action="@{'/cart/add/' + ${like.product.id}}" method="post">
+                            <button type="submit" class="btn btn-cart w-100 rounded-pill py-2">
+                                <i class="bi bi-cart-plus me-1"></i> GIỎ HÀNG
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                
             </div>
         </div>
 
         <div th:if="${#lists.isEmpty(likes)}" class="text-center py-5">
-            <i class="bi bi-heartbreak empty-state-icon"></i>
-            <p class="text-secondary mt-3 fs-5">Danh sách yêu thích của bạn đang trống.</p>
-            <a th:href="@{/products}" class="btn btn-outline-info mt-3 rounded-pill px-4 py-2 fw-bold">
-                <i class="bi bi-arrow-left me-2"></i> Khám phá sản phẩm
-            </a>
+            <div class="empty-state-icon mb-4">
+                <i class="bi bi-heartbreak"></i>
+            </div>
+            <h4 class="text-white">Danh sách trống</h4>
+            <p class="text-secondary">Hãy quay lại cửa hàng để chọn mô hình ưng ý nhất.</p>
+            <a th:href="@{/products}" class="btn btn-info rounded-pill px-5 py-2 fw-bold mt-3">MUA SẮM NGAY</a>
         </div>
     </div>
 </section>
 
 <footer class="text-center">
     <div class="container text-secondary small">
-        <h4 style="font-family: var(--font-logo); color: #fff;">MODEL WORLD</h4>
-        <p>Chuyên cung cấp mô hình tĩnh cao cấp — Luxury Boutique</p>
-        <p class="mb-0">&copy; 2026 Model World. All rights reserved.</p>
+        <p class="mb-0">&copy; 2026 Model World. Premium Hobby Store.</p>
     </div>
 </footer>
 
