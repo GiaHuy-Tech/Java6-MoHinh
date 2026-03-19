@@ -59,7 +59,7 @@ public class CheckoutController {
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
         if (cartList.isEmpty()) return "redirect:/cart";
 
-        List<Address> userAddresses = addressRepo.findByAccount_Id(account.getId());
+        List<Address> userAddresses = addressRepo.findByAccountId(account.getId());
         model.addAttribute("addresses", userAddresses);
 
         List<VoucherDetail> myVouchers = voucherDetailRepo.findByAccount_Id(account.getId())
