@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -66,4 +67,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> { // Sá
            "GROUP BY MONTH(o.createdDate) " +
            "ORDER BY MONTH(o.createdDate)")
     List<Object[]> countOrdersPerMonth();
+    List<Orders> findByStatusAndCreatedDateBefore(Integer status, Date date);
 }

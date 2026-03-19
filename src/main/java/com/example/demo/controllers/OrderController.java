@@ -11,10 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
-import com.example.demo.model.OrderDetail;
-import com.example.demo.model.Products;
 import com.example.demo.repository.OrdersRepository;
-import com.example.demo.repository.ProductRepository;
+import com.example.demo.service.OrderService; // Import Service mới
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -27,11 +25,11 @@ public class OrderController {
     private OrdersRepository orderRepo;
     
     @Autowired
-    private ProductRepository productRepo;
+    private OrderService orderService; // Inject OrderService vào đây
 
     @GetMapping("/orders")
     public String viewOrders(Model model, @RequestParam(name = "sort", defaultValue = "newest") String sort) {
-        Account account = (Account) session.getAttribute("account");
+        Account account = getAccount();
         if (account == null) return "redirect:/login";
 
         List<Orders> orders;
@@ -49,7 +47,7 @@ public class OrderController {
 
     @GetMapping("/orders/detail/{id}")
     public String viewOrderDetail(@PathVariable("id") Integer orderId, Model model) {
-        Account account = (Account) session.getAttribute("account");
+        Account account = getAccount();
         if (account == null) return "redirect:/login";
 
         Optional<Orders> orderOpt = orderRepo.findById(orderId);
@@ -65,34 +63,24 @@ public class OrderController {
         return "redirect:/orders";
     }
 
+    // =====================================================
+    // XÁC NHẬN ĐƠN HÀNG (ĐÃ RÚT GỌN)
+    // =====================================================
     @PostMapping("/orders/confirm/{id}")
     public String confirmOrder(@PathVariable("id") Integer orderId) {
-        Account account = (Account) session.getAttribute("account");
+        Account account = getAccount();
         if (account == null) return "redirect:/login";
 
         Optional<Orders> optionalOrder = orderRepo.findById(orderId);
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();
 
-            // CHỈ XỬ LÝ KHI ADMIN ĐÃ GIAO XONG (STATUS = 3)
+            // Kiểm tra đúng chủ đơn và trạng thái là Đã giao (3)
             if (order.getAccount().getId().equals(account.getId()) && order.getStatus() == 3) {
-                // 1. TRỪ KHO SẢN PHẨM
-                List<OrderDetail> details = order.getOrderDetails();
-                if (details != null) {
-                    for (OrderDetail detail : details) {
-                        Products product = detail.getProduct();
-                        if (product != null) {
-                            int newQty = Math.max(0, product.getQuantity() - detail.getQuantity());
-                            product.setQuantity(newQty);
-                            if (newQty <= 0) product.setAvailable(false);
-                            productRepo.save(product);
-                        }
-                    }
-                }
-                // 2. CẬP NHẬT TRẠNG THÁI
-                order.setStatus(4); // 4 = Hoàn tất
-                order.setPaymentStatus(true);
-                orderRepo.save(order);
+                
+                // GỌI DUY NHẤT HÀM NÀY: Nó tự trừ kho và tự đổi status
+                orderService.completeOrder(order);
+                
             }
         }
         return "redirect:/orders";
@@ -100,18 +88,23 @@ public class OrderController {
 
     @PostMapping("/orders/cancel/{id}")
     public String cancelOrder(@PathVariable("id") Integer orderId) {
-        Account account = (Account) session.getAttribute("account");
+        Account account = getAccount();
         if (account == null) return "redirect:/login";
 
         Optional<Orders> optionalOrder = orderRepo.findById(orderId);
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();
-            // Khách chỉ hủy được khi status = 0 hoặc 1
             if (order.getAccount().getId().equals(account.getId()) && (order.getStatus() == 0 || order.getStatus() == 1)) {
                 order.setStatus(5); // 5 = Đã hủy
                 orderRepo.save(order);
             }
         }
         return "redirect:/orders";
+    }
+
+    // Hàm phụ để lấy account cho gọn
+    private Account getAccount() {
+        Account acc = (Account) session.getAttribute("account");
+        return (acc != null) ? acc : (Account) session.getAttribute("user");
     }
 }

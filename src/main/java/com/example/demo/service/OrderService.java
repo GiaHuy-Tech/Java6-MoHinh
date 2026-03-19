@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
@@ -21,48 +22,45 @@ public class OrderService {
 
     @Autowired
     OrdersDetailRepository orderDetailRepo;
+    
+    @Autowired
+    ProductRepository productRepo; // Thêm repo này để trừ kho
 
+    // =====================================================
+    // 1. TẠO ĐƠN HÀNG (Dùng khi khách nhấn Thanh toán)
+    // =====================================================
+    @Transactional
     public void createOrder(Account acc, String voucherCode) {
 
-        // 1. Lấy danh sách giỏ hàng trực tiếp theo Account ID
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(acc.getId());
         
-        // Nếu giỏ hàng trống thì dừng luôn
         if (cartList == null || cartList.isEmpty()) {
             return;
         }
 
-        // 2. Tính tổng tiền gốc bằng BigDecimal
         BigDecimal rawTotal = BigDecimal.ZERO;
         for (CartDetail item : cartList) {
             BigDecimal price = item.getProduct().getPrice();
             BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
-            // Cộng dồn: rawTotal = rawTotal + (price * quantity)
             rawTotal = rawTotal.add(price.multiply(quantity));
         }
 
-        // 3. Tính tiền giảm giá (VD: voucher SALE10 giảm 10%)
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && voucherCode.equalsIgnoreCase("SALE10")) {
-            // discount = rawTotal * 0.1
             discount = rawTotal.multiply(new BigDecimal("0.1")); 
         }
 
-        // 4. Tính phí ship (Trên 1 triệu thì freeship, ngược lại 30k)
         BigDecimal feeShip = new BigDecimal("30000");
         if (rawTotal.compareTo(new BigDecimal("1000000")) > 0) {
             feeShip = BigDecimal.ZERO;
         }
 
-        // 5. Tính tổng thanh toán cuối cùng: final = raw - discount + freeship
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
         
-        // Đảm bảo tổng tiền không bị âm
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
 
-        // 6. Tạo đơn hàng (Lưu ý: Tên model là Orders có 's')
         Orders order = new Orders();
         order.setAccount(acc);
         order.setCreatedDate(new Date());
@@ -76,22 +74,53 @@ public class OrderService {
             order.setVoucherCode(voucherCode);
         }
 
-        // Lưu đơn hàng vào DB
         orderRepo.save(order);
 
-        // 7. Tạo chi tiết đơn hàng
         for (CartDetail cd : cartList) {
             OrderDetail od = new OrderDetail();
             od.setOrder(order);
             od.setProduct(cd.getProduct());
             od.setQuantity(cd.getQuantity());
             od.setPrice(cd.getProduct().getPrice());
-            
-            // Lưu chi tiết đơn hàng
             orderDetailRepo.save(od);
         }
 
-        // 8. Xóa giỏ hàng sau khi đặt thành công
         cartDetailRepo.deleteAll(cartList);
+    }
+
+    // =====================================================
+    // 2. HOÀN TẤT ĐƠN HÀNG (Dùng cho cả bấm tay & tự động)
+    // =====================================================
+    @Transactional
+    public void completeOrder(Orders order) {
+        // Chỉ xử lý nếu đơn chưa Hoàn tất (4) và chưa Hủy (5)
+        if (order.getStatus() < 4) {
+            
+            // A. Trừ kho sản phẩm
+            List<OrderDetail> details = order.getOrderDetails();
+            if (details != null) {
+                for (OrderDetail detail : details) {
+                    Products product = detail.getProduct();
+                    if (product != null) {
+                        // Tính số lượng mới (không để âm)
+                        int newQty = Math.max(0, product.getQuantity() - detail.getQuantity());
+                        product.setQuantity(newQty);
+                        
+                        // Nếu hết hàng thì ngừng kinh doanh sản phẩm đó
+                        if (newQty <= 0) {
+                            product.setAvailable(false);
+                        }
+                        productRepo.save(product);
+                    }
+                }
+            }
+
+            // B. Cập nhật trạng thái đơn hàng
+            order.setStatus(4); // 4 = Hoàn tất
+            order.setPaymentStatus(true); // Đã nhận tiền
+            orderRepo.save(order);
+            
+            System.out.println("Đơn hàng " + order.getId() + " đã được chuyển sang trạng thái HOÀN TẤT.");
+        }
     }
 }
