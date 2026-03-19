@@ -1,17 +1,12 @@
 package com.example.demo.controllers;
 
 import java.math.BigDecimal;
-import java.text.Normalizer;
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
 import com.example.demo.repository.OrdersRepository;
@@ -27,27 +22,6 @@ public class OrdersManaController {
     @Autowired
     private MailService mailService;
 
-    private static final List<String> SOUTH = Arrays.asList("ho chi minh", "can tho", "long an");
-
-    // Hàm tính phí ship
-    private int calculateShippingFee(String address, int subTotal) {
-        if (subTotal >= 1000000) return 0;
-        if (address == null) return 50000;
-        String a = unAccent(address.toLowerCase());
-        if (a.contains("can tho")) return 20000;
-        for (String s : SOUTH) {
-            if (a.contains(s)) return 30000;
-        }
-        return 50000;
-    }
-
-    public static String unAccent(String s) {
-        String temp = Normalizer.normalize(s, Normalizer.Form.NFD);
-        return Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
-                .matcher(temp).replaceAll("").replaceAll("đ", "d");
-    }
-
-    // --- CẬP NHẬT HÀM LIST VỚI BỘ LỌC ---
     @GetMapping
     public String list(Model model, 
                        @RequestParam(name = "keywords", required = false) String keywords,
@@ -55,7 +29,6 @@ public class OrdersManaController {
         
         List<Orders> list = ordersRepo.findAll();
 
-        // Lọc theo từ khóa (Tên khách hàng hoặc ID đơn hàng)
         if (keywords != null && !keywords.trim().isEmpty()) {
             list = list.stream()
                 .filter(o -> (o.getAccount() != null && o.getAccount().getFullName().toLowerCase().contains(keywords.toLowerCase())) 
@@ -63,7 +36,6 @@ public class OrdersManaController {
                 .collect(Collectors.toList());
         }
 
-        // Lọc theo trạng thái
         if (status != null) {
             list = list.stream()
                 .filter(o -> o.getStatus() == status)
@@ -85,38 +57,35 @@ public class OrdersManaController {
         Orders order = ordersRepo.findById(id).orElse(null);
         if (order == null) return "redirect:/orders-mana";
 
+        // 1. Admin KHÔNG được phép chỉnh trạng thái sang 4 (Hoàn tất)
+        if (status == 4) return "redirect:/orders-mana";
+
+        // 2. Nếu đơn đã Hoàn tất (4) hoặc Đã hủy (5), không cho phép đổi nữa
+        if (order.getStatus() == 4 || order.getStatus() == 5) {
+            return "redirect:/orders-mana";
+        }
+
         order.setStatus(status);
 
-        // Logic thanh toán tự động
-        if (status == 3 || "VNPAY".equalsIgnoreCase(order.getPaymentMethod())) {
+        // 3. Tự động cập nhật Payment Status nếu là VNPAY hoặc khi Admin xác nhận Đã giao xong (3)
+        if ("VNPAY".equalsIgnoreCase(order.getPaymentMethod()) || status == 3) {
             order.setPaymentStatus(true);
         }
 
-        // Tính lại tiền
-        BigDecimal subTotal = order.getOrderDetails().stream()
-                .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        String fullAddress = (order.getAddress() != null) ? order.getAddress().getFullAddress() : null;
-        BigDecimal fee = BigDecimal.valueOf(calculateShippingFee(fullAddress, subTotal.intValue()));
-
-        order.setFeeship(fee);
-        order.setTotal(subTotal.add(fee));
         ordersRepo.save(order);
 
-        // Gửi mail
+        // 4. Gửi mail thông báo cho khách (Tùy chọn)
         Account acc = order.getAccount();
         if (acc != null && acc.getEmail() != null) {
             String statusText = switch (status) {
-                case 0 -> "Chờ xác nhận";
                 case 1 -> "Đã xác nhận";
                 case 2 -> "Đang giao hàng";
-                case 3 -> "Đã hoàn tất (Thành công)";
-                case 4 -> "Đã hủy";
-                default -> "Không xác định";
+                case 3 -> "Đã giao đến nơi (Vui lòng xác nhận trên web)";
+                case 5 -> "Đã hủy";
+                default -> "Cập nhật";
             };
             mailService.sendStatusMail(acc.getEmail(), "Cập nhật đơn hàng #" + order.getId(), 
-                "Đơn hàng của bạn hiện tại có trạng thái: " + statusText + ". Cảm ơn bạn!");
+                "Đơn hàng của bạn đã chuyển sang trạng thái: " + statusText);
         }
 
         return "redirect:/orders-mana";

@@ -423,10 +423,55 @@
         }
     }
 
+ // 1. Hàm xử lý khi Click vào trái tim (Toggle)
     function toggleWishlist(btn, pid) {
-        if (!isLoggedIn) { showAuthModal(); return; }
-        btn.classList.toggle('active');
+        if (!isLoggedIn) { 
+            showAuthModal(); 
+            return; 
+        }
+
+        // Gọi đến API trong LikeController mà bạn đã gửi
+        fetch(`/wishlist/toggle/${pid}`)
+            .then(res => res.text()) // Nhận về text: "added", "removed", hoặc "unauthorized"
+            .then(status => {
+                if (status === 'added') {
+                    btn.classList.add('active'); // Hiện màu đỏ
+                } else if (status === 'removed') {
+                    btn.classList.remove('active'); // Mất màu đỏ
+                } else if (status === 'unauthorized') {
+                    showAuthModal();
+                }
+            })
+            .catch(err => console.error("Lỗi Wishlist:", err));
     }
+
+    // 2. Tự động kiểm tra và tô màu đỏ cho các sản phẩm đã thích khi load trang
+    document.addEventListener("DOMContentLoaded", function() {
+        const loggedInStatus = document.getElementById('isLoggedIn').value === 'true';
+        
+        if (loggedInStatus) {
+            fetch('/wishlist/my-likes')
+                .then(res => res.json())
+                .then(likedIds => {
+                    // Tìm tất cả các nút trái tim dựa trên class của bạn
+                    document.querySelectorAll('.product-wishlist').forEach(btn => {
+                        // Lấy ID sản phẩm từ chuỗi onclick="toggleWishlist(this, 123)"
+                        const onclickAttr = btn.getAttribute('onclick');
+                        if (onclickAttr) {
+                            const match = onclickAttr.match(/\d+/);
+                            if (match) {
+                                const pid = parseInt(match[0]);
+                                // Nếu ID sản phẩm nằm trong danh sách đã thích thì tô màu đỏ
+                                if (likedIds.includes(pid)) {
+                                    btn.classList.add('active');
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(err => console.log("Chưa đăng nhập hoặc lỗi lấy danh sách yêu thích"));
+        }
+    });
 
     const tiltBox = document.getElementById('tiltBox');
     if(tiltBox) {
