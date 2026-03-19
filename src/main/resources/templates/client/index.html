@@ -1,296 +1,442 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trang chủ - MODEL WORLD</title>
-<th:block th:if="${_csrf != null}">
-<meta name="_csrf" th:content="${_csrf.token}" />
-<meta name="_csrf_header" th:content="${_csrf.headerName}" />
-</th:block>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@500;700;800;900&display=swap" rel="stylesheet">
-<style>
-:root{--bg-body:#0b0c10;--bg-card:#1f2833;--text-main:#66fcf1;--text-light:#c5c6c7;--accent-cyan:#45a29e;--accent-hover:#66fcf1;--accent-red:#ff2e63;--border-color:#2d3238;--sidebar-width:260px;--font-main:'Be Vietnam Pro',sans-serif;--font-title:'Montserrat',sans-serif}
-body{background-color:var(--bg-body);color:var(--text-light);font-family:var(--font-main);overflow-x:hidden;display:flex;flex-direction:column;min-height:100vh;margin:0;padding:0}
-::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg-body)}::-webkit-scrollbar-thumb{background:var(--accent-cyan);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--accent-hover)}
-#wrapper{display:flex;width:100%;transition:all .3s;flex-grow:1}
-#sidebar-wrapper{min-width:var(--sidebar-width);max-width:var(--sidebar-width);background:#050505;border-right:1px solid var(--border-color);min-height:100vh;position:fixed;z-index:1000;height:100%;transition:all .3s}
-#page-content-wrapper{width:100%;margin-left:var(--sidebar-width);transition:margin .3s ease-out;display:flex;flex-direction:column;min-height:100vh}
-body.toggled #sidebar-wrapper{margin-left:calc(-1 * var(--sidebar-width))}
-body.toggled #page-content-wrapper{margin-left:0;width:100%}
-.sidebar-heading{padding:2rem 1.5rem;font-family:var(--font-title);font-size:1.5rem;font-weight:900;color:var(--text-main);text-align:center;text-decoration:none;display:block;text-shadow:0 0 10px rgba(102,252,241,.3);letter-spacing:1px}
-.list-group-item{background:0 0;color:#888;border:none;padding:12px 25px;font-weight:500;transition:.3s;border-bottom:1px solid rgba(255,255,255,.05)}
-.list-group-item.active,.list-group-item:hover{color:var(--text-main);background:rgba(102,252,241,.05);border-left:4px solid var(--text-main);padding-left:30px}
-.top-navbar{background:rgba(31,40,51,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-color);padding:15px 30px;position:sticky;top:0;z-index:999;box-shadow:0 2px 10px rgba(0,0,0,.5);width:100%}
-#menu-toggle{color:var(--text-main);border-color:var(--accent-cyan);background:0 0}#menu-toggle:hover{background:var(--accent-cyan);color:#000}
-.nav-logo{font-family:var(--font-title);text-decoration:none;font-size:1.4rem;font-weight:900;display:flex;align-items:center;gap:10px;letter-spacing:1px;margin-left:15px}
-.nav-logo i{color:var(--text-main);font-size:1.6rem}.nav-logo span{background:linear-gradient(90deg,var(--text-main),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.search-box{position:relative;max-width:600px;width:100%;margin:0 auto;flex-grow:1}
-.search-box input{border-radius:50px;padding:10px 45px 10px 20px;border:1px solid var(--border-color);width:100%;background:#0b0c10;color:#fff}
-.search-box input:focus{outline:0;border-color:var(--accent-cyan);box-shadow:0 0 0 2px rgba(102,252,241,.2)}
-.search-box button{position:absolute;right:5px;top:50%;transform:translateY(-50%);border-radius:50%;width:34px;height:34px;border:none;background:var(--accent-cyan);color:#0b0c10;display:flex;align-items:center;justify-content:center}
-.search-box button:hover{background:var(--accent-hover)}
-#heroCarousel{width:100%;margin:0;padding:0;overflow:hidden}.carousel-inner{width:100%}.carousel-item{height:60vh;min-height:500px;position:relative;width:100%}
-.carousel-item img{object-fit:cover;height:100%;width:100%;display:block;filter:brightness(.55)}
-.carousel-caption-custom{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(11,12,16,.65);backdrop-filter:blur(8px);padding:40px 50px;border-radius:15px;border-top:3px solid var(--accent-cyan);border-bottom:3px solid var(--accent-red);text-align:center;max-width:750px;width:90%;box-shadow:0 10px 30px rgba(0,0,0,.8)}
-.carousel-caption-custom h2{font-family:var(--font-title);color:var(--text-main);font-size:2.5rem;font-weight:900;margin-bottom:15px;text-shadow:0 2px 10px rgba(102,252,241,.5);text-transform:uppercase;letter-spacing:2px}
-.carousel-caption-custom p{font-size:1.1rem;color:#ddd;margin-bottom:20px;line-height:1.6}
-.voucher-banner{background:linear-gradient(135deg,#1f2833 0,#0b0c10 100%);border:1px solid var(--accent-red);border-radius:10px;padding:20px 30px;margin:20px 0;display:flex;align-items:center;justify-content:space-between;box-shadow:0 0 20px rgba(255,46,99,.1);position:relative;overflow:hidden;text-decoration:none;transition:.3s;width:100%}
-.voucher-banner:hover{transform:translateY(-3px);box-shadow:0 0 30px rgba(255,46,99,.3);border-color:var(--accent-hover)}
-.voucher-banner::before{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(to right,transparent,rgba(255,255,255,.1),transparent);transform:skewX(-20deg);animation:shine 3s infinite}
-@keyframes shine{100%{left:200%}}
-.voucher-content h4{color:var(--accent-red);font-family:var(--font-title);margin:0;font-weight:900;text-transform:uppercase}.voucher-content p{color:var(--text-light);margin:5px 0 0;font-size:.95rem}
-.voucher-btn{background:var(--accent-red);color:#fff;padding:10px 25px;border-radius:5px;font-weight:700;font-family:var(--font-title);border:none;transition:.3s;position:relative;z-index:2;white-space:nowrap}
-.voucher-banner:hover .voucher-btn{background:var(--accent-hover);color:#000}
-.category-wrapper{margin-top:30px;margin-bottom:40px}.title-line{height:2px;background:linear-gradient(90deg,var(--accent-cyan) 0,transparent 100%);opacity:.6}
-.quick-cat-bar{background:rgba(31,40,51,.4);border:1px solid rgba(102,252,241,.15);backdrop-filter:blur(5px);box-shadow:0 5px 20px rgba(0,0,0,.5),inset 0 0 15px rgba(102,252,241,.05)}
-.deco-corner{position:absolute;width:25px;height:25px;border:2px solid var(--text-main);box-shadow:0 0 10px rgba(102,252,241,.5)}
-.deco-corner.top-left{top:-2px;left:-2px;border-right:none;border-bottom:none}.deco-corner.top-right{top:-2px;right:-2px;border-left:none;border-bottom:none}
-.deco-corner.bottom-left{bottom:-2px;left:-2px;border-right:none;border-top:none}.deco-corner.bottom-right{bottom:-2px;right:-2px;border-left:none;border-top:none}
-.cat-item{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;width:120px;cursor:pointer;transition:.3s;text-decoration:none;color:var(--text-light)}
-.cat-item:hover{transform:translateY(-8px);color:var(--text-main)}
-.cat-icon-circle{width:75px;height:75px;background:#0b0c10;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;transition:.3s;border:2px solid var(--border-color);overflow:hidden;padding:10px}
-.cat-icon-circle img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 5px rgba(255,255,255,.2))}
-.cat-item:hover .cat-icon-circle{border-color:var(--accent-cyan);box-shadow:0 0 20px rgba(102,252,241,.4);background:rgba(102,252,241,.1)}
-.cat-name{font-size:.9rem;font-weight:700;text-align:center;text-shadow:2px 3px 6px rgba(0,0,0,.9);transition:.3s;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3}
-.cat-item:hover .cat-name{text-shadow:0 0 12px var(--accent-cyan)}
-.section-title{font-family:var(--font-title);font-weight:800;color:var(--text-main);border-left:5px solid var(--accent-red);padding-left:15px;text-transform:uppercase;letter-spacing:1px}
-.product-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;transition:all .3s ease;position:relative;overflow:hidden;height:100%;display:flex;flex-direction:column}
-.product-card:hover{box-shadow:0 0 20px rgba(102,252,241,.15);transform:translateY(-5px);border-color:var(--accent-cyan)}
-.wishlist-icon{position:absolute;top:10px;left:10px;width:36px;height:36px;background:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.3s;z-index:20;border:1px solid rgba(255,255,255,.2)}
-.wishlist-icon i{color:#fff;font-size:16px;transition:.3s}.wishlist-icon.active i{color:var(--accent-red)}.wishlist-icon:hover{transform:scale(1.1);background:rgba(0,0,0,.8)}
-.product-img-wrap{position:relative;padding-top:100%;overflow:hidden;background:#fff;border-bottom:1px solid var(--border-color)}
-.product-img-wrap img{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90%;max-height:90%;transition:.4s;object-fit:contain}
-.product-card:hover .product-img-wrap img{transform:translate(-50%,-50%) scale(1.08)}
-.product-details{padding:15px;display:flex;flex-direction:column;flex-grow:1}
-.product-brand{font-size:.75rem;color:var(--accent-cyan);text-transform:uppercase;font-weight:700;margin-bottom:5px}
-.product-name{font-size:.95rem;font-weight:600;line-height:1.4;height:40px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-bottom:auto}
-.product-name a{color:var(--text-light);text-decoration:none;transition:.2s}.product-name a:hover{color:var(--text-main)}
-.price-box{margin:10px 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
-.product-price{color:var(--accent-red);font-size:1.25rem;font-weight:800;text-shadow:0 0 5px rgba(255,46,99,.3)}
-.product-old-price{color:#777;font-size:.9rem;text-decoration:line-through}
-.btn-add-cart{width:100%;border-radius:4px;font-weight:600;font-size:.9rem;background:rgba(69,162,158,.1);color:var(--accent-cyan);border:1px solid var(--accent-cyan);padding:10px;transition:.3s;text-transform:uppercase;letter-spacing:.5px;margin-top:auto}
-.btn-add-cart:hover:not(:disabled){background:var(--accent-cyan);color:#0b0c10;box-shadow:0 0 10px var(--accent-cyan)}
-footer{background:#050505!important;border-top:1px solid var(--border-color)!important;color:#888;margin-top:auto;width:100%}
-footer h5,footer h6{color:var(--text-main);font-family:var(--font-title);letter-spacing:1px;text-transform:uppercase;font-weight:800}
-footer a{color:#888;transition:.2s}footer a:hover{color:var(--accent-cyan)}
-.floating-socials{position:fixed;right:20px;bottom:100px;z-index:9999;display:flex;flex-direction:column;gap:15px}
-.social-btn{width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,.5);transition:.3s;position:relative}
-.social-btn:hover{transform:scale(1.1);color:#fff}.social-btn.zalo{background:#0068ff}.social-btn.messenger{background:#0084ff}
-.social-btn.phone{background:var(--accent-red);animation:pulse 2s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,46,99,.7)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
-#floating-cart{position:fixed;bottom:30px;left:30px;width:60px;height:60px;background:var(--accent-cyan);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:1000;box-shadow:0 0 20px rgba(102,252,241,.5);transition:.3s}
-#floating-cart:hover{transform:scale(1.1);box-shadow:0 0 30px var(--accent-cyan)}
-.cart-badge{position:absolute;top:-5px;right:-5px;background:var(--accent-red);color:#fff;width:24px;height:24px;border-radius:50%;font-size:.8rem;display:flex;align-items:center;justify-content:center;font-weight:700}
-.mini-cart-panel{position:fixed;bottom:100px;left:30px;width:340px;height:420px;background:var(--bg-card);border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.8);z-index:1000;display:none;flex-direction:column;border:1px solid var(--accent-cyan);color:var(--text-light)}
-.mini-cart-panel.show{display:flex;animation:slideUp .3s ease}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MODEL WORLD - Premium Hobby Store</title>
+
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </th:block>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #0b0c10; --bg-card: #1f2833; --bg-nav: #0b0c10;
+            --text-main: #66fcf1; --text-light: #c5c6c7; --accent-cyan: #45a29e; 
+            --border-color: #2d3238; --shadow: rgba(0,0,0,0.5); --card-hover: #232d39;
+        }
+        [data-theme="light"] {
+            --bg-body: #f8f9fa; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #00adb5; --text-light: #222831; --accent-cyan: #393e46; 
+            --border-color: #dee2e6; --shadow: rgba(0,0,0,0.08); --card-hover: #f1f3f5;
+        }
+        
+        body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; }
+
+        /* NAVBAR */
+        .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 10px 0; box-shadow: 0 2px 10px var(--shadow); }
+        .nav-holder { position: relative; }
+        .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
+        .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; text-decoration: none; border:none; background:none; cursor: pointer; }
+        .nav-icon-link:hover { color: var(--text-main); }
+
+        /* LIVE SEARCH UI - ĐÃ CHỈNH VỪA SEARCH BAR */
+        .search-container { position: relative; max-width: 450px; }
+        .search-results {
+            position: absolute; top: 100%; left: 0; right: 0; 
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            border-radius: 12px; margin-top: 8px; display: none; z-index: 3000;
+            overflow: hidden; box-shadow: 0 10px 30px var(--shadow);
+            width: 100%;
+        }
+        .search-item { display: flex; align-items: center; gap: 10px; padding: 10px; text-decoration: none; color: var(--text-light); border-bottom: 1px solid var(--border-color); }
+        .search-item:hover { background: var(--text-main); color: #000; }
+        .search-item img { width: 40px; height: 40px; object-fit: contain; background: #fff; border-radius: 5px; }
+
+        /* MEGA MENU */
+        .mega-menu-content {
+            position: absolute; top: calc(100% + 15px); left: 50%; transform: translateX(-50%);
+            width: 92vw; max-width: 1300px; background: var(--bg-card);
+            border: 1px solid var(--border-color); border-top: 4px solid var(--text-main);
+            display: none; z-index: 1500; padding: 0; box-shadow: 0 30px 60px var(--shadow); border-radius: 0 0 15px 15px;
+        }
+        .mega-menu-content.active { display: block; animation: slideIn 0.3s ease forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+        .mega-sidebar { background: rgba(0,0,0,0.03); padding: 25px; min-height: 400px; }
+        .mega-main-content { padding: 30px; }
+        .mega-cat-link {
+            display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+            color: var(--text-light); text-decoration: none; border-radius: 8px; transition: 0.2s; cursor: pointer;
+        }
+        .mega-cat-link:hover, .mega-cat-link.active { background: var(--text-main); color: #fff !important; font-weight: 700; }
+        .mega-cat-link img { width: 35px; height: 35px; object-fit: contain; background: #fff; border-radius: 5px; padding: 3px; }
+
+        /* SLIDESHOW - ĐÃ THÊM BÓNG ĐỔ */
+        .carousel-item { height: 550px; background: #000; }
+        .carousel-item img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5); }
+        .carousel-caption { bottom: 20%; text-align: left; left: 8%; max-width: 700px; }
+        .carousel-caption h1, .carousel-caption h2, .carousel-caption h5 { 
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.9); 
+        }
+
+        /* DANH MỤC TRÒN DƯỚI SLIDESHOW */
+        .cat-circles-container { padding: 50px 0; background: var(--bg-body); }
+        .cat-circles-wrap { display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; }
+        .cat-circle-item { width: 110px; text-align: center; text-decoration: none; transition: 0.3s; }
+        .cat-circle-img {
+            width: 90px; height: 90px; background: #fff; border-radius: 50%;
+            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 10px 25px var(--shadow); border: 2px solid var(--border-color); overflow: hidden;
+        }
+        .cat-circle-item:hover { transform: translateY(-10px); }
+        .cat-circle-item:hover .cat-circle-name { color: var(--text-main); }
+        .cat-circle-img img { width: 65%; height: 65%; object-fit: contain; }
+        .cat-circle-name { color: var(--text-light); font-weight: 700; font-size: 0.9rem; transition: 0.3s; }
+
+        /* PRODUCT CARD */
+        .product-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; height: 100%; transition: 0.4s; position: relative; box-shadow: 0 5px 15px var(--shadow); }
+        .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px var(--shadow); border-color: var(--text-main); background: var(--card-hover); }
+        .product-wishlist { position: absolute; top: 15px; right: 15px; z-index: 10; width: 38px; height: 38px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; color: #888; transition: 0.3s; border: none; }
+        .product-wishlist.active { color: #ff4757; }
+        .product-img-holder { background: #fff; height: 210px; display: flex; align-items: center; justify-content: center; padding: 25px; }
+        .product-img-holder img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        /* FLY EFFECT */
+        .fly-item { position: fixed; z-index: 9999; pointer-events: none; transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); border-radius: 50%; object-fit: contain; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        /* MODAL ERROR */
+        .modal-custom-content { background: #fff; border-radius: 12px; text-align: center; padding: 45px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .modal-custom-icon { width: 90px; height: 90px; border: 5px solid #f8bb86; border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; color: #f8bb86; font-size: 60px; font-weight: 500; font-family: serif; }
+        .modal-custom-text { color: #444; font-size: 22px; font-weight: 600; margin-bottom: 30px; }
+        .btn-custom-ok { background: #3085d6; color: #fff; border: none; padding: 12px 50px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+
+        .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
+        
+        /* MINI CART DROPDOWN */
+        .cart-dropdown-menu { width: 320px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; padding: 0; box-shadow: 0 15px 35px var(--shadow); }
+    </style>
 </head>
 <body>
-<div id="wrapper">
-<div id="sidebar-wrapper">
-<a href="/" class="sidebar-heading">MODEL WORLD</a>
-<div class="list-group list-group-flush px-2 mt-3">
-<a href="/" class="list-group-item active"><i class="bi bi-grid-fill me-2"></i> Trang chủ</a> 
-<a href="/products" class="list-group-item"><i class="bi bi-collection-play me-2"></i> Sản phẩm</a> 
-<a href="/wishlist" class="list-group-item"><i class="bi bi-heart me-2"></i> Yêu thích</a> 
-<a href="/cart" class="list-group-item"><i class="bi bi-cart3 me-2"></i> Giỏ hàng</a> 
-<a href="/orders" class="list-group-item"><i class="bi bi-receipt me-2"></i> Đơn hàng</a>
-<hr class="border-secondary mx-3">
-<a href="/account" class="list-group-item"><i class="bi bi-person-gear me-2"></i> Tài khoản</a>
-</div>
-</div>
-<div id="page-content-wrapper">
-<nav class="top-navbar d-flex justify-content-between align-items-center">
-<div class="d-flex align-items-center gap-2 w-100 me-3">
-<button class="btn btn-outline-secondary border-0" id="menu-toggle"><i class="bi bi-list fs-4"></i></button>
-<a href="/" class="nav-logo d-none d-sm-flex"><i class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span></a>
-<div class="search-box d-none d-md-block ms-md-4" id="searchBox">
-<input type="text" id="liveSearchInput" placeholder="Tìm kiếm Gunpla, Figure, Tool...">
-<button><i class="bi bi-search"></i></button>
-</div>
-</div>
-<div class="d-flex align-items-center gap-3">
-<th:block th:if="${user == null}">
-<a href="/login" class="text-decoration-none fw-bold text-nowrap" style="color:var(--text-main)">Đăng nhập</a>
-<a href="/register" class="btn btn-sm rounded-pill px-3 text-nowrap" style="background:var(--accent-cyan);color:#000;font-weight:700">Đăng ký</a>
-</th:block>
-<th:block th:if="${user != null}">
-<div class="dropdown">
-<a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" style="color:var(--text-light)">
-<img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle me-2 border border-secondary" width="35" height="35" style="object-fit:cover"> 
-<span class="d-none d-sm-block fw-bold small" th:text="${user.fullName ?: user.username}">User</span>
-</a>
-<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
-<li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>Hồ sơ</a></li>
-<li><hr class="dropdown-divider"></li>
-<li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
-</ul>
-</div>
-</th:block>
-</div>
+
+<input type="hidden" id="isLoggedIn" th:value="${user != null ? 'true' : 'false'}">
+
+<nav class="top-navbar">
+    <div class="container-fluid px-lg-5 nav-holder">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-4">
+                <a href="/" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
+                
+                <div class="position-static">
+                    <button class="btn btn-info rounded-pill px-4 fw-bold" id="btnMegaMenu">
+                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DANH MỤC
+                    </button>
+                    
+                    <div class="mega-menu-content shadow-lg" id="megaMenu">
+                        <div class="row g-0">
+                            <div class="col-md-3 mega-sidebar border-end">
+                                <span class="fw-bold mb-3 d-block" style="color: var(--text-main)">DANH MỤC MÔ HÌNH</span>
+                                <div class="d-flex flex-column" id="categoryList">
+                                    <th:block th:each="cat : ${featuredCategories}">
+                                        <div class="mega-cat-link" th:attr="data-target='cat-content-' + ${cat.id}">
+                                            <img th:src="${cat.image}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'">
+                                            <span th:text="${cat.name}">Category</span>
+                                        </div>
+                                    </th:block>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-9 mega-main-content">
+                                <span class="fw-bold mb-4 d-block" style="color: var(--text-main)">SẢN PHẨM NỔI BẬT</span>
+                                <th:block th:each="cat : ${featuredCategories}">
+                                    <div class="cat-product-pane d-none" th:id="'cat-content-' + ${cat.id}">
+                                        <div class="row g-4">
+                                            <th:block th:each="p, i : ${latestProducts}" th:if="${p.category?.id == cat.id and i.index < 6}">
+                                                <div class="col-md-4">
+                                                    <a th:href="@{'/product-detail/' + ${p.id}}" class="d-flex align-items-center gap-3 p-2 border rounded text-decoration-none hover-bg">
+                                                        <img th:src="${p.mainImage}" style="width:55px; height:55px; background:#fff; border-radius:5px; object-fit:contain;">
+                                                        <div class="overflow-hidden">
+                                                            <div class="small fw-bold text-truncate text-light" th:text="${p.name}">Product</div>
+                                                            <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </th:block>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;">
+                    <i class="bi bi-box-seam"></i> SẢN PHẨM
+                </a>
+            </div>
+
+            <!-- SEARCH BAR VỚI ICON VÀ ENTER KEY -->
+            <div class="search-container flex-grow-1 mx-5 d-none d-md-block">
+                <div class="input-group">
+                    <input type="text" id="liveSearchInput" class="form-control rounded-start-pill bg-dark border-secondary text-white px-4 py-2" style="background: rgba(0,0,0,0.05) !important;" placeholder="Tìm kiếm mô hình chuyên nghiệp...">
+                    <button class="btn btn-outline-info rounded-end-pill border-secondary border-start-0 bg-dark px-3" id="btnMainSearch">
+                        <i class="bi bi-search" style="color: var(--text-main)"></i>
+                    </button>
+                </div>
+                <div class="search-results shadow-lg" id="searchResultList"></div>
+            </div>
+
+            <div class="d-flex align-items-center gap-4">
+                <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
+                <a href="/wishlist" class="nav-icon-link" id="btnWishlistNav"><i class="bi bi-heart"></i></a>
+                
+                <div class="dropdown">
+                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-cart3"></i>
+                        <span class="badge-count" th:if="${cartSize > 0}" th:text="${cartSize}">0</span>
+                    </div>
+                    <div class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg" style="width: 350px;">
+                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
+                            <span style="color: var(--text-main)">GIỎ HÀNG CỦA BẠN</span>
+                            <span class="badge bg-info text-dark" th:text="${cartSize + ' món'}">0 món</span>
+                        </div>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg" style="transition: 0.3s">
+                                <div style="width: 60px; height: 60px; background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <img th:src="${item.product.mainImage}" style="max-width:90%; max-height:90%; object-fit:contain;">
+                                </div>
+                                <div class="overflow-hidden flex-grow-1">
+                                    <div class="small text-truncate fw-bold text-light mb-1" th:text="${item.product.name}"></div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+                                        <div class="d-flex align-items-center border border-secondary rounded-pill px-1 bg-dark">
+                                            <a th:href="@{'/cart/minus/' + ${item.id}}" class="btn btn-sm p-0 text-info border-0" style="width: 20px;"><i class="bi bi-dash"></i></a>
+                                            <span class="px-2 small fw-bold text-white" th:text="${item.quantity}">1</span>
+                                            <a th:href="@{'/cart/plus/' + ${item.id}}" class="btn btn-sm p-0 text-info border-0" style="width: 20px;"><i class="bi bi-plus"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a th:href="@{'/cart/delete/' + ${item.id}}" class="text-danger" onclick="return confirm('Xóa sản phẩm này?')"><i class="bi bi-trash3-fill"></i></a>
+                            </div>
+                            <div th:if="${#lists.isEmpty(cart)}" class="p-5 text-center text-muted"><small>Giỏ hàng trống!</small></div>
+                        </div>
+                        <div class="p-3 bg-dark">
+                            <a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT GIỎ HÀNG</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown" th:if="${user != null}">
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                        <img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                        <i class="bi bi-chevron-down small text-light"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
+                        <li><a class="dropdown-item py-2" href="/profile"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
+                        <li><a class="dropdown-item py-2" href="/orders"><i class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                    </ul>
+                </div>
+                <a th:if="${user == null}" href="/login" class="btn btn-sm btn-outline-info rounded-pill px-4">Đăng nhập</a>
+            </div>
+        </div>
+    </div>
 </nav>
-<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
-<div class="carousel-indicators">
-<th:block th:each="cat, i : ${featuredCategories}">
-<button type="button" data-bs-target="#heroCarousel" th:data-bs-slide-to="${i.index}" th:class="${i.index == 0} ? 'active' : ''"></button>
-</th:block>
+
+<!-- Slideshow & Intro -->
+<div id="productCarousel" class="carousel slide carousel-fade shadow" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <th:block th:each="p, i : ${latestProducts}" th:if="${i.index < 3}">
+            <div th:class="${i.index == 0 ? 'carousel-item active' : 'carousel-item'}">
+                <img th:src="${p.mainImage}" alt="Banner">
+                <div class="carousel-caption">
+                    <h5 class="text-main fw-bold text-uppercase mb-3" th:text="${p.category?.name}">CATEGORY</h5>
+                    <h1 class="display-2 fw-black text-white mb-3" style="font-family:Montserrat" th:text="${p.name}">Product Name</h1>
+                    <h2 class="text-danger fw-bold mb-4" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></h2>
+                    <a th:href="@{'/product-detail/' + ${p.id}}" class="btn btn-info btn-lg px-5 py-3 rounded-pill fw-bold shadow-lg">SỞ HỮU NGAY</a>
+                </div>
+            </div>
+        </th:block>
+    </div>
 </div>
-<div class="carousel-inner">
-<th:block th:each="cat, i : ${featuredCategories}">
-<div class="carousel-item" th:classappend="${i.index == 0} ? ' active' : ''">
-<img th:src="${cat.image != null ? (cat.image.startsWith('/') or cat.image.startsWith('http') ? cat.image : '/uploads/' + cat.image) : 'https://via.placeholder.com/1920x800?text=' + cat.name}" onerror="this.src='https://via.placeholder.com/1920x800?text=MODEL+WORLD'" th:alt="${cat.name}">
-<div class="carousel-caption-custom">
-<h2 th:text="${cat.name}">Tên danh mục</h2>
-<p>Khám phá ngay bộ sưu tập <strong th:text="${cat.name}" style="color:var(--accent-hover)"></strong> mới nhất với hàng ngàn ưu đãi!</p>
-<a th:href="@{'/category/' + ${cat.id}}" class="btn btn-outline-info rounded-pill px-4 fw-bold mt-2">XEM NGAY</a>
+
+<div class="container my-5">
+    <div class="p-5 rounded-4 shadow-lg" id="tiltBox" style="background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-body) 100%); transform-style: preserve-3d; transition: 0.1s; border: 1px solid var(--border-color);">
+        <div class="row align-items-center">
+            <div class="col-md-7" style="transform: translateZ(50px)">
+                <h2 class="display-5 fw-bold text-main mb-3" style="font-family:Montserrat">THẾ GIỚI MÔ HÌNH</h2>
+                <p class="fs-5 opacity-75">Nơi hội tụ những nhà sưu tầm chuyên nghiệp. Chúng tôi mang đến những dòng Gunpla, Figure và Lego chính hãng cao cấp nhất.</p>
+            </div>
+            <div class="col-md-5 d-none d-md-block text-center" style="transform: translateZ(80px)">
+                <img src="https://www.pngmart.com/files/13/Gundam-PNG-Transparent-Image.png" class="img-fluid" style="max-height: 250px; filter: drop-shadow(0 15px 35px var(--text-main)); opacity: 0.8">
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Category Circles -->
+<div class="cat-circles-container">
+    <div class="container">
+        <div class="cat-circles-wrap">
+            <th:block th:each="cat : ${featuredCategories}">
+                <a th:href="@{/products(categoryId=${cat.id})}" class="cat-circle-item">
+                    <div class="cat-circle-img"><img th:src="${cat.image}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'"></div>
+                    <div class="cat-circle-name text-truncate" th:text="${cat.name}">Category</div>
+                </a>
+            </th:block>
+        </div>
+    </div>
 </div>
-</th:block>
-<div th:if="${#lists.isEmpty(featuredCategories)}" class="carousel-item active">
-<img src="https://via.placeholder.com/1920x800/1f2833/66fcf1?text=CHÀO+MỪNG+ĐẾN+VỚI+MODEL+WORLD" alt="Default Banner">
-<div class="carousel-caption-custom">
-<h2>MODEL WORLD</h2>
-<p>Thế giới mô hình chính hãng dành cho bạn. Khám phá ngay!</p>
-<a href="/products" class="btn btn-outline-info rounded-pill px-4 fw-bold mt-2">XEM NGAY</a>
+
+<!-- Products Grid -->
+<div class="container-fluid px-lg-5 py-5">
+    <h3 class="fw-bold text-main border-start border-5 border-info ps-3 mb-5">SẢN PHẨM MỚI NHẤT</h3>
+    <div class="row g-4">
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" th:each="p : ${latestProducts}">
+            <div class="product-card">
+                <button class="product-wishlist shadow-sm" th:onclick="'toggleWishlist(this, ' + ${p.id} + ')'"><i class="bi bi-heart-fill"></i></button>
+                <div class="product-img-holder">
+                    <a th:href="@{'/product-detail/' + ${p.id}}"><img th:src="${p.mainImage}" th:id="'img-' + ${p.id}"></a>
+                </div>
+                <div class="p-3">
+                    <div class="small text-info fw-bold mb-1 text-uppercase" style="font-size:0.7rem" th:text="${p.category?.name}">BRAND</div>
+                    <h6 class="text-truncate small mb-3"><a th:href="@{'/product-detail/' + ${p.id}}" class="text-decoration-none text-light fw-bold" th:text="${p.name}">Name</a></h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-danger fs-5" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></span>
+                        <button class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold" th:onclick="'flyToCart(this, ' + ${p.id} + ')'">MUA <i class="bi bi-cart-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Modal Auth -->
+<div class="modal fade" id="authModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+        <div class="modal-content modal-custom-content shadow-lg">
+            <div class="modal-custom-icon">!</div>
+            <div class="modal-custom-text">Bạn cần đăng nhập để thực hiện giao dịch</div>
+            <button class="btn-custom-ok shadow" id="btnAuthOk">OK</button>
+        </div>
+    </div>
 </div>
-</div>
-</div>
-<div class="container-fluid px-4 pb-5 flex-grow-1 mt-4">
-<a href="/vouchers" class="voucher-banner">
-<div class="voucher-content">
-<h4><i class="bi bi-ticket-perforated-fill me-2"></i>KHO VOUCHER KHỦNG</h4>
-<p>Săn mã giảm giá lên đến 50% & Freeship toàn quốc mỗi ngày.</p>
-</div>
-<button class="voucher-btn">LƯU MÃ NGAY</button>
-</a>
-<div class="category-wrapper">
-<div class="d-flex align-items-center mb-4">
-<h4 class="section-title m-0">DANH MỤC NỔI BẬT</h4><div class="title-line flex-grow-1 ms-3"></div>
-</div>
-<div class="quick-cat-bar p-4 rounded-3 position-relative">
-<div class="deco-corner top-left"></div><div class="deco-corner top-right"></div><div class="deco-corner bottom-left"></div><div class="deco-corner bottom-right"></div>
-<div class="d-flex justify-content-center align-items-start flex-wrap gap-4">
-<th:block th:each="cat : ${featuredCategories}">
-<a th:href="@{'/category/' + ${cat.id}}" class="cat-item">
-<div class="cat-icon-circle"><img th:src="${cat.image != null ? (cat.image.startsWith('/') or cat.image.startsWith('http') ? cat.image : '/uploads/' + cat.image) : ''}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'" th:alt="${cat.name}"></div> 
-<span class="cat-name" th:text="${cat.name}">Tên DM</span>
-</a>
-</th:block>
-<div th:if="${#lists.isEmpty(featuredCategories)}" class="text-muted w-100 text-center"><i class="bi bi-inbox fs-4 d-block mb-2"></i> Chưa có danh mục nào!</div>
-</div>
-</div>
-</div>
-<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
-<h4 class="section-title m-0">SẢN PHẨM MỚI NHẤT</h4>
-<a href="/products" class="text-decoration-none fw-bold small" style="color:var(--text-main)">Xem tất cả <i class="bi bi-chevron-right"></i></a>
-</div>
-<div class="row g-4">
-<th:block th:each="p : ${latestProducts}">
-<div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 col-12">
-<div class="product-card">
-<div class="wishlist-icon" th:attr="data-id=${p.id}" onclick="toggleWishlist(this)"><i class="bi bi-heart"></i></div>
-<div class="product-img-wrap">
-<a th:href="@{'/product-detail/' + ${p.id}}"><img th:src="${p.mainImage != null ? (p.mainImage.startsWith('/') or p.mainImage.startsWith('http') ? p.mainImage : '/uploads/' + p.mainImage) : ''}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'" alt="Product"></a>
-</div>
-<div class="product-details">
-<div class="product-brand" th:text="${p.category?.name ?: 'BANDAI'}">BRAND</div>
-<div class="product-name"><a th:href="@{'/product-detail/' + ${p.id}}" th:text="${p.name}">Tên SP</a></div>
-<div class="price-box"><span class="product-price" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}+'₫'"></span></div>
-<button class="btn-add-cart mt-auto" th:data-id="${p.id}" onclick="animateAddToCart(event,this)"><i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ</button>
-</div>
-</div>
-</div>
-</th:block>
-<div th:if="${#lists.isEmpty(latestProducts)}" class="col-12 text-center py-5 text-muted"><i class="bi bi-box-seam fs-1 d-block mb-3"></i><p>Hiện chưa có sản phẩm nào!</p></div>
-</div>
-</div>
-<footer class="py-5">
-<div class="container-fluid px-4">
-<div class="row g-4">
-<div class="col-lg-4 col-md-6">
-<h5 class="fw-bold mb-3">MODEL WORLD</h5><p class="small" style="color:#aaa">Hệ thống phân phối mô hình chính hãng hàng đầu Việt Nam.</p>
-<div class="d-flex gap-3 mt-3"><a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a></div>
-</div>
-<div class="col-lg-2 col-md-3 col-6">
-<h6 class="fw-bold mb-3">Về chúng tôi</h6><ul class="list-unstyled small lh-lg"><li><a href="#" class="text-decoration-none">Giới thiệu</a></li><li><a href="#" class="text-decoration-none">Cửa hàng</a></li></ul>
-</div>
-<div class="col-lg-2 col-md-3 col-6">
-<h6 class="fw-bold mb-3">Chính sách</h6><ul class="list-unstyled small lh-lg"><li><a href="#" class="text-decoration-none">Đổi trả</a></li><li><a href="#" class="text-decoration-none">Bảo hành</a></li></ul>
-</div>
-<div class="col-lg-4 col-md-12">
-<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
-<div class="input-group"><input type="text" class="form-control" placeholder="Nhập email..." style="background:#111;border:1px solid #333;color:#fff"><button class="btn" style="background:var(--accent-cyan);color:#000;font-weight:700">Đăng ký</button></div>
-</div>
-</div>
-<div class="text-center mt-5 pt-3 border-top border-secondary small">© 2026 Model World. All rights reserved.</div>
-</div>
+
+<footer class="py-5 bg-dark border-top border-secondary text-center">
+    <p class="text-white small">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p>
 </footer>
-</div>
-</div>
-<div class="floating-socials">
-<a href="tel:0909123456" class="social-btn phone"><i class="bi bi-telephone-fill"></i></a> 
-<a href="https://zalo.me/0909123456" class="social-btn zalo"><i class="bi bi-chat-dots-fill"></i></a> 
-<a href="https://m.me/modelworld" class="social-btn messenger"><i class="bi bi-messenger"></i></a>
-</div>
-<div id="floating-cart" onclick="toggleMiniCart()">
-<i class="bi bi-cart3"></i> <span class="cart-badge" th:if="${cartSize > 0}" th:text="${cartSize}"></span>
-</div>
-<div id="mini-cart-panel" class="mini-cart-panel">
-<div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="border-color:var(--border-color)!important">
-<span class="fw-bold" style="color:var(--accent-cyan);font-family:var(--font-title)"><i class="bi bi-bag me-1"></i> GIỎ HÀNG</span>
-<button onclick="toggleMiniCart()" class="btn-close btn-close-white small"></button>
-</div>
-<div id="mini-cart-body" class="p-3 overflow-auto flex-grow-1">
-<div th:if="${#lists.isEmpty(cart)}" class="text-center text-muted py-5"><i class="bi bi-cart-x fs-1 mb-2 d-block"></i> Chưa có sản phẩm</div>
-<div th:each="item : ${cart}" class="d-flex mb-3 border-bottom pb-2">
-<img th:src="${item.product.mainImage != null ? (item.product.mainImage.startsWith('/') or item.product.mainImage.startsWith('http') ? item.product.mainImage : '/images/products/' + item.product.mainImage) : 'https://via.placeholder.com/60'}" width="60" height="60" style="object-fit:contain" class="me-2">
-<div class="flex-grow-1">
-<div style="font-size:.9rem" th:text="${item.product.name}"></div>
-<div class="small text-muted">SL: <span th:text="${item.quantity}"></span></div>
-<div style="color:var(--accent-red);font-weight:700">
-<span th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT')}"></span>₫ × <span th:text="${item.quantity}"></span>
-</div>
-<div class="small">= <span th:text="${#numbers.formatDecimal(item.product.price * item.quantity,0,'COMMA',0,'POINT')}"></span>₫</div>
-</div>
-</div>
-</div>
-<div class="p-3 border-top" style="border-color:var(--border-color)!important;background:rgba(0,0,0,.3)">
-<div class="d-flex justify-content-between mb-2 small fw-bold">
-<span style="color:var(--text-light)">Tổng cộng:</span> 
-<span style="color:var(--accent-red);font-size:1.1rem" th:text="${cart != null and not #lists.isEmpty(cart) ? #numbers.formatDecimal(#aggregates.sum(cart.![product.price * quantity]),0,'COMMA',0,'POINT') : '0'} + '₫'"></span></div>
-<a href="/cart" class="btn w-100 btn-sm" style="background:var(--accent-cyan);color:#000;font-weight:700;padding:10px;font-family:var(--font-title)">THANH TOÁN NGAY</a>
-</div>
-</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.addEventListener("DOMContentLoaded",()=>{
-let m=document.getElementById("menu-toggle");
-if(m)m.onclick=e=>{e.preventDefault();document.body.classList.toggle("toggled")};
-window.toggleMiniCart=()=>document.getElementById("mini-cart-panel").classList.toggle("show");
-window.toggleWishlist=el=>{
-el.classList.toggle("active");
-el.querySelector("i").className=el.classList.contains("active")?"bi bi-heart-fill":"bi bi-heart";
-};
-window.animateAddToCart=(e,btn)=>{
-e.preventDefault();
-let id=btn.dataset.id, img=btn.closest(".product-card").querySelector(".product-img-wrap img"), cart=document.getElementById("floating-cart");
-let tk=document.querySelector('meta[name="_csrf"]')?.content, hd=document.querySelector('meta[name="_csrf_header"]')?.content;
-let h={'Content-Type':'application/json'}; if(hd&&tk)h[hd]=tk;
-if(img&&cart){
-let ir=img.getBoundingClientRect(), cr=cart.getBoundingClientRect(), f=img.cloneNode(!0);
-f.style.cssText=`position:fixed;left:${ir.left}px;top:${ir.top}px;width:${ir.width}px;height:${ir.height}px;transition:all .8s cubic-bezier(.2,.8,.2,1);z-index:9999;pointer-events:none;border-radius:50%;object-fit:contain`;
-document.body.appendChild(f);
-requestAnimationFrame(()=>{f.style.cssText+=`;left:${cr.left+cr.width/2-10}px;top:${cr.top+cr.height/2-10}px;width:20px;height:20px;opacity:.3;transform:scale(.3)`});
-setTimeout(()=>{f.remove();cart.style.transform="scale(1.25)";setTimeout(()=>cart.style.transform="scale(1)",200)},800);
-}
-fetch("/cart/add/"+id,{method:"POST",headers:h}).then(r=>r.text()).then(t=>{if(t==="success")location.reload()});
-}
-});
+    const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+
+    // Logic chuyển hướng khi chưa login
+    function showAuthModal() {
+        const modal = new bootstrap.Modal(document.getElementById('authModal'));
+        modal.show();
+        document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login';
+    }
+
+    // Logic tìm kiếm thực sự (Enter hoặc Click icon)
+    function executeSearch() {
+        const keyword = searchInput.value.trim();
+        if (keyword) window.location.href = `/products?keyword=${encodeURIComponent(keyword)}`;
+    }
+
+    // 1. LIVE SEARCH LOGIC
+    const searchInput = document.getElementById('liveSearchInput');
+    const searchResultList = document.getElementById('searchResultList');
+    const btnMainSearch = document.getElementById('btnMainSearch');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            if (query.length < 2) { searchResultList.style.display = 'none'; return; }
+            fetch(`/cart/api/search?keyword=${encodeURIComponent(query)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        searchResultList.innerHTML = data.map(p => `
+                            <a href="/product-detail/${p.id}" class="search-item">
+                                <img src="${p.mainImage}" onerror="this.src='/images/no-image.png'">
+                                <div class="overflow-hidden">
+                                    <div class="small fw-bold text-truncate">${p.name}</div>
+                                    <div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div>
+                                </div>
+                            </a>
+                        `).join('');
+                        searchResultList.style.display = 'block';
+                    } else { searchResultList.style.display = 'none'; }
+                });
+        });
+
+        // Bấm Enter để tìm kiếm
+        searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') executeSearch(); });
+    }
+
+    // Bấm Icon để tìm kiếm
+    if(btnMainSearch) btnMainSearch.onclick = executeSearch;
+
+    document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
+
+    // MEGA MENU
+    const btnMega = document.getElementById('btnMegaMenu');
+    const megaMenu = document.getElementById('megaMenu');
+    btnMega.addEventListener('click', (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); });
+    document.addEventListener('click', (e) => { if (!megaMenu.contains(e.target) && e.target !== btnMega) megaMenu.classList.remove('active'); });
+
+    const catLinks = document.querySelectorAll('.mega-cat-link');
+    const panes = document.querySelectorAll('.cat-product-pane');
+    if (panes.length > 0) { panes[0].classList.remove('d-none'); catLinks[0].classList.add('active'); }
+    catLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            catLinks.forEach(l => l.classList.remove('active'));
+            panes.forEach(p => p.classList.add('d-none'));
+            this.classList.add('active');
+            document.getElementById(this.getAttribute('data-target')).classList.remove('d-none');
+        });
+    });
+
+    // Theme Toggle
+    function toggleTheme() {
+        const h = document.documentElement;
+        h.setAttribute('data-theme', h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
+
+    // Fly to Cart
+    function flyToCart(btn, pid) {
+        if (!isLoggedIn) { showAuthModal(); return; }
+        const cart = document.getElementById('cartIconNav');
+        const img = document.getElementById('img-' + pid);
+        if (img && cart) {
+            const clone = img.cloneNode();
+            const start = img.getBoundingClientRect();
+            const end = cart.getBoundingClientRect();
+            clone.classList.add('fly-item');
+            clone.style.top = start.top + 'px';
+            clone.style.left = start.left + 'px';
+            clone.style.width = start.width + 'px';
+            clone.style.height = start.height + 'px';
+            document.body.appendChild(clone);
+            setTimeout(() => {
+                clone.style.top = (window.scrollY + end.top) + 'px';
+                clone.style.left = end.left + 'px';
+                clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0';
+            }, 10);
+            setTimeout(() => { clone.remove(); fetch(`/cart/add/${pid}`, { method: 'POST' }).then(() => location.reload()); }, 800);
+        }
+    }
+
+    function toggleWishlist(btn, pid) {
+        if (!isLoggedIn) { showAuthModal(); return; }
+        btn.classList.toggle('active');
+    }
+
+    const tiltBox = document.getElementById('tiltBox');
+    if(tiltBox) {
+        tiltBox.addEventListener('mousemove', (e) => {
+            let x = (window.innerWidth / 2 - e.pageX) / 45;
+            let y = (window.innerHeight / 2 - e.pageY) / 45;
+            tiltBox.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        });
+        tiltBox.addEventListener('mouseleave', () => tiltBox.style.transform = `rotateY(0) rotateX(0)`);
+    }
 </script>
 </body>
 </html>

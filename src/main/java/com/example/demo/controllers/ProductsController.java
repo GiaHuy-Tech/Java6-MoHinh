@@ -72,9 +72,8 @@ public class ProductsController {
         // ==========================================
         // ĐOẠN CODE SỬA LỖI HIỂN THỊ USER Ở ĐÂY
         // LƯU Ý: Chữ "user" trong session.getAttribute() phải đúng với key bạn đã set lúc Login
-        Object currentUser = session.getAttribute("user"); 
-        model.addAttribute("user", currentUser);
-        // ==========================================
+        Account user = (Account) session.getAttribute("account");
+        model.addAttribute("user", user);        // ==========================================
 
         return "client/products";
     }
