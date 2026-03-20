@@ -66,4 +66,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     List<Object[]> countOrdersPerMonthByYear(@Param("year") int year);
 
     List<Orders> findByStatusAndCreatedDateBefore(Integer status, Date date);
+    long countByAccountId(Integer accountId);
 }
