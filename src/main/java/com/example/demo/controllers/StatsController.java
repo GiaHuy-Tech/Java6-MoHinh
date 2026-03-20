@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Membership;
 import com.example.demo.model.Products;
@@ -46,115 +47,97 @@ public class StatsController {
 
     // ===== TRANG DASHBOARD THỐNG KÊ =====
     @GetMapping("/stats")
-    public String dashboard(Model model) {
+    public String dashboard(Model model,
+                            @RequestParam(value = "year", required = false) Integer year) {
 
-        // ===== 1. TỔNG QUAN (TOP CARDS) =====
-        model.addAttribute("totalOrders", ordersRepo.countCompletedOrders()); 
+        int currentYear = (year != null) ? year : LocalDate.now().getYear();
+        model.addAttribute("selectedYear", currentYear);
+
+        List<Integer> years = new ArrayList<>();
+        for (int i = 2020; i <= LocalDate.now().getYear(); i++) {
+            years.add(i);
+        }
+        model.addAttribute("years", years);
+
+        model.addAttribute("totalOrders", ordersRepo.countCompletedOrders());
         model.addAttribute("totalProducts", productRepo.count());
         model.addAttribute("totalAccounts", accountRepo.count());
         model.addAttribute("totalCategories", categoryRepo.count());
 
-        // ===== 2. TỔNG DOANH THU TOÀN THỜI GIAN =====
         Long totalRev = ordersRepo.getTotalRevenue();
         model.addAttribute("totalRevenue", totalRev != null ? totalRev : 0L);
 
-        // ===== 3. DỮ LIỆU BIỂU ĐỒ TRÒN (DOANH THU THEO DANH MỤC) =====
+        // ===== Chart danh mục =====
         List<Object[]> revenueByCategory = ordersRepo.getRevenueByCategory();
-        
         List<String> chartLabels = new ArrayList<>();
         List<Long> chartData = new ArrayList<>();
 
-        if (revenueByCategory != null) {
-            for (Object[] row : revenueByCategory) {
-                chartLabels.add((String) row[0]);             // Tên danh mục
-                chartData.add(((Number) row[1]).longValue()); // Doanh thu
-            }
+        for (Object[] row : revenueByCategory) {
+            chartLabels.add((String) row[0]);
+            chartData.add(((Number) row[1]).longValue());
         }
+
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartData", chartData);
 
-
-        // ===== 4. DỮ LIỆU BIỂU ĐỒ CỘT (DOANH THU THEO 12 THÁNG) =====
-        int currentYear = LocalDate.now().getYear();
+        // ===== Chart tháng =====
         List<Object[]> revenueByMonth = ordersRepo.getRevenueByMonth(currentYear);
 
-        // Tạo mảng 12 phần tử có giá trị 0 (đại diện tháng 1 -> 12)
         List<Long> monthlyRevenueData = new ArrayList<>(Collections.nCopies(12, 0L));
         List<String> monthlyLabels = new ArrayList<>();
+
         for (int i = 1; i <= 12; i++) {
             monthlyLabels.add("Tháng " + i);
         }
 
-        // Đổ dữ liệu từ DB vào đúng vị trí tháng
-        if (revenueByMonth != null) {
-            for (Object[] row : revenueByMonth) {
-                int month = (int) row[0];
-                Long revenue = ((Number) row[1]).longValue();
-                // List index bắt đầu từ 0, tháng bắt đầu từ 1 -> phải trừ 1
-                if (month >= 1 && month <= 12) {
-                    monthlyRevenueData.set(month - 1, revenue);
-                }
-            }
+        for (Object[] row : revenueByMonth) {
+            int month = (int) row[0];
+            Long revenue = ((Number) row[1]).longValue();
+            monthlyRevenueData.set(month - 1, revenue);
         }
+
         model.addAttribute("revenueMonthLabels", monthlyLabels);
         model.addAttribute("revenueMonthData", monthlyRevenueData);
 
-
-        // ===== 5. TOP SẢN PHẨM (YÊU THÍCH & BÁN CHẠY) =====
+        // ===== Top =====
         Products topWish = wishlistRepo.findTopByMostLiked().orElse(null);
         model.addAttribute("topWish", topWish);
 
         List<Products> topSellingList = ordersRepo.findTopSellingProduct(PageRequest.of(0, 1));
-        Products topSold = topSellingList.isEmpty() ? null : topSellingList.get(0);
-        model.addAttribute("topSold", topSold);
+        model.addAttribute("topSold", topSellingList.isEmpty() ? null : topSellingList.get(0));
 
+        // ===== Đơn theo tháng =====
+        List<Object[]> ordersPerMonth = ordersRepo.countOrdersPerMonthByYear(currentYear);
 
-        // ===== 6. BẢNG THỐNG KÊ SỐ ĐƠN (DƯỚI CÙNG) =====
-        List<Object[]> ordersPerMonth = ordersRepo.countOrdersPerMonth();
         List<String> months = new ArrayList<>();
         List<Long> orderCounts = new ArrayList<>();
 
-        if (ordersPerMonth != null) {
-            for (Object[] row : ordersPerMonth) {
-                 months.add("Tháng " + row[0]);
-                 orderCounts.add(((Number) row[1]).longValue());
-            }
+        for (Object[] row : ordersPerMonth) {
+            months.add("Tháng " + row[0]);
+            orderCounts.add(((Number) row[1]).longValue());
         }
+
         model.addAttribute("months", months);
         model.addAttribute("orderCounts", orderCounts);
-        
-        // Thêm số liệu đơn tháng này/năm này cho thẻ hiển thị
-        model.addAttribute("monthOrders", orderCounts.isEmpty() ? 0 : orderCounts.get(orderCounts.size() -1));
+
+        model.addAttribute("monthOrders", orderCounts.isEmpty() ? 0 : orderCounts.get(orderCounts.size() - 1));
         model.addAttribute("yearOrders", ordersRepo.countCompletedOrders());
 
+        // ===== Membership =====
+        model.addAttribute("memberships", membershipRepo.findAll());
 
-        // ===== 7. QUẢN LÝ & THỐNG KÊ MEMBERSHIP (MỚI THÊM) =====
-        // a. Lấy danh sách để hiển thị bảng quản lý
-        List<Membership> memberships = membershipRepo.findAll();
-        model.addAttribute("memberships", memberships);
-
-        // b. Lấy thống kê số lượng người dùng theo hạng
         List<Object[]> memStats = membershipRepo.countUsersByMembership();
         List<String> memLabels = new ArrayList<>();
         List<Long> memData = new ArrayList<>();
-        
-        if (memStats != null) {
-            for (Object[] row : memStats) {
-                memLabels.add((String) row[0]); // Tên hạng
-                memData.add(((Number) row[1]).longValue()); // Số lượng user
-            }
+
+        for (Object[] row : memStats) {
+            memLabels.add((String) row[0]);
+            memData.add(((Number) row[1]).longValue());
         }
+
         model.addAttribute("memLabels", memLabels);
         model.addAttribute("memData", memData);
 
         return "admin/stats";
-    }
-
-    // ===== METHOD XỬ LÝ CẬP NHẬT MEMBERSHIP TỪ MODAL =====
-    @PostMapping("/admin/membership/update")
-    public String updateMembership(@ModelAttribute Membership membership) {
-        // Lưu lại thông tin (JPA tự hiểu là update nếu ID đã tồn tại)
-        membershipRepo.save(membership);
-        return "redirect:/stats?success=true";
     }
 }
