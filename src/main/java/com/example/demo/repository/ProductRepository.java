@@ -1,5 +1,6 @@
 package com.example.demo.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,5 +39,17 @@ public interface ProductRepository extends JpaRepository<Products, Integer> {
     Page<Products> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
     Page<Products> findByCategoryIdAndNameContainingIgnoreCase(Integer categoryId, String name, Pageable pageable);
+    
+    // 1. Chỉ lọc theo khoảng giá
+    Page<Products> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+
+    // 2. Lọc theo danh mục + khoảng giá
+    Page<Products> findByCategoryIdAndPriceBetween(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+
+    // 3. Lọc theo từ khóa + khoảng giá
+    Page<Products> findByNameContainingIgnoreCaseAndPriceBetween(String name, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+
+    // 4. Lọc tổng hợp: Danh mục + Từ khóa + Khoảng giá
+    Page<Products> findByCategoryIdAndNameContainingIgnoreCaseAndPriceBetween(Integer categoryId, String name, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
 
 }

@@ -1,12 +1,12 @@
 package com.example.demo.controllers;
 
+import java.math.BigDecimal; // Import BigDecimal
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import jakarta.servlet.http.HttpSession; // <-- THÊM IMPORT NÀY
-
+import jakarta.servlet.http.HttpSession;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 
@@ -24,39 +24,54 @@ public class ProductsController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
+            @RequestParam(required = false) BigDecimal minPrice, // Tham số mới
+            @RequestParam(required = false) BigDecimal maxPrice, // Tham số mới
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             Model model,
-            HttpSession session) { // <-- THÊM HttpSession VÀO ĐÂY
+            HttpSession session) {
 
         // Xử lý sort
         Sort sorting = Sort.unsorted();
-
         if ("asc".equalsIgnoreCase(sort)) {
             sorting = Sort.by("price").ascending();
         } else if ("desc".equalsIgnoreCase(sort)) {
             sorting = Sort.by("price").descending();
         }
 
-        if (page < 0) {
-            page = 0;
-        }
-        
-        Pageable pageable = PageRequest.of(page, size, sorting);
+        Pageable pageable = PageRequest.of(page < 0 ? 0 : page, size, sorting);
         Page<Products> productPage;
 
-        // Filter logic (PHÂN TRANG TẠI DATABASE)
-        if (keyword != null && !keyword.isBlank() && categoryId != null) {
-            productPage = productRepo.findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword, pageable);
-        } 
-        else if (keyword != null && !keyword.isBlank()) {
-            productPage = productRepo.findByNameContainingIgnoreCase(keyword, pageable);
-        } 
-        else if (categoryId != null) {
-            productPage = productRepo.findByCategoryId(categoryId, pageable);
-        } 
-        else {
-            productPage = productRepo.findByAvailableTrue(pageable);
+        // Thiết lập giá mặc định nếu để trống để tránh lỗi query
+        BigDecimal min = (minPrice == null) ? BigDecimal.ZERO : minPrice;
+        BigDecimal max = (maxPrice == null) ? new BigDecimal("999999999") : maxPrice;
+
+        // --- LOGIC LỌC TỔNG HỢP ---
+        boolean hasKeyword = (keyword != null && !keyword.isBlank());
+        boolean hasCategory = (categoryId != null);
+        boolean hasPriceFilter = (minPrice != null || maxPrice != null);
+
+        if (hasPriceFilter) {
+            if (hasKeyword && hasCategory) {
+                productPage = productRepo.findByCategoryIdAndNameContainingIgnoreCaseAndPriceBetween(categoryId, keyword, min, max, pageable);
+            } else if (hasKeyword) {
+                productPage = productRepo.findByNameContainingIgnoreCaseAndPriceBetween(keyword, min, max, pageable);
+            } else if (hasCategory) {
+                productPage = productRepo.findByCategoryIdAndPriceBetween(categoryId, min, max, pageable);
+            } else {
+                productPage = productRepo.findByPriceBetween(min, max, pageable);
+            }
+        } else {
+            // Logic cũ khi không có lọc giá
+            if (hasKeyword && hasCategory) {
+                productPage = productRepo.findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword, pageable);
+            } else if (hasKeyword) {
+                productPage = productRepo.findByNameContainingIgnoreCase(keyword, pageable);
+            } else if (hasCategory) {
+                productPage = productRepo.findByCategoryId(categoryId, pageable);
+            } else {
+                productPage = productRepo.findByAvailableTrue(pageable);
+            }
         }
 
         // Truyền dữ liệu ra view
@@ -64,16 +79,16 @@ public class ProductsController {
         model.addAttribute("productPage", productPage);
         model.addAttribute("categories", categoryRepo.findAll());
 
-        // Giữ lại filter khi chuyển trang
+        // Giữ lại các giá trị filter để hiển thị trên Form
         model.addAttribute("selectedCategory", categoryId);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedSort", sort);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
 
-        // ==========================================
-        // ĐOẠN CODE SỬA LỖI HIỂN THỊ USER Ở ĐÂY
-        // LƯU Ý: Chữ "user" trong session.getAttribute() phải đúng với key bạn đã set lúc Login
+        // Hiển thị User
         Account user = (Account) session.getAttribute("account");
-        model.addAttribute("user", user);        // ==========================================
+        model.addAttribute("user", user);
 
         return "client/products";
     }
