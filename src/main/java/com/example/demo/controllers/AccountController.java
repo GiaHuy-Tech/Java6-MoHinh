@@ -31,298 +31,124 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/account")
 public class AccountController {
 
-    @Autowired
-    private AccountRepository accountRepo;
+    @Autowired private AccountRepository accountRepo;
+    @Autowired private OrdersRepository ordersRepo;
+    @Autowired private AddressRepository addressRepo;
+    @Autowired private MembershipRepository membershipRepo;
+    @Autowired private HttpSession session;
 
-    @Autowired
-    private OrdersRepository ordersRepo;
-
-    @Autowired
-    private AddressRepository addressRepo;
-
-    @Autowired
-    private MembershipRepository membershipRepo;
-
-    @Autowired
-    private HttpSession session;
-
-    private final String UPLOAD_DIR = "src/main/resources/static/images/avatar/";
-
-    // =====================================================
-    // PROFILE PAGE
-    // =====================================================
+    // Sửa đường dẫn để lưu trực tiếp vào thư mục runtime giúp ảnh hiện ngay
+    private final String UPLOAD_DIR = "target/classes/static/images/avatar/";
 
     @GetMapping
     public String accountPage(Model model) {
+        Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) return "redirect:/login";
 
-        Account acc = (Account) session.getAttribute("account");
+        // Lấy dữ liệu tươi nhất từ DB
+        Account account = accountRepo.findById(sessionAcc.getId()).orElse(null);
+        if (account == null) return "redirect:/login";
 
-        if (acc == null) {
-            return "redirect:/login";
-        }
+        // Fix lỗi LazyInitialization: Lấy địa chỉ mặc định riêng
+        Address defaultAddress = addressRepo.findByAccount_IdAndIsDefaultTrue(account.getId()).orElse(null);
 
-        Account account =
-                accountRepo.findById(acc.getId()).orElse(null);
-
-        if (account == null) {
-            return "redirect:/login";
-        }
-
+        // Tính toán Membership
         BigDecimal totalSpent = account.getTotalSpending();
-
         String membershipName = "Đồng";
-
         if (totalSpent != null) {
-
-            if (totalSpent.compareTo(new BigDecimal("1000000000")) >= 0) {
-                membershipName = "Kim Cương";
-            }
-            else if (totalSpent.compareTo(new BigDecimal("500000000")) >= 0) {
-                membershipName = "Bạch Kim";
-            }
-            else if (totalSpent.compareTo(new BigDecimal("100000000")) >= 0) {
-                membershipName = "Vàng";
-            }
-            else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) {
-                membershipName = "Bạc";
-            }
+            if (totalSpent.compareTo(new BigDecimal("1000000000")) >= 0) membershipName = "Kim Cương";
+            else if (totalSpent.compareTo(new BigDecimal("500000000")) >= 0) membershipName = "Bạch Kim";
+            else if (totalSpent.compareTo(new BigDecimal("100000000")) >= 0) membershipName = "Vàng";
+            else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) membershipName = "Bạc";
         }
 
-        Membership membership =
-                membershipRepo.findByName(membershipName).orElse(null);
-
+        Membership membership = membershipRepo.findByName(membershipName).orElse(null);
         if (membership != null) {
-
             account.setMembership(membership);
-
             accountRepo.save(account);
         }
 
+        // Đẩy dữ liệu ra View
         model.addAttribute("account", account);
+        model.addAttribute("defaultAddress", defaultAddress);
         model.addAttribute("membershipName", membershipName);
+        model.addAttribute("orderCount", ordersRepo.countByAccountId(account.getId())); // Giả định bạn có hàm này
+        model.addAttribute("totalSpent", totalSpent != null ? totalSpent : 0);
 
         return "client/account";
     }
 
-    // =====================================================
-    // UPDATE FULL NAME
-    // =====================================================
-
     @PostMapping("/update-fullname")
-    public String updateFullName(
-            @RequestParam("fullName") String fullName,
-            RedirectAttributes redirect) {
-
-        return updateAccountField(
-                acc -> acc.setFullName(fullName.trim()),
-                redirect,
-                "Họ tên");
+    public String updateFullName(@RequestParam("fullName") String fullName, RedirectAttributes redirect) {
+        return updateAccountField(acc -> acc.setFullName(fullName.trim()), redirect, "Họ tên");
     }
-
-    // =====================================================
-    // UPDATE PHONE
-    // =====================================================
 
     @PostMapping("/update-phone")
-    public String updatePhone(
-            @RequestParam("phone") String phone,
-            RedirectAttributes redirect) {
-
-        return updateAccountField(
-                acc -> acc.setPhone(phone.trim()),
-                redirect,
-                "Số điện thoại");
+    public String updatePhone(@RequestParam("phone") String phone, RedirectAttributes redirect) {
+        return updateAccountField(acc -> acc.setPhone(phone.trim()), redirect, "Số điện thoại");
     }
-
-    // =====================================================
-    // UPDATE BIRTHDAY
-    // =====================================================
-
-    @PostMapping("/update-birthday")
-    public String updateBirthday(
-            @RequestParam("birthday") String birthdayStr,
-            RedirectAttributes redirect) {
-
-        Account acc = getSessionAccount();
-
-        if (acc == null)
-            return "redirect:/login";
-
-        try {
-
-            acc.setBirthDay(LocalDate.parse(birthdayStr));
-
-            accountRepo.save(acc);
-
-            session.setAttribute("account", acc);
-
-            redirect.addFlashAttribute("success",
-                    "Cập nhật ngày sinh thành công!");
-
-        } catch (DateTimeParseException e) {
-
-            redirect.addFlashAttribute("error",
-                    "Định dạng ngày không hợp lệ!");
-        }
-
-        return "redirect:/account";
-    }
-
-    // =====================================================
-    // UPDATE PASSWORD
-    // =====================================================
-
-    @PostMapping("/update-password")
-    public String updatePassword(
-            @RequestParam("password") String password,
-            RedirectAttributes redirect) {
-
-        return updateAccountField(
-                acc -> acc.setPassword(password),
-                redirect,
-                "Mật khẩu");
-    }
-
-    // =====================================================
-    // UPDATE ADDRESS
-    // =====================================================
 
     @PostMapping("/update-address")
-    public String updateAddress(
-            @RequestParam("address") String addressDetail,
-            RedirectAttributes redirect) {
+    public String updateAddress(@RequestParam("address") String addressDetail, RedirectAttributes redirect) {
+        Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) return "redirect:/login";
 
-        Account acc = getSessionAccount();
-
-        if (acc == null)
-            return "redirect:/login";
-
-        Optional<Address> optionalAddress =
-                addressRepo.findByAccount_IdAndIsDefaultTrue(acc.getId());
-
-        Address address;
-
-        if (optionalAddress.isPresent()) {
-
-            address = optionalAddress.get();
-
-            address.setDetail(addressDetail);
-
-        } else {
-
-            address = new Address();
-
-            address.setAccount(acc);
-
-            address.setDetail(addressDetail);
-
+        Optional<Address> optionalAddress = addressRepo.findByAccount_IdAndIsDefaultTrue(sessionAcc.getId());
+        Address address = optionalAddress.orElse(new Address());
+        
+        if (address.getId() == null) {
+            address.setAccount(sessionAcc);
             address.setIsDefault(true);
         }
-
+        address.setDetail(addressDetail);
         addressRepo.save(address);
 
-        redirect.addFlashAttribute("success",
-                "Cập nhật địa chỉ thành công!");
-
+        redirect.addFlashAttribute("success", "Cập nhật địa chỉ thành công!");
         return "redirect:/account";
     }
 
-    // =====================================================
-    // UPLOAD AVATAR
-    // =====================================================
-
     @PostMapping("/upload-avatar")
-    public String uploadAvatar(
-            @RequestParam("avatar") MultipartFile file,
-            RedirectAttributes redirect) {
-
-        Account acc = getSessionAccount();
-
-        if (acc == null)
-            return "redirect:/login";
+    public String uploadAvatar(@RequestParam("avatar") MultipartFile file, RedirectAttributes redirect) {
+        Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) return "redirect:/login";
 
         if (file.isEmpty()) {
-
-            redirect.addFlashAttribute("error",
-                    "Vui lòng chọn ảnh!");
-
+            redirect.addFlashAttribute("error", "Vui lòng chọn ảnh!");
             return "redirect:/account";
         }
 
         try {
-
             Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
 
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String fileName =
-                    System.currentTimeMillis()
-                            + "_" + file.getOriginalFilename();
-
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            Files.copy(file.getInputStream(),
-                    filePath,
-                    StandardCopyOption.REPLACE_EXISTING);
-
-            acc.setAvatar("/images/avatar/" + fileName);
-
-            accountRepo.save(acc);
-
-            session.setAttribute("account", acc);
-
-            redirect.addFlashAttribute("success",
-                    "Đổi ảnh đại diện thành công!");
-
-        } catch (IOException e) {
-
-            redirect.addFlashAttribute("error",
-                    "Lỗi khi lưu ảnh!");
-        }
-
-        return "redirect:/account";
-    }
-
-    // =====================================================
-    // HELPER
-    // =====================================================
-
-    private Account getSessionAccount() {
-
-        return (Account) session.getAttribute("account");
-    }
-
-    private interface AccountUpdater {
-        void update(Account acc);
-    }
-
-    private String updateAccountField(
-            AccountUpdater updater,
-            RedirectAttributes redirect,
-            String fieldName) {
-
-        Account sessionAcc = getSessionAccount();
-
-        if (sessionAcc == null)
-            return "redirect:/login";
-
-        Account dbAcc =
-                accountRepo.findById(sessionAcc.getId()).orElse(null);
-
-        if (dbAcc != null) {
-
-            updater.update(dbAcc);
-
+            Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+            dbAcc.setAvatar("/images/avatar/" + fileName);
             accountRepo.save(dbAcc);
 
             session.setAttribute("account", dbAcc);
-
-            redirect.addFlashAttribute("success",
-                    "Cập nhật " + fieldName + " thành công!");
+            redirect.addFlashAttribute("success", "Đổi ảnh đại diện thành công!");
+        } catch (IOException e) {
+            redirect.addFlashAttribute("error", "Lỗi lưu ảnh!");
         }
-
         return "redirect:/account";
     }
+
+    private String updateAccountField(java.util.function.Consumer<Account> updater, RedirectAttributes redirect, String fieldName) {
+        Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) return "redirect:/login";
+        Account dbAcc = accountRepo.findById(sessionAcc.getId()).orElse(null);
+        if (dbAcc != null) {
+            updater.accept(dbAcc);
+            accountRepo.save(dbAcc);
+            session.setAttribute("account", dbAcc);
+            redirect.addFlashAttribute("success", "Cập nhật " + fieldName + " thành công!");
+        }
+        return "redirect:/account";
+    }
+
+    private Account getSessionAccount() { return (Account) session.getAttribute("account"); }
 }

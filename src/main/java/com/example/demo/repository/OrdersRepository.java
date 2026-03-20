@@ -68,4 +68,5 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> { // Sá
            "ORDER BY MONTH(o.createdDate)")
     List<Object[]> countOrdersPerMonth();
     List<Orders> findByStatusAndCreatedDateBefore(Integer status, Date date);
+    long countByAccountId(Integer accountId);
 }
