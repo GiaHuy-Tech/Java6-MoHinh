@@ -19,11 +19,12 @@
             --bg-body: #0b0c10; --bg-card: #1f2833; --bg-nav: #0b0c10;
             --text-main: #66fcf1; --text-light: #c5c6c7; --accent-cyan: #45a29e; 
             --border-color: #2d3238; --shadow: rgba(0,0,0,0.5); --card-hover: #232d39;
+            --accent-red: #ff2e63;
         }
         [data-theme="light"] {
             --bg-body: #f8f9fa; --bg-card: #ffffff; --bg-nav: #ffffff;
             --text-main: #00adb5; --text-light: #222831; --accent-cyan: #393e46; 
-            --border-color: #dee2e6; --shadow: rgba(0,0,0,0.08); --card-hover: #f1f3f5;
+            --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1); --card-hover: #f1f3f5;
         }
         
         body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; }
@@ -35,14 +36,14 @@
         .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; text-decoration: none; border:none; background:none; cursor: pointer; }
         .nav-icon-link:hover { color: var(--text-main); }
 
-        /* LIVE SEARCH UI - ĐÃ CHỈNH VỪA SEARCH BAR */
+        /* SEARCH BAR TƯƠNG THÍCH */
         .search-container { position: relative; max-width: 450px; }
+        #liveSearchInput { background-color: var(--bg-card) !important; color: var(--text-light) !important; border-color: var(--border-color); }
         .search-results {
             position: absolute; top: 100%; left: 0; right: 0; 
             background: var(--bg-card); border: 1px solid var(--border-color);
             border-radius: 12px; margin-top: 8px; display: none; z-index: 3000;
-            overflow: hidden; box-shadow: 0 10px 30px var(--shadow);
-            width: 100%;
+            overflow: hidden; box-shadow: 0 10px 30px var(--shadow); width: 100%;
         }
         .search-item { display: flex; align-items: center; gap: 10px; padding: 10px; text-decoration: none; color: var(--text-light); border-bottom: 1px solid var(--border-color); }
         .search-item:hover { background: var(--text-main); color: #000; }
@@ -56,32 +57,35 @@
             display: none; z-index: 1500; padding: 0; box-shadow: 0 30px 60px var(--shadow); border-radius: 0 0 15px 15px;
         }
         .mega-menu-content.active { display: block; animation: slideIn 0.3s ease forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translate(-50%, -10px); } to { opacity: 1; transform: translate(-50%, 0); } }
-
         .mega-sidebar { background: rgba(0,0,0,0.03); padding: 25px; min-height: 400px; }
         .mega-main-content { padding: 30px; }
-        .mega-cat-link {
-            display: flex; align-items: center; gap: 12px; padding: 12px 15px;
-            color: var(--text-light); text-decoration: none; border-radius: 8px; transition: 0.2s; cursor: pointer;
-        }
-        .mega-cat-link:hover, .mega-cat-link.active { background: var(--text-main); color: #fff !important; font-weight: 700; }
-        .mega-cat-link img { width: 35px; height: 35px; object-fit: contain; background: #fff; border-radius: 5px; padding: 3px; }
+        .mega-cat-link { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: var(--text-light); text-decoration: none; border-radius: 8px; transition: 0.2s; cursor: pointer; }
+        .mega-cat-link:hover, .mega-cat-link.active { background: var(--text-main); color: #000 !important; font-weight: 700; }
 
-        /* SLIDESHOW - ĐÃ THÊM BÓNG ĐỔ */
+        /* VOUCHER BANNER */
+        .voucher-banner {
+            background: linear-gradient(135deg, #1f2833 0%, #0b0c10 100%);
+            border: 1px solid var(--accent-red); border-radius: 20px; padding: 30px 50px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; overflow: hidden; text-decoration: none !important; transition: 0.4s;
+        }
+        .voucher-btn { background: var(--accent-red); color: white; padding: 12px 35px; border-radius: 50px; font-weight: 800; transition: 0.3s; border: none; }
+        .v-decor { position: absolute; background: var(--accent-red); border-radius: 50%; filter: blur(50px); opacity: 0.1; z-index: 1; }
+
+        /* SLIDESHOW TEXT SHADOW (FIX ĐẸP) */
         .carousel-item { height: 550px; background: #000; }
         .carousel-item img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.5); }
-        .carousel-caption { bottom: 20%; text-align: left; left: 8%; max-width: 700px; }
-        .carousel-caption h1, .carousel-caption h2, .carousel-caption h5 { 
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.9); 
+        .carousel-caption h1, .carousel-caption h2, .carousel-caption h5, .carousel-caption p { 
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.9), 0px 0px 5px rgba(0,0,0,0.5); 
         }
 
-        /* DANH MỤC TRÒN DƯỚI SLIDESHOW */
-        .cat-circles-container { padding: 50px 0; background: var(--bg-body); }
-        .cat-circles-wrap { display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; }
-        .cat-circle-item { width: 110px; text-align: center; text-decoration: none; transition: 0.3s; }
+        /* PHỤC HỒI CSS DANH MỤC TRÒN CHUẨN */
+        .cat-circles-container { padding: 40px 0; background: var(--bg-body); }
+        .cat-circles-wrap { display: flex; justify-content: center; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .cat-circle-item { width: 110px; text-align: center; text-decoration: none; transition: 0.3s; display: block; }
         .cat-circle-img {
-            width: 90px; height: 90px; background: #fff; border-radius: 50%;
-            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
+            width: 85px; height: 85px; background: #fff; border-radius: 50%;
+            margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 10px 25px var(--shadow); border: 2px solid var(--border-color); overflow: hidden;
         }
         .cat-circle-item:hover { transform: translateY(-10px); }
@@ -89,58 +93,82 @@
         .cat-circle-img img { width: 65%; height: 65%; object-fit: contain; }
         .cat-circle-name { color: var(--text-light); font-weight: 700; font-size: 0.9rem; transition: 0.3s; }
 
-        /* PRODUCT CARD */
-        .product-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; height: 100%; transition: 0.4s; position: relative; box-shadow: 0 5px 15px var(--shadow); }
-        .product-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px var(--shadow); border-color: var(--text-main); background: var(--card-hover); }
-        .product-wishlist { position: absolute; top: 15px; right: 15px; z-index: 10; width: 38px; height: 38px; background: rgba(255,255,255,0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; color: #888; transition: 0.3s; border: none; }
-        .product-wishlist.active { color: #ff4757; }
-        .product-img-holder { background: #fff; height: 210px; display: flex; align-items: center; justify-content: center; padding: 25px; }
-        .product-img-holder img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        /* --- PRODUCT CARD NEW DESIGN (BỰ + HOVER ZOOM) --- */
+        .product-card { 
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; 
+            overflow: hidden; height: 100%; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; padding: 20px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+        .product-card:hover { transform: translateY(-12px); box-shadow: 0 15px 40px var(--shadow); border-color: var(--text-main); }
+        .product-card.out-of-stock { opacity: 0.7; }
+        .product-card.out-of-stock .product-img-holder img { filter: grayscale(1); }
+        
+        .stock-label { position: absolute; top: 20px; left: 20px; color: #ff2e63; font-weight: 800; z-index: 5; font-size: 0.9rem; text-transform: uppercase; }
+        
+        .product-img-holder { background: #fff; height: 260px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border-radius: 6px; position: relative; overflow: hidden; border: 1px solid #eee; }
+        .product-img-holder img { max-width: 90%; max-height: 90%; object-fit: contain; transition: transform 0.5s ease; }
+        .product-card:hover .product-img-holder img { transform: scale(1.1); }
+
+        .product-info-name { 
+            font-size: 1.1rem; font-weight: 700; color: var(--text-light); /* FIX CHẾ ĐỘ SÁNG */
+            margin-bottom: 12px; height: 50px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
+        }
+        .product-meta { font-size: 0.9rem; color: var(--text-light); opacity: 0.7; margin-bottom: 5px; }
+        .product-meta i { color: var(--text-main); margin-right: 5px; }
+        
+        .product-price-new { color: #cc0000; font-weight: 900; font-size: 1.4rem; margin: 15px 0; display: block; }
+        
+        .card-actions { display: flex; gap: 8px; align-items: center; }
+        .btn-action { 
+            border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-light); 
+            width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; 
+            border-radius: 6px; transition: 0.2s;
+        }
+        .btn-action:hover { background: var(--text-main); color: #000; border-color: var(--text-main); }
+        .btn-add-to-cart-icon { 
+            flex-grow: 1; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-light); 
+            height: 42px; border-radius: 6px; font-size: 1.2rem; transition: 0.2s;
+        }
+        .btn-add-to-cart-icon:hover:not(:disabled) { background: var(--text-main); color: #000; border-color: var(--text-main); }
+        .product-wishlist.active { color: #ff2e63 !important; }
+
+        /* QUICK VIEW MODAL (SÁNG TỐI) */
+        .modal-content { background: var(--bg-card); color: var(--text-light); border: 1px solid var(--border-color); }
+        .modal-header-blue { background: #0072bc; color: #fff; text-align: center; justify-content: center; position: relative; padding: 15px; }
+        .modal-header-blue .btn-close { position: absolute; right: 20px; filter: invert(1); }
+        .quickview-img-main { width: 100%; height: 350px; object-fit: contain; background: #fff; border: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; }
 
         /* FLY EFFECT */
-        .fly-item { position: fixed; z-index: 9999; pointer-events: none; transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); border-radius: 50%; object-fit: contain; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-
-        /* MODAL ERROR */
-        .modal-custom-content { background: #fff; border-radius: 12px; text-align: center; padding: 45px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-        .modal-custom-icon { width: 90px; height: 90px; border: 5px solid #f8bb86; border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; color: #f8bb86; font-size: 60px; font-weight: 500; font-family: serif; }
-        .modal-custom-text { color: #444; font-size: 22px; font-weight: 600; margin-bottom: 30px; }
-        .btn-custom-ok { background: #3085d6; color: #fff; border: none; padding: 12px 50px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-
-        .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
+        .fly-item { position: fixed; z-index: 9999; pointer-events: none; transition: all 0.8s; border-radius: 50%; object-fit: contain; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         
-        /* MINI CART DROPDOWN */
-        .cart-dropdown-menu { width: 320px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; padding: 0; box-shadow: 0 15px 35px var(--shadow); }
+        .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
     </style>
 </head>
 <body>
 
 <input type="hidden" id="isLoggedIn" th:value="${user != null ? 'true' : 'false'}">
 
+<!-- Navbar -->
 <nav class="top-navbar">
     <div class="container-fluid px-lg-5 nav-holder">
         <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-4">
                 <a href="/" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
-                
                 <div class="position-static">
-                    <button class="btn btn-info rounded-pill px-4 fw-bold" id="btnMegaMenu">
-                        <i class="bi bi-grid-3x3-gap-fill me-2"></i> DANH MỤC
-                    </button>
-                    
+                    <button class="btn btn-info rounded-pill px-4 fw-bold" id="btnMegaMenu"><i class="bi bi-grid-3x3-gap-fill me-2"></i> DANH MỤC</button>
                     <div class="mega-menu-content shadow-lg" id="megaMenu">
                         <div class="row g-0">
                             <div class="col-md-3 mega-sidebar border-end">
-                                <span class="fw-bold mb-3 d-block" style="color: var(--text-main)">DANH MỤC MÔ HÌNH</span>
+                                <span class="fw-bold mb-3 d-block" style="color: var(--text-main)">DANH MỤC</span>
                                 <div class="d-flex flex-column" id="categoryList">
                                     <th:block th:each="cat : ${featuredCategories}">
                                         <div class="mega-cat-link" th:attr="data-target='cat-content-' + ${cat.id}">
-                                            <img th:src="${cat.image}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'">
+                                            <img th:src="${cat.image}" width="35" height="35" style="object-fit:contain; background:#fff; border-radius:5px; margin-right:10px;">
                                             <span th:text="${cat.name}">Category</span>
                                         </div>
                                     </th:block>
                                 </div>
                             </div>
-                            
                             <div class="col-md-9 mega-main-content">
                                 <span class="fw-bold mb-4 d-block" style="color: var(--text-main)">SẢN PHẨM NỔI BẬT</span>
                                 <th:block th:each="cat : ${featuredCategories}">
@@ -164,19 +192,13 @@
                         </div>
                     </div>
                 </div>
-
-                <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;">
-                    <i class="bi bi-box-seam"></i> SẢN PHẨM
-                </a>
+                <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;"><i class="bi bi-box-seam"></i> SẢN PHẨM</a>
             </div>
 
-            <!-- SEARCH BAR VỚI ICON VÀ ENTER KEY -->
             <div class="search-container flex-grow-1 mx-5 d-none d-md-block">
                 <div class="input-group">
-                    <input type="text" id="liveSearchInput" class="form-control rounded-start-pill bg-dark border-secondary text-white px-4 py-2" style="background: rgba(0,0,0,0.05) !important;" placeholder="Tìm kiếm mô hình chuyên nghiệp...">
-                    <button class="btn btn-outline-info rounded-end-pill border-secondary border-start-0 bg-dark px-3" id="btnMainSearch">
-                        <i class="bi bi-search" style="color: var(--text-main)"></i>
-                    </button>
+                    <input type="text" id="liveSearchInput" class="form-control rounded-start-pill px-4 py-2" placeholder="Tìm kiếm mô hình...">
+                    <button class="btn btn-outline-info rounded-end-pill border-secondary border-start-0 bg-dark px-3" id="btnMainSearch"><i class="bi bi-search"></i></button>
                 </div>
                 <div class="search-results shadow-lg" id="searchResultList"></div>
             </div>
@@ -184,48 +206,18 @@
             <div class="d-flex align-items-center gap-4">
                 <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
                 <a href="/wishlist" class="nav-icon-link" id="btnWishlistNav"><i class="bi bi-heart"></i></a>
-                
                 <div class="dropdown">
-                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-cart3"></i>
-                        <span class="badge-count" th:if="${cartSize > 0}" th:text="${cartSize}">0</span>
-                    </div>
+                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown"><i class="bi bi-cart3"></i><span class="badge-count" th:if="${cartSize > 0}" th:text="${cartSize}">0</span></div>
                     <div class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg" style="width: 350px;">
-                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
-                            <span style="color: var(--text-main)">GIỎ HÀNG CỦA BẠN</span>
-                            <span class="badge bg-info text-dark" th:text="${cartSize + ' món'}">0 món</span>
+                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center"><span>GIỎ HÀNG CỦA BẠN</span><span class="badge bg-info text-dark" th:text="${cartSize + ' món'}"></span></div>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg"><img th:src="${item.product.mainImage}" width="40" height="40" style="background:#fff; object-fit:contain;"><div class="overflow-hidden flex-grow-1"><div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div><div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div></div></div>
                         </div>
-                        <div style="max-height: 400px; overflow-y: auto;">
-                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg" style="transition: 0.3s">
-                                <div style="width: 60px; height: 60px; background:#fff; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                    <img th:src="${item.product.mainImage}" style="max-width:90%; max-height:90%; object-fit:contain;">
-                                </div>
-                                <div class="overflow-hidden flex-grow-1">
-                                    <div class="small text-truncate fw-bold text-light mb-1" th:text="${item.product.name}"></div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
-                                        <div class="d-flex align-items-center border border-secondary rounded-pill px-1 bg-dark">
-                                            <a th:href="@{'/cart/minus/' + ${item.id}}" class="btn btn-sm p-0 text-info border-0" style="width: 20px;"><i class="bi bi-dash"></i></a>
-                                            <span class="px-2 small fw-bold text-white" th:text="${item.quantity}">1</span>
-                                            <a th:href="@{'/cart/plus/' + ${item.id}}" class="btn btn-sm p-0 text-info border-0" style="width: 20px;"><i class="bi bi-plus"></i></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <a th:href="@{'/cart/delete/' + ${item.id}}" class="text-danger" onclick="return confirm('Xóa sản phẩm này?')"><i class="bi bi-trash3-fill"></i></a>
-                            </div>
-                            <div th:if="${#lists.isEmpty(cart)}" class="p-5 text-center text-muted"><small>Giỏ hàng trống!</small></div>
-                        </div>
-                        <div class="p-3 bg-dark">
-                            <a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT GIỎ HÀNG</a>
-                        </div>
+                        <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT GIỎ HÀNG</a></div>
                     </div>
                 </div>
-
                 <div class="dropdown" th:if="${user != null}">
-                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
-                        <img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
-                        <i class="bi bi-chevron-down small text-light"></i>
-                    </div>
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown"><img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;"><i class="bi bi-chevron-down small text-light"></i></div>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
                         <li><a class="dropdown-item py-2" href="/profile"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
                         <li><a class="dropdown-item py-2" href="/orders"><i class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
@@ -239,7 +231,7 @@
     </div>
 </nav>
 
-<!-- Slideshow & Intro -->
+<!-- Slideshow -->
 <div id="productCarousel" class="carousel slide carousel-fade shadow" data-bs-ride="carousel">
     <div class="carousel-inner">
         <th:block th:each="p, i : ${latestProducts}" th:if="${i.index < 3}">
@@ -256,232 +248,146 @@
     </div>
 </div>
 
+<!-- Voucher Banner -->
+<div class="container voucher-section">
+    <a href="/voucher" class="voucher-banner shadow-lg" id="voucherTilt">
+        <div class="v-decor" style="width:200px; height:200px; top:-100px; left:-50px;"></div>
+        <div class="voucher-content" style="position:relative; z-index:2;"><h3><i class="bi bi-ticket-perforated-fill me-2"></i> Kho Voucher Cực Khủng</h3><p>Săn ngay mã giảm giá lên đến 50% & Freeship toàn quốc.</p></div>
+        <button class="voucher-btn">LƯU MÃ NGAY</button>
+    </a>
+</div>
+
+<!-- Intro 3D -->
 <div class="container my-5">
-    <div class="p-5 rounded-4 shadow-lg" id="tiltBox" style="background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-body) 100%); transform-style: preserve-3d; transition: 0.1s; border: 1px solid var(--border-color);">
-        <div class="row align-items-center">
-            <div class="col-md-7" style="transform: translateZ(50px)">
-                <h2 class="display-5 fw-bold text-main mb-3" style="font-family:Montserrat">THẾ GIỚI MÔ HÌNH</h2>
-                <p class="fs-5 opacity-75">Nơi hội tụ những nhà sưu tầm chuyên nghiệp. Chúng tôi mang đến những dòng Gunpla, Figure và Lego chính hãng cao cấp nhất.</p>
-            </div>
-            <div class="col-md-5 d-none d-md-block text-center" style="transform: translateZ(80px)">
-                <img src="data:image/jpeg;base64,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" class="img-fluid" style="max-height: 250px; filter: drop-shadow(0 15px 35px var(--text-main)); opacity: 0.8">
-            </div>
-        </div>
+    <div class="p-5 rounded-4 shadow-lg text-center" id="tiltBox" style="background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-body) 100%); transform-style: preserve-3d; transition: 0.1s; border: 1px solid var(--border-color);">
+        <h2 class="display-5 fw-bold text-main mb-3" style="font-family:Montserrat">THẾ GIỚI MÔ HÌNH</h2>
+        <p class="fs-5 opacity-75">Nơi hội tụ những nhà sưu tầm chuyên nghiệp Nhật Bản cao cấp nhất.</p>
     </div>
 </div>
 
-<!-- Category Circles -->
+<!-- Category Circles (RE-CSS) -->
 <div class="cat-circles-container">
-    <div class="container">
-        <div class="cat-circles-wrap">
-            <th:block th:each="cat : ${featuredCategories}">
-                <a th:href="@{/products(categoryId=${cat.id})}" class="cat-circle-item">
-                    <div class="cat-circle-img"><img th:src="${cat.image}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'"></div>
-                    <div class="cat-circle-name text-truncate" th:text="${cat.name}">Category</div>
-                </a>
-            </th:block>
-        </div>
-    </div>
+    <div class="container"><div class="cat-circles-wrap">
+        <th:block th:each="cat : ${featuredCategories}">
+            <a th:href="@{/products(categoryId=${cat.id})}" class="cat-circle-item">
+                <div class="cat-circle-img"><img th:src="${cat.image}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2802/2802099.png'"></div>
+                <div class="cat-circle-name text-truncate" th:text="${cat.name}">Category</div>
+            </a>
+        </th:block>
+    </div></div>
 </div>
 
-<!-- Products Grid -->
+<!-- Products Grid (BỰ HƠN & ICON) -->
 <div class="container-fluid px-lg-5 py-5">
     <h3 class="fw-bold text-main border-start border-5 border-info ps-3 mb-5">SẢN PHẨM MỚI NHẤT</h3>
     <div class="row g-4">
-        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6" th:each="p : ${latestProducts}">
-            <div class="product-card">
-                <button class="product-wishlist shadow-sm" th:onclick="'toggleWishlist(this, ' + ${p.id} + ')'"><i class="bi bi-heart-fill"></i></button>
-                <div class="product-img-holder">
-                    <a th:href="@{'/product-detail/' + ${p.id}}"><img th:src="${p.mainImage}" th:id="'img-' + ${p.id}"></a>
-                </div>
-                <div class="p-3">
-                    <div class="small text-info fw-bold mb-1 text-uppercase" style="font-size:0.7rem" th:text="${p.category?.name}">BRAND</div>
-                    <h6 class="text-truncate small mb-3"><a th:href="@{'/product-detail/' + ${p.id}}" class="text-decoration-none text-light fw-bold" th:text="${p.name}">Name</a></h6>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="fw-bold text-danger fs-5" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></span>
-                        <button class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold" th:onclick="'flyToCart(this, ' + ${p.id} + ')'"><i class="bi bi-cart-plus"></i></button>
+        <th:block th:each="p : ${latestProducts}">
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                <div th:class="${p.quantity == 0 ? 'product-card out-of-stock shadow' : 'product-card shadow'}">
+                    <span th:if="${p.quantity == 0}" class="stock-label">Hết hàng</span>
+                    <div class="product-img-holder">
+                        <a th:href="@{'/product-detail/' + ${p.id}}"><img th:src="${p.mainImage}" th:id="'img-' + ${p.id}" alt="Product"></a>
+                    </div>
+                    <h6 class="product-info-name" th:text="${p.name}">Tên sản phẩm</h6>
+                    <div class="product-meta"><i class="bi bi-plus-lg"></i> Hãng: <span th:text="${p.category?.name}">BRAND</span></div>
+                    <div class="product-meta"><i class="bi bi-plus-lg"></i> Trọng lượng: <span th:text="${p.weight + 'kg'}">0kg</span></div>
+                    <span class="product-price-new" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
+                    
+                    <div class="card-actions">
+                        <button class="btn-action" th:onclick="'openQuickView(' + ${p.id} + ')'" title="Xem nhanh"><i class="bi bi-search"></i></button>
+                        <button class="btn-add-to-cart-icon" th:disabled="${p.quantity == 0}" th:onclick="'flyToCart(this, ' + ${p.id} + ')'" title="Thêm vào giỏ"><i class="bi bi-cart-plus"></i></button>
+                        <button class="btn-action product-wishlist" th:onclick="'toggleWishlist(this, ' + ${p.id} + ')'" title="Yêu thích"><i class="bi bi-heart"></i></button>
                     </div>
                 </div>
             </div>
-        </div>
+        </th:block>
     </div>
 </div>
 
 <!-- Modal Auth -->
-<div class="modal fade" id="authModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-        <div class="modal-content modal-custom-content shadow-lg">
-            <div class="modal-custom-icon">!</div>
-            <div class="modal-custom-text">Bạn cần đăng nhập để thực hiện giao dịch</div>
-            <button class="btn-custom-ok shadow" id="btnAuthOk">OK</button>
-        </div>
-    </div>
-</div>
+<div class="modal fade" id="authModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered" style="max-width: 400px;"><div class="modal-content modal-custom-content"><div class="modal-custom-icon">!</div><div class="modal-custom-text">Bạn cần đăng nhập để thực hiện giao dịch</div><button class="btn-custom-ok shadow" id="btnAuthOk">OK</button></div></div></div>
 
-<footer class="py-5 bg-dark border-top border-secondary text-center">
-    <p class="text-white small">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p>
-</footer>
+<!-- QUICK VIEW -->
+<div class="modal fade" id="quickViewModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content border-0 shadow-lg"><div class="modal-header modal-header-blue"><h5 class="modal-title fw-bold">THÔNG TIN SẢN PHẨM</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="row"><div class="col-md-6"><img id="qv-img-main" class="quickview-img-main" src=""></div><div class="col-md-6"><h4 id="qv-name" class="fw-bold mb-2"></h4><div id="qv-price" class="qv-price"></div><div class="qv-meta"><b>Nhà cung cấp:</b> <span id="qv-brand"></span></div><div class="qv-meta"><b>Tình trạng:</b> <span id="qv-status"></span></div><hr class="my-3 border-secondary"><p id="qv-desc" class="qv-desc"></p><button id="qv-btn-action" class="btn btn-info w-100 fw-bold text-white py-2 mt-4"></button></div></div></div></div></div></div>
+
+<footer class="py-5 bg-dark border-top border-secondary text-center"><p class="text-white small">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
 
-    // Logic chuyển hướng khi chưa login
-    function showAuthModal() {
-        const modal = new bootstrap.Modal(document.getElementById('authModal'));
-        modal.show();
-        document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login';
-    }
+    function showAuthModal() { new bootstrap.Modal(document.getElementById('authModal')).show(); document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login'; }
+    function executeSearch() { const q = document.getElementById('liveSearchInput').value.trim(); if (q) window.location.href = `/products?keyword=${encodeURIComponent(q)}`; }
 
-    // Logic tìm kiếm thực sự (Enter hoặc Click icon)
-    function executeSearch() {
-        const keyword = searchInput.value.trim();
-        if (keyword) window.location.href = `/products?keyword=${encodeURIComponent(keyword)}`;
-    }
-
-    // 1. LIVE SEARCH LOGIC
-    const searchInput = document.getElementById('liveSearchInput');
-    const searchResultList = document.getElementById('searchResultList');
-    const btnMainSearch = document.getElementById('btnMainSearch');
-
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            if (query.length < 2) { searchResultList.style.display = 'none'; return; }
-            fetch(`/cart/api/search?keyword=${encodeURIComponent(query)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        searchResultList.innerHTML = data.map(p => `
-                            <a href="/product-detail/${p.id}" class="search-item">
-                                <img src="${p.mainImage}" onerror="this.src='/images/no-image.png'">
-                                <div class="overflow-hidden">
-                                    <div class="small fw-bold text-truncate">${p.name}</div>
-                                    <div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div>
-                                </div>
-                            </a>
-                        `).join('');
-                        searchResultList.style.display = 'block';
-                    } else { searchResultList.style.display = 'none'; }
-                });
+    // QUICK VIEW
+    function openQuickView(pid) {
+        fetch(`/api/products/${pid}`).then(res => res.json()).then(p => {
+            document.getElementById('qv-name').innerText = p.name;
+            document.getElementById('qv-price').innerText = new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
+            document.getElementById('qv-desc').innerText = p.description || 'Chưa có mô tả.';
+            document.getElementById('qv-brand').innerText = p.category ? p.category.name : 'Đang cập nhật';
+            document.getElementById('qv-img-main').src = p.mainImage;
+            const statusEl = document.getElementById('qv-status'); const btnAction = document.getElementById('qv-btn-action');
+            if(p.quantity > 0) { statusEl.innerText = 'Còn hàng'; statusEl.className = 'text-success fw-bold'; btnAction.innerText = 'THÊM VÀO GIỎ'; btnAction.disabled = false; btnAction.onclick = () => flyToCart(null, p.id); }
+            else { statusEl.innerText = 'Hết hàng'; statusEl.className = 'text-danger fw-bold'; btnAction.innerText = 'HẾT HÀNG'; btnAction.disabled = true; }
+            new bootstrap.Modal(document.getElementById('quickViewModal')).show();
         });
-
-        // Bấm Enter để tìm kiếm
-        searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') executeSearch(); });
     }
 
-    // Bấm Icon để tìm kiếm
-    if(btnMainSearch) btnMainSearch.onclick = executeSearch;
-
+    // LIVE SEARCH
+    const searchInput = document.getElementById('liveSearchInput'); const searchResultList = document.getElementById('searchResultList');
+    if (searchInput) {
+        searchInput.oninput = function() {
+            const q = this.value.trim(); if (q.length < 2) { searchResultList.style.display = 'none'; return; }
+            fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`).then(res => res.json()).then(data => {
+                if (data.length > 0) {
+                    searchResultList.innerHTML = data.map(p => `<a href="/product-detail/${p.id}" class="search-item"><img src="${p.mainImage}"><div class="overflow-hidden"><div class="small fw-bold text-truncate">${p.name}</div><div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div></div></a>`).join('');
+                    searchResultList.style.display = 'block';
+                } else { searchResultList.style.display = 'none'; }
+            });
+        };
+        searchInput.onkeypress = (e) => { if(e.key === 'Enter') executeSearch(); };
+    }
+    document.getElementById('btnMainSearch').onclick = executeSearch;
     document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
 
-    // MEGA MENU
-    const btnMega = document.getElementById('btnMegaMenu');
-    const megaMenu = document.getElementById('megaMenu');
-    btnMega.addEventListener('click', (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); });
-    document.addEventListener('click', (e) => { if (!megaMenu.contains(e.target) && e.target !== btnMega) megaMenu.classList.remove('active'); });
-
-    const catLinks = document.querySelectorAll('.mega-cat-link');
-    const panes = document.querySelectorAll('.cat-product-pane');
-    if (panes.length > 0) { panes[0].classList.remove('d-none'); catLinks[0].classList.add('active'); }
-    catLinks.forEach(link => {
-        link.addEventListener('mouseenter', function() {
-            catLinks.forEach(l => l.classList.remove('active'));
-            panes.forEach(p => p.classList.add('d-none'));
-            this.classList.add('active');
-            document.getElementById(this.getAttribute('data-target')).classList.remove('d-none');
-        });
-    });
-
-    // Theme Toggle
-    function toggleTheme() {
-        const h = document.documentElement;
-        h.setAttribute('data-theme', h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-    }
-
-    // Fly to Cart
+    // FLY TO CART
     function flyToCart(btn, pid) {
         if (!isLoggedIn) { showAuthModal(); return; }
-        const cart = document.getElementById('cartIconNav');
-        const img = document.getElementById('img-' + pid);
-        if (img && cart) {
-            const clone = img.cloneNode();
-            const start = img.getBoundingClientRect();
-            const end = cart.getBoundingClientRect();
-            clone.classList.add('fly-item');
-            clone.style.top = start.top + 'px';
-            clone.style.left = start.left + 'px';
-            clone.style.width = start.width + 'px';
-            clone.style.height = start.height + 'px';
+        const cart = document.getElementById('cartIconNav'); const img = document.getElementById('img-' + pid);
+        if (img) {
+            const clone = img.cloneNode(); const start = img.getBoundingClientRect(); const end = cart.getBoundingClientRect();
+            clone.classList.add('fly-item'); clone.style.top = start.top + 'px'; clone.style.left = start.left + 'px';
+            clone.style.width = start.width + 'px'; clone.style.height = start.height + 'px';
             document.body.appendChild(clone);
-            setTimeout(() => {
-                clone.style.top = (window.scrollY + end.top) + 'px';
-                clone.style.left = end.left + 'px';
-                clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0';
-            }, 10);
+            setTimeout(() => { clone.style.top = end.top + 'px'; clone.style.left = end.left + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0'; }, 10);
             setTimeout(() => { clone.remove(); fetch(`/cart/add/${pid}`, { method: 'POST' }).then(() => location.reload()); }, 800);
         }
     }
 
- // 1. Hàm xử lý khi Click vào trái tim (Toggle)
+    // THEME & UI
+    function toggleTheme() {
+        const h = document.documentElement; const icon = document.getElementById('themeIcon');
+        const isDark = h.getAttribute('data-theme') === 'dark';
+        h.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+    }
+    
     function toggleWishlist(btn, pid) {
-        if (!isLoggedIn) { 
-            showAuthModal(); 
-            return; 
-        }
-
-        // Gọi đến API trong LikeController mà bạn đã gửi
-        fetch(`/wishlist/toggle/${pid}`)
-            .then(res => res.text()) // Nhận về text: "added", "removed", hoặc "unauthorized"
-            .then(status => {
-                if (status === 'added') {
-                    btn.classList.add('active'); // Hiện màu đỏ
-                } else if (status === 'removed') {
-                    btn.classList.remove('active'); // Mất màu đỏ
-                } else if (status === 'unauthorized') {
-                    showAuthModal();
-                }
-            })
-            .catch(err => console.error("Lỗi Wishlist:", err));
-    }
-
-    // 2. Tự động kiểm tra và tô màu đỏ cho các sản phẩm đã thích khi load trang
-    document.addEventListener("DOMContentLoaded", function() {
-        const loggedInStatus = document.getElementById('isLoggedIn').value === 'true';
-        
-        if (loggedInStatus) {
-            fetch('/wishlist/my-likes')
-                .then(res => res.json())
-                .then(likedIds => {
-                    // Tìm tất cả các nút trái tim dựa trên class của bạn
-                    document.querySelectorAll('.product-wishlist').forEach(btn => {
-                        // Lấy ID sản phẩm từ chuỗi onclick="toggleWishlist(this, 123)"
-                        const onclickAttr = btn.getAttribute('onclick');
-                        if (onclickAttr) {
-                            const match = onclickAttr.match(/\d+/);
-                            if (match) {
-                                const pid = parseInt(match[0]);
-                                // Nếu ID sản phẩm nằm trong danh sách đã thích thì tô màu đỏ
-                                if (likedIds.includes(pid)) {
-                                    btn.classList.add('active');
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(err => console.log("Chưa đăng nhập hoặc lỗi lấy danh sách yêu thích"));
-        }
-    });
-
-    const tiltBox = document.getElementById('tiltBox');
-    if(tiltBox) {
-        tiltBox.addEventListener('mousemove', (e) => {
-            let x = (window.innerWidth / 2 - e.pageX) / 45;
-            let y = (window.innerHeight / 2 - e.pageY) / 45;
-            tiltBox.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+        if (!isLoggedIn) { showAuthModal(); return; }
+        fetch(`/wishlist/toggle/${pid}`).then(res => res.text()).then(status => {
+            if(status === 'added') btn.classList.add('active'); else btn.classList.remove('active');
         });
-        tiltBox.addEventListener('mouseleave', () => tiltBox.style.transform = `rotateY(0) rotateX(0)`);
     }
+
+    const btnMega = document.getElementById('btnMegaMenu'); const megaMenu = document.getElementById('megaMenu');
+    btnMega.onclick = (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); };
+    document.querySelectorAll('.mega-cat-link').forEach(link => { link.onmouseenter = function() { document.querySelectorAll('.mega-cat-link').forEach(l => l.classList.remove('active')); document.querySelectorAll('.cat-product-pane').forEach(p => p.classList.add('d-none')); this.classList.add('active'); document.getElementById(this.getAttribute('data-target')).classList.remove('d-none'); }; });
+    
+    const applyTilt = (el, f) => { if(!el) return; el.onmousemove = (e) => { let x = (window.innerWidth / 2 - e.pageX) / f; let y = (window.innerHeight / 2 - e.pageY) / f; el.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`; }; el.onmouseleave = () => el.style.transform = `rotateY(0) rotateX(0)`; };
+    applyTilt(document.getElementById('tiltBox'), 45); applyTilt(document.getElementById('voucherTilt'), 60);
+
+    document.addEventListener("DOMContentLoaded", () => { if(isLoggedIn) fetch('/wishlist/my-likes').then(r => r.json()).then(ids => { document.querySelectorAll('.product-wishlist').forEach(btn => { const pid = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]); if(ids.includes(pid)) btn.classList.add('active'); }); }); });
 </script>
 </body>
-</html>
+</html> 
