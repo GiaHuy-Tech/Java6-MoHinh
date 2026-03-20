@@ -255,7 +255,8 @@
                     </div>
                 </div>
             </div>
-
+            
+    
             <div class="row g-4 mb-4">
                 <div class="col-lg-4">
                     <div class="stats-card flex-column align-items-center text-center h-100 position-relative">
@@ -412,6 +413,20 @@
                     </div>
                 </div>
             </div>
+
+        <form method="get" action="/stats" class="mb-3">
+    <div class="d-flex align-items-center gap-2">
+        <label class="text-neon small">Năm:</label>
+        <select name="year" class="form-select form-select-sm w-auto"
+                onchange="this.form.submit()">
+            <option th:each="y : ${years}"
+                    th:value="${y}"
+                    th:selected="${y == selectedYear}"
+                    th:text="${y}">
+            </option>
+        </select>
+    </div>
+</form>
 
             <div class="row mb-4">
                 <div class="col-12">
