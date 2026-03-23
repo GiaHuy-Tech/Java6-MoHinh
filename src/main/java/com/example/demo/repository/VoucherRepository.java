@@ -22,5 +22,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
     Optional<Voucher> findByIdAndAccountIsNull(Integer id);
 
     boolean existsByAccount_IdAndCode(Integer accountId, String code);
+    
+    
 
 }

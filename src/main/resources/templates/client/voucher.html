@@ -1,400 +1,181 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kho Ưu Đãi - MODEL WORLD</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&family=Orbitron:wght@700&display=swap" rel="stylesheet">
 
-<title>Kho Ưu Đãi - Model World</title>
+    <style>
+        :root {
+            --bg-body: #0b0c10; --bg-card: #1f2833; --bg-nav: #0b0c10;
+            --text-main: #66fcf1; --text-light: #c5c6c7; --accent-cyan: #45a29e; 
+            --border-color: #2d3238; --shadow: rgba(0,0,0,0.5); --accent-red: #ff2e63;
+        }
+        [data-theme="light"] {
+            --bg-body: #f8f9fa; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #00adb5; --text-light: #222831; --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1);
+        }
+        body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+        /* NAVBAR */
+        .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 12px 0; box-shadow: 0 2px 10px var(--shadow); }
+        .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
+        .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; text-decoration: none; position: relative; }
+        .nav-icon-link:hover { color: var(--text-main); }
 
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+        /* VOUCHER CARD */
+        .voucher-card {
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px;
+            display: flex; height: 160px; overflow: hidden; transition: 0.3s; position: relative;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+        .voucher-card:hover { transform: translateY(-5px); border-color: var(--text-main); }
+        
+        .voucher-left {
+            width: 35%; background: rgba(0, 242, 255, 0.05);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border-right: 2px dashed var(--border-color); position: relative;
+        }
+        .voucher-left::before, .voucher-left::after {
+            content: ''; position: absolute; width: 20px; height: 20px; 
+            background: var(--bg-body); border-radius: 50%; right: -11px;
+        }
+        .voucher-left::before { top: -10px; } .voucher-left::after { bottom: -10px; }
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        .discount-val { font-family: 'Orbitron'; font-weight: 900; font-size: 1.8rem; color: var(--text-main); line-height: 1; }
+        
+        .voucher-right { width: 65%; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .membership-tag { font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 50px; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
+        
+        .voucher-locked { opacity: 0.6; filter: grayscale(0.8); }
+        .locked-overlay { position: absolute; top: 10px; right: 10px; color: var(--accent-red); font-size: 1.2rem; }
 
-<style>
+        .btn-claim {
+            background: transparent; border: 1px solid var(--text-main); color: var(--text-main);
+            border-radius: 8px; font-weight: 800; padding: 6px 15px; transition: 0.3s; font-size: 0.85rem;
+        }
+        .btn-claim:hover { background: var(--text-main); color: #000; }
 
-:root{
---bg-body:#050b14;
---bg-panel:#0b1426;
---text-main:#e1e7ff;
---text-sub:#aab8c5;
---accent-cyan:#00f2ff;
---accent-gold:#ffd700;
---accent-purple:#bd00ff;
---border-color:rgba(255,255,255,0.15);
-}
-
-body{
-background:var(--bg-body);
-color:var(--text-main);
-font-family:"Be Vietnam Pro",sans-serif;
-}
-
-/* NAVBAR */
-
-.navbar{
-background:rgba(12,21,37,0.95);
-backdrop-filter:blur(10px);
-border-bottom:1px solid var(--border-color);
-}
-
-.navbar-brand span{
-font-family:'Orbitron';
-letter-spacing:1px;
-color:#fff;
-}
-
-.nav-link{
-color:#aab8c5!important;
-transition:0.3s;
-font-weight:500;
-}
-
-.nav-link:hover{
-color:var(--accent-cyan)!important;
-text-shadow:0 0 8px var(--accent-cyan);
-}
-
-/* SEARCH */
-
-.search-bar-wrapper{
-background:rgba(255,255,255,0.05);
-border:1px solid var(--border-color);
-border-radius:50px;
-padding:4px 15px;
-}
-
-.form-control-custom,
-.form-select-custom{
-background:transparent;
-border:none;
-color:var(--accent-cyan);
-}
-
-.btn-search{
-background:none;
-border:none;
-color:var(--text-sub);
-}
-
-/* PAGE HEADER */
-
-.page-header{
-text-align:center;
-padding:40px 0 20px;
-}
-
-.page-title{
-font-family:'Orbitron';
-font-weight:700;
-letter-spacing:2px;
-}
-
-.page-subtitle{
-color:var(--text-sub);
-}
-
-/* VOUCHER CARD */
-
-.voucher-card{
-background:var(--bg-panel);
-border:1px solid var(--border-color);
-border-radius:16px;
-overflow:hidden;
-display:flex;
-height:140px;
-transition:0.3s;
-}
-
-.voucher-card:hover{
-transform:translateY(-5px);
-border-color:var(--accent-cyan);
-box-shadow:0 8px 25px rgba(0,242,255,0.2);
-}
-
-.voucher-left{
-width:32%;
-background:rgba(0,242,255,0.1);
-border-right:2px dashed rgba(255,255,255,0.2);
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-}
-
-.discount-val{
-font-family:'Orbitron';
-font-weight:700;
-font-size:1.4rem;
-color:var(--accent-cyan);
-}
-
-.discount-label{
-font-size:0.75rem;
-color:#fff;
-}
-
-.voucher-right{
-width:68%;
-padding:15px;
-display:flex;
-flex-direction:column;
-justify-content:space-between;
-}
-
-.voucher-title{
-font-weight:600;
-font-size:0.95rem;
-}
-
-.voucher-date{
-font-size:0.75rem;
-opacity:0.8;
-}
-
-.btn-claim{
-border:1px solid var(--accent-cyan);
-color:var(--accent-cyan);
-background:rgba(0,242,255,0.05);
-padding:5px 15px;
-border-radius:6px;
-font-size:0.85rem;
-}
-
-.btn-claim:hover{
-background:var(--accent-cyan);
-color:#000;
-}
-
-.hidden{
-display:none!important;
-}
-
-</style>
+        .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
+        footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); padding: 50px 0; margin-top: auto; }
+    </style>
 </head>
-
 <body>
 
-<nav class="navbar navbar-expand-lg sticky-top">
+<!-- Navbar -->
+<nav class="top-navbar">
+    <div class="container-fluid px-lg-5">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-4">
+                <a href="/" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
+                <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;">
+                    <i class="bi bi-grid"></i> SẢN PHẨM
+                </a>
+            </div>
 
-<div class="container">
-
-<a class="navbar-brand d-flex align-items-center gap-2" href="/">
-<i class="bi bi-box-seam-fill fs-3 text-info"></i>
-<span class="fw-bold fs-4">MODEL WORLD</span>
-</a>
-
-<button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-<span class="bi bi-list text-white fs-2"></span>
-</button>
-
-<div class="collapse navbar-collapse" id="navbarNav">
-
-<ul class="navbar-nav ms-auto align-items-center">
-
-<li class="nav-item mx-1">
-<a class="nav-link" href="/products">
-<i class="bi bi-grid me-1"></i> Sản phẩm
-</a>
-</li>
-
-<th:block th:if="${session.account == null}">
-<li class="nav-item mx-1">
-<a class="nav-link" href="/login">
-<i class="bi bi-box-arrow-in-right"></i> Đăng nhập
-</a>
-</li>
-</th:block>
-
-<th:block th:if="${session.account != null}">
-
-<li class="nav-item mx-1">
-<a class="nav-link" href="/cart">
-<i class="bi bi-cart3"></i> Giỏ hàng
-</a>
-</li>
-
-<li class="nav-item mx-1">
-<a class="nav-link" href="/orders">
-<i class="bi bi-receipt"></i> Đơn hàng
-</a>
-</li>
-
-<li class="nav-item mx-1">
-<a class="nav-link" href="/wishlist">
-<i class="bi bi-heart"></i> Yêu thích
-</a>
-</li>
-
-<li class="nav-item dropdown mx-2">
-
-<a class="nav-link dropdown-toggle p-0 d-flex align-items-center"
-data-bs-toggle="dropdown">
-
-<img th:if="${session.account.avatar != null}"
-th:src="@{${session.account.avatar}}"
-class="rounded-circle border border-info"
-style="width:38px;height:38px;object-fit:cover">
-
-<i th:if="${session.account.avatar == null}"
-class="bi bi-person-circle fs-3 text-info"></i>
-
-</a>
-
-<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-
-<li>
-<a class="dropdown-item" href="/account">
-<i class="bi bi-person"></i> Tài khoản
-</a>
-</li>
-
-<li>
-<hr class="dropdown-divider">
-</li>
-
-<li>
-<a class="dropdown-item text-danger" href="/logout">
-<i class="bi bi-box-arrow-right"></i> Đăng xuất
-</a>
-</li>
-
-</ul>
-</li>
-
-</th:block>
-
-</ul>
-
-</div>
-</div>
+            <div class="d-flex align-items-center gap-4">
+                <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
+                <a href="/cart" class="nav-icon-link"><i class="bi bi-cart3"></i><span class="badge-count" th:text="${cartSize ?: 0}">0</span></a>
+                
+                <div class="dropdown" th:if="${session.account != null}">
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                        <img th:src="${session.account.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                        <i class="bi bi-chevron-down small"></i>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 bg-dark">
+                        <li><a class="dropdown-item text-white" href="/profile">Hồ sơ</a></li>
+                        <li><a class="dropdown-item text-danger" href="/logout">Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </nav>
 
-<div class="container pb-5">
+<div class="container py-5 flex-grow-1">
+    <div class="text-center mb-5">
+        <h1 style="font-family:'Orbitron'; font-weight:900; color:var(--text-main); letter-spacing:2px;">KHO ƯU ĐÃI THÀNH VIÊN</h1>
+        <p class="opacity-75">Tích lũy chi tiêu để mở khóa các Voucher giá trị</p>
+        <div th:if="${session.account != null}" class="mt-3">
+            <span class="badge bg-info text-dark px-3 py-2 fs-6">
+                Hạng hiện tại: <span th:text="${session.account.membership?.name ?: 'Chưa có'}"></span>
+            </span>
+        </div>
+    </div>
 
-<div class="page-header">
+    <!-- Thông báo -->
+    <div th:if="${success}" class="alert alert-success rounded-pill px-4" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger rounded-pill px-4" th:text="${error}"></div>
 
-<h2 class="page-title">Kho Ưu Đãi</h2>
+    <div class="row g-4 mt-2">
+        <th:block th:each="v : ${availableVouchers}">
+            <div class="col-md-6 col-lg-4">
+                <!-- Logic check hạng -->
+                <div class="voucher-card shadow" 
+                     th:with="userPoints=${session.account.membership?.pointRequired ?: 0}, 
+                              reqPoints=${v.membership?.pointRequired ?: 0}"
+                     th:classappend="${userPoints < reqPoints ? 'voucher-locked' : ''}">
+                    
+                    <div class="locked-overlay" th:if="${userPoints < reqPoints}">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
 
-<p class="page-subtitle">
-Săn mã giảm giá độc quyền
-</p>
+                    <div class="voucher-left">
+                        <div class="discount-val">
+                            <!-- FIX TRIỆT ĐỂ LỖI DIVIDE BY NULL -->
+                            <span th:if="${v.discountPercent != null}" th:text="${v.discountPercent + '%'}"></span>
+                            
+                            <th:block th:if="${v.discountPercent == null}">
+                                <span th:if="${v.discountAmount != null}" th:text="${(v.discountAmount/1000) + 'K'}"></span>
+                                <span th:if="${v.discountAmount == null}">0đ</span>
+                            </th:block>
+                        </div>
+                        <div class="discount-label">GIẢM GIÁ</div>
+                    </div>
 
+                    <div class="voucher-right">
+                        <div>
+                            <span class="membership-tag shadow-sm" 
+                                  th:style="${'background:' + (v.membership != null ? '#ffd700;color:#000' : '#45a29e;color:#fff')}"
+                                  th:text="${v.membership?.name ?: 'Mọi thành viên'}">Hạng</span>
+                            <div class="voucher-title" th:text="${'Mã: ' + v.code}">Code</div>
+                            <div class="small opacity-75" th:if="${v.membership != null}" 
+                                 th:text="${'Yêu cầu tích lũy: ' + #numbers.formatDecimal(v.membership.pointRequired, 0, 'COMMA', 0, 'POINT') + 'đ'}"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div class="small text-info">
+                                HSD: <span th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy')}"></span>
+                            </div>
+                            
+                            <form th:if="${userPoints >= reqPoints}" th:action="@{/voucher/claim}" method="post">
+                                <input type="hidden" name="voucherId" th:value="${v.id}">
+                                <button type="submit" class="btn btn-claim">Lưu mã</button>
+                            </form>
+                            <button th:if="${userPoints < reqPoints}" class="btn btn-secondary btn-sm" disabled>Chưa đủ hạng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </div>
 </div>
 
-<div class="row g-4" id="voucherListContainer">
-
-<th:block th:each="v : ${availableVouchers}">
-
-<div class="col-md-6 col-lg-4 voucher-item"
-
-th:data-search="${(v.discountPercent != null ? v.discountPercent + '%' : '') + ' ' + (v.discountAmount != null ? v.discountAmount.toString() : '')}">
-
-<div class="voucher-card">
-
-<div class="voucher-left">
-
-<div class="discount-val">
-
-<span th:if="${v.discountPercent != null}"
-th:text="${v.discountPercent + '%'}"></span>
-
-<span th:if="${v.discountPercent == null}"
-th:text="${#numbers.formatDecimal(v.discountAmount/1000,0,'POINT',0,'POINT') + 'K'}"></span>
-
-</div>
-
-<div class="discount-label">
-GIẢM GIÁ
-</div>
-
-</div>
-
-<div class="voucher-right">
-
-<div class="voucher-title"
-
-th:text="${'Giảm ' + (v.discountPercent != null ? v.discountPercent + '%' : #numbers.formatDecimal(v.discountAmount,0,'POINT',0,'POINT') + 'đ')}">
-
-Voucher
-
-</div>
-
-<div class="d-flex justify-content-between align-items-end">
-
-<div class="voucher-date">
-
-HSD:
-<span th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy')}"></span>
-
-</div>
-
-<form th:action="@{/voucher/claim}" method="post">
-
-<input type="hidden" name="voucherId" th:value="${v.id}">
-
-<button type="submit" class="btn btn-claim">
-Lưu mã
-</button>
-
-</form>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</th:block>
-
-</div>
-
-</div>
-
-<footer class="text-center py-4 border-top border-secondary border-opacity-25 mt-5">
-
-<div class="container">
-
-<p class="mb-0 small text-secondary">
-© 2025 Model World
-</p>
-
-</div>
-
+<footer class="text-center">
+    <div class="container">
+        <h4 style="font-family:'Montserrat'; font-weight: 900; color: var(--text-main)">MODEL WORLD</h4>
+        <p class="opacity-50 small">© 2026 Model World. All rights reserved.</p>
+    </div>
 </footer>
 
 <script>
-
-function searchVouchers(){
-
-const searchText=document.getElementById("voucherSearchInput")?.value?.toLowerCase()||"";
-
-const items=document.querySelectorAll(".voucher-item");
-
-items.forEach(item=>{
-
-const data=item.getAttribute("data-search").toLowerCase();
-
-if(data.includes(searchText)){
-
-item.classList.remove("hidden");
-
-}else{
-
-item.classList.add("hidden");
-
-}
-
-});
-
-}
-
+    function toggleTheme() {
+        const h = document.documentElement;
+        h.setAttribute('data-theme', h.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    }
 </script>
-
 </body>
 </html>

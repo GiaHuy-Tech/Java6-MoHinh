@@ -65,38 +65,34 @@ public class VoucherController {
     public String claimVoucher(@RequestParam("voucherId") Integer originalVoucherId,
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
-
         Account account = (Account) session.getAttribute("account");
-
-        if (account == null) {
-            return "redirect:/login";
-        }
+        if (account == null) return "redirect:/login";
 
         try {
-
-            Optional<Voucher> optionalVoucher = voucherRepo.findById(originalVoucherId);
-
-            if (optionalVoucher.isEmpty()) {
-
+            Voucher originalVoucher = voucherRepo.findById(originalVoucherId).orElse(null);
+            if (originalVoucher == null) {
                 redirectAttributes.addFlashAttribute("error", "Voucher không tồn tại");
                 return "redirect:/voucher";
             }
 
-            Voucher originalVoucher = optionalVoucher.get();
+            // --- LOGIC KIỂM TRA CẤP BẬC THÀNH VIÊN ---
+            if (originalVoucher.getMembership() != null) {
+                int userPoints = (account.getMembership() != null) ? account.getMembership().getPointRequired() : 0;
+                int requiredPoints = originalVoucher.getMembership().getPointRequired();
 
-            // kiểm tra đã lưu chưa
-            boolean alreadyHas = voucherRepo.existsByAccount_IdAndCode(
-                    account.getId(),
-                    originalVoucher.getCode()
-            );
+                if (userPoints < requiredPoints) {
+                    redirectAttributes.addFlashAttribute("error", "Cấp bậc thành viên của bạn chưa đủ để nhận mã này!");
+                    return "redirect:/voucher";
+                }
+            }
 
-            if (alreadyHas) {
-
-                redirectAttributes.addFlashAttribute("error", "Bạn đã lưu voucher này rồi!");
+            // Kiểm tra đã lưu chưa
+            if (voucherRepo.existsByAccount_IdAndCode(account.getId(), originalVoucher.getCode())) {
+                redirectAttributes.addFlashAttribute("error", "Bạn đã lưu mã này rồi!");
                 return "redirect:/voucher";
             }
 
-            // tạo voucher mới cho user
+            // Tạo voucher riêng cho User
             Voucher newVoucher = Voucher.builder()
                     .code(originalVoucher.getCode())
                     .discountPercent(originalVoucher.getDiscountPercent())
@@ -111,14 +107,11 @@ public class VoucherController {
                     .build();
 
             voucherRepo.save(newVoucher);
-
             redirectAttributes.addFlashAttribute("success", "Lưu voucher thành công!");
 
         } catch (Exception e) {
-
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra");
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
         }
-
         return "redirect:/voucher";
     }
 
