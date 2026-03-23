@@ -1,18 +1,10 @@
 package com.example.demo.controllers;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.*;
@@ -23,72 +15,31 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class DetailController {
 
-    @Autowired
-    private ProductRepository productRepo;
-
-    @Autowired
-    private ProductImageRepository productImageRepo;
-
-    @Autowired
-    private CommentRepository commentRepo;
-
-    @Autowired
-    private OrdersDetailRepository orderDetailRepo;
-
-    @Autowired
-    private CartDetailRepository cartDetailRepo;
-
-    @Autowired
-    private HttpSession session;
+    @Autowired private ProductRepository productRepo;
+    @Autowired private ProductImageRepository productImageRepo;
+    @Autowired private CommentRepository commentRepo;
+    @Autowired private CartDetailRepository cartDetailRepo;
+    @Autowired private HttpSession session;
 
     // ================= PRODUCT DETAIL =================
     @GetMapping("/product-detail/{id}")
     public String productDetail(@PathVariable Integer id, Model model) {
-
-        Account account = (Account) session.getAttribute("account");
-
+        // 1. Tìm sản phẩm
         Products product = productRepo.findById(id).orElse(null);
         if (product == null) return "redirect:/products";
 
         model.addAttribute("product", product);
 
-        // load images
+        // 2. Load ảnh phụ
         List<ProductImage> images = productImageRepo.findByProduct_Id(id);
         model.addAttribute("extraImages", images);
 
-        // ===== COMMENT PERMISSION =====
-        boolean canComment = false;
-
-        if (account != null) {
-
-            List<OrderDetail> details =
-                    orderDetailRepo.findByOrder_Account_IdAndProduct_Id(
-                            account.getId(), id);
-
-            for (OrderDetail d : details) {
-
-                if (d.getOrder().getStatus() == 3) {
-
-                    boolean commented =
-                            commentRepo.existsByAccount_IdAndProduct_Id(
-                                    account.getId(), id);
-
-                    if (!commented) {
-                        canComment = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        model.addAttribute("canComment", canComment);
-
-        model.addAttribute("comments",
-                commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
+        // 3. Load TẤT CẢ đánh giá của sản phẩm này từ mọi người dùng
+        // Logic đánh giá đã được chuyển sang OrderController
+        model.addAttribute("comments", commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
 
         return "client/product-detail";
     }
-
 
     // ================= ADD TO CART =================
     @PostMapping("/cart/add")
@@ -97,119 +48,26 @@ public class DetailController {
                             RedirectAttributes redirectAttributes) {
 
         Account account = (Account) session.getAttribute("account");
+        if (account == null) return "redirect:/login";
 
-        if (account == null)
-            return "redirect:/login";
+        Products product = productRepo.findById(productId).orElse(null);
+        if (product == null) return "redirect:/products";
 
-        Products product =
-                productRepo.findById(productId).orElse(null);
+        cartDetailRepo.findByAccountAndProduct(account, product).ifPresentOrElse(
+            detail -> {
+                detail.setQuantity(detail.getQuantity() + quantity);
+                cartDetailRepo.save(detail);
+            },
+            () -> {
+                CartDetail newDetail = new CartDetail();
+                newDetail.setAccount(account);
+                newDetail.setProduct(product);
+                newDetail.setQuantity(quantity);
+                cartDetailRepo.save(newDetail);
+            }
+        );
 
-        if (product == null)
-            return "redirect:/products";
-
-        Optional<CartDetail> existing =
-                cartDetailRepo.findByAccountAndProduct(account, product);
-
-        if (existing.isPresent()) {
-
-            CartDetail detail = existing.get();
-            detail.setQuantity(detail.getQuantity() + quantity);
-            cartDetailRepo.save(detail);
-
-        } else {
-
-            CartDetail newDetail = new CartDetail();
-            newDetail.setAccount(account);
-            newDetail.setProduct(product);
-            newDetail.setQuantity(quantity);
-
-            cartDetailRepo.save(newDetail);
-        }
-
-        redirectAttributes.addFlashAttribute(
-                "successMessage", "Đã thêm vào giỏ hàng!");
-
+        redirectAttributes.addFlashAttribute("successMessage", "Đã thêm vào giỏ hàng!");
         return "redirect:/cart";
-    }
-
-
-    // ================= POST COMMENT =================
-    @PostMapping("/product-detail/comment/{productId}")
-    public String postComment(@PathVariable Integer productId,
-                              @RequestParam String content,
-                              @RequestParam Integer rating,
-                              @RequestParam(required = false) MultipartFile imageFile) {
-
-        Account account =
-                (Account) session.getAttribute("account");
-
-        if (account == null)
-            return "redirect:/login";
-
-        Products product =
-                productRepo.findById(productId).orElse(null);
-
-        if (product == null)
-            return "redirect:/products";
-
-        boolean canComment = false;
-
-        List<OrderDetail> details =
-                orderDetailRepo.findByOrder_Account_IdAndProduct_Id(
-                        account.getId(), productId);
-
-        for (OrderDetail d : details) {
-
-            if (d.getOrder().getStatus() == 3) {
-
-                boolean commented =
-                        commentRepo.existsByAccount_IdAndProduct_Id(
-                                account.getId(), productId);
-
-                if (!commented) {
-                    canComment = true;
-                    break;
-                }
-            }
-        }
-
-        if (!canComment)
-            return "redirect:/product-detail/" + productId;
-
-        Comment comment = new Comment();
-        comment.setAccount(account);
-        comment.setProduct(product);
-        comment.setContent(content);
-        comment.setRating(rating);
-        comment.setCreatedAt(LocalDateTime.now());
-
-        // ===== Upload image =====
-        if (imageFile != null && !imageFile.isEmpty()) {
-
-            try {
-
-                String fileName =
-                        System.currentTimeMillis()
-                                + "_" + imageFile.getOriginalFilename();
-
-                Path uploadPath =
-                        Paths.get("uploads/comments");
-
-                if (!Files.exists(uploadPath))
-                    Files.createDirectories(uploadPath);
-
-                Files.write(uploadPath.resolve(fileName),
-                        imageFile.getBytes());
-
-                comment.setImage(fileName);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        commentRepo.save(comment);
-
-        return "redirect:/product-detail/" + productId;
     }
 }
