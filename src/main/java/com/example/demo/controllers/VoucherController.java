@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.Voucher;
+import com.example.demo.repository.AccountRepository;
 import com.example.demo.repository.VoucherRepository;
 
 import jakarta.servlet.http.HttpSession;
@@ -22,39 +23,36 @@ public class VoucherController {
 
     @Autowired
     VoucherRepository voucherRepo;
+    @Autowired
+    AccountRepository accountRepo; // Thêm repo này vào
 
-    // ===============================
-    // HIỂN THỊ TRANG VOUCHER
-    // ===============================
     @GetMapping
     public String voucherPage(Model model, HttpSession session) {
-
-        Account account = (Account) session.getAttribute("account");
-
-        if (account == null) {
-            return "redirect:/login";
+        Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) {
+            sessionAcc = (Account) session.getAttribute("user");
         }
 
+        if (sessionAcc == null) return "redirect:/login";
+
+        // --- QUAN TRỌNG: Lấy lại dữ liệu mới nhất từ Database để cập nhật Hạng ---
+        Account currentAccount = accountRepo.findById(sessionAcc.getId()).orElse(sessionAcc);
+        model.addAttribute("user", currentAccount); 
+
         List<Voucher> availableVouchers = new ArrayList<>();
-
-        // 1. voucher chung
         List<Voucher> publicVouchers = voucherRepo.findByAccountIsNull();
-
-        // 2. voucher membership
         List<Voucher> membershipVouchers = new ArrayList<>();
 
-        if (account.getMembership() != null) {
+        if (currentAccount.getMembership() != null) {
             membershipVouchers = voucherRepo.findByMembership_IdAndAccountIsNull(
-                    account.getMembership().getId()
+                    currentAccount.getMembership().getId()
             );
         }
 
-        // gộp tất cả lại
         availableVouchers.addAll(publicVouchers);
         availableVouchers.addAll(membershipVouchers);
 
         model.addAttribute("availableVouchers", availableVouchers);
-
         return "client/voucher";
     }
 

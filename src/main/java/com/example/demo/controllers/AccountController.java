@@ -6,8 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,45 +35,82 @@ public class AccountController {
     @Autowired private MembershipRepository membershipRepo;
     @Autowired private HttpSession session;
 
-    // Sửa đường dẫn để lưu trực tiếp vào thư mục runtime giúp ảnh hiện ngay
-    private final String UPLOAD_DIR = "target/classes/static/images/avatar/";
+    // CHỈNH LẠI: Lưu vào thư mục vật lý khớp với StaticResourceConfig
+    private final String UPLOAD_DIR = "uploads/avatar/";
 
     @GetMapping
     public String accountPage(Model model) {
         Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) sessionAcc = (Account) session.getAttribute("user");
         if (sessionAcc == null) return "redirect:/login";
 
-        // Lấy dữ liệu tươi nhất từ DB
+        // Lấy dữ liệu mới nhất từ DB
         Account account = accountRepo.findById(sessionAcc.getId()).orElse(null);
         if (account == null) return "redirect:/login";
 
-        // Fix lỗi LazyInitialization: Lấy địa chỉ mặc định riêng
+        // Lấy địa chỉ mặc định
         Address defaultAddress = addressRepo.findByAccount_IdAndIsDefaultTrue(account.getId()).orElse(null);
 
-        // Tính toán Membership
+        // Tính toán Membership dựa trên chi tiêu thực tế trong DB
         BigDecimal totalSpent = account.getTotalSpending();
+        if (totalSpent == null) totalSpent = BigDecimal.ZERO;
+        
         String membershipName = "Đồng";
-        if (totalSpent != null) {
-            if (totalSpent.compareTo(new BigDecimal("1000000000")) >= 0) membershipName = "Kim Cương";
-            else if (totalSpent.compareTo(new BigDecimal("500000000")) >= 0) membershipName = "Bạch Kim";
-            else if (totalSpent.compareTo(new BigDecimal("100000000")) >= 0) membershipName = "Vàng";
-            else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) membershipName = "Bạc";
-        }
+        if (totalSpent.compareTo(new BigDecimal("1000000000")) >= 0) membershipName = "Kim Cương";
+        else if (totalSpent.compareTo(new BigDecimal("500000000")) >= 0) membershipName = "Bạch Kim";
+        else if (totalSpent.compareTo(new BigDecimal("100000000")) >= 0) membershipName = "Vàng";
+        else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) membershipName = "Bạc";
 
+        // Cập nhật membership vào object account
         Membership membership = membershipRepo.findByName(membershipName).orElse(null);
         if (membership != null) {
             account.setMembership(membership);
             accountRepo.save(account);
         }
 
-        // Đẩy dữ liệu ra View
         model.addAttribute("account", account);
         model.addAttribute("defaultAddress", defaultAddress);
         model.addAttribute("membershipName", membershipName);
-        model.addAttribute("orderCount", ordersRepo.countByAccountId(account.getId())); // Giả định bạn có hàm này
-        model.addAttribute("totalSpent", totalSpent != null ? totalSpent : 0);
+        model.addAttribute("orderCount", ordersRepo.countByAccountId(account.getId()));
+        model.addAttribute("totalSpent", totalSpent);
 
         return "client/account";
+    }
+
+    @PostMapping("/upload-avatar")
+    public String uploadAvatar(@RequestParam("avatar") MultipartFile file, RedirectAttributes redirect) {
+        Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) sessionAcc = (Account) session.getAttribute("user");
+        if (sessionAcc == null) return "redirect:/login";
+
+        if (file.isEmpty()) {
+            redirect.addFlashAttribute("error", "Vui lòng chọn ảnh!");
+            return "redirect:/account";
+        }
+
+        try {
+            // Tạo thư mục nếu chưa tồn tại
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+
+            // Ghi đè hoặc tạo file mới với tên duy nhất
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            
+            // Cập nhật Database: CHỈ LƯU TÊN FILE
+            Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+            dbAcc.setAvatar(fileName); 
+            accountRepo.save(dbAcc);
+
+            // Cập nhật lại Session để các trang khác thấy ảnh mới ngay
+            session.setAttribute("account", dbAcc);
+            
+            redirect.addFlashAttribute("success", "Đổi ảnh đại diện thành công!");
+        } catch (IOException e) {
+            redirect.addFlashAttribute("error", "Lỗi lưu ảnh: " + e.getMessage());
+        }
+        return "redirect:/account";
     }
 
     @PostMapping("/update-fullname")
@@ -91,13 +126,14 @@ public class AccountController {
     @PostMapping("/update-address")
     public String updateAddress(@RequestParam("address") String addressDetail, RedirectAttributes redirect) {
         Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) sessionAcc = (Account) session.getAttribute("user");
         if (sessionAcc == null) return "redirect:/login";
 
-        Optional<Address> optionalAddress = addressRepo.findByAccount_IdAndIsDefaultTrue(sessionAcc.getId());
-        Address address = optionalAddress.orElse(new Address());
+        Address address = addressRepo.findByAccount_IdAndIsDefaultTrue(sessionAcc.getId()).orElse(new Address());
         
         if (address.getId() == null) {
-            address.setAccount(sessionAcc);
+            Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+            address.setAccount(dbAcc);
             address.setIsDefault(true);
         }
         address.setDetail(addressDetail);
@@ -107,39 +143,11 @@ public class AccountController {
         return "redirect:/account";
     }
 
-    @PostMapping("/upload-avatar")
-    public String uploadAvatar(@RequestParam("avatar") MultipartFile file, RedirectAttributes redirect) {
-        Account sessionAcc = (Account) session.getAttribute("account");
-        if (sessionAcc == null) return "redirect:/login";
-
-        if (file.isEmpty()) {
-            redirect.addFlashAttribute("error", "Vui lòng chọn ảnh!");
-            return "redirect:/account";
-        }
-
-        try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
-
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
-            dbAcc.setAvatar("/images/avatar/" + fileName);
-            accountRepo.save(dbAcc);
-
-            session.setAttribute("account", dbAcc);
-            redirect.addFlashAttribute("success", "Đổi ảnh đại diện thành công!");
-        } catch (IOException e) {
-            redirect.addFlashAttribute("error", "Lỗi lưu ảnh!");
-        }
-        return "redirect:/account";
-    }
-
     private String updateAccountField(java.util.function.Consumer<Account> updater, RedirectAttributes redirect, String fieldName) {
         Account sessionAcc = (Account) session.getAttribute("account");
+        if (sessionAcc == null) sessionAcc = (Account) session.getAttribute("user");
         if (sessionAcc == null) return "redirect:/login";
+        
         Account dbAcc = accountRepo.findById(sessionAcc.getId()).orElse(null);
         if (dbAcc != null) {
             updater.accept(dbAcc);
@@ -149,6 +157,4 @@ public class AccountController {
         }
         return "redirect:/account";
     }
-
-    private Account getSessionAccount() { return (Account) session.getAttribute("account"); }
 }

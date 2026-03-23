@@ -3,87 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tài khoản - MODEL WORLD</title>
+    <title>Hồ sơ cá nhân - MODEL WORLD</title>
+
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </th:block>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 
     <style>
-        /* HỆ BIẾN MÀU ĐỒNG BỘ WISHLIST/INDEX */
         :root {
             --bg-body: #0b0c10; --bg-card: #1f2833; --bg-nav: #0b0c10;
-            --text-main: #66fcf1; --text-light: #c5c6c7; --accent-cyan: #45a29e; 
-            --border-color: #2d3238; --shadow: rgba(0,0,0,0.5); --card-hover: #232d39;
+            --text-main: #66fcf1; --text-light: #c5c6c7; --text-dim: #999999;
+            --accent-cyan: #45a29e; --border-color: #2d3238; --shadow: rgba(0,0,0,0.5);
             --accent-red: #ff2e63;
         }
         [data-theme="light"] {
             --bg-body: #f8f9fa; --bg-card: #ffffff; --bg-nav: #ffffff;
-            --text-main: #00adb5; --text-light: #222831; --accent-cyan: #393e46; 
-            --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1); --card-hover: #f1f3f5;
+            --text-main: #00adb5; --text-light: #222831; --text-dim: #666666;
+            --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1);
         }
         
-        body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; min-height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* NAVBAR STYLE */
+        /* NAVBAR */
         .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 10px 0; box-shadow: 0 2px 10px var(--shadow); }
         .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
         .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; text-decoration: none; border:none; background:none; cursor: pointer; }
-        .nav-icon-link:hover, .nav-icon-link.active { color: var(--text-main); }
-        .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
+        .nav-icon-link:hover { color: var(--text-main); }
 
         /* ACCOUNT CARDS */
         .account-card { 
-            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; 
-            padding: 30px; box-shadow: 0 10px 30px var(--shadow); height: 100%;
+            background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; 
+            padding: 35px; box-shadow: 0 10px 30px var(--shadow); height: 100%; transition: 0.3s;
         }
         
-        .avatar-wrapper { position: relative; width: 150px; margin: 0 auto 20px; }
-        .avatar-img { 
-            width: 150px; height: 150px; border-radius: 50%; object-fit: cover; 
-            border: 4px solid var(--text-main); transition: 0.3s; cursor: pointer;
+        /* AVATAR SYSTEM */
+        .avatar-section { position: relative; width: 160px; margin: 0 auto 25px; }
+        .avatar-display { 
+            width: 160px; height: 160px; border-radius: 50%; object-fit: cover; 
+            border: 4px solid var(--text-main); box-shadow: 0 0 20px rgba(102, 252, 241, 0.3); transition: 0.3s; cursor: pointer;
         }
-        .avatar-img:hover { filter: brightness(0.8); }
-        .btn-change-avatar { 
-            position: absolute; bottom: 5px; right: 5px; background: var(--text-main); 
-            color: #000; border-radius: 50%; width: 35px; height: 35px; 
-            display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card);
+        .avatar-display:hover { filter: brightness(0.8); transform: scale(1.02); }
+        .camera-icon { 
+            position: absolute; bottom: 8px; right: 8px; background: var(--text-main); 
+            color: #000; border-radius: 50%; width: 40px; height: 40px; 
+            display: flex; align-items: center; justify-content: center; border: 4px solid var(--bg-card); font-size: 1.2rem;
         }
+
+        /* --- MEMBERSHIP COLORS (FIXED FONT) --- */
+        .rank-tag { 
+            font-family: 'Montserrat', sans-serif; /* Đổi font từ Orbitron sang Montserrat để hết lỗi dấu */
+            font-size: 0.85rem; font-weight: 800; padding: 8px 22px; border-radius: 50px; 
+            display: inline-block; text-transform: uppercase; margin-bottom: 20px; 
+            letter-spacing: 0.5px;
+        }
+        
+        .rank-kim-cuong { 
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); 
+            background-size: 200% auto; color: #fff !important; 
+            animation: shine_diamond 2s linear infinite; border: 1px solid rgba(255,255,255,0.5); 
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        .rank-vang { background: linear-gradient(45deg, #f1c40f, #f39c12); color: #000 !important; }
+        .rank-bac { background: linear-gradient(45deg, #bdc3c7, #ecf0f1); color: #000 !important; border: 1px solid #999; }
+        .rank-dong { background: #cd7f32; color: #fff !important; }
+        @keyframes shine_diamond { to { background-position: 200% center; } }
 
         /* FORM CONTROLS */
-        .form-label { color: var(--text-main); font-weight: 600; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 8px; }
+        .form-label { color: var(--text-main); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .form-control { 
-            background-color: rgba(0,0,0,0.2) !important; color: var(--text-light) !important; 
-            border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 15px;
+            background-color: var(--bg-body) !important; color: var(--text-light) !important; 
+            border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 12px 18px; transition: 0.3s;
         }
-        .form-control:focus { border-color: var(--text-main); box-shadow: 0 0 0 0.25rem rgba(102, 252, 243, 0.1); }
+        .form-control:focus { border-color: var(--text-main) !important; box-shadow: 0 0 15px rgba(102, 252, 241, 0.1); }
         
-        .btn-save { 
-            background: var(--text-main); color: #000; font-weight: 800; border: none; 
-            padding: 10px 25px; border-radius: 8px; transition: 0.3s;
-        }
-        .btn-save:hover { background: #fff; transform: translateY(-2px); }
+        .btn-update { background: var(--text-main); color: #000; font-weight: 800; border: none; padding: 12px 30px; border-radius: 10px; transition: 0.3s; }
+        .btn-update:hover { background: #fff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255,255,255,0.2); }
 
-        .membership-badge { 
-            background: linear-gradient(45deg, var(--text-main), var(--accent-cyan)); 
-            color: #000; font-weight: 900; padding: 5px 15px; border-radius: 50px; display: inline-block;
-        }
-
-        footer { background: #020408; border-top: 1px solid var(--border-color); padding: 30px 0; margin-top: auto; }
+        footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); padding: 40px 0; margin-top: auto; }
+        .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
     </style>
 </head>
 <body>
 
 <nav class="top-navbar">
-    <div class="container-fluid px-lg-5">
+    <div class="container-fluid px-lg-5 nav-holder">
         <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-4">
                 <a th:href="@{/}" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
-                <a th:href="@{/products}" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;"><i class="bi bi-box-seam"></i> SẢN PHẨM</a>
+                <a th:href="@{/products}" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;">
+                    <i class="bi bi-box-seam"></i> SẢN PHẨM
+                </a>
             </div>
 
             <div class="d-flex align-items-center gap-4">
-                <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
+                <div class="theme-toggle nav-icon-link" onclick="toggleTheme()"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
                 <a th:href="@{/wishlist}" class="nav-icon-link"><i class="bi bi-heart"></i></a>
                 <a th:href="@{/cart}" class="nav-icon-link position-relative">
                     <i class="bi bi-cart3"></i>
@@ -91,11 +109,15 @@
                 </a>
                 
                 <div class="dropdown">
-                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
-                        <img th:src="${account.avatar != null ? account.avatar : '/images/default-avatar.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown" style="cursor:pointer">
+                        <img th:src="${account.avatar != null ? (account.avatar.startsWith('http') ? account.avatar : '/images/avatar/' + account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
+                             class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                        <i class="bi bi-chevron-down small text-light"></i>
                     </div>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
-                        <li><a class="dropdown-item py-2 active" th:href="@{/account}"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 bg-dark">
+                        <li><a class="dropdown-item py-2 text-info fw-bold" th:href="@{/account}"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
+                        <li><a class="dropdown-item py-2 text-white" th:href="@{/orders}"><i class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
+                        <li><hr class="dropdown-divider border-secondary"></li>
                         <li><a class="dropdown-item py-2 text-danger" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
                     </ul>
                 </div>
@@ -105,42 +127,46 @@
 </nav>
 
 <div class="container py-5">
-    <div class="d-flex align-items-center justify-content-between mb-5">
-        <h3 class="fw-bold text-main border-start border-5 border-info ps-3 mb-0">HỒ SƠ CỦA TÔI</h3>
-    </div>
+    <h3 class="fw-bold text-main border-start border-5 border-info ps-3 mb-5">HỒ SƠ CỦA TÔI</h3>
 
-    <div th:if="${success}" class="alert alert-success bg-dark border-success text-success rounded-3 mb-4">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success border-0 shadow-sm rounded-3 mb-4 py-3">
         <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
     </div>
-    <div th:if="${error}" class="alert alert-danger bg-dark border-danger text-danger rounded-3 mb-4">
+    <div th:if="${error}" class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 py-3">
         <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-4">
             <div class="account-card text-center">
-                <form id="avatarForm" action="/account/upload-avatar" method="post" enctype="multipart/form-data">
-                    <div class="avatar-wrapper">
+                <form id="avatarForm" th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data">
+                    <div class="avatar-section">
                         <label for="avatarInput">
-                            <img th:src="${account.avatar != null ? account.avatar : '/images/default-avatar.png'}" class="avatar-img shadow-lg">
-                            <div class="btn-change-avatar"><i class="bi bi-camera-fill"></i></div>
+                            <img th:src="${account.avatar != null ? (account.avatar.startsWith('http') ? account.avatar : '/images/avatar/' + account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
+                                 class="avatar-display">
+                            <div class="camera-icon shadow"><i class="bi bi-camera-fill"></i></div>
                         </label>
                         <input type="file" id="avatarInput" name="avatar" style="display:none" onchange="document.getElementById('avatarForm').submit()">
                     </div>
                 </form>
                 
-                <h4 class="fw-bold text-white mb-1" th:text="${account.fullName}">Họ tên</h4>
-                <p class="text-secondary mb-3" th:text="${account.email}">email@example.com</p>
-                <div class="membership-badge mb-4" th:text="${membershipName}">Hạng đồng</div>
+                <h4 class="fw-bold text-white mb-1" th:text="${account.fullName ?: account.username}">Họ tên</h4>
+                <p style="color: var(--text-dim)" class="mb-3" th:text="${account.email}">email@example.com</p>
+                
+                <!-- Badge hạng thành viên ĐÃ SỬA LỖI FONT -->
+                <div class="rank-tag shadow" 
+                     th:classappend="${membershipName == 'Kim Cương' ? 'rank-kim-cuong' : (membershipName == 'Vàng' ? 'rank-vang' : (membershipName == 'Bạc' ? 'rank-bac' : 'rank-dong'))}"
+                     th:text="${membershipName ?: 'Thành viên'}">Hạng</div>
 
-                <div class="row g-2 border-top border-secondary pt-4 mt-2">
-                    <div class="col-6 text-center border-end border-secondary">
-                        <div class="small text-secondary">Đơn hàng</div>
-                        <div class="fw-bold fs-5 text-main" th:text="${orderCount}">0</div>
+                <div class="row g-3 border-top border-secondary pt-4 mt-2">
+                    <div class="col-6 border-end border-secondary">
+                        <div class="small text-dim text-uppercase fw-bold" style="font-size:0.7rem">Đơn hàng</div>
+                        <div class="fw-bold fs-4 text-main" th:text="${orderCount}">0</div>
                     </div>
-                    <div class="col-6 text-center">
-                        <div class="small text-secondary">Tổng chi</div>
-                        <div class="fw-bold fs-6 text-main" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
+                    <div class="col-6">
+                        <div class="small text-dim text-uppercase fw-bold" style="font-size:0.7rem">Tổng chi</div>
+                        <div class="fw-bold fs-5 text-main" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
                     </div>
                 </div>
             </div>
@@ -148,46 +174,42 @@
 
         <div class="col-lg-8">
             <div class="account-card">
-                <h5 class="fw-bold text-main mb-4"><i class="bi bi-pencil-square me-2"></i>CHỈNH SỬA THÔNG TIN</h5>
-                
+                <h5 class="fw-bold text-main mb-5"><i class="bi bi-shield-lock me-2"></i>THÔNG TIN TÀI KHOẢN</h5>
                 <div class="row g-4">
-                    <div class="col-md-12">
-                        <form action="/account/update-fullname" method="post">
-                            <label class="form-label">Họ và tên</label>
+                    <div class="col-12">
+                        <form th:action="@{/account/update-fullname}" method="post">
+                            <label class="form-label">Họ và tên đầy đủ</label>
                             <div class="input-group">
-                                <input name="fullName" class="form-control" th:value="${account.fullName}">
-                                <button class="btn btn-save">LƯU</button>
+                                <input type="text" name="fullName" class="form-control" th:value="${account.fullName}" placeholder="Nhập họ tên...">
+                                <button class="btn btn-update px-4">LƯU</button>
                             </div>
                         </form>
                     </div>
-
-                    <div class="col-md-12">
-                        <form action="/account/update-phone" method="post">
-                            <label class="form-label">Số điện thoại</label>
+                    <div class="col-12">
+                        <form th:action="@{/account/update-phone}" method="post">
+                            <label class="form-label">Số điện thoại liên lạc</label>
                             <div class="input-group">
-                                <input name="phone" class="form-control" th:value="${account.phone}">
-                                <button class="btn btn-save">LƯU</button>
+                                <input type="text" name="phone" class="form-control" th:value="${account.phone}" placeholder="Nhập số điện thoại...">
+                                <button class="btn btn-update px-4">LƯU</button>
                             </div>
                         </form>
                     </div>
-
-                    <div class="col-md-12">
-                        <form action="/account/update-address" method="post">
-                            <label class="form-label">Địa chỉ mặc định</label>
+                    <div class="col-12">
+                        <form th:action="@{/account/update-address}" method="post">
+                            <label class="form-label">Địa chỉ giao hàng mặc định</label>
                             <div class="input-group">
-                                <input name="address" class="form-control" th:value="${defaultAddress != null ? defaultAddress.detail : ''}">
-                                <button class="btn btn-save">LƯU</button>
+                                <input type="text" name="address" class="form-control" th:value="${defaultAddress != null ? defaultAddress.detail : ''}" placeholder="Số nhà, tên đường, quận/huyện...">
+                                <button class="btn btn-update px-4">LƯU</button>
                             </div>
                         </form>
                     </div>
-
-                    <div class="col-md-12 mt-5">
-                        <div class="p-3 rounded-3" style="background: rgba(255,46,99,0.05); border: 1px solid rgba(255,46,99,0.2);">
-                            <form action="/account/update-password" method="post">
-                                <label class="form-label text-danger">Đổi mật khẩu</label>
+                    <div class="col-12 mt-5">
+                        <div class="p-4 rounded-4" style="background: rgba(255,46,99,0.03); border: 1px dashed var(--accent-red);">
+                            <form th:action="@{/account/update-password}" method="post">
+                                <label class="form-label text-danger">Bảo mật & Mật khẩu</label>
                                 <div class="input-group">
-                                    <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu mới nếu muốn thay đổi">
-                                    <button class="btn btn-danger px-4">ĐỔI</button>
+                                    <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu mới">
+                                    <button class="btn btn-danger px-4 fw-bold">ĐỔI MẬT KHẨU</button>
                                 </div>
                             </form>
                         </div>
@@ -204,14 +226,14 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // JS ĐỒNG BỘ THEME TỪ WISHLIST
     function toggleTheme() {
         const h = document.documentElement;
         const icon = document.getElementById('themeIcon');
         const isDark = h.getAttribute('data-theme') === 'dark';
-        h.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        const newTheme = isDark ? 'light' : 'dark';
+        h.setAttribute('data-theme', newTheme);
+        icon.className = newTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+        localStorage.setItem('theme', newTheme);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
