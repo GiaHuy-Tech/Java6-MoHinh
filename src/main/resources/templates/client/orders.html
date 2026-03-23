@@ -14,32 +14,53 @@
     <style>
         :root { --bg-body: #0b0c10; --bg-card: #1f2833; --bg-nav: #0b0c10; --text-main: #66fcf1; --text-light: #c5c6c7; --text-dim: #999999; --accent-cyan: #45a29e; --border-color: #2d3238; --shadow: rgba(0,0,0,0.5); }
         [data-theme="light"] { --bg-body: #f8f9fa; --bg-card: #ffffff; --bg-nav: #ffffff; --text-main: #00adb5; --text-light: #222831; --text-dim: #666666; --border-color: #dee2e6; --shadow: rgba(0,0,0,0.08); }
-        body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; min-height: 100vh; display: flex; flex-direction: column; }
         .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 12px 0; box-shadow: 0 2px 10px var(--shadow); }
         .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
+        
         .order-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; margin-bottom: 30px; overflow: hidden; transition: 0.3s; box-shadow: 0 5px 15px var(--shadow); }
+        
+        /* Trạng thái màu sắc */
         .badge-status { padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; border: 1px solid; }
-        .status-4 { color: #00ffcc; border-color: #00ffcc; background: rgba(0,255,204,0.1); }
-        .product-img-box { width: 80px; height: 80px; background: #fff; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); }
+        .status-0 { color: #ffc107; border-color: #ffc107; background: rgba(255,193,7,0.1); } 
+        .status-1 { color: #0d6efd; border-color: #0d6efd; background: rgba(13,110,253,0.1); } 
+        .status-2 { color: #fd7e14; border-color: #fd7e14; background: rgba(253,126,20,0.1); } 
+        .status-3 { color: #00d2ff; border-color: #00d2ff; background: rgba(0,210,255,0.1); } 
+        .status-4 { color: #00ffcc; border-color: #00ffcc; background: rgba(0,255,204,0.1); } 
+        .status-5 { color: #dc3545; border-color: #dc3545; background: rgba(220,53,69,0.1); }
+
+        .product-img-box { width: 80px; height: 80px; background: #fff; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-color); overflow: hidden;}
         .product-img-box img { max-width: 90%; max-height: 90%; object-fit: contain; }
-        .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; }
+        
+        .btn-main { background-color: var(--text-main); color: #0b0c10; font-weight: 700; border: none; transition: 0.3s; }
+        .btn-main:hover { background-color: var(--accent-cyan); color: white; transform: translateY(-2px); }
+
+        /* Hiệu ứng nhấp nháy cho nút xác nhận */
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(102, 252, 241, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(102, 252, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(102, 252, 241, 0); }
+        }
+        .btn-pulse { animation: pulse-border 2s infinite; }
     </style>
 </head>
 <body>
 
 <nav class="top-navbar">
-    <div class="container-fluid px-lg-5 nav-holder">
+    <div class="container-fluid px-lg-5">
         <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-4">
                 <a href="/" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
-                <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600; text-decoration: none; color: var(--text-light);">
-                    <i class="bi bi-box-seam"></i> SẢN PHẨM
+                <a href="/products" class="text-decoration-none" style="color: var(--text-light); font-weight: 600;">
+                    <i class="bi bi-box-seam me-2"></i>SẢN PHẨM
                 </a>
             </div>
-            <div class="d-flex align-items-center gap-4">
-                <div class="theme-toggle nav-icon-link" style="cursor: pointer;" onclick="toggleTheme()"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="theme-toggle" style="cursor: pointer;" onclick="toggleTheme()"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
                 <div th:if="${user != null}">
-                    <img th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                    <img th:src="${user.avatar != null ? '/images/avatar/' + user.avatar : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" 
+                         class="rounded-circle border border-info" width="35" height="35" style="object-fit:cover;">
                 </div>
             </div>
         </div>
@@ -49,29 +70,45 @@
 <div class="container py-5 flex-grow-1">
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h3 style="font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); text-transform: uppercase; border-left: 5px solid var(--accent-cyan); padding-left: 15px;">
-            QUẢN LÝ ĐƠN HÀNG
+            ĐƠN HÀNG CỦA TÔI
         </h3>
         <div th:if="${reviewSuccess}" class="alert alert-success alert-dismissible fade show rounded-pill px-4 mb-0">
-            <i class="bi bi-check-circle-fill me-2"></i> Đánh giá đã được gửi thành công!
+            <i class="bi bi-check-circle-fill me-2"></i> Đánh giá của bạn đã được ghi lại!
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     </div>
 
-    <div th:each="order : ${orders}" class="order-card">
-        <div class="p-3 px-4 border-bottom border-secondary d-flex justify-content-between align-items-center">
+    <div th:each="order : ${orders}" class="order-card shadow">
+        <div class="p-3 px-4 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center bg-black bg-opacity-10">
             <div>
                 <span class="text-main fw-bold me-3 fs-5" th:text="'#DH' + ${order.id}"></span>
-                <span style="color: var(--text-dim); font-size: 0.9rem;"><i class="bi bi-calendar3 me-1"></i> <span th:text="${#dates.format(order.createdDate, 'dd/MM/yyyy HH:mm')}"></span></span>
+                <span style="color: var(--text-dim); font-size: 0.85rem;">
+                    <i class="bi bi-calendar-check me-1"></i> 
+                    <span th:text="${#dates.format(order.createdDate, 'dd/MM/yyyy HH:mm')}"></span>
+                </span>
             </div>
-            <span th:class="'badge-status status-' + ${order.status}" th:text="${order.status == 4 ? '🎉 Hoàn tất' : 'Đơn hàng'}"></span>
+            
+            <div class="d-flex align-items-center gap-3">
+                <span th:class="'badge-status status-' + ${order.status}" 
+                      th:text="${order.status == 0 ? '🕒 Chờ xác nhận' : 
+                                (order.status == 1 ? '✅ Đã xác nhận' : 
+                                (order.status == 2 ? '🚚 Đang giao hàng' : 
+                                (order.status == 3 ? '📦 Chờ bạn xác nhận đã nhận hàng' : 
+                                (order.status == 4 ? '🎉 Hoàn tất' : '❌ Đã hủy'))))}">
+                </span>
+            </div>
         </div>
 
         <div class="p-4">
-            <div th:each="detail : ${order.orderDetails}" class="d-flex align-items-center gap-4 mb-3 pb-3 border-bottom border-dark border-opacity-25">
-                <div class="product-img-box"><img th:src="${detail.product.mainImage}"></div>
+            <div th:each="detail : ${order.orderDetails}" class="d-flex align-items-center gap-4 mb-3 pb-3 border-bottom border-secondary border-opacity-10">
+                <div class="product-img-box">
+                    <img th:src="@{'/images/products/' + ${detail.product.mainImage}}">
+                </div>
                 <div class="flex-grow-1">
                     <h6 class="mb-1 fw-bold text-white" th:text="${detail.product.name}"></h6>
-                    <div style="color: var(--text-dim); font-size: 0.9rem;">Số lượng: <span class="text-main fw-bold" th:text="${detail.quantity}"></span></div>
+                    <div style="color: var(--text-dim); font-size: 0.9rem;">
+                        Số lượng: <span class="text-main fw-bold" th:text="${detail.quantity}"></span> 
+                    </div>
                     
                     <div th:if="${order.status == 4}" class="mt-2">
                         <button th:if="${!reviewedKeys.contains(order.id + '_' + detail.product.id)}"
@@ -79,15 +116,47 @@
                                 th:data-id="${detail.product.id}" 
                                 th:data-name="${detail.product.name}"
                                 th:data-orderid="${order.id}">
-                            <i class="bi bi-star-fill me-1"></i> Đánh giá sản phẩm
+                            <i class="bi bi-star-fill me-1"></i> VIẾT ĐÁNH GIÁ
                         </button>
                         
-                        <span th:if="${reviewedKeys.contains(order.id + '_' + detail.product.id)}" class="badge border border-secondary text-dim rounded-pill px-3">
-                            <i class="bi bi-check2-all me-1"></i> Đã đánh giá đơn này
+                        <span th:if="${reviewedKeys.contains(order.id + '_' + detail.product.id)}" class="badge border border-secondary text-secondary rounded-pill px-3 py-2">
+                            <i class="bi bi-check2-all me-1"></i> ĐÃ ĐÁNH GIÁ
                         </span>
                     </div>
                 </div>
-                <div class="text-end fw-bold text-main" th:text="${#numbers.formatDecimal(detail.price,0,'COMMA',0,'POINT')} + '₫'"></div>
+                <div class="text-end fw-bold text-main fs-5" 
+                     th:text="${#numbers.formatDecimal(detail.price * detail.quantity,0,'COMMA',0,'POINT')} + '₫'">
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 pt-0 d-flex flex-wrap justify-content-between align-items-center">
+            <div class="small fw-bold">
+                <span th:if="${order.paymentStatus}" class="text-success"><i class="bi bi-cash-stack me-1"></i> ĐÃ THANH TOÁN</span>
+                <span th:unless="${order.paymentStatus}" class="text-warning"><i class="bi bi-hourglass-split me-1"></i> CHƯA THANH TOÁN</span>
+            </div>
+            
+            <div class="d-flex align-items-center gap-4">
+                <div class="text-end">
+                    <span class="text-secondary small d-block">Tổng đơn:</span>
+                    <span class="text-danger fw-bold fs-4" th:text="${#numbers.formatDecimal(order.total,0,'COMMA',0,'POINT')} + '₫'"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <form th:if="${order.status == 3}" th:action="@{'/orders/confirm/' + ${order.id}}" method="post">
+                        <button type="submit" class="btn btn-main btn-pulse rounded-pill px-4" 
+                                onclick="return confirm('Bạn xác nhận đã cầm trên tay kiện hàng này?')">
+                            ĐÃ NHẬN ĐƯỢC HÀNG
+                        </button>
+                    </form>
+
+                    <form th:if="${order.status == 0 || order.status == 1}" th:action="@{'/orders/cancel/' + ${order.id}}" method="post">
+                        <button type="submit" class="btn btn-outline-danger rounded-pill px-4 fw-bold" 
+                                onclick="return confirm('Bạn muốn hủy đơn hàng này?')">
+                            HỦY ĐƠN
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -95,33 +164,36 @@
 
 <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-white">
+        <div class="modal-content text-white shadow-lg">
             <form th:action="@{/orders/submit-review}" method="post">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-main">Viết đánh giá</h5>
+                <div class="modal-header border-secondary border-opacity-25">
+                    <h5 class="modal-title text-main fw-bold">ĐÁNH GIÁ SẢN PHẨM</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="productId" id="modalProductId">
-                    <input type="hidden" name="orderId" id="modalOrderId"> <p>Sản phẩm: <span id="modalProductName" class="fw-bold text-info"></span></p>
+                    <input type="hidden" name="orderId" id="modalOrderId">
+                    <p>Sản phẩm: <span id="modalProductName" class="fw-bold text-info"></span></p>
+                    
                     <div class="mb-3">
-                        <label class="form-label">Đánh giá sao:</label>
+                        <label class="form-label">Mức độ hài lòng:</label>
                         <select name="rating" class="form-select bg-dark text-white border-secondary">
-                            <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
-                            <option value="4">⭐⭐⭐⭐ (4/5)</option>
-                            <option value="3">⭐⭐⭐ (3/5)</option>
-                            <option value="2">⭐⭐ (2/5)</option>
-                            <option value="1">⭐ (1/5)</option>
+                            <option value="5">⭐⭐⭐⭐⭐ (Rất tốt)</option>
+                            <option value="4">⭐⭐⭐⭐ (Tốt)</option>
+                            <option value="3">⭐⭐⭐ (Bình thường)</option>
+                            <option value="2">⭐⭐ (Tệ)</option>
+                            <option value="1">⭐ (Rất tệ)</option>
                         </select>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Cảm nhận:</label>
-                        <textarea name="content" class="form-control bg-dark text-white border-secondary" rows="4" required></textarea>
+                        <label class="form-label">Nội dung đánh giá:</label>
+                        <textarea name="content" class="form-control bg-dark text-white border-secondary" rows="4" required placeholder="Chia sẻ cảm nhận của bạn..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-info px-4 fw-bold">GỬI ĐÁNH GIÁ</button>
+                <div class="modal-footer border-secondary border-opacity-25">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">HỦY</button>
+                    <button type="submit" class="btn btn-main rounded-pill px-4">GỬI NGAY</button>
                 </div>
             </form>
         </div>
@@ -135,10 +207,8 @@
         if (trigger) {
             document.getElementById('modalProductId').value = trigger.getAttribute('data-id');
             document.getElementById('modalProductName').innerText = trigger.getAttribute('data-name');
-            document.getElementById('modalOrderId').value = trigger.getAttribute('data-orderid'); // Lấy OrderId từ data attribute
-            
-            const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
-            reviewModal.show();
+            document.getElementById('modalOrderId').value = trigger.getAttribute('data-orderid');
+            new bootstrap.Modal(document.getElementById('reviewModal')).show();
         }
     });
 
@@ -146,7 +216,7 @@
         const h = document.documentElement;
         const isDark = h.getAttribute('data-theme') === 'dark';
         h.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        document.getElementById('themeIcon').className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+        document.getElementById('themeIcon').className = isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-info';
     }
 </script>
 </body>
