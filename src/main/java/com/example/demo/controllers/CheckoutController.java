@@ -1,6 +1,8 @@
 package com.example.demo.controllers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,151 +25,162 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/checkout")
 public class CheckoutController {
 
-    @Autowired
-    private CartDetailRepository cartDetailRepo;
+    @Autowired private CartDetailRepository cartDetailRepo;
+    @Autowired private OrdersRepository ordersRepo;
+    @Autowired private OrdersDetailRepository orderDetailRepo;
+    @Autowired private VoucherDetailRepository voucherDetailRepo;
+    @Autowired private VoucherRepository voucherRepo; // Dùng để lấy voucher chung
+    @Autowired private AccountRepository accountRepo;
+    @Autowired private AddressRepository addressRepo;
+    @Autowired private VNPayService vnPayService;
 
-    @Autowired
-    private OrdersRepository ordersRepo;
-
-    @Autowired
-    private OrdersDetailRepository orderDetailRepo;
-
-    @Autowired
-    private VoucherDetailRepository voucherDetailRepo;
-
-    @Autowired
-    private AccountRepository accountRepo;
-
-    @Autowired
-    private AddressRepository addressRepo;
-
-    // THÊM: Inject VNPayService vào đây
-    @Autowired
-    private VNPayService vnPayService;
-
-    // =====================================================
-    // 1️⃣ HIỂN THỊ TRANG CHECKOUT
-    // =====================================================
     @GetMapping
     public String viewCheckout(HttpSession session,
                                @RequestParam(required = false) String voucherCode,
                                Model model) {
-
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
 
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
         if (cartList.isEmpty()) return "redirect:/cart";
 
-        List<Address> userAddresses = addressRepo.findByAccountId(account.getId());
-        model.addAttribute("addresses", userAddresses);
+        // 1. Tính tổng tiền hàng (Raw Total)
+        BigDecimal rawTotal = cartList.stream()
+                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        List<VoucherDetail> myVouchers = voucherDetailRepo.findByAccount_Id(account.getId())
-                .stream()
-                .filter(v -> !Boolean.TRUE.equals(v.getIsUsed()))
+        // 2. LẤY DANH SÁCH VOUCHER KHẢ DỤNG (Đã sửa để đổ dữ liệu lên)
+        // Lấy voucher riêng đã thu thập
+        List<VoucherDetail> myVoucherDetails = voucherDetailRepo.findByAccount_IdAndIsUsedFalse(account.getId());
+        // Lấy thêm voucher chung (account_id is null)
+        List<Voucher> publicVouchers = voucherRepo.findByAccountIsNull();
+
+        List<Voucher> availableVouchers = new ArrayList<>();
+        
+        // Gộp voucher riêng
+        myVoucherDetails.forEach(vd -> availableVouchers.add(vd.getVoucher()));
+        // Gộp voucher chung
+        availableVouchers.addAll(publicVouchers);
+
+        // Lọc theo điều kiện: Còn hạn + Đủ giá trị đơn hàng tối thiểu
+        List<Voucher> savedVouchers = availableVouchers.stream()
+                .filter(v -> v != null && Boolean.TRUE.equals(v.getActive()))
+                .filter(v -> v.getMinOrderValue() == null || rawTotal.doubleValue() >= v.getMinOrderValue())
+                .distinct() // Tránh trùng lặp mã
                 .collect(Collectors.toList());
-        model.addAttribute("savedVouchers", myVouchers);
 
-        BigDecimal rawTotal = BigDecimal.ZERO;
-        for (CartDetail item : cartList) {
-            rawTotal = rawTotal.add(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
-        }
+        model.addAttribute("savedVouchers", savedVouchers);
 
+        // 3. XỬ LÝ ÁP DỤNG VOUCHER
         BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal feeShip = BigDecimal.ZERO;
+        BigDecimal feeShip = BigDecimal.valueOf(30000);
 
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
-            Optional<VoucherDetail> voucherOpt = voucherDetailRepo.findValidVoucherForAccount(account.getId(), voucherCode.trim());
-            if (voucherOpt.isPresent()) {
-                Voucher v = voucherOpt.get().getVoucher();
-                if (v.getDiscountPercent() != null && v.getDiscountPercent() > 0) {
-                    discount = rawTotal.multiply(BigDecimal.valueOf(v.getDiscountPercent()).divide(BigDecimal.valueOf(100)));
-                } else if (v.getDiscountAmount() != null && v.getDiscountAmount() > 0) {
-                    discount = BigDecimal.valueOf(v.getDiscountAmount());
-                }
-                if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
-                if (Boolean.TRUE.equals(v.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
-            }
-        }
+            Optional<Voucher> vOpt = savedVouchers.stream()
+                    .filter(v -> v.getCode().equals(voucherCode.trim()))
+                    .findFirst();
 
-        BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
-        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
-
-        model.addAttribute("cartList", cartList);
-        model.addAttribute("rawTotal", rawTotal);
-        model.addAttribute("discount", discount);
-        model.addAttribute("feeShip", feeShip);
-        model.addAttribute("finalTotal", finalTotal);
-        model.addAttribute("voucherCode", voucherCode);
-
-        return "client/checkout";
-    }
-
-    // =====================================================
-    // 2️⃣ XÁC NHẬN ĐẶT HÀNG (LƯU DB & GỌI VNPAY NẾU CẦN)
-    // =====================================================
-    @PostMapping("/confirm")
-    public String confirmOrder(HttpSession session,
-                               @RequestParam(required = false) String voucherCode,
-                               @RequestParam("addressId") Long addressId,
-                               @RequestParam("paymentMethod") String paymentMethod) {
-
-        Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
-
-        List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
-        if (cartList.isEmpty()) return "redirect:/cart";
-
-        Address selectedAddress = addressRepo.findById(addressId)
-                .orElseThrow(() -> new IllegalArgumentException("Địa chỉ không tồn tại"));
-
-        BigDecimal rawTotal = BigDecimal.ZERO;
-        for (CartDetail item : cartList) {
-            rawTotal = rawTotal.add(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
-        }
-
-        BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal feeShip = BigDecimal.ZERO;
-        VoucherDetail appliedVoucherDetail = null;
-
-        if (voucherCode != null && !voucherCode.trim().isEmpty()) {
-            Optional<VoucherDetail> voucherOpt = voucherDetailRepo.findValidVoucherForAccount(account.getId(), voucherCode.trim());
-            if (voucherOpt.isPresent()) {
-                appliedVoucherDetail = voucherOpt.get();
-                Voucher v = appliedVoucherDetail.getVoucher();
+            if (vOpt.isPresent()) {
+                Voucher v = vOpt.get();
                 if (v.getDiscountPercent() != null) {
                     discount = rawTotal.multiply(BigDecimal.valueOf(v.getDiscountPercent()).divide(BigDecimal.valueOf(100)));
                 } else if (v.getDiscountAmount() != null) {
                     discount = BigDecimal.valueOf(v.getDiscountAmount());
                 }
+                // Giảm giá không vượt quá tổng tiền
                 if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
                 if (Boolean.TRUE.equals(v.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
             }
         }
 
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
+
+        model.addAttribute("cartList", cartList);
+        model.addAttribute("addresses", addressRepo.findByAccountId(account.getId()));
+        model.addAttribute("rawTotal", rawTotal);
+        model.addAttribute("discount", discount);
+        model.addAttribute("feeShip", feeShip);
+        model.addAttribute("finalTotal", finalTotal);
+        model.addAttribute("voucherCode", voucherCode);
+        model.addAttribute("user", account);
+
+        return "client/checkout";
+    }
+
+    @PostMapping("/confirm")
+    public String confirmOrder(HttpSession session,
+                               @RequestParam(required = false) String voucherCode,
+                               @RequestParam("addressId") Long addressId,
+                               @RequestParam("paymentMethod") String paymentMethod) {
+        Account account = getAccount(session);
+        if (account == null) return "redirect:/login";
+
+        List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
+        if (cartList.isEmpty()) return "redirect:/cart";
+
+        // 1. Tính tổng tiền hàng gốc
+        BigDecimal rawTotal = cartList.stream()
+                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal feeShip = BigDecimal.valueOf(30000); // Mặc định
+        Voucher appliedVoucher = null;
+
+        // 2. TÌM VOUCHER ĐỂ TÍNH LẠI GIẢM GIÁ (Tìm cả chung và riêng)
+        if (voucherCode != null && !voucherCode.trim().isEmpty()) {
+            // Tìm trong bảng Voucher gốc (Bao gồm cả voucher chung và voucher riêng)
+            Optional<Voucher> vOpt = voucherRepo.findAll().stream()
+                    .filter(v -> v.getCode().equals(voucherCode.trim()) && Boolean.TRUE.equals(v.getActive()))
+                    .findFirst();
+
+            if (vOpt.isPresent()) {
+                appliedVoucher = vOpt.get();
+                
+                // Tính số tiền giảm
+                if (appliedVoucher.getDiscountPercent() != null) {
+                    discount = rawTotal.multiply(BigDecimal.valueOf(appliedVoucher.getDiscountPercent()).divide(BigDecimal.valueOf(100)));
+                } else if (appliedVoucher.getDiscountAmount() != null) {
+                    discount = BigDecimal.valueOf(appliedVoucher.getDiscountAmount());
+                }
+
+                // Giảm giá không được vượt quá tiền hàng
+                if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
+                
+                // Kiểm tra miễn phí vận chuyển
+                if (Boolean.TRUE.equals(appliedVoucher.getIsFreeShipping())) {
+                    feeShip = BigDecimal.ZERO;
+                }
+
+                // 3. CẬP NHẬT TRẠNG THÁI VOUCHER (Nếu là voucher riêng của User)
+                Optional<VoucherDetail> vdOpt = voucherDetailRepo.findValidVoucherForAccount(account.getId(), voucherCode.trim());
+                if (vdOpt.isPresent()) {
+                    VoucherDetail vd = vdOpt.get();
+                    vd.setIsUsed(true);
+                    vd.setUsedAt(new Date());
+                    vd.setStatus("USED");
+                    voucherDetailRepo.save(vd);
+                }
+            }
+        }
+
+        // 4. Tính tổng tiền cuối cùng cực kỳ quan trọng
+        BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
 
-        // BƯỚC 1: LƯU ORDER VỚI TRẠNG THÁI "CHƯA THANH TOÁN"
+        // 5. Lưu Đơn hàng với finalTotal đã giảm
         Orders order = new Orders();
         order.setAccount(account);
         order.setCreatedDate(new Date());
-        order.setTotal(finalTotal);
+        order.setTotal(finalTotal); // <--- TIỀN ĐÃ GIẢM LƯU TẠI ĐÂY
         order.setFeeship(feeShip);
         order.setMoneyDiscounted(discount);
-        
-        // 0: Chờ xác nhận/Chưa thanh toán
-        order.setStatus(0); 
-        order.setPaymentStatus(false); 
-        
-        if (appliedVoucherDetail != null) {
-            order.setVoucherCode(appliedVoucherDetail.getVoucher().getCode());
-        }
-
-        // Lưu đơn hàng để sinh ra ID
+        order.setStatus(0);
+        order.setPaymentStatus(false);
+        order.setVoucherCode(voucherCode);
         ordersRepo.save(order);
 
-        // Lưu Order Detail
+        // 6. Lưu Chi tiết đơn hàng
         for (CartDetail item : cartList) {
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
@@ -177,80 +190,35 @@ public class CheckoutController {
             orderDetailRepo.save(detail);
         }
 
-        // Cập nhật Voucher (nếu có)
-        if (appliedVoucherDetail != null) {
-            appliedVoucherDetail.setIsUsed(true);
-            appliedVoucherDetail.setUsedAt(new Date());
-            appliedVoucherDetail.setStatus("USED");
-            voucherDetailRepo.save(appliedVoucherDetail);
-        }
-
-        // Xoá giỏ hàng
         cartDetailRepo.deleteAll(cartList);
 
-        // =====================================================
-        // BƯỚC 2: KIỂM TRA PHƯƠNG THỨC THANH TOÁN
-        // =====================================================
+        // 7. CHUYỂN HƯỚNG THANH TOÁN
         if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
-            // Ép kiểu tổng tiền sang int để truyền vào service VNPAY
-            int total = finalTotal.intValue();
-            
-            // Dùng ID của đơn hàng làm OrderInfo để lát nữa VNPAY trả về mình biết là đơn nào
-            String orderInfo = String.valueOf(order.getId()); 
-            
-            // Gọi hàm tạo URL thanh toán
-            String paymentUrl = vnPayService.createOrder(total, orderInfo, VNPayConfig.vnp_ReturnUrl);
-            
-            // Chuyển hướng người dùng sang trang của VNPAY
+            // Truyền finalTotal (đã giảm) vào VNPay
+            String paymentUrl = vnPayService.createOrder(finalTotal.intValue(), String.valueOf(order.getId()), VNPayConfig.vnp_ReturnUrl);
             return "redirect:" + paymentUrl;
         }
 
-        // Nếu thanh toán COD (Nhận hàng trả tiền) thì chuyển về trang lịch sử đơn hàng luôn
         return "redirect:/orders";
     }
 
-    // =====================================================
-    // 3️⃣ HỨNG KẾT QUẢ TỪ VNPAY TRẢ VỀ
-    // =====================================================
     @GetMapping("/vnpay-return")
-    public String vnpayReturn(HttpServletRequest request, Model model) {
-        // Kiểm tra mã hash và kết quả giao dịch từ VNPayService
+    public String vnpayReturn(HttpServletRequest request) {
         int paymentStatus = vnPayService.orderReturn(request);
-
-        // Lấy lại ID đơn hàng từ orderInfo mà ta đã truyền lúc nãy
-        String orderInfo = request.getParameter("vnp_OrderInfo");
-        Integer orderId = Integer.valueOf(orderInfo);
-        // Tìm lại đơn hàng trong Database
-        Orders order = ordersRepo.findById(orderId).orElse(null);
-
-        if (paymentStatus == 1) { // 1 = GIAO DỊCH THÀNH CÔNG
-            if (order != null) {
-                // Cập nhật trạng thái đã thanh toán
+        String orderIdStr = request.getParameter("vnp_OrderInfo");
+        
+        if (orderIdStr != null) {
+            Orders order = ordersRepo.findById(Integer.valueOf(orderIdStr)).orElse(null);
+            if (order != null && paymentStatus == 1) {
                 order.setPaymentStatus(true);
-                order.setStatus(1); // 1: Đã xác nhận/Đã thanh toán
+                order.setStatus(1);
                 ordersRepo.save(order);
-                
-                // Cộng tiền vào tổng chi tiêu của Account
-                Account acc = order.getAccount();
-                BigDecimal current = acc.getTotalSpending() == null ? BigDecimal.ZERO : acc.getTotalSpending();
-                acc.setTotalSpending(current.add(order.getTotal()));
-                accountRepo.save(acc);
+                return "redirect:/orders?success";
             }
-            // Bạn có thể tạo 1 trang payment-success.html để hiển thị cho đẹp
-            return "redirect:/orders"; 
-            
-        } else { // 0 hoặc -1 = GIAO DỊCH THẤT BẠI / SAI CHỮ KÝ
-            if (order != null) {
-                // Đánh dấu đơn hàng là đã huỷ hoặc thanh toán lỗi
-                order.setStatus(3); // 3: Đã huỷ
-                ordersRepo.save(order);
-            }
-            // Bạn có thể tạo 1 trang payment-fail.html để báo lỗi
-            return "redirect:/cart"; 
         }
+        return "redirect:/cart?error";
     }
 
-    // Hàm phụ trợ lấy thông tin user đang đăng nhập
     private Account getAccount(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
         if (account == null) account = (Account) session.getAttribute("user");
