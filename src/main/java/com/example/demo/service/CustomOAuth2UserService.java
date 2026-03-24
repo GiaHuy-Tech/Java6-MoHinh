@@ -43,51 +43,42 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (optionalAccount.isPresent()) {
             account = optionalAccount.get();
-            // Nếu cần cập nhật thông tin mới nhất từ Google thì set lại ở đây
-            // account.setAvatar(picture);
-            // accountRepo.save(account);
         } else {
             // 3. Tạo account mới nếu chưa tồn tại
             account = new Account();
             account.setEmail(email);
             account.setPassword("google-login"); // Mật khẩu giả định
-            account.setRole(false);              // false = User thường
-            account.setActive(true);             // SỬA: actived -> active
+            account.setRole(false);              // false = ROLE_USER
+            account.setActive(true);             
             
             account.setFullName(name != null ? name : email);
-            account.setPhone(""); // Để trống hoặc chuỗi rỗng
-            account.setGender(null); // Không xác định được từ Google cơ bản
+            account.setPhone(""); 
 
-            // SỬA: Dùng LocalDate thay vì Calendar
+            // FIX LỖI TẠI ĐÂY: Vì DB không cho phép NULL, gán mặc định là true (hoặc false)
+            // User có thể vào trang cá nhân để sửa lại sau.
+            account.setGender(true); 
+
+            // Dùng LocalDate.now() hoặc một ngày mặc định
             account.setBirthDay(LocalDate.now()); 
 
-            // SỬA: setPhoto -> setAvatar
             account.setAvatar(picture);
-
-            // Khởi tạo chi tiêu bằng 0
             account.setTotalSpending(BigDecimal.ZERO);
 
-            /* * LƯU Ý: Không setAddress vì trong Model mới, Address là 
-             * List<Address> (bảng riêng), không phải String.
-             * User sẽ cập nhật địa chỉ sau trong trang cá nhân.
-             */
-
+            // Lưu xuống Database
             accountRepo.save(account);
         }
 
-        // 4. Lưu account vào session để sử dụng trong controller/view
+        // 4. Lưu account vào session để sử dụng trong giao diện
         session.setAttribute("account", account);
 
-        // 5. Cấp quyền (Role) cho Spring Security
-        // Account.role là Boolean: true = ADMIN, false = USER
+        // 5. Cấp quyền (Role)
         String roleName = (Boolean.TRUE.equals(account.getRole())) ? "ROLE_ADMIN" : "ROLE_USER";
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(roleName));
 
-        // 6. Trả về đối tượng User chuẩn của OAuth2
         return new DefaultOAuth2User(
             authorities,
             oAuth2User.getAttributes(),
-            "email" // Key để định danh user (primary key logic của Google user map)
+            "email"
         );
     }
 }
