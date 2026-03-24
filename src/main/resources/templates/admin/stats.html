@@ -197,6 +197,8 @@
         </div>
     </div>
 
+
+
     <div id="page-content-wrapper">
         
         <nav class="top-navbar d-flex justify-content-between align-items-center">
@@ -215,6 +217,32 @@
             </div>
         </nav>
 
+<!-- ===== FORM LỌC ===== -->
+<form method="get" action="/stats" class="mb-3">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+        <label class="text-neon small">Từ ngày:</label>
+        <input type="date" name="fromDate"
+               class="form-control form-control-sm w-auto"
+               th:value="${fromDate}">
+
+        <label class="text-neon small">Đến ngày:</label>
+        <input type="date" name="toDate"
+               class="form-control form-control-sm w-auto"
+               th:value="${toDate}">
+
+        <label class="text-neon small">Năm:</label>
+        <select name="year" class="form-select form-select-sm w-auto">
+            <option th:each="y : ${years}"
+                    th:value="${y}"
+                    th:selected="${y == selectedYear}"
+                    th:text="${y}">
+            </option>
+        </select>
+
+        <button type="submit" class="btn btn-sm btn-info">Lọc</button>
+    </div>
+</form>
         <div class="container-fluid p-4">
             
             <div class="row g-4 mb-4">
@@ -427,6 +455,8 @@
         </select>
     </div>
 </form>
+
+
 
             <div class="row mb-4">
                 <div class="col-12">
