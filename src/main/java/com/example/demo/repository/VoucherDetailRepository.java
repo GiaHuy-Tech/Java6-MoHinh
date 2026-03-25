@@ -1,22 +1,20 @@
 package com.example.demo.repository;
 
+import com.example.demo.model.VoucherDetail;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import com.example.demo.model.VoucherDetail;
-
 import java.util.List;
 import java.util.Optional;
 
 public interface VoucherDetailRepository extends JpaRepository<VoucherDetail, Long> {
-    
-    // Tìm voucher chi tiết của account dựa vào mã voucher, đảm bảo chưa sử dụng
-    @Query("SELECT vd FROM VoucherDetail vd " +
-           "JOIN FETCH vd.voucher v " +
-           "WHERE vd.account.id = :accountId " +
-           "AND v.code = :code " +
+
+    // Sử dụng accountId kiểu Integer nếu model Account của bạn dùng Integer id
+    List<VoucherDetail> findByAccount_IdAndIsUsedFalse(Integer accountId);
+
+    @Query("SELECT vd FROM VoucherDetail vd WHERE vd.account.id = :accountId " +
+           "AND vd.voucher.code = :code " +
            "AND vd.isUsed = false " +
-           "AND v.active = true")
+           "AND (vd.voucher.expiredAt IS NULL OR vd.voucher.expiredAt > CURRENT_TIMESTAMP)")
     Optional<VoucherDetail> findValidVoucherForAccount(@Param("accountId") Integer accountId, @Param("code") String code);
-    List<VoucherDetail> findByAccount_Id(Integer accountId);
 }
