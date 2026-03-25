@@ -221,18 +221,14 @@
 <form method="get" action="/stats" class="mb-3">
     <div class="d-flex align-items-center gap-2 flex-wrap">
 
-        <label class="text-neon small">Từ ngày:</label>
-        <input type="date" name="fromDate"
-               class="form-control form-control-sm w-auto"
-               th:value="${fromDate}">
+        <label>Từ ngày:</label>
+        <input type="date" name="fromDate" th:value="${fromDate}">
 
-        <label class="text-neon small">Đến ngày:</label>
-        <input type="date" name="toDate"
-               class="form-control form-control-sm w-auto"
-               th:value="${toDate}">
+        <label>Đến ngày:</label>
+        <input type="date" name="toDate" th:value="${toDate}">
 
-        <label class="text-neon small">Năm:</label>
-        <select name="year" class="form-select form-select-sm w-auto">
+        <label>Năm:</label>
+        <select name="year">
             <option th:each="y : ${years}"
                     th:value="${y}"
                     th:selected="${y == selectedYear}"
@@ -240,7 +236,7 @@
             </option>
         </select>
 
-        <button type="submit" class="btn btn-sm btn-info">Lọc</button>
+        <button type="submit">Lọc</button>
     </div>
 </form>
         <div class="container-fluid p-4">

@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,12 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Products;
-import com.example.demo.repository.AccountRepository;
-import com.example.demo.repository.CategoryRepository;
-import com.example.demo.repository.LikeRepository;
-import com.example.demo.repository.MembershipRepository;
-import com.example.demo.repository.OrdersRepository;
-import com.example.demo.repository.ProductRepository;
+import com.example.demo.repository.*;
 
 @Controller
 public class StatsController {
@@ -36,15 +32,18 @@ public class StatsController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate) {
 
-        int currentYear = (year != null) ? year : LocalDate.now().getYear();
+        // 🔥 FIX DATETIME
+        LocalDateTime from = (fromDate != null && !fromDate.isEmpty())
+                ? LocalDate.parse(fromDate).atStartOfDay()
+                : null;
 
-        LocalDate from = (fromDate != null && !fromDate.isEmpty())
-                ? LocalDate.parse(fromDate) : null;
-
-        LocalDate to = (toDate != null && !toDate.isEmpty())
-                ? LocalDate.parse(toDate) : null;
+        LocalDateTime to = (toDate != null && !toDate.isEmpty())
+                ? LocalDate.parse(toDate).plusDays(1).atStartOfDay()
+                : null;
 
         boolean isFilterByDate = (from != null || to != null);
+
+        int currentYear = (year != null) ? year : LocalDate.now().getYear();
 
         model.addAttribute("selectedYear", currentYear);
         model.addAttribute("fromDate", fromDate);
@@ -57,13 +56,15 @@ public class StatsController {
         }
         model.addAttribute("years", years);
 
-        // ===== COUNT =====
+        // ===== TOTAL ORDERS =====
         Long totalOrders = isFilterByDate
                 ? ordersRepo.countCompletedOrdersByDate(from, to)
                 : ordersRepo.countOrdersPerMonthByYear(currentYear)
                     .stream().mapToLong(r -> ((Number) r[1]).longValue()).sum();
 
         model.addAttribute("totalOrders", totalOrders != null ? totalOrders : 0);
+
+        // ===== BASIC =====
         model.addAttribute("totalProducts", productRepo.count());
         model.addAttribute("totalAccounts", accountRepo.count());
         model.addAttribute("totalCategories", categoryRepo.count());
@@ -86,18 +87,19 @@ public class StatsController {
 
         for (Object[] row : revenueByCategory) {
             chartLabels.add((String) row[0]);
-            chartData.add(((Number) row[1]).longValue());
+            chartData.add(row[1] != null ? ((Number) row[1]).longValue() : 0L);
         }
 
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartData", chartData);
 
-        // ===== MONTH CHART =====
+        // ===== MONTHLY REVENUE =====
         List<Object[]> revenueByMonth = isFilterByDate
                 ? ordersRepo.getRevenueByMonthByDate(from, to)
                 : ordersRepo.getRevenueByMonth(currentYear);
 
         List<Long> monthlyRevenueData = new ArrayList<>(Collections.nCopies(12, 0L));
+
         for (Object[] row : revenueByMonth) {
             int m = ((Number) row[0]).intValue();
             monthlyRevenueData.set(m - 1, ((Number) row[1]).longValue());
@@ -122,6 +124,7 @@ public class StatsController {
                 : ordersRepo.countOrdersPerMonthByYear(currentYear);
 
         List<Long> orderCounts = new ArrayList<>(Collections.nCopies(12, 0L));
+
         for (Object[] row : ordersPerMonth) {
             int m = ((Number) row[0]).intValue();
             orderCounts.set(m - 1, ((Number) row[1]).longValue());

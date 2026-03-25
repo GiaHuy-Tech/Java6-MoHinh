@@ -1,35 +1,29 @@
 package com.example.demo.repository;
 
-import java.time.LocalDate;
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 import com.example.demo.model.Orders;
 import com.example.demo.model.Products;
 
-@Repository
 public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
-    // ===== FIND =====
-    List<Orders> findByAccount_IdOrderByCreatedDateDesc(Integer accountId);
-    List<Orders> findByAccount_IdOrderByCreatedDateAsc(Integer accountId);
-
-    // ===== COUNT =====
+    // ===== COUNT COMPLETED =====
     @Query("""
         SELECT COUNT(o)
         FROM Orders o
         WHERE o.status = 3
         AND (:from IS NULL OR o.createdDate >= :from)
-        AND (:to IS NULL OR o.createdDate <= :to)
+        AND (:to IS NULL OR o.createdDate < :to)
     """)
-    Long countCompletedOrdersByDate(@Param("from") LocalDate from,
-                                   @Param("to") LocalDate to);
+    Long countCompletedOrdersByDate(@Param("from") LocalDateTime from,
+                                   @Param("to") LocalDateTime to);
 
     // ===== REVENUE CATEGORY =====
     @Query("""
@@ -51,10 +45,11 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
         JOIN p.category c
         WHERE o.status = 3
         AND (:from IS NULL OR o.createdDate >= :from)
-        AND (:to IS NULL OR o.createdDate <= :to)
+        AND (:to IS NULL OR o.createdDate < :to)
         GROUP BY c.name
     """)
-    List<Object[]> getRevenueByCategoryByDate(LocalDate from, LocalDate to);
+    List<Object[]> getRevenueByCategoryByDate(@Param("from") LocalDateTime from,
+                                              @Param("to") LocalDateTime to);
 
     // ===== REVENUE MONTH =====
     @Query("""
@@ -68,19 +63,21 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> getRevenueByMonth(@Param("year") int year);
 
+    // 🔥 FIX DATE RANGE
     @Query("""
         SELECT FUNCTION('MONTH', o.createdDate), SUM(d.quantity * d.price)
         FROM OrderDetail d
         JOIN d.order o
         WHERE o.status = 3
         AND (:from IS NULL OR o.createdDate >= :from)
-        AND (:to IS NULL OR o.createdDate <= :to)
+        AND (:to IS NULL OR o.createdDate < :to)
         GROUP BY FUNCTION('MONTH', o.createdDate)
         ORDER BY FUNCTION('MONTH', o.createdDate)
     """)
-    List<Object[]> getRevenueByMonthByDate(LocalDate from, LocalDate to);
+    List<Object[]> getRevenueByMonthByDate(@Param("from") LocalDateTime from,
+                                           @Param("to") LocalDateTime to);
 
-    // ===== TOTAL =====
+    // ===== TOTAL REVENUE =====
     @Query("""
         SELECT SUM(d.quantity * d.price)
         FROM OrderDetail d
@@ -95,11 +92,12 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
         JOIN d.order o
         WHERE o.status = 3
         AND (:from IS NULL OR o.createdDate >= :from)
-        AND (:to IS NULL OR o.createdDate <= :to)
+        AND (:to IS NULL OR o.createdDate < :to)
     """)
-    Long getTotalRevenueByDate(LocalDate from, LocalDate to);
+    Long getTotalRevenueByDate(@Param("from") LocalDateTime from,
+                               @Param("to") LocalDateTime to);
 
-    // ===== TOP =====
+    // ===== TOP SELLING =====
     @Query("""
         SELECT p
         FROM OrderDetail d
@@ -122,14 +120,25 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> countOrdersPerMonthByYear(@Param("year") int year);
 
+    // 🔥 FIX DATE RANGE
     @Query("""
         SELECT FUNCTION('MONTH', o.createdDate), COUNT(o)
         FROM Orders o
         WHERE o.status = 3
         AND (:from IS NULL OR o.createdDate >= :from)
-        AND (:to IS NULL OR o.createdDate <= :to)
+        AND (:to IS NULL OR o.createdDate < :to)
         GROUP BY FUNCTION('MONTH', o.createdDate)
         ORDER BY FUNCTION('MONTH', o.createdDate)
     """)
-    List<Object[]> countOrdersPerMonthByDate(LocalDate from, LocalDate to);
+    List<Object[]> countOrdersPerMonthByDate(@Param("from") LocalDateTime from,
+                                             @Param("to") LocalDateTime to);
+
+    // ===== SUM ACCOUNT =====
+    @Query("""
+        SELECT SUM(o.total)
+        FROM Orders o
+        WHERE o.account.id = :accountId
+        AND o.status = 4
+    """)
+    BigDecimal sumTotalByAccountAndStatus(@Param("accountId") Integer accountId);
 }
