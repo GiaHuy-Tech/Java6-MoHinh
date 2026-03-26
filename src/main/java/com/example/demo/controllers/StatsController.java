@@ -55,7 +55,7 @@ public class StatsController {
             years.add(i);
         }
         model.addAttribute("years", years);
-
+        //
         // ===== TOTAL ORDERS =====
         Long totalOrders = isFilterByDate
                 ? ordersRepo.countCompletedOrdersByDate(from, to)

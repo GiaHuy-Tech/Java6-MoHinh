@@ -39,10 +39,10 @@ public class AccountController {
 
     @GetMapping
     public String accountPage(Model model) {
-        Account sessionAcc = (Account) session.getAttribute("account");
-        if (sessionAcc == null) sessionAcc = (Account) session.getAttribute("user");
+        Account sessionAcc = getSessionAccount();
         if (sessionAcc == null) return "redirect:/login";
 
+        // Lấy dữ liệu mới nhất từ DB
         Account account = accountRepo.findById(sessionAcc.getId()).orElse(null);
         if (account == null) return "redirect:/login";
 
@@ -50,7 +50,7 @@ public class AccountController {
         BigDecimal totalSpent = ordersRepo.sumTotalByAccountAndStatus(account.getId());
         if (totalSpent == null) totalSpent = BigDecimal.ZERO;
 
-        // Cập nhật lại vào Database để đồng bộ dữ liệu
+        // Cập nhật lại vào object để hiển thị và lưu DB
         account.setTotalSpending(totalSpent);
 
         // 2. XÁC ĐỊNH HẠNG DỰA TRÊN TỔNG CHI
@@ -60,17 +60,16 @@ public class AccountController {
         else if (totalSpent.compareTo(new BigDecimal("50000000")) >= 0) membershipName = "Vàng";
         else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) membershipName = "Bạc";
 
-        // 3. CẬP NHẬT OBJECT MEMBERSHIP VÀO ACCOUNT
+        // 3. CẬP NHẬT MEMBERSHIP VÀO DATABASE
         Membership membership = membershipRepo.findByName(membershipName).orElse(null);
         if (membership != null) {
             account.setMembership(membership);
         }
-        
-        // Lưu lại thay đổi mới nhất vào DB
         accountRepo.save(account);
 
-        // Đẩy dữ liệu ra View
+        // 4. CHUẨN BỊ DỮ LIỆU RA VIEW
         Address defaultAddress = addressRepo.findByAccount_IdAndIsDefaultTrue(account.getId()).orElse(null);
+        
         model.addAttribute("account", account);
         model.addAttribute("defaultAddress", defaultAddress);
         model.addAttribute("membershipName", membershipName);
@@ -138,6 +137,7 @@ public class AccountController {
         return "redirect:/account";
     }
 
+    // --- HÀM PHỤ TRỢ ---
     private String updateAccountField(java.util.function.Consumer<Account> updater, RedirectAttributes redirect, String fieldName) {
         Account sessionAcc = getSessionAccount();
         if (sessionAcc == null) return "redirect:/login";
