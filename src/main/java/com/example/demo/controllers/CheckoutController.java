@@ -63,12 +63,15 @@ public class CheckoutController {
         availableVouchers.addAll(publicVouchers);
 
         // Lọc theo điều kiện: Còn hạn + Đủ giá trị đơn hàng tối thiểu
+        LocalDateTime now = LocalDateTime.now(); // Lấy thời gian hiện tại
+
         List<Voucher> savedVouchers = availableVouchers.stream()
                 .filter(v -> v != null && Boolean.TRUE.equals(v.getActive()))
+                // THÊM DÒNG NÀY: Kiểm tra nếu expiredAt null thì coi như vô hạn, hoặc phải còn hạn
+                .filter(v -> v.getExpiredAt() == null || v.getExpiredAt().isAfter(now)) 
                 .filter(v -> v.getMinOrderValue() == null || rawTotal.doubleValue() >= v.getMinOrderValue())
-                .distinct() // Tránh trùng lặp mã
+                .distinct()
                 .collect(Collectors.toList());
-
         model.addAttribute("savedVouchers", savedVouchers);
 
         // 3. XỬ LÝ ÁP DỤNG VOUCHER
