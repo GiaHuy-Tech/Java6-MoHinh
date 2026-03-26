@@ -476,30 +476,6 @@ body {
 	border-radius: 8px;
 }
 
-/* FLY EFFECT */
-.fly-item {
-	position: fixed;
-	z-index: 9999;
-	pointer-events: none;
-	transition: all 0.8s;
-	border-radius: 50%;
-	object-fit: contain;
-	background: #fff;
-	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.badge-count {
-	position: absolute;
-	top: -5px;
-	right: -8px;
-	background: #ff4757;
-	color: #fff;
-	font-size: 0.7rem;
-	padding: 2px 6px;
-	border-radius: 50%;
-	font-weight: 900;
-}
-
 footer {
 	background: var(--bg-nav);
 	border-top: 1px solid var(--border-color);
@@ -522,6 +498,30 @@ footer .form-control:focus {
 	border-color: var(--text-main);
 	color: #fff;
 	box-shadow: none;
+}
+
+/* FLY EFFECT */
+.fly-item {
+	position: fixed;
+	z-index: 9999;
+	pointer-events: none;
+	transition: all 0.8s;
+	border-radius: 50%;
+	object-fit: contain;
+	background: #fff;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.badge-count {
+	position: absolute;
+	top: -5px;
+	right: -8px;
+	background: #ff4757;
+	color: #fff;
+	font-size: 0.7rem;
+	padding: 2px 6px;
+	border-radius: 50%;
+	font-weight: 900;
 }
 </style>
 </head>
@@ -702,7 +702,7 @@ footer .form-control:focus {
 	</div>
 
 	<!-- Voucher Banner -->
-	<div class="container voucher-section py-5">
+	<div class="container voucher-section">
 		<a href="/voucher" class="voucher-banner shadow-lg" id="voucherTilt">
 			<div class="v-decor"
 				style="width: 200px; height: 200px; top: -100px; left: -50px;"></div>
@@ -765,7 +765,7 @@ footer .form-control:focus {
 						<h6 class="product-info-name" th:text="${p.name}">Tên sản
 							phẩm</h6>
 						<div class="product-meta">
-							<i class="bi bi-plus-lg"></i> Danh mục: <span
+							<i class="bi bi-plus-lg"></i> Hãng: <span
 								th:text="${p.category?.name}">BRAND</span>
 						</div>
 						<div class="product-meta">

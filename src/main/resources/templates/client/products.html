@@ -470,8 +470,25 @@ body {
 footer {
 	background: var(--bg-nav);
 	border-top: 1px solid var(--border-color);
-	padding: 50px 0;
-	margin-top: 100px;
+	color: var(--text-light);
+}
+
+footer a {
+	color: var(--text-light);
+	opacity: 0.7;
+	transition: 0.3s;
+}
+
+footer a:hover {
+	color: var(--text-main);
+	opacity: 1;
+}
+
+footer .form-control:focus {
+	background: #111;
+	border-color: var(--text-main);
+	color: #fff;
+	box-shadow: none;
 }
 
 .badge-count {
@@ -494,128 +511,6 @@ footer {
 	border-radius: 50%;
 	object-fit: contain;
 	background: #fff;
-}
-
-/* QUICK VIEW MODAL RE-LAYOUT */
-#quickViewModal .modal-content {
-	background: var(--bg-card); /* Đồng bộ màu nền card từ index */
-	border: 1px solid var(--border-color);
-	border-radius: 20px;
-	overflow: hidden;
-}
-
-#quickViewModal .modal-header {
-	background: linear-gradient(90deg, var(--bg-nav), var(--bg-card));
-	border-bottom: 1px solid var(--border-color);
-	padding: 1rem 1.5rem;
-}
-
-#quickViewModal .modal-title {
-	color: var(--text-main);
-	font-size: 1.1rem;
-	letter-spacing: 1px;
-}
-
-/* Khung chứa ảnh bên trái */
-.qv-img-container {
-	background: #fff;
-	border-radius: 12px;
-	height: 100%;
-	min-height: 380px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 20px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.quickview-img-main {
-	max-width: 100%;
-	max-height: 340px;
-	object-fit: contain;
-}
-
-/* Cột thông tin bên phải */
-.qv-info-column {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	padding-left: 15px;
-}
-
-#qv-name {
-	color: #fff;
-	font-size: 1.6rem;
-	line-height: 1.3;
-	margin-bottom: 10px;
-}
-
-.qv-price {
-	color: var(--accent-red);
-	font-size: 1.8rem;
-	font-weight: 900;
-	margin-bottom: 20px;
-}
-
-.qv-meta {
-	font-size: 0.95rem;
-	margin-bottom: 8px;
-	color: var(--text-light);
-}
-
-.qv-meta b {
-	color: var(--text-main);
-	font-weight: 600;
-}
-
-.qv-desc {
-	font-size: 0.9rem;
-	color: var(--text-light);
-	opacity: 0.8;
-	line-height: 1.6;
-	max-height: 150px;
-	overflow-y: auto;
-	margin-top: 15px;
-}
-
-/* Tùy chỉnh nút bấm */
-#qv-btn-action {
-	border-radius: 50px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-	padding: 12px;
-	transition: 0.3s;
-	border: none;
-}
-
-#qv-btn-action:hover {
-	filter: brightness(1.2);
-	transform: translateY(-2px);
-	box-shadow: 0 5px 15px rgba(102, 252, 241, 0.3);
-}
-
-footer {
-	background: var(--bg-nav);
-	border-top: 1px solid var(--border-color);
-	color: var(--text-light);
-}
-
-footer a {
-	color: var(--text-light);
-	opacity: 0.7;
-	transition: 0.3s;
-}
-
-footer a:hover {
-	color: var(--text-main);
-	opacity: 1;
-}
-
-footer .form-control:focus {
-	background: #111;
-	border-color: var(--text-main);
-	color: #fff;
-	box-shadow: none;
 }
 </style>
 </head>
@@ -666,7 +561,7 @@ footer .form-control:focus {
 															class="d-flex align-items-center gap-3 p-2 border rounded text-decoration-none hover-bg"><img
 															th:src="${p.mainImage}"
 															style="width: 55px; height: 55px; background: #fff; border-radius: 5px; object-fit: contain;">
-															<div class="overflow-hidden">
+														<div class="overflow-hidden">
 																<div class="small fw-bold text-truncate text-light"
 																	th:text="${p.name}">Product</div>
 																<div class="text-danger small fw-bold"
@@ -909,7 +804,7 @@ footer .form-control:focus {
 								</div>
 								<div class="product-meta">
 									<i class="bi bi-plus-lg"></i> Trọng lượng: <span
-										th:text="${p.weight + 'kg'}">0kg</span>
+										th:text="${p.weight != null ? '1:' + p.weight : '1:18'}">1:18</span>
 								</div>
 								<span class="product-price-new"
 									th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
@@ -964,51 +859,42 @@ footer .form-control:focus {
 	</div>
 
 	<!-- Modal Auth & Quick View -->
+	<div class="modal fade" id="authModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered"
+			style="max-width: 400px;">
+			<div class="modal-content modal-custom-content">
+				<div class="modal-custom-icon">!</div>
+				<div class="modal-custom-text">Bạn cần đăng nhập để thực hiện
+					giao dịch</div>
+				<button class="btn-custom-ok shadow" id="btnAuthOk">OK</button>
+			</div>
+		</div>
+	</div>
 	<div class="modal fade" id="quickViewModal" tabindex="-1">
-		<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
 			<div class="modal-content border-0 shadow-lg">
-				<div class="modal-header">
-					<h5 class="modal-title fw-bold">
-						<i class="bi bi-box-seam me-2"></i>THÔNG TIN SẢN PHẨM CHI TIẾT
-					</h5>
-					<button type="button" class="btn-close btn-close-white"
-						data-bs-dismiss="modal"></button>
+				<div class="modal-header modal-header-blue">
+					<h5 class="modal-title fw-bold">THÔNG TIN SẢN PHẨM</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<div class="modal-body p-4 p-lg-5">
-					<div class="row g-4">
-						<div class="col-lg-7">
-							<div class="qv-img-container">
-								<img id="qv-img-main" class="quickview-img-main" src=""
-									alt="Product Image">
-							</div>
+				<div class="modal-body p-4">
+					<div class="row">
+						<div class="col-md-6">
+							<img id="qv-img-main" class="quickview-img-main" src="">
 						</div>
-
-						<div class="col-lg-5 qv-info-column">
-							<h2 id="qv-name" class="fw-bold"></h2>
+						<div class="col-md-6">
+							<h4 id="qv-name" class="fw-bold mb-2"></h4>
 							<div id="qv-price" class="qv-price"></div>
-
-							<div class="qv-meta-box p-3 rounded-3"
-								style="background: rgba(255, 255, 255, 0.05);">
-								<div class="qv-meta">
-									<b>Số lượng:</b> <span id="qv-quantity" class="text-white"></span>
-								</div>
-								<div class="qv-meta">
-									<b>Tình trạng:</b> <span id="qv-status"></span>
-								</div>
+							<div class="qv-meta">
+								<b>Nhà cung cấp:</b> <span id="qv-brand"></span>
 							</div>
-
-							<hr class="my-3 border-secondary opacity-25">
-
-							<div class="qv-description-wrap">
-								<p class="small text-main fw-bold mb-2">MÔ TẢ SẢN PHẨM:</p>
-								<p id="qv-desc" class="qv-desc"></p>
+							<div class="qv-meta">
+								<b>Tình trạng:</b> <span id="qv-status"></span>
 							</div>
-
-							<div class="mt-auto pt-4">
-								<button id="qv-btn-action"
-									class="btn btn-info w-100 fw-bold text-dark shadow-sm">
-								</button>
-							</div>
+							<hr class="my-3 border-secondary">
+							<p id="qv-desc" class="qv-desc"></p>
+							<button id="qv-btn-action"
+								class="btn btn-info w-100 fw-bold text-white py-2 mt-4"></button>
 						</div>
 					</div>
 				</div>
@@ -1083,6 +969,7 @@ footer .form-control:focus {
 			</div>
 		</div>
 	</footer>
+
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
@@ -1097,7 +984,7 @@ footer .form-control:focus {
             document.getElementById('qv-name').innerText = p.name;
             document.getElementById('qv-price').innerText = new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
             document.getElementById('qv-desc').innerText = p.description || 'Chưa có mô tả.';
-            document.getElementById('qv-quantity').innerText = p.quantity + " sản phẩm";
+            document.getElementById('qv-brand').innerText = p.category ? p.category.name : 'Đang cập nhật';
             document.getElementById('qv-img-main').src = p.mainImage;
             const statusEl = document.getElementById('qv-status'); const btnAction = document.getElementById('qv-btn-action');
             if(p.quantity > 0) { statusEl.innerText = 'Còn hàng'; statusEl.className = 'text-success fw-bold'; btnAction.innerText = 'THÊM VÀO GIỎ'; btnAction.disabled = false; btnAction.onclick = () => flyToCart(null, p.id); }
