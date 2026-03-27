@@ -127,35 +127,26 @@ public class CheckoutController {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal feeShip = BigDecimal.valueOf(30000); // Mặc định
+        BigDecimal feeShip = BigDecimal.valueOf(30000); // Phí mặc định
         Voucher appliedVoucher = null;
 
-        // 2. TÌM VOUCHER ĐỂ TÍNH LẠI GIẢM GIÁ (Tìm cả chung và riêng)
+        // 2. TÌM VOUCHER ĐỂ TÍNH LẠI GIẢM GIÁ
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
-            // Tìm trong bảng Voucher gốc (Bao gồm cả voucher chung và voucher riêng)
             Optional<Voucher> vOpt = voucherRepo.findAll().stream()
                     .filter(v -> v.getCode().equals(voucherCode.trim()) && Boolean.TRUE.equals(v.getActive()))
                     .findFirst();
 
             if (vOpt.isPresent()) {
                 appliedVoucher = vOpt.get();
-                
-                // Tính số tiền giảm
                 if (appliedVoucher.getDiscountPercent() != null) {
                     discount = rawTotal.multiply(BigDecimal.valueOf(appliedVoucher.getDiscountPercent()).divide(BigDecimal.valueOf(100)));
                 } else if (appliedVoucher.getDiscountAmount() != null) {
                     discount = BigDecimal.valueOf(appliedVoucher.getDiscountAmount());
                 }
-
-                // Giảm giá không được vượt quá tiền hàng
                 if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
-                
-                // Kiểm tra miễn phí vận chuyển
-                if (Boolean.TRUE.equals(appliedVoucher.getIsFreeShipping())) {
-                    feeShip = BigDecimal.ZERO;
-                }
+                if (Boolean.TRUE.equals(appliedVoucher.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
 
-                // 3. CẬP NHẬT TRẠNG THÁI VOUCHER (Nếu là voucher riêng của User)
+                // Cập nhật trạng thái voucher riêng (nếu có)
                 Optional<VoucherDetail> vdOpt = voucherDetailRepo.findValidVoucherForAccount(account.getId(), voucherCode.trim());
                 if (vdOpt.isPresent()) {
                     VoucherDetail vd = vdOpt.get();
@@ -167,21 +158,38 @@ public class CheckoutController {
             }
         }
 
-        // 4. Tính tổng tiền cuối cùng cực kỳ quan trọng
+        // 3. Tính tổng tiền cuối cùng
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
 
-        // 5. Lưu Đơn hàng với finalTotal đã giảm
+        // 4. TÌM ĐỊA CHỈ TỪ DATABASE (Phần quan trọng nhất bị thiếu)
+        // Tìm địa chỉ và đảm bảo địa chỉ này thuộc về account đang đăng nhập
+        Address selectedAddress = addressRepo.findById(addressId)
+                .filter(a -> a.getAccount().getId().equals(account.getId()))
+                .orElse(null);
+
+        // 5. LƯU ĐƠN HÀNG
         Orders order = new Orders();
         order.setAccount(account);
         order.setCreatedDate(new Date());
-        order.setTotal(finalTotal); // <--- TIỀN ĐÃ GIẢM LƯU TẠI ĐÂY
+        
+        // GÁN ĐỊA CHỈ VÀO ĐƠN HÀNG
+        order.setAddress(selectedAddress); 
+        
+        // Gán số điện thoại (Ưu tiên lấy từ địa chỉ giao hàng)
+        if (selectedAddress != null) {
+            order.setPhone(selectedAddress.getRecipientPhone());
+        }
+
+        order.setTotal(finalTotal);
         order.setFeeship(feeShip);
         order.setMoneyDiscounted(discount);
-        order.setStatus(0);
+        order.setStatus(0); // Chờ xác nhận
         order.setPaymentStatus(false);
         order.setVoucherCode(voucherCode);
-        ordersRepo.save(order);
+        order.setPaymentMethod(paymentMethod);
+        
+        ordersRepo.save(order); // Lưu order để lấy được ID cho OrderDetail
 
         // 6. Lưu Chi tiết đơn hàng
         for (CartDetail item : cartList) {
@@ -193,11 +201,11 @@ public class CheckoutController {
             orderDetailRepo.save(detail);
         }
 
+        // Xóa giỏ hàng sau khi đặt hàng thành công
         cartDetailRepo.deleteAll(cartList);
 
         // 7. CHUYỂN HƯỚNG THANH TOÁN
         if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
-            // Truyền finalTotal (đã giảm) vào VNPay
             String paymentUrl = vnPayService.createOrder(finalTotal.intValue(), String.valueOf(order.getId()), VNPayConfig.vnp_ReturnUrl);
             return "redirect:" + paymentUrl;
         }
