@@ -1,10 +1,12 @@
 package com.example.demo.controllers;
 
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.*;
@@ -24,19 +26,20 @@ public class DetailController {
     // ================= PRODUCT DETAIL =================
     @GetMapping("/product-detail/{id}")
     public String productDetail(@PathVariable Integer id, Model model) {
-        // 1. Tìm sản phẩm
-        Products product = productRepo.findById(id).orElse(null);
+
+        // 🔥 FIX: dùng JOIN FETCH
+        Products product = productRepo.findByIdWithImages(id);
         if (product == null) return "redirect:/products";
 
         model.addAttribute("product", product);
 
-        // 2. Load ảnh phụ
+        // Load ảnh phụ
         List<ProductImage> images = productImageRepo.findByProduct_Id(id);
         model.addAttribute("extraImages", images);
 
-        // 3. Load TẤT CẢ đánh giá của sản phẩm này từ mọi người dùng
-        // Logic đánh giá đã được chuyển sang OrderController
-        model.addAttribute("comments", commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
+        // Load comment
+        model.addAttribute("comments",
+                commentRepo.findByProduct_IdOrderByCreatedAtDesc(id));
 
         return "client/product-detail";
     }
@@ -44,8 +47,8 @@ public class DetailController {
     // ================= ADD TO CART =================
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam Integer productId,
-                            @RequestParam Integer quantity,
-                            RedirectAttributes redirectAttributes) {
+                           @RequestParam Integer quantity,
+                           RedirectAttributes redirectAttributes) {
 
         Account account = (Account) session.getAttribute("account");
         if (account == null) return "redirect:/login";

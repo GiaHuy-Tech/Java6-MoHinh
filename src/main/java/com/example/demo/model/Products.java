@@ -78,20 +78,33 @@ public class Products {
     public String getMainImage() {
         if (images != null && !images.isEmpty()) {
 
-            // ưu tiên thumbnail trước
             for (ProductImage img : images) {
                 if (Boolean.TRUE.equals(img.getThumbnail()) && img.getImage() != null) {
-                    return img.getImage();
+                    return buildImagePath(img.getImage());
                 }
             }
 
-            // nếu không có thumbnail thì lấy ảnh đầu tiên
             if (images.get(0).getImage() != null) {
-                return images.get(0).getImage();
+                return buildImagePath(images.get(0).getImage());
             }
         }
 
-        return "no-image.png";
+        return "/images/products/no-image.png";
+    }
+
+    // 🔥 Hàm xử lý path
+    private String buildImagePath(String path) {
+        if (path == null || path.isEmpty()) {
+            return "/images/products/no-image.png";
+        }
+
+        // nếu DB đã có /images/... thì dùng luôn
+        if (path.startsWith("/images/")) {
+            return path;
+        }
+
+        // nếu chỉ là filename → thêm prefix
+        return "/images/products/" + path;
     }
 
     // Nếu bạn cần lấy tên category
