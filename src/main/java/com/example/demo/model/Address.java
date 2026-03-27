@@ -50,19 +50,10 @@ public class Address {
 
     // --- Đã sửa: Nối chuỗi để tạo địa chỉ hoàn chỉnh ---
     public String getFullAddress() {
-        String fullAddress = "";
-        
-        if (detail != null && !detail.trim().isEmpty()) {
-            fullAddress += detail.trim();
-        }
-        if (district != null && !district.trim().isEmpty()) {
-            fullAddress += (fullAddress.isEmpty() ? "" : ", ") + district.trim();
-        }
-        if (province != null && !province.trim().isEmpty()) {
-            fullAddress += (fullAddress.isEmpty() ? "" : ", ") + province.trim();
-        }
-        
-        // Nếu tất cả đều trống thì trả về câu thông báo mặc định
-        return fullAddress.isEmpty() ? "Chưa có thông tin chi tiết" : fullAddress;
+        StringBuilder sb = new StringBuilder();
+        if (detail != null && !detail.isBlank()) sb.append(detail.trim());
+        if (district != null && !district.isBlank()) sb.append((sb.length() > 0 ? ", " : "") + district.trim());
+        if (province != null && !province.isBlank()) sb.append((sb.length() > 0 ? ", " : "") + province.trim());
+        return sb.length() > 0 ? sb.toString() : "Chưa có chi tiết địa chỉ";
     }
 }
