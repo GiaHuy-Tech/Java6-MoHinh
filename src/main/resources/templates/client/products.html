@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +10,6 @@
         <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     </th:block>
 
-    <!-- SCRIPT KHÓA THEME -->
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -38,7 +36,7 @@
         
         body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; }
 
-        /* NAV\BAR */
+        /* NAVBAR */
         .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 10px 0; box-shadow: 0 2px 10px var(--shadow); }
         .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
         .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; text-decoration: none; border:none; background:none; cursor: pointer; }
@@ -91,6 +89,7 @@
         .btn-action:hover { background: var(--text-main); color: #000; border-color: var(--text-main); }
         .btn-add-to-cart-icon { flex-grow: 1; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-light); height: 42px; border-radius: 6px; font-size: 1.2rem; }
         .product-wishlist.active { color: #ff2e63 !important; }
+        .stock-label { position: absolute; top: 10px; right: 10px; background: var(--accent-red); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; z-index: 5; }
 
         /* --- MODERN PAGINATION --- */
         .custom-pagination .page-link { 
@@ -110,8 +109,7 @@
         /* MODALS & SEARCH FIXES */
         .modal-content { background: var(--bg-card); color: var(--text-light); border: 1px solid var(--border-color); backdrop-filter: blur(15px); border-radius: 20px; box-shadow: 0 10px 30px var(--shadow); }
         .modal-header { border-bottom: 1px solid var(--border-color); }
-        .btn-close { filter: invert(var(--close-inv, 1)); }
-        [data-theme="light"] { --close-inv: 0; }
+        .btn-close { filter: invert(var(--close-inv, 1)); }[data-theme="light"] { --close-inv: 0; }
         .search-results { position: absolute; top: 100%; left: 0; width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; z-index: 1000; display: none; margin-top: 5px; max-height: 400px; overflow-y: auto; }
         .search-item { display: flex; align-items: center; gap: 15px; padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.2s; color: var(--text-light); }
         .search-item:hover { background: var(--card-hover); color: var(--text-main); }
@@ -122,7 +120,7 @@
 </head>
 <body>
 
-<input type="hidden" id="isLoggedIn" th:value="${session.account != null ? 'true' : 'false'}">
+<input type="hidden" id="isLoggedIn" th:value="${user != null ? 'true' : 'false'}">
 
 <!-- Navbar -->
 <nav class="top-navbar">
@@ -138,7 +136,10 @@
                                 <span class="fw-bold mb-3 d-block" style="color: var(--text-main)">DANH MỤC</span>
                                 <div class="d-flex flex-column" id="categoryList">
                                     <th:block th:each="cat : ${categories}">
-                                        <div class="mega-cat-link" th:attr="data-target='cat-content-' + ${cat.id}"><img th:src="${cat.image != null ? '/images/categories/' + cat.image : '/images/no-image.png'}" onerror="this.src='/images/no-image.png'" width="30" height="30" style="object-fit:contain; background:#fff; border-radius:4px; margin-right:10px;"><span th:text="${cat.name}">Category</span></div>
+                                        <div class="mega-cat-link" th:attr="data-target='cat-content-' + ${cat.id}">
+                                            <img th:src="@{${cat.image != null and cat.image.startsWith('http') ? cat.image : '/images/categories/' + cat.image}}" onerror="this.onerror=null; this.src='/images/no-image.png'" width="30" height="30" style="object-fit:contain; background:#fff; border-radius:4px; margin-right:10px;">
+                                            <span th:text="${cat.name}">Category</span>
+                                        </div>
                                     </th:block>
                                 </div>
                             </div>
@@ -150,7 +151,8 @@
                                             <th:block th:each="p, i : ${products}" th:if="${p.category?.id == cat.id and i.index < 6}">
                                                 <div class="col-md-4">
                                                     <a th:href="@{'/product-detail/' + ${p.id}}" class="d-flex align-items-center gap-3 p-2 border rounded text-decoration-none hover-bg">
-                                                        <img th:src="${p.mainImage.startsWith('http') ? p.mainImage : '/images/products/' + p.mainImage}" onerror="this.src='/images/no-image.png'" style="width:50px; height:50px; background:#fff; border-radius:5px; object-fit:contain;">
+                                                        <!-- Đã fix đường dẫn ảnh từ Model -->
+                                                        <img th:src="${p.mainImage}" onerror="this.onerror=null; this.src='/images/no-image.png'" style="width:50px; height:50px; background:#fff; border-radius:5px; object-fit:contain;">
                                                         <div class="overflow-hidden">
                                                             <div class="small fw-bold text-truncate text-light" th:text="${p.name}">Product</div>
                                                             <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></div>
@@ -183,13 +185,23 @@
                     <div class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg" style="width: 350px;">
                         <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center"><span>GIỎ HÀNG</span><span class="badge bg-info text-dark" th:text="${cartSize ?: 0} + ' món'"></span></div>
                         <div id="miniCartWrapper" style="max-height: 300px; overflow-y: auto;">
-                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg"><img th:src="${item.product.mainImage.startsWith('http') ? item.product.mainImage : '/images/products/' + item.product.mainImage}" onerror="this.src='/images/no-image.png'" width="40" height="40" style="background:#fff; object-fit:contain;"><div class="overflow-hidden flex-grow-1"><div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div><div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div></div></div>
+                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
+                                <!-- Đã fix đường dẫn ảnh từ Model -->
+                                <img th:src="${item.product.mainImage}" onerror="this.onerror=null; this.src='/images/no-image.png'" width="40" height="40" style="background:#fff; object-fit:contain;">
+                                <div class="overflow-hidden flex-grow-1">
+                                    <div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div>
+                                    <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT GIỎ HÀNG</a></div>
                     </div>
                 </div>
-                <div class="dropdown" th:if="${session.account != null}">
-                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown"><img th:src="${session.account.avatar != null ? (session.account.avatar.startsWith('http') ? session.account.avatar : '/images/avatar/' + session.account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;"><i class="bi bi-chevron-down small text-light"></i></div>
+                <div class="dropdown" th:if="${user != null}">
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                        <img th:src="@{${user.avatar != null ? (user.avatar.startsWith('http') ? user.avatar : '/images/avatar/' + user.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}}" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                        <i class="bi bi-chevron-down small text-light"></i>
+                    </div>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
                         <li><a class="dropdown-item py-2" href="/account">Hồ sơ</a></li>
                         <li><a class="dropdown-item py-2" href="/orders">Đơn hàng</a></li>
@@ -197,7 +209,7 @@
                         <li><a class="dropdown-item py-2 text-danger" href="/logout">Đăng xuất</a></li>
                     </ul>
                 </div>
-                <a th:if="${session.account == null}" href="/login" class="btn btn-sm btn-outline-info rounded-pill px-4">Đăng nhập</a>
+                <a th:if="${user == null}" href="/login" class="btn btn-sm btn-outline-info rounded-pill px-4">Đăng nhập</a>
             </div>
         </div>
     </div>
@@ -207,7 +219,7 @@
 <div class="container">
     <div id="productSpotlight" class="carousel slide carousel-fade products-slideshow shadow-lg" data-bs-ride="carousel">
         <div class="carousel-inner">
-            <th:block th:each="p, i : ${latestProducts}" th:if="${i.index < 3}">
+            <th:block th:each="p, i : ${products}" th:if="${i.index < 3}">
                 <div th:class="${i.index == 0 ? 'carousel-item active' : 'carousel-item'}">
                     <div class="hero-slide-item">
                         <div class="slide-text">
@@ -216,7 +228,10 @@
                             <div class="product-price-new mb-4" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></div>
                             <a th:href="@{'/product-detail/' + ${p.id}}" class="btn btn-info btn-lg rounded-pill px-5 fw-bold shadow">SỞ HỮU NGAY</a>
                         </div>
-                        <div class="slide-image"><img th:src="${p.mainImage.startsWith('http') ? p.mainImage : '/images/products/' + p.mainImage}" onerror="this.src='/images/no-image.png'" alt="Product"></div>
+                        <div class="slide-image">
+                            <!-- Đã fix đường dẫn ảnh từ Model -->
+                            <img th:src="${p.mainImage}" onerror="this.onerror=null; this.src='/images/no-image.png'" alt="Product">
+                        </div>
                     </div>
                 </div>
             </th:block>
@@ -304,7 +319,8 @@
                             <span th:if="${p.quantity == 0}" class="stock-label">Hết hàng</span>
                             <div class="product-img-holder">
                                 <a th:href="@{'/product-detail/' + ${p.id}}">
-                                    <img th:src="${p.mainImage.startsWith('http') ? p.mainImage : '/images/products/' + p.mainImage}" onerror="this.src='/images/no-image.png'" th:id="'img-' + ${p.id}">
+                                    <!-- Đã fix đường dẫn ảnh từ Model -->
+                                    <img th:src="${p.mainImage}" onerror="this.onerror=null; this.src='/images/no-image.png'" th:id="'img-' + ${p.id}">
                                 </a>
                             </div>
                             <h6 class="product-info-name" th:text="${p.name}">Tên sản phẩm</h6>
@@ -365,7 +381,7 @@
             <div class="modal-body p-0">
                 <div class="row g-0">
                     <div class="col-md-6 bg-white d-flex align-items-center justify-content-center p-4">
-                        <img id="qv-img-main" src="" onerror="this.src='/images/no-image.png'" class="img-fluid" style="max-height: 350px; object-fit: contain;">
+                        <img id="qv-img-main" src="" onerror="this.onerror=null; this.src='/images/no-image.png'" class="img-fluid" style="max-height: 350px; object-fit: contain;">
                     </div>
                     <div class="col-md-6 p-4 d-flex flex-column">
                         <h3 id="qv-name" class="fw-bold mb-2"></h3>
@@ -400,7 +416,19 @@
             document.getElementById('qv-desc').innerText = p.description || 'Chưa có mô tả.';
             document.getElementById('qv-brand').innerText = p.category ? p.category.name : 'Đang cập nhật';
             document.getElementById('qv-stock').innerText = p.quantity + ' sản phẩm';
-            document.getElementById('qv-img-main').src = p.mainImage.startsWith('http') ? p.mainImage : '/images/products/' + p.mainImage;
+            
+            // Hàm getMainImage bên Java đôi khi không map ra JSON chuẩn khi dùng fetch tùy thư viện, 
+            // nên nếu p.mainImage null, ta lấy ảnh đầu tiên.
+            let imgUrl = p.mainImage;
+            if(!imgUrl && p.images && p.images.length > 0) {
+                 imgUrl = p.images[0].image;
+                 if(!imgUrl.startsWith('/images/')) imgUrl = '/images/products/' + imgUrl;
+            } else if (!imgUrl) {
+                 imgUrl = '/images/no-image.png';
+            }
+            
+            document.getElementById('qv-img-main').src = imgUrl;
+            
             const btnAction = document.getElementById('qv-btn-action');
             if(p.quantity > 0) { 
                 btnAction.innerText = 'THÊM VÀO GIỎ'; 
@@ -422,7 +450,22 @@
             fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`).then(res => res.json()).then(data => {
                 if (data.length > 0) {
                     let headerHtml = `<div class="p-2 border-bottom small fw-bold" style="background: var(--bg-nav); color: var(--text-main);">Tìm thấy ${data.length} sản phẩm phù hợp</div>`;
-                    searchResultList.innerHTML = headerHtml + data.map(p => `<a href="/product-detail/${p.id}" class="search-item text-decoration-none"><img src="${p.mainImage.startsWith('http') ? p.mainImage : '/images/products/' + p.mainImage}" onerror="this.src='/images/no-image.png'"><div class="overflow-hidden"><div class="small fw-bold text-truncate">${p.name}</div><div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div></div></a>`).join('');
+                    searchResultList.innerHTML = headerHtml + data.map(p => {
+                        let imgUrl = p.mainImage;
+                        if(!imgUrl && p.images && p.images.length > 0) {
+                             imgUrl = p.images[0].image;
+                             if(!imgUrl.startsWith('/images/')) imgUrl = '/images/products/' + imgUrl;
+                        } else if (!imgUrl) {
+                             imgUrl = '/images/no-image.png';
+                        }
+                        return `<a href="/product-detail/${p.id}" class="search-item text-decoration-none">
+                            <img src="${imgUrl}" onerror="this.onerror=null; this.src='/images/no-image.png'">
+                            <div class="overflow-hidden">
+                                <div class="small fw-bold text-truncate">${p.name}</div>
+                                <div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div>
+                            </div>
+                        </a>`;
+                    }).join('');
                     searchResultList.style.display = 'block';
                 } else { searchResultList.style.display = 'none'; }
             });
@@ -450,7 +493,6 @@
             setTimeout(() => { clone.style.top = (end.top + 10) + 'px'; clone.style.left = (end.left + 10) + 'px'; clone.style.width = '10px'; clone.style.height = '10px'; clone.style.opacity = '0'; }, 10);
             setTimeout(() => { clone.remove(); fetch(`/cart/add/${pid}`, { method: 'POST' }).then(() => { updateMiniCartUI(); location.reload(); }); }, 800);
         } else {
-            // Fallback trong trường hợp không tìm thấy ảnh
             fetch(`/cart/add/${pid}`, { method: 'POST' }).then(() => { updateMiniCartUI(); location.reload(); });
         }
     }
@@ -470,7 +512,22 @@
     if(btnMega) btnMega.onclick = (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); };
     document.querySelectorAll('.mega-cat-link').forEach(link => { link.onmouseenter = function() { document.querySelectorAll('.mega-cat-link').forEach(l => l.classList.remove('active')); document.querySelectorAll('.cat-product-pane').forEach(p => p.classList.add('d-none')); this.classList.add('active'); document.getElementById(this.getAttribute('data-target'))?.classList.remove('d-none'); }; });
 
-    // Price Dropdown
+    // Price Dropdown - Set Initial State & Handle Change
+    document.addEventListener("DOMContentLoaded", () => {
+        const minP = document.getElementById('minPriceHidden').value;
+        const maxP = document.getElementById('maxPriceHidden').value;
+        const priceSelect = document.getElementById('priceRangeSelect');
+        
+        if (minP && maxP) {
+            const targetVal = `${minP}-${maxP}`;
+            Array.from(priceSelect.options).forEach(opt => {
+                if (opt.value === targetVal) {
+                    opt.selected = true;
+                }
+            });
+        }
+    });
+
     document.getElementById('priceRangeSelect').onchange = function() {
         const val = this.value; const min = document.getElementById('minPriceHidden'); const max = document.getElementById('maxPriceHidden');
         if (val === "all") { min.value = ""; max.value = ""; } else { const r = val.split('-'); min.value = r[0]; max.value = r[1]; }

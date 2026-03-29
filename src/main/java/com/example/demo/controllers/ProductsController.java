@@ -1,12 +1,13 @@
 package com.example.demo.controllers;
 
-import java.math.BigDecimal; // Import BigDecimal
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
+
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 
@@ -24,8 +25,8 @@ public class ProductsController {
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) BigDecimal minPrice, // Tham số mới
-            @RequestParam(required = false) BigDecimal maxPrice, // Tham số mới
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             Model model,
@@ -42,7 +43,7 @@ public class ProductsController {
         Pageable pageable = PageRequest.of(page < 0 ? 0 : page, size, sorting);
         Page<Products> productPage;
 
-        // Thiết lập giá mặc định nếu để trống để tránh lỗi query
+        // Thiết lập giá mặc định
         BigDecimal min = (minPrice == null) ? BigDecimal.ZERO : minPrice;
         BigDecimal max = (maxPrice == null) ? new BigDecimal("999999999") : maxPrice;
 
@@ -62,7 +63,6 @@ public class ProductsController {
                 productPage = productRepo.findByPriceBetween(min, max, pageable);
             }
         } else {
-            // Logic cũ khi không có lọc giá
             if (hasKeyword && hasCategory) {
                 productPage = productRepo.findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword, pageable);
             } else if (hasKeyword) {
@@ -74,7 +74,7 @@ public class ProductsController {
             }
         }
 
-        // Truyền dữ liệu ra view
+        // Truyền thẳng dữ liệu ra view (Không cần format ảnh vì Entity getMainImage() đã lo)
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("productPage", productPage);
         model.addAttribute("categories", categoryRepo.findAll());
