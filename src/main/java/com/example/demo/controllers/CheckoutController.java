@@ -206,7 +206,9 @@ public class CheckoutController {
 
         // 7. CHUYỂN HƯỚNG THANH TOÁN
         if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
-            String paymentUrl = vnPayService.createOrder(finalTotal.intValue(), String.valueOf(order.getId()), VNPayConfig.vnp_ReturnUrl);
+            // Nhân 100 theo yêu cầu của VNPay. Dùng long để tránh tràn số (Overflow)
+            long amount = finalTotal.longValue() * 100; 
+            String paymentUrl = vnPayService.createOrder((int) amount, String.valueOf(order.getId()), VNPayConfig.vnp_ReturnUrl);
             return "redirect:" + paymentUrl;
         }
 

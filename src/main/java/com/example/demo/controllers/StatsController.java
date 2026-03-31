@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class StatsController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate) {
 
-        // 🔥 FIX DATETIME
+        // ===== DATETIME =====
         LocalDateTime from = (fromDate != null && !fromDate.isEmpty())
                 ? LocalDate.parse(fromDate).atStartOfDay()
                 : null;
@@ -55,7 +56,7 @@ public class StatsController {
             years.add(i);
         }
         model.addAttribute("years", years);
-        //
+
         // ===== TOTAL ORDERS =====
         Long totalOrders = isFilterByDate
                 ? ordersRepo.countCompletedOrdersByDate(from, to)
@@ -69,13 +70,17 @@ public class StatsController {
         model.addAttribute("totalAccounts", accountRepo.count());
         model.addAttribute("totalCategories", categoryRepo.count());
 
-        // ===== REVENUE =====
-        Long totalRevenue = isFilterByDate
+        // ===== REVENUE (FIX BIGDECIMAL) =====
+        BigDecimal totalRevenue = isFilterByDate
                 ? ordersRepo.getTotalRevenueByDate(from, to)
                 : ordersRepo.getRevenueByMonth(currentYear)
-                    .stream().mapToLong(r -> ((Number) r[1]).longValue()).sum();
+                    .stream()
+                    .map(r -> (BigDecimal) (r[1] != null ? r[1] : BigDecimal.ZERO))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        model.addAttribute("totalRevenue", totalRevenue != null ? totalRevenue : 0);
+        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+
+        model.addAttribute("totalRevenue", totalRevenue);
 
         // ===== CATEGORY =====
         List<Object[]> revenueByCategory = isFilterByDate
@@ -83,11 +88,11 @@ public class StatsController {
                 : ordersRepo.getRevenueByCategory();
 
         List<String> chartLabels = new ArrayList<>();
-        List<Long> chartData = new ArrayList<>();
+        List<BigDecimal> chartData = new ArrayList<>();
 
         for (Object[] row : revenueByCategory) {
             chartLabels.add((String) row[0]);
-            chartData.add(row[1] != null ? ((Number) row[1]).longValue() : 0L);
+            chartData.add(row[1] != null ? (BigDecimal) row[1] : BigDecimal.ZERO);
         }
 
         model.addAttribute("chartLabels", chartLabels);
@@ -98,11 +103,11 @@ public class StatsController {
                 ? ordersRepo.getRevenueByMonthByDate(from, to)
                 : ordersRepo.getRevenueByMonth(currentYear);
 
-        List<Long> monthlyRevenueData = new ArrayList<>(Collections.nCopies(12, 0L));
+        List<BigDecimal> monthlyRevenueData = new ArrayList<>(Collections.nCopies(12, BigDecimal.ZERO));
 
         for (Object[] row : revenueByMonth) {
             int m = ((Number) row[0]).intValue();
-            monthlyRevenueData.set(m - 1, ((Number) row[1]).longValue());
+            monthlyRevenueData.set(m - 1, row[1] != null ? (BigDecimal) row[1] : BigDecimal.ZERO);
         }
 
         List<String> monthlyLabels = new ArrayList<>();
