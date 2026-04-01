@@ -204,11 +204,34 @@ public class CheckoutController {
         // Xóa giỏ hàng sau khi đặt hàng thành công
         cartDetailRepo.deleteAll(cartList);
 
-        // 7. CHUYỂN HƯỚNG THANH TOÁN
+     // 7. CHUYỂN HƯỚNG THANH TOÁN
         if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
-            // Nhân 100 theo yêu cầu của VNPay. Dùng long để tránh tràn số (Overflow)
-            long amount = finalTotal.longValue() * 100; 
-            String paymentUrl = vnPayService.createOrder((int) amount, String.valueOf(order.getId()), VNPayConfig.vnp_ReturnUrl);
+
+            // ❗ KHÔNG cho thanh toán nếu <= 0
+            if (finalTotal.compareTo(BigDecimal.ZERO) <= 0) {
+                return "redirect:/checkout?error=amount_zero";
+            }
+
+            // ❗ VNPay yêu cầu tối thiểu ~10,000 VND
+            if (finalTotal.compareTo(BigDecimal.valueOf(10000)) < 0) {
+                return "redirect:/checkout?error=amount_invalid";
+            }
+
+            // ✅ Nhân 100 CHỈ Ở ĐÂY
+            long amount = finalTotal.multiply(BigDecimal.valueOf(100)).longValue();
+
+            // 🔍 DEBUG (giữ lại để test)
+            System.out.println("RAW TOTAL: " + rawTotal);
+            System.out.println("DISCOUNT: " + discount);
+            System.out.println("FINAL TOTAL: " + finalTotal);
+            System.out.println("VNPAY AMOUNT: " + amount);
+
+            String paymentUrl = vnPayService.createOrder(
+                    amount,
+                    String.valueOf(order.getId()),
+                    VNPayConfig.vnp_ReturnUrl
+            );
+
             return "redirect:" + paymentUrl;
         }
 
