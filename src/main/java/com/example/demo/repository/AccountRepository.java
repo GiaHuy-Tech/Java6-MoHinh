@@ -20,5 +20,4 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query("SELECT a FROM Account a WHERE MONTH(a.birthDay) = :month AND DAY(a.birthDay) = :day")
     List<Account> findByBirthday(@Param("month") int month,
                                  @Param("day") int day);
-    
 }	

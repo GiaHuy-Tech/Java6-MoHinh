@@ -94,7 +94,16 @@ public class OrdersManaController {
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Integer id, Model model) {
         Orders order = ordersRepo.findById(id).orElse(null);
-        if (order == null) return "redirect:/orders-mana";
+        
+        if (order == null) {
+            return "redirect:/orders-mana";
+        }
+
+        // Log kiểm tra nếu bạn chạy debug (Tùy chọn)
+        if (order.getAddress() == null) {
+            System.out.println("DEBUG: Đơn hàng #" + id + " đang bị thiếu address_id trong DB");
+        }
+
         model.addAttribute("order", order);
         model.addAttribute("orderDetails", order.getOrderDetails());
         return "admin/order-detail";

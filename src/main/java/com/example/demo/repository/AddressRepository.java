@@ -3,16 +3,16 @@ package com.example.demo.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.demo.model.Address;
 import java.util.List;
-import java.util.Optional; // Thêm thư viện này
+import java.util.Optional;
 
 public interface AddressRepository extends JpaRepository<Address, Long> {
-    
-    // --- GIỮ NGUYÊN CÁC PHƯƠNG THỨC CŨ ---
-    List<Address> findByAccountId(Integer accountId);
-    Address findByAccountIdAndIsDefaultTrue(Integer accountId);
 
-    // --- THÊM PHƯƠNG THỨC MỚI ĐỂ HẾT BÁO ĐỎ Ở CONTROLLER ---
-    // Việc thêm dấu gạch dưới (_) giúp JPA hiểu rõ hơn về liên kết giữa Address và Account
+    // Lấy danh sách địa chỉ của user
+    List<Address> findByAccount_Id(Integer accountId);
+
+    // Lấy địa chỉ mặc định
     Optional<Address> findByAccount_IdAndIsDefaultTrue(Integer accountId);
 
+    // Tìm theo id + user (tránh hack)
+    Optional<Address> findByIdAndAccount_Id(Long id, Integer accountId);
 }

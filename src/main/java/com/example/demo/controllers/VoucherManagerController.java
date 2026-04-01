@@ -40,13 +40,14 @@ public class VoucherManagerController {
     @GetMapping("/edit/{id}")
     public String editVoucher(@PathVariable("id") Integer id, Model model) {
         Voucher voucher = voucherRepo.findById(id).orElse(new Voucher());
-        // Khi đang ở chế độ sửa, tạm thời reset các bộ lọc
+        // Khi đang sửa, reset bộ lọc để dễ quan sát đối tượng đang sửa
         return loadPage(model, voucher, null, null, null, null);
     }
 
     // HÀM HỖ TRỢ XỬ LÝ LOAD TRANG VÀ LỌC DỮ LIỆU BẰNG JAVA STREAM
     private String loadPage(Model model, Voucher voucher, String keyword, String discountType, Integer filterMembershipId, String status) {
         List<Voucher> list = voucherRepo.findAll();
+        LocalDateTime now = LocalDateTime.now();
 
         // --- BẮT ĐẦU XỬ LÝ LỌC ---
 
@@ -71,22 +72,26 @@ public class VoucherManagerController {
         // Lọc theo hạng thành viên (Membership)
         if (filterMembershipId != null) {
             if (filterMembershipId == 0) {
-                // Lọc các voucher áp dụng cho tất cả (Membership == null)
                 list = list.stream().filter(v -> v.getMembership() == null).collect(Collectors.toList());
             } else {
-                // Lọc theo ID Membership cụ thể
                 list = list.stream()
                         .filter(v -> v.getMembership() != null && v.getMembership().getId().equals(filterMembershipId))
                         .collect(Collectors.toList());
             }
         }
 
-        // Lọc theo trạng thái
+        // Lọc theo trạng thái THỰC TẾ (Kết hợp active và expiredAt)
         if (status != null && !status.isEmpty()) {
             if ("active".equals(status)) {
-                list = list.stream().filter(v -> Boolean.TRUE.equals(v.getActive())).collect(Collectors.toList());
+                // Chỉ lấy voucher đang bật và CÒN HẠN
+                list = list.stream()
+                    .filter(v -> Boolean.TRUE.equals(v.getActive()) && (v.getExpiredAt() == null || v.getExpiredAt().isAfter(now)))
+                    .collect(Collectors.toList());
             } else if ("hidden".equals(status)) {
-                list = list.stream().filter(v -> !Boolean.TRUE.equals(v.getActive())).collect(Collectors.toList());
+                // Lấy voucher bị tắt HOẶC đã hết hạn
+                list = list.stream()
+                    .filter(v -> !Boolean.TRUE.equals(v.getActive()) || (v.getExpiredAt() != null && v.getExpiredAt().isBefore(now)))
+                    .collect(Collectors.toList());
             }
         }
         // --- KẾT THÚC XỬ LÝ LỌC ---
@@ -122,24 +127,30 @@ public class VoucherManagerController {
             Membership mem = membershipRepo.findById(membershipId).orElse(null);
             voucher.setMembership(mem);
         } else {
-            voucher.setMembership(null); // Tất cả thành viên
+            voucher.setMembership(null); 
         }
 
-        // 3. Xử lý Active mặc định
-        if (voucher.getId() == null) {
+        // 3. XỬ LÝ TỰ ĐỘNG KÍCH HOẠT LẠI KHI GIA HẠN NGÀY
+        LocalDateTime now = LocalDateTime.now();
+        if (voucher.getExpiredAt() != null) {
+            if (voucher.getExpiredAt().isAfter(now)) {
+                // Nếu ngày hết hạn mới nằm ở tương lai -> Tự động bật Active để hiện lại
+                voucher.setActive(true);
+            } else {
+                // Nếu ngày ở quá khứ -> Tự động ẩn
+                voucher.setActive(false);
+            }
+        } else {
+            // Nếu không chọn ngày, mặc định cho 1 tháng kể từ bây giờ và Active
+            voucher.setExpiredAt(now.plusMonths(1));
             voucher.setActive(true);
-        }
-        
-        // 4. Ngày hết hạn mặc định
-        if (voucher.getExpiredAt() == null) {
-            voucher.setExpiredAt(LocalDateTime.now().plusMonths(1));
         }
 
         voucherRepo.save(voucher);
         return "redirect:/admin/vouchers";
     }
 
-    // 4. ẨN VOUCHER
+    // 4. ẨN VOUCHER (Ẩn thủ công)
     @GetMapping("/hide/{id}")
     public String hideVoucher(@PathVariable("id") Integer id) {
         voucherRepo.findById(id).ifPresent(v -> {
@@ -149,11 +160,12 @@ public class VoucherManagerController {
         return "redirect:/admin/vouchers";
     }
 
-    // 5. HIỆN VOUCHER
+    // 5. HIỆN VOUCHER (Mở lại thủ công)
     @GetMapping("/show/{id}")
     public String showVoucher(@PathVariable("id") Integer id) {
         voucherRepo.findById(id).ifPresent(v -> {
             v.setActive(true);
+            // Lưu ý: Nếu bấm hiện nhưng ngày vẫn ở quá khứ, logic ở View vẫn sẽ báo là Hết hạn
             voucherRepo.save(v);
         });
         return "redirect:/admin/vouchers";
