@@ -100,18 +100,12 @@ body.toggled #page-content-wrapper { margin-left: 0; }
                                     <div th:if="${addresses == null || addresses.isEmpty()}" class="alert alert-warning border-warning bg-transparent small">
                                         Bạn chưa có địa chỉ. <a href="/account" class="fw-bold text-main">Thêm ngay</a>
                                     </div>
-                                   <select class="form-select form-select-dark" name="addressId" required th:unless="${addresses == null || addresses.isEmpty()}">
-    <option value="" disabled selected>-- Chọn địa chỉ nhận hàng --</option>
-    <option th:each="addr : ${addresses}" 
-            th:value="${addr.id}"
-            th:selected="${addr.isDefault}">
-        
-        [[${addr.recipientName ?: 'Không tên'}]] | 
-        [[${addr.recipientPhone ?: 'Không SDT'}]] | 
-        [[${addr.getFullAddress()}]]
-        
-    </option>
-</select>
+                                    <select class="form-select form-select-dark" name="addressId" required th:unless="${addresses == null || addresses.isEmpty()}">
+                                        <option value="" disabled selected>-- Chọn địa chỉ nhận hàng --</option>
+                                        <option th:each="addr : ${addresses}" th:value="${addr.id}"
+                                                th:text="${addr.recipientName + ' | ' + addr.recipientPhone + ' | ' + addr.getFullAddress()}"
+                                                th:selected="${addr.isDefault}"></option>
+                                    </select>
                                 </div>
 
                                 <div class="mb-4">
