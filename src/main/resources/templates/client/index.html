@@ -629,18 +629,62 @@ footer .form-control:focus {
 								<span>GIỎ HÀNG CỦA BẠN</span><span
 									class="badge bg-info text-dark" th:text="${cartSize + ' món'}"></span>
 							</div>
-							<div style="max-height: 300px; overflow-y: auto;">
-								<div th:each="item : ${cart}"
-									class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
-									<img th:src="${item.product.mainImage}" width="40" height="40"
-										style="background: #fff; object-fit: contain;">
-									<div class="overflow-hidden flex-grow-1">
-										<div class="small text-truncate fw-bold text-light"
-											th:text="${item.product.name}"></div>
-										<div class="text-danger small fw-bold"
-											th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+							<div id="mini-cart-body"
+								style="max-height: 300px; overflow-y: auto;">
+
+								<!-- Nếu có sản phẩm -->
+								<div th:if="${cart != null and !cart.isEmpty()}">
+									<div th:each="item : ${cart}"
+										class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
+
+										<img th:src="${item.product.mainImage}" width="45" height="45"
+											style="background: #fff; object-fit: contain; border-radius: 6px;">
+
+										<div class="flex-grow-1">
+											<div class="small fw-bold text-truncate"
+												th:text="${item.product.name}"></div>
+
+											<div class="text-danger small fw-bold"
+												th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+
+											<!-- CONTROL -->
+											<div class="d-flex align-items-center mt-1">
+
+												<!-- MINUS -->
+												<button type="button"
+													class="btn btn-sm btn-outline-secondary p-1 minus-btn"
+													th:attr="data-id=${item.id}" style="width: 25px;">
+													-</button>
+
+												<!-- QUANTITY -->
+												<span class="fw-bold mx-2" th:text="${item.quantity}">1</span>
+
+												<!-- PLUS -->
+												<button type="button"
+													class="btn btn-sm btn-outline-info p-1 plus-btn"
+													th:attr="data-id=${item.id}" style="width: 25px;">
+													+</button>
+
+												<!-- DELETE -->
+												<button type="button"
+													class="text-danger ms-2 delete-btn border-0 bg-transparent"
+													th:attr="data-id=${item.id}"
+													onclick="return confirm('Xóa khỏi giỏ hàng?');">
+													<i class="bi bi-trash"></i>
+												</button>
+
+											</div>
+										</div>
 									</div>
 								</div>
+
+								<!-- Giỏ rỗng -->
+								<div th:if="${cart == null or cart.isEmpty()}"
+									class="text-center text-muted py-4">
+									<i class="bi bi-cart-x fs-1"></i>
+									<div>Không có sản phẩm nào</div>
+								</div>
+
 							</div>
 							<div class="p-3 bg-dark">
 								<a href="/cart"
@@ -915,80 +959,272 @@ footer .form-control:focus {
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
-    const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+const isLoggedIn = document.getElementById('isLoggedIn')?.value === 'true';
 
-    function showAuthModal() { new bootstrap.Modal(document.getElementById('authModal')).show(); document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login'; }
-    function executeSearch() { const q = document.getElementById('liveSearchInput').value.trim(); if (q) window.location.href = `/products?keyword=${encodeURIComponent(q)}`; }
+/* ================= AUTH ================= */
+function showAuthModal() {
+    new bootstrap.Modal(document.getElementById('authModal')).show();
+    document.getElementById('btnAuthOk').onclick = () => location.href = '/login';
+}
 
-    // QUICK VIEW
-    function openQuickView(pid) {
-        fetch(`/api/products/${pid}`).then(res => res.json()).then(p => {
-            document.getElementById('qv-name').innerText = p.name;
-            document.getElementById('qv-price').innerText = new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
-            document.getElementById('qv-desc').innerText = p.description || 'Chưa có mô tả.';
-            document.getElementById('qv-brand').innerText = p.category ? p.category.name : 'Đang cập nhật';
-            document.getElementById('qv-img-main').src = p.mainImage;
-            const statusEl = document.getElementById('qv-status'); const btnAction = document.getElementById('qv-btn-action');
-            if(p.quantity > 0) { statusEl.innerText = 'Còn hàng'; statusEl.className = 'text-success fw-bold'; btnAction.innerText = 'THÊM VÀO GIỎ'; btnAction.disabled = false; btnAction.onclick = () => flyToCart(null, p.id); }
-            else { statusEl.innerText = 'Hết hàng'; statusEl.className = 'text-danger fw-bold'; btnAction.innerText = 'HẾT HÀNG'; btnAction.disabled = true; }
-            new bootstrap.Modal(document.getElementById('quickViewModal')).show();
+/* ================= SEARCH ================= */
+function executeSearch() {
+    const q = document.getElementById('liveSearchInput').value.trim();
+    if (q) location.href = `/products?keyword=${encodeURIComponent(q)}`;
+}
+
+const searchInput = document.getElementById('liveSearchInput');
+const searchResultList = document.getElementById('searchResultList');
+
+if (searchInput) {
+    searchInput.oninput = () => {
+        const q = searchInput.value.trim();
+        if (q.length < 2) return searchResultList.style.display = 'none';
+
+        fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(data => {
+            if (!data.length) return searchResultList.style.display = 'none';
+
+            searchResultList.innerHTML = data.map(p => `
+                <a href="/product-detail/${p.id}" class="search-item">
+                    <img src="${p.mainImage}">
+                    <div>
+                        <div class="small fw-bold">${p.name}</div>
+                        <div class="text-danger small fw-bold">
+                            ${new Intl.NumberFormat('vi-VN').format(p.price)}₫
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+
+            searchResultList.style.display = 'block';
         });
-    }
+    };
 
-    // LIVE SEARCH
-    const searchInput = document.getElementById('liveSearchInput'); const searchResultList = document.getElementById('searchResultList');
-    if (searchInput) {
-        searchInput.oninput = function() {
-            const q = this.value.trim(); if (q.length < 2) { searchResultList.style.display = 'none'; return; }
-            fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`).then(res => res.json()).then(data => {
-                if (data.length > 0) {
-                    searchResultList.innerHTML = data.map(p => `<a href="/product-detail/${p.id}" class="search-item"><img src="${p.mainImage}"><div class="overflow-hidden"><div class="small fw-bold text-truncate">${p.name}</div><div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div></div></a>`).join('');
-                    searchResultList.style.display = 'block';
-                } else { searchResultList.style.display = 'none'; }
-            });
-        };
-        searchInput.onkeypress = (e) => { if(e.key === 'Enter') executeSearch(); };
-    }
-    document.getElementById('btnMainSearch').onclick = executeSearch;
-    document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
+    searchInput.onkeypress = e => { if (e.key === 'Enter') executeSearch(); };
+}
 
-    // FLY TO CART
-    function flyToCart(btn, pid) {
-        if (!isLoggedIn) { showAuthModal(); return; }
-        const cart = document.getElementById('cartIconNav'); const img = document.getElementById('img-' + pid);
-        if (img) {
-            const clone = img.cloneNode(); const start = img.getBoundingClientRect(); const end = cart.getBoundingClientRect();
-            clone.classList.add('fly-item'); clone.style.top = start.top + 'px'; clone.style.left = start.left + 'px';
-            clone.style.width = start.width + 'px'; clone.style.height = start.height + 'px';
-            document.body.appendChild(clone);
-            setTimeout(() => { clone.style.top = end.top + 'px'; clone.style.left = end.left + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0'; }, 10);
-            setTimeout(() => { clone.remove(); fetch(`/cart/add/${pid}`, { method: 'POST' }).then(() => location.reload()); }, 800);
+document.getElementById('btnMainSearch')?.addEventListener('click', executeSearch);
+
+/* ================= QUICK VIEW ================= */
+function openQuickView(id) {
+    fetch(`/api/products/${id}`)
+    .then(r => r.json())
+    .then(p => {
+
+        document.getElementById('qv-name').innerText = p.name;
+        document.getElementById('qv-price').innerText =
+            new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
+
+        document.getElementById('qv-desc').innerText =
+            p.description || 'Chưa có mô tả';
+
+        document.getElementById('qv-brand').innerText =
+            p.category?.name || 'Đang cập nhật';
+
+        document.getElementById('qv-img-main').src = p.mainImage;
+
+        if (p.quantity > 0) {
+            document.getElementById('qv-status').innerText = 'Còn hàng';
+
+            const btn = document.getElementById('qv-btn-action');
+            btn.innerText = 'THÊM VÀO GIỎ';
+            btn.disabled = false;
+            btn.onclick = () => flyToCart(null, p.id);
+
+        } else {
+            document.getElementById('qv-status').innerText = 'Hết hàng';
+
+            const btn = document.getElementById('qv-btn-action');
+            btn.innerText = 'HẾT HÀNG';
+            btn.disabled = true;
         }
-    }
 
-    // THEME & UI
-    function toggleTheme() {
-        const h = document.documentElement; const icon = document.getElementById('themeIcon');
-        const isDark = h.getAttribute('data-theme') === 'dark';
-        h.setAttribute('data-theme', isDark ? 'light' : 'dark');
-        icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
-    }
-    
-    function toggleWishlist(btn, pid) {
-        if (!isLoggedIn) { showAuthModal(); return; }
-        fetch(`/wishlist/toggle/${pid}`).then(res => res.text()).then(status => {
-            if(status === 'added') btn.classList.add('active'); else btn.classList.remove('active');
+        new bootstrap.Modal(document.getElementById('quickViewModal')).show();
+    });
+}
+
+/* ================= ADD TO CART ================= */
+function addToCart(pid) {
+    if (!isLoggedIn) return showAuthModal();
+
+    fetch(`/cart/add/${pid}`, { method: 'POST' })
+    .then(r => r.text())
+    .then(t => {
+        if (t === 'success') updateMiniCart();
+    });
+}
+
+/* ================= FLY EFFECT ================= */
+function flyToCart(btn, pid) {
+    if (!isLoggedIn) return showAuthModal();
+
+    const img = document.getElementById('img-' + pid);
+    const cart = document.getElementById('cartIconNav');
+
+    if (!img) return addToCart(pid);
+
+    const clone = img.cloneNode();
+    const start = img.getBoundingClientRect();
+    const end = cart.getBoundingClientRect();
+
+    Object.assign(clone.style, {
+        position: 'fixed',
+        top: start.top + 'px',
+        left: start.left + 'px',
+        width: start.width + 'px',
+        height: start.height + 'px',
+        transition: 'all 0.7s',
+        zIndex: 9999
+    });
+
+    document.body.appendChild(clone);
+
+    setTimeout(() => {
+        clone.style.top = end.top + 'px';
+        clone.style.left = end.left + 'px';
+        clone.style.width = '20px';
+        clone.style.height = '20px';
+        clone.style.opacity = '0';
+    }, 10);
+
+    setTimeout(() => {
+        clone.remove();
+        addToCart(pid);
+    }, 700);
+}
+
+/* ================= MINI CART ================= */
+function updateMiniCart() {
+    fetch('/cart/api/mini-cart')
+    .then(r => r.json())
+    .then(data => {
+        const body = document.getElementById('mini-cart-body');
+        const badge = document.querySelector('.badge-count');
+
+        if (!data || !data.length) {
+            body.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-cart-x fs-1"></i>
+                    <div>Không có sản phẩm nào</div>
+                </div>
+            `;
+            if (badge) badge.innerText = 0;
+            return;
+        }
+
+        let totalQty = 0;
+
+        body.innerHTML = data.map(item => {
+            totalQty += item.quantity;
+
+            return `
+            <div class="p-3 d-flex align-items-center gap-3 border-bottom">
+                <img src="${item.image}" width="45" height="45"
+                    style="background:#fff;object-fit:contain;border-radius:6px;">
+
+                <div class="flex-grow-1">
+                    <div class="small fw-bold text-truncate">
+                        ${item.name}
+                    </div>
+
+                    <div class="text-danger small fw-bold">
+                        ${item.price.toLocaleString()}₫
+                    </div>
+
+                    <div class="d-flex align-items-center mt-1">
+
+                        <button class="btn btn-sm btn-outline-secondary p-1 minus-btn"
+                            data-id="${item.id}" style="width:25px;">-</button>
+
+                        <span class="fw-bold mx-2">${item.quantity}</span>
+
+                        <button class="btn btn-sm btn-outline-info p-1 plus-btn"
+                            data-id="${item.id}" style="width:25px;">+</button>
+
+                        <button class="text-danger ms-2 delete-btn border-0 bg-transparent"
+                            data-id="${item.id}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+            `;
+        }).join('');
+
+        if (badge) badge.innerText = totalQty;
+
+        bindMiniCartEvents();
+    });
+}
+
+/* ================= MINI CART EVENTS ================= */
+function bindMiniCartEvents() {
+
+    // PLUS
+    document.querySelectorAll('.plus-btn').forEach(btn => {
+        btn.onclick = () => {
+            const id = btn.dataset.id;
+            fetch(`/cart/plus/${id}`, { method: 'POST' })
+                .then(() => updateMiniCart());
+        };
+    });
+
+    // MINUS
+    document.querySelectorAll('.minus-btn').forEach(btn => {
+        btn.onclick = () => {
+            const id = btn.dataset.id;
+            fetch(`/cart/minus/${id}`, { method: 'POST' })
+                .then(() => updateMiniCart());
+        };
+    });
+
+    // DELETE
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.onclick = () => {
+            if (!confirm("Xóa sản phẩm?")) return;
+
+            const id = btn.dataset.id;
+            fetch(`/cart/delete/${id}`, { method: 'DELETE' }) // 🔥 FIX METHOD
+                .then(() => updateMiniCart());
+        };
+    });
+
+}
+
+/* ================= WISHLIST ================= */
+function toggleWishlist(btn, pid) {
+    if (!isLoggedIn) return showAuthModal();
+
+    fetch(`/wishlist/toggle/${pid}`)
+    .then(r => r.text())
+    .then(s => btn.classList.toggle('active', s === 'added'));
+}
+
+/* ================= INIT ================= */
+document.addEventListener("DOMContentLoaded", () => {
+    updateMiniCart();
+
+    if (isLoggedIn) {
+        fetch('/wishlist/my-likes')
+        .then(r => r.json())
+        .then(ids => {
+            document.querySelectorAll('.product-wishlist').forEach(btn => {
+                const pid = +btn.getAttribute('onclick').match(/\d+/)[0];
+                if (ids.includes(pid)) btn.classList.add('active');
+            });
         });
     }
+});
 
-    const btnMega = document.getElementById('btnMegaMenu'); const megaMenu = document.getElementById('megaMenu');
-    btnMega.onclick = (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); };
-    document.querySelectorAll('.mega-cat-link').forEach(link => { link.onmouseenter = function() { document.querySelectorAll('.mega-cat-link').forEach(l => l.classList.remove('active')); document.querySelectorAll('.cat-product-pane').forEach(p => p.classList.add('d-none')); this.classList.add('active'); document.getElementById(this.getAttribute('data-target')).classList.remove('d-none'); }; });
-    
-    const applyTilt = (el, f) => { if(!el) return; el.onmousemove = (e) => { let x = (window.innerWidth / 2 - e.pageX) / f; let y = (window.innerHeight / 2 - e.pageY) / f; el.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`; }; el.onmouseleave = () => el.style.transform = `rotateY(0) rotateX(0)`; };
-    applyTilt(document.getElementById('tiltBox'), 45); applyTilt(document.getElementById('voucherTilt'), 60);
-
-    document.addEventListener("DOMContentLoaded", () => { if(isLoggedIn) fetch('/wishlist/my-likes').then(r => r.json()).then(ids => { document.querySelectorAll('.product-wishlist').forEach(btn => { const pid = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]); if(ids.includes(pid)) btn.classList.add('active'); }); }); });
+/* ================= UI ================= */
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+}
 </script>
 </body>
 </html>

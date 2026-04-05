@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.demo.dto.MiniCartDTO;
 import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
 import com.example.demo.model.Products;
@@ -92,14 +93,18 @@ public class CartController {
     // ================= 3. MINI CART API =================
     @GetMapping("/api/mini-cart")
     @ResponseBody
-    public ResponseEntity<List<CartDetail>> getMiniCartData(HttpSession session) {
+    public ResponseEntity<List<MiniCartDTO>> getMiniCartData(HttpSession session) {
 
         Account account = getAccount(session);
         if (account == null) return ResponseEntity.status(401).build();
 
         List<CartDetail> cartList = cartRepo.findCartWithProduct(account.getId());
 
-        return ResponseEntity.ok(cartList);
+        List<MiniCartDTO> result = cartList.stream()
+            .map(MiniCartDTO::new)
+            .toList();
+
+        return ResponseEntity.ok(result);
     }
 
     // ================= 4. LIVE SEARCH =================
@@ -116,12 +121,13 @@ public class CartController {
         return ResponseEntity.ok(results);
     }
 
-    // ================= TĂNG SỐ LƯỢNG =================
-    @GetMapping("/plus/{id}")
-    public String increase(@PathVariable Integer id, HttpSession session) {
+ // ================= API TĂNG =================
+    @PostMapping("/plus/{id}")
+    @ResponseBody
+    public ResponseEntity<?> apiIncrease(@PathVariable Integer id, HttpSession session) {
 
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) return ResponseEntity.status(401).build();
 
         CartDetail item = cartRepo.findById(id).orElse(null);
 
@@ -130,15 +136,16 @@ public class CartController {
             cartRepo.save(item);
         }
 
-        return "redirect:/cart";
+        return ResponseEntity.ok().build();
     }
 
-    // ================= GIẢM SỐ LƯỢNG =================
-    @GetMapping("/minus/{id}")
-    public String decrease(@PathVariable Integer id, HttpSession session) {
+    // ================= API GIẢM =================
+    @PostMapping("/minus/{id}")
+    @ResponseBody
+    public ResponseEntity<?> apiDecrease(@PathVariable Integer id, HttpSession session) {
 
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) return ResponseEntity.status(401).build();
 
         CartDetail item = cartRepo.findById(id).orElse(null);
 
@@ -152,15 +159,16 @@ public class CartController {
             }
         }
 
-        return "redirect:/cart";
+        return ResponseEntity.ok().build();
     }
 
-    // ================= XOÁ SẢN PHẨM =================
-    @GetMapping("/delete/{id}")
-    public String delete(@PathVariable Integer id, HttpSession session) {
+    // ================= API XOÁ =================
+    @DeleteMapping("/delete/{id}")
+    @ResponseBody
+    public ResponseEntity<?> apiDelete(@PathVariable Integer id, HttpSession session) {
 
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) return ResponseEntity.status(401).build();
 
         CartDetail item = cartRepo.findById(id).orElse(null);
 
@@ -168,7 +176,7 @@ public class CartController {
             cartRepo.delete(item);
         }
 
-        return "redirect:/cart";
+        return ResponseEntity.ok().build();
     }
 
     // ================= LẤY USER =================
