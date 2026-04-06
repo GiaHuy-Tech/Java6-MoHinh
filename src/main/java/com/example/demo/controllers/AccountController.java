@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.*;
 import java.util.List;
 
@@ -38,23 +39,36 @@ public class AccountController {
         Account account = accountRepo.findById(sessionAcc.getId()).orElse(null);
         if (account == null) return "redirect:/login";
 
+        // 1. Lấy tổng chi tiêu
         BigDecimal totalSpent = ordersRepo.sumTotalByAccountAndStatus(account.getId());
         if (totalSpent == null) totalSpent = BigDecimal.ZERO;
 
         account.setTotalSpending(totalSpent);
 
-        String membershipName = "Đồng";
-        if (totalSpent.compareTo(new BigDecimal("1000000000")) >= 0) membershipName = "Kim Cương";
-        else if (totalSpent.compareTo(new BigDecimal("100000000")) >= 0) membershipName = "Bạch Kim";
-        else if (totalSpent.compareTo(new BigDecimal("50000000")) >= 0) membershipName = "Vàng";
-        else if (totalSpent.compareTo(new BigDecimal("10000000")) >= 0) membershipName = "Bạc";
+        // 2. QUY ĐỔI RA ĐIỂM (Tỷ lệ: 10.000đ = 1 Điểm)
+        int currentPoints = totalSpent.divide(new BigDecimal("10000"), RoundingMode.DOWN).intValue();
 
+        // 3. XẾP HẠNG THEO ĐIỂM (Chuẩn 100% theo Admin Dashboard)
+        String membershipName = "Đồng";
+        if (currentPoints >= 10000) {
+            membershipName = "Kim Cương";
+        } else if (currentPoints >= 5000) {
+            membershipName = "Vàng";
+        } else if (currentPoints >= 1000) {
+            membershipName = "Bạc";
+        }
+
+        // 4. Lưu hạng vào Database
         Membership membership = membershipRepo.findByName(membershipName).orElse(null);
         if (membership != null) {
             account.setMembership(membership);
         }
         accountRepo.save(account);
 
+<<<<<<< HEAD
+=======
+        // LẤY DANH SÁCH ĐỊA CHỈ
+>>>>>>> GiaHuy
         List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
 
         model.addAttribute("account", account);
@@ -62,6 +76,7 @@ public class AccountController {
         model.addAttribute("membershipName", membershipName);
         model.addAttribute("orderCount", ordersRepo.countByAccountId(account.getId()));
         model.addAttribute("totalSpent", totalSpent);
+        model.addAttribute("currentPoints", currentPoints); // Gửi điểm ra giao diện
 
         return "client/account";
     }
