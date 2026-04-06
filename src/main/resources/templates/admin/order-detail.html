@@ -230,32 +230,25 @@
                             <span th:unless="${order.paymentStatus}" class="badge bg-secondary ms-2">Chưa thanh toán</span>
                         </div>
 
-                       <div class="mb-3 w-100">
+                        <div class="mb-3 w-100">
     <small class="text-secondary d-block">Địa chỉ giao hàng</small>
     
     <th:block th:if="${order.address != null}">
         <div class="text-bright">
-            <i class="bi bi-person-circle text-neon me-2"></i>
-            <strong th:text="${order.address.recipientName}"></strong>
+            <i class="bi bi-person-badge text-neon me-1"></i>
+            <span th:text="${order.address.recipientName}"></span> 
+            <small class="text-secondary" th:text="'(' + ${order.address.recipientPhone} + ')'"></small>
         </div>
-        <div class="text-neon small mt-1">
-            <i class="bi bi-telephone-fill me-2"></i>
-            <span th:text="${order.address.recipientPhone}"></span>
-        </div>
-        <div class="text-bright fst-italic mt-2 border-top border-secondary pt-2" style="font-size: 0.9rem;">
-            <i class="bi bi-geo-alt-fill text-neon me-2"></i>
+        <div class="text-bright fst-italic mt-1">
+            <i class="bi bi-geo-alt-fill text-neon me-1"></i>
             <span th:text="${order.address.getFullAddress()}"></span>
         </div>
     </th:block>
 
     <th:block th:unless="${order.address != null}">
-        <div class="p-3 border border-dashed border-danger rounded mt-2">
-            <span class="text-danger small">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                Lỗi: Đơn hàng này chưa được gắn địa chỉ (address_id = NULL).
-            </span>
-            <p class="text-muted mb-0 extra-small">Vui lòng kiểm tra lại logic Checkout hoặc gán thủ công trong DB.</p>
-        </div>
+        <span class="text-muted fst-italic">
+            <i class="bi bi-exclamation-triangle me-1"></i> Không có thông tin địa chỉ
+        </span>
     </th:block>
 </div>
                     </div>
