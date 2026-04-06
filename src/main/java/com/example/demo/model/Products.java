@@ -43,6 +43,15 @@ public class Products {
 
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
+    
+    private Integer sold;
+    public Integer getSold() {
+        return sold;
+    }
+
+    public void setSold(Integer sold) {
+        this.sold = sold;
+    }
 
     @Column
     private Double weight;
