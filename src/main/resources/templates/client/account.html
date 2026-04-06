@@ -440,46 +440,57 @@ footer {
 
     <!-- ADD NEW ADDRESS -->
     <div class="mt-4 p-4 rounded-4"
-         style="background: rgba(69,162,158,0.05); border:1px dashed var(--accent-cyan)">
+     style="background: rgba(69,162,158,0.05); border:1px dashed var(--accent-cyan)">
 
-        <form th:action="@{/account/add-address}" method="post">
-            <div class="row g-3">
+    <form th:action="@{/account/add-address}" method="post">
+        <div class="row g-3">
 
-                <div class="col-md-6">
-                    <label class="form-label">Người nhận</label>
-                    <input type="text" name="recipientName" class="form-control" required>
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label">SĐT người nhận</label>
-                    <input type="text" name="recipientPhone" class="form-control" required>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Tỉnh/Thành</label>
-                    <input type="text" name="province" class="form-control" required>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Quận/Huyện</label>
-                    <input type="text" name="district" class="form-control" required>
-                </div>
-
-                <div class="col-md-12">
-                    <label class="form-label">Chi tiết</label>
-                    <input type="text" name="detail" class="form-control"
-                           placeholder="Số nhà, tên đường..." required>
-                </div>
-
-                <div class="col-12 text-end">
-                    <button class="btn btn-update">
-                        <i class="bi bi-plus-circle me-1"></i>Thêm địa chỉ
-                    </button>
-                </div>
-
+            <div class="col-md-6">
+                <label class="form-label">Người nhận</label>
+                <input type="text" name="recipientName" class="form-control" required>
             </div>
-        </form>
-    </div>
+
+            <div class="col-md-6">
+                <label class="form-label">SĐT người nhận</label>
+                <input type="text" name="recipientPhone" class="form-control" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Tỉnh/Thành</label>
+                <select id="province" name="province" class="form-control" required>
+                    <option value="">-- Chọn tỉnh --</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Quận/Huyện</label>
+                <select id="district" name="district" class="form-control" required>
+                    <option value="">-- Chọn quận --</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Phường/Xã</label>
+                <select id="ward" name="ward" class="form-control">
+                    <option value="">-- Chọn phường --</option>
+                </select>
+            </div>
+
+            <div class="col-md-12">
+                <label class="form-label">Chi tiết</label>
+                <input type="text" name="detail" class="form-control"
+                       placeholder="Số nhà, tên đường..." required>
+            </div>
+
+            <div class="col-12 text-end">
+                <button class="btn btn-update">
+                    <i class="bi bi-plus-circle me-1"></i>Thêm địa chỉ
+                </button>
+            </div>
+
+        </div>
+    </form>
+</div>
 </div>
 						<div class="col-12 mt-5">
 							<div class="p-4 rounded-4"
@@ -526,6 +537,57 @@ footer {
         const icon = document.getElementById('themeIcon');
         if(icon) icon.className = savedTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
     });
+    const provinceSelect = document.getElementById("province");
+    const districtSelect = document.getElementById("district");
+    const wardSelect = document.getElementById("ward");
+
+    fetch("https://provinces.open-api.vn/api/?depth=1")
+        .then(res => res.json())
+        .then(data => {
+            data.forEach(p => {
+                provinceSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+        });
+
+    provinceSelect.addEventListener("change", () => {
+        const provinceName = provinceSelect.value;
+
+        districtSelect.innerHTML = `<option value="">-- Chọn quận --</option>`;
+        wardSelect.innerHTML = `<option value="">-- Chọn phường --</option>`;
+
+        fetch("https://provinces.open-api.vn/api/?depth=2")
+            .then(res => res.json())
+            .then(data => {
+                const province = data.find(p => p.name === provinceName);
+                if (!province) return;
+
+                province.districts.forEach(d => {
+                    districtSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                });
+            });
+    });
+
+    districtSelect.addEventListener("change", () => {
+        const provinceName = provinceSelect.value;
+        const districtName = districtSelect.value;
+
+        wardSelect.innerHTML = `<option value="">-- Chọn phường --</option>`;
+
+        fetch("https://provinces.open-api.vn/api/?depth=3")
+            .then(res => res.json())
+            .then(data => {
+                const province = data.find(p => p.name === provinceName);
+                if (!province) return;
+
+                const district = province.districts.find(d => d.name === districtName);
+                if (!district) return;
+
+                district.wards.forEach(w => {
+                    wardSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+                });
+            });
+    });
+    
 </script>
 </body>
 </html>

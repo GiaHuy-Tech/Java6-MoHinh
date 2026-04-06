@@ -55,7 +55,6 @@ public class AccountController {
         }
         accountRepo.save(account);
 
-        // 🔥 LẤY DANH SÁCH ĐỊA CHỈ
         List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
 
         model.addAttribute("account", account);
@@ -91,14 +90,15 @@ public class AccountController {
         return "redirect:/account";
     }
 
-    // ================= CRUD ADDRESS =================
-
+    // ================= ADD ADDRESS =================
     @PostMapping("/add-address")
-    public String addAddress(@RequestParam String recipientName,
-                             @RequestParam String recipientPhone,
-                             @RequestParam String detail,
-                             @RequestParam String district,
-                             @RequestParam String province) {
+    public String addAddress(
+            @RequestParam String recipientName,
+            @RequestParam String recipientPhone,
+            @RequestParam String detail,
+            @RequestParam String district,
+            @RequestParam String province,
+            @RequestParam(required = false) String ward) {
 
         Account acc = getSessionAccount();
         if (acc == null) return "redirect:/login";
@@ -110,12 +110,15 @@ public class AccountController {
         address.setDetail(detail);
         address.setDistrict(district);
         address.setProvince(province);
+        address.setWard(ward);
         address.setIsDefault(false);
+        address.setIsActive(true);
 
         addressRepo.save(address);
         return "redirect:/account";
     }
 
+    // ================= DELETE =================
     @PostMapping("/delete-address")
     public String deleteAddress(@RequestParam Long id) {
         Account acc = getSessionAccount();
@@ -127,6 +130,7 @@ public class AccountController {
         return "redirect:/account";
     }
 
+    // ================= SET DEFAULT =================
     @PostMapping("/set-default")
     public String setDefault(@RequestParam Long id) {
         Account acc = getSessionAccount();

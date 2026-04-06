@@ -14,6 +14,7 @@ import com.example.demo.config.VNPayConfig;
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.VNPayService;
+import com.example.demo.service.ShippingService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -29,11 +30,13 @@ public class CheckoutController {
     @Autowired private VoucherRepository voucherRepo;
     @Autowired private AddressRepository addressRepo;
     @Autowired private VNPayService vnPayService;
+    @Autowired private ShippingService shippingService;
 
     // ================== VIEW ==================
     @GetMapping
     public String viewCheckout(HttpSession session,
                               @RequestParam(required = false) String voucherCode,
+                              @RequestParam(required = false) Long addressId,
                               Model model) {
 
         Account account = getAccount(session);
@@ -46,6 +49,28 @@ public class CheckoutController {
                 .map(item -> item.getProduct().getPrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // ===== ADDRESS =====
+        List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
+
+        Address selectedAddress = null;
+
+        if (addressId != null) {
+            selectedAddress = addressRepo
+                    .findByIdAndAccount_Id(addressId, account.getId())
+                    .orElse(null);
+        }
+
+        // nếu chưa chọn → lấy default
+        if (selectedAddress == null) {
+            selectedAddress = addresses.stream()
+                    .filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        // ===== SHIP (FIX CHUẨN) =====
+        BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList);
 
         // ===== VOUCHER =====
         List<VoucherDetail> myVoucherDetails =
@@ -65,11 +90,10 @@ public class CheckoutController {
                 .filter(v -> v.getMinOrderValue() == null
                         || rawTotal.doubleValue() >= v.getMinOrderValue())
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
         // ===== APPLY VOUCHER =====
         BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal feeShip = BigDecimal.valueOf(30000);
 
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Optional<Voucher> vOpt = savedVouchers.stream()
@@ -94,11 +118,10 @@ public class CheckoutController {
 
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
 
-        // 🔥 FIX CHUẨN: dùng method mới
-        List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
-
+        // ===== MODEL =====
         model.addAttribute("cartList", cartList);
         model.addAttribute("addresses", addresses);
+        model.addAttribute("selectedAddressId", addressId);
         model.addAttribute("rawTotal", rawTotal);
         model.addAttribute("discount", discount);
         model.addAttribute("feeShip", feeShip);
@@ -128,8 +151,15 @@ public class CheckoutController {
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // ===== ADDRESS =====
+        Address selectedAddress = addressRepo
+                .findByIdAndAccount_Id(addressId, account.getId())
+                .orElse(null);
+
+        // ===== SHIP (FIX CHUẨN) =====
+        BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList);
+
         BigDecimal discount = BigDecimal.ZERO;
-        BigDecimal feeShip = BigDecimal.valueOf(30000);
 
         // ===== VOUCHER =====
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
@@ -152,7 +182,6 @@ public class CheckoutController {
                 if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
                 if (Boolean.TRUE.equals(v.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
 
-                // update voucher detail
                 voucherDetailRepo.findValidVoucherForAccount(account.getId(), voucherCode.trim())
                         .ifPresent(vd -> {
                             vd.setIsUsed(true);
@@ -167,11 +196,6 @@ public class CheckoutController {
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
-
-        // 🔥 FIX CHUẨN BẢO MẬT
-        Address selectedAddress = addressRepo
-                .findByIdAndAccount_Id(addressId, account.getId())
-                .orElse(null);
 
         // ===== CREATE ORDER =====
         Orders order = new Orders();
@@ -193,7 +217,6 @@ public class CheckoutController {
 
         ordersRepo.save(order);
 
-        // ===== ORDER DETAIL =====
         for (CartDetail item : cartList) {
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
@@ -205,7 +228,6 @@ public class CheckoutController {
 
         cartDetailRepo.deleteAll(cartList);
 
-        // ===== PAYMENT =====
         if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
             long amount = finalTotal.longValue() * 100;
 
@@ -221,28 +243,6 @@ public class CheckoutController {
         return "redirect:/orders";
     }
 
-    // ================== VNPAY RETURN ==================
-    @GetMapping("/vnpay-return")
-    public String vnpayReturn(HttpServletRequest request) {
-        int paymentStatus = vnPayService.orderReturn(request);
-        String orderIdStr = request.getParameter("vnp_OrderInfo");
-
-        if (orderIdStr != null) {
-            Orders order = ordersRepo.findById(Integer.valueOf(orderIdStr)).orElse(null);
-
-            if (order != null && paymentStatus == 1) {
-                order.setPaymentStatus(true);
-                order.setStatus(1);
-                order.setPaymentMethod("VNPAY");
-                ordersRepo.save(order);
-                return "redirect:/orders?success";
-            }
-        }
-
-        return "redirect:/cart?error";
-    }
-
-    // ================== GET ACCOUNT ==================
     private Account getAccount(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
         if (account == null) account = (Account) session.getAttribute("user");
