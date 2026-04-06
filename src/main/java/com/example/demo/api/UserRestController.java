@@ -1,11 +1,12 @@
 package com.example.demo.api;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDate; // 1. Thay java.util.Date bằng cái này
+import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,7 +39,6 @@ public class UserRestController {
             @RequestParam("phone") String phone,
             @RequestParam("address") String address,
             @RequestParam("gender") Boolean gender,
-            // 2. Sửa 'Date' thành 'LocalDate' ở dòng dưới đây
             @RequestParam("birthDay") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate birthDay,
             @RequestParam(value = "file", required = false) MultipartFile file) {
         try {
@@ -47,41 +47,46 @@ public class UserRestController {
                 return ResponseEntity.badRequest().body("Email đã tồn tại!");
             }
 
+            // 2. Khởi tạo đối tượng Account
             Account acc = new Account();
             acc.setEmail(email);
             acc.setPassword(password);
             acc.setFullName(fullName);
             acc.setPhone(phone);
             acc.setGender(gender);
+            acc.setBirthDay(birthDay); // Đã khớp với tên thuộc tính birthDay
+            acc.setRole(false);        // Mặc định là User
+            acc.setActive(true);       // ĐÃ SỬA: dùng setActive thay vì setActived
+            acc.setTotalSpending(BigDecimal.ZERO); // Khởi tạo chi tiêu bằng 0
 
-            // 3. Dòng này sẽ hết lỗi vì cả 2 đều là LocalDate
-
-            acc.setRole(false);
-            acc.setActived(true);
-
-            // 2. Xử lý file ảnh
+            // 3. Xử lý file ảnh
             if (file != null && !file.isEmpty()) {
-                String fileName = file.getOriginalFilename();
-                // Lưu ý: Đường dẫn này có thể cần chỉnh lại tùy vào môi trường chạy (Window/Linux)
-                String uploadDir = new File("src/main/resources/static/images/").getAbsolutePath();
+                String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                
+                // Đường dẫn lưu file (Cố định vào thư mục uploads để tránh mất ảnh khi rebuild)
+                String uploadDir = new File("uploads/images/").getAbsolutePath();
                 File dir = new File(uploadDir);
                 if (!dir.exists()) {
-					dir.mkdirs();
-				}
+                    dir.mkdirs();
+                }
 
                 Path filePath = Paths.get(uploadDir, fileName);
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                acc.setPhoto("/images/" + fileName);
+                
+                // ĐÃ SỬA: dùng setAvatar thay vì setPhoto
+                acc.setAvatar(fileName); 
             } else {
-                acc.setPhoto("user.png");
+                acc.setAvatar("user.png"); // ĐÃ SỬA: dùng setAvatar thay vì setPhoto
             }
 
+            // 4. Lưu vào Database
             repo.save(acc);
+            
             return ResponseEntity.status(HttpStatus.CREATED).body(acc);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi hệ thống: " + e.getMessage());
         }
     }
 }
