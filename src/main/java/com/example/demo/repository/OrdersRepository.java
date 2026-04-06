@@ -16,23 +16,24 @@ import com.example.demo.model.Products;
 @Repository
 public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
-    // 1. Tìm đơn hàng theo tài khoản (Dùng cho trang Orders)
+    // 1. Tìm đơn hàng theo tài khoản
     List<Orders> findByAccount_IdOrderByCreatedDateDesc(Integer accountId);
     List<Orders> findByAccount_IdOrderByCreatedDateAsc(Integer accountId);
 
-    // 2. Đếm số đơn hàng của tài khoản (Dùng cho trang Account)
+    // 2. Đếm số đơn hàng
     @Query("SELECT COUNT(o) FROM Orders o WHERE o.account.id = :accountId")
     Long countByAccountId(@Param("accountId") Integer accountId);
 
-    // 3. Tổng chi tiêu của tài khoản (Hạng thành viên)
-    @Query("SELECT SUM(o.total) FROM Orders o WHERE o.account.id = :accountId AND o.status = 4")
+    // 3. Tổng chi tiêu (FIX OVERFLOW)
+    @Query("""
+        SELECT SUM(CAST(o.total AS big_decimal)) 
+        FROM Orders o 
+        WHERE o.account.id = :accountId AND o.status = 4
+    """)
     BigDecimal sumTotalByAccountAndStatus(@Param("accountId") Integer accountId);
 
-    // ========================================================================
-    // CÁC HÀM THỐNG KÊ (Dùng cho StatsController)
-    // ========================================================================
+    // ===================== STATS =====================
 
-    // 4. Đếm số đơn hàng hoàn tất theo khoảng ngày (Dòng 61 Controller)
     @Query("""
         SELECT COUNT(o) FROM Orders o 
         WHERE o.status >= 3 
@@ -41,7 +42,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     Long countCompletedOrdersByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    // 5. Đếm số đơn hàng theo tháng trong năm (Dòng 62 & 116 Controller)
     @Query("""
         SELECT FUNCTION('MONTH', o.createdDate), COUNT(o) 
         FROM Orders o 
@@ -51,7 +51,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> countOrdersPerMonthByYear(@Param("year") int year);
 
-    // 6. Đếm số đơn hàng theo tháng trong khoảng ngày (Dòng 115 Controller)
     @Query("""
         SELECT FUNCTION('MONTH', o.createdDate), COUNT(o) 
         FROM Orders o 
@@ -63,19 +62,20 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> countOrdersPerMonthByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    // 7. Tổng doanh thu theo khoảng ngày (Dòng 74 Controller)
+    // ✅ FIX OVERFLOW
     @Query("""
-        SELECT SUM(d.quantity * d.price) 
+        SELECT SUM(CAST(d.quantity * d.price AS big_decimal)) 
         FROM OrderDetail d JOIN d.order o 
         WHERE o.status >= 3 
         AND (:from IS NULL OR o.createdDate >= :from) 
         AND (:to IS NULL OR o.createdDate <= :to)
     """)
-    Long getTotalRevenueByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+    BigDecimal getTotalRevenueByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    // 8. Doanh thu theo tháng trong khoảng ngày (Dòng 95 Controller)
+    // ✅ FIX OVERFLOW
     @Query("""
-        SELECT FUNCTION('MONTH', o.createdDate), SUM(d.quantity * d.price) 
+        SELECT FUNCTION('MONTH', o.createdDate), 
+               SUM(CAST(d.quantity * d.price AS big_decimal)) 
         FROM OrderDetail d JOIN d.order o 
         WHERE o.status >= 3 
         AND (:from IS NULL OR o.createdDate >= :from) 
@@ -85,9 +85,10 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> getRevenueByMonthByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    // 9. Doanh thu theo tháng trong năm (Dòng 75 & 96 Controller)
+    // ✅ FIX OVERFLOW
     @Query("""
-        SELECT FUNCTION('MONTH', o.createdDate), SUM(d.quantity * d.price) 
+        SELECT FUNCTION('MONTH', o.createdDate), 
+               SUM(CAST(d.quantity * d.price AS big_decimal)) 
         FROM OrderDetail d JOIN d.order o 
         WHERE FUNCTION('YEAR', o.createdDate) = :year AND o.status >= 3 
         GROUP BY FUNCTION('MONTH', o.createdDate) 
@@ -95,18 +96,18 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> getRevenueByMonth(@Param("year") int year);
 
-    // 10. Doanh thu theo danh mục (Dòng 82 Controller)
+    // ✅ FIX OVERFLOW
     @Query("""
-        SELECT c.name, SUM(d.quantity * d.price) 
+        SELECT c.name, SUM(CAST(d.quantity * d.price AS big_decimal)) 
         FROM OrderDetail d JOIN d.order o JOIN d.product p JOIN p.category c 
         WHERE o.status >= 3 
         GROUP BY c.name
     """)
     List<Object[]> getRevenueByCategory();
 
-    // 11. Doanh thu theo danh mục & ngày (Dòng 81 Controller)
+    // ✅ FIX OVERFLOW
     @Query("""
-        SELECT c.name, SUM(d.quantity * d.price) 
+        SELECT c.name, SUM(CAST(d.quantity * d.price AS big_decimal)) 
         FROM OrderDetail d JOIN d.order o JOIN d.product p JOIN p.category c 
         WHERE o.status >= 3 
         AND (:from IS NULL OR o.createdDate >= :from) 
@@ -115,7 +116,6 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
     """)
     List<Object[]> getRevenueByCategoryByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    // 12. Top sản phẩm bán chạy (Dòng 108 Controller)
     @Query("""
         SELECT p 
         FROM OrderDetail d JOIN d.product p JOIN d.order o 
