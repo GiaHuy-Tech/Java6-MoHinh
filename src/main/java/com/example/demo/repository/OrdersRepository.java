@@ -16,6 +16,9 @@ import com.example.demo.model.Products;
 @Repository
 public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
+    // ===================== AUTO TASK (FIX LỖI) =====================
+    List<Orders> findByStatusAndCreatedDateBefore(int status, LocalDateTime date);
+
     // 1. Tìm đơn hàng theo tài khoản
     List<Orders> findByAccount_IdOrderByCreatedDateDesc(Integer accountId);
     List<Orders> findByAccount_IdOrderByCreatedDateAsc(Integer accountId);
