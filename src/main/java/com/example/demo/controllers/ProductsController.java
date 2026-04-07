@@ -1,12 +1,17 @@
 package com.example.demo.controllers;
 
-import java.math.BigDecimal; // Import BigDecimal
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import jakarta.servlet.http.HttpSession;
+
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
 
@@ -19,19 +24,22 @@ public class ProductsController {
     @Autowired
     private CategoryRepository categoryRepo;
 
+    @Autowired
+    private CartDetailRepository cartRepo; // 🔥 THÊM
+
     @GetMapping("/products")
     public String productPage(
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
-            @RequestParam(required = false) BigDecimal minPrice, // Tham số mới
-            @RequestParam(required = false) BigDecimal maxPrice, // Tham số mới
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "8") int size,
             Model model,
             HttpSession session) {
 
-        // Xử lý sort
+        // ===== SORT =====
         Sort sorting = Sort.unsorted();
         if ("asc".equalsIgnoreCase(sort)) {
             sorting = Sort.by("price").ascending();
@@ -42,15 +50,15 @@ public class ProductsController {
         Pageable pageable = PageRequest.of(page < 0 ? 0 : page, size, sorting);
         Page<Products> productPage;
 
-        // Thiết lập giá mặc định nếu để trống để tránh lỗi query
+        // ===== PRICE DEFAULT =====
         BigDecimal min = (minPrice == null) ? BigDecimal.ZERO : minPrice;
         BigDecimal max = (maxPrice == null) ? new BigDecimal("999999999") : maxPrice;
 
-        // --- LOGIC LỌC TỔNG HỢP ---
         boolean hasKeyword = (keyword != null && !keyword.isBlank());
         boolean hasCategory = (categoryId != null);
         boolean hasPriceFilter = (minPrice != null || maxPrice != null);
 
+        // ===== FILTER LOGIC =====
         if (hasPriceFilter) {
             if (hasKeyword && hasCategory) {
                 productPage = productRepo.findByCategoryIdAndNameContainingIgnoreCaseAndPriceBetween(categoryId, keyword, min, max, pageable);
@@ -62,7 +70,6 @@ public class ProductsController {
                 productPage = productRepo.findByPriceBetween(min, max, pageable);
             }
         } else {
-            // Logic cũ khi không có lọc giá
             if (hasKeyword && hasCategory) {
                 productPage = productRepo.findByCategoryIdAndNameContainingIgnoreCase(categoryId, keyword, pageable);
             } else if (hasKeyword) {
@@ -74,21 +81,33 @@ public class ProductsController {
             }
         }
 
-        // Truyền dữ liệu ra view
+        // ===== DATA =====
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("productPage", productPage);
         model.addAttribute("categories", categoryRepo.findAll());
 
-        // Giữ lại các giá trị filter để hiển thị trên Form
         model.addAttribute("selectedCategory", categoryId);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedSort", sort);
         model.addAttribute("minPrice", minPrice);
         model.addAttribute("maxPrice", maxPrice);
 
-        // Hiển thị User
+        // ===== 🔥 FIX LOGIN (QUAN TRỌNG NHẤT) =====
         Account user = (Account) session.getAttribute("account");
+        if (user == null) {
+            user = (Account) session.getAttribute("user");
+        }
         model.addAttribute("user", user);
+
+        // ===== 🔥 FIX MINI CART =====
+        List<CartDetail> cart = new ArrayList<>();
+
+        if (user != null) {
+            cart = cartRepo.findCartWithProduct(user.getId());
+        }
+
+        model.addAttribute("cart", cart);
+        model.addAttribute("cartSize", cart.size());
 
         return "client/products";
     }
