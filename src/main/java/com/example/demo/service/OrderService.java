@@ -9,9 +9,16 @@ import com.example.demo.repository.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderService {
+	
+	@Autowired
+	ShippingService shippingService;   // thêm dòng này
+
+	@Autowired
+	AddressRepository addressRepository; // thêm dòng này
 
     @Autowired
     CartDetailRepository cartDetailRepo;
@@ -22,7 +29,7 @@ public class OrderService {
     @Autowired
     OrdersDetailRepository orderDetailRepo;
 
-    public void createOrder(Account acc, String voucherCode) {
+    public void createOrder(Account acc, String voucherCode,  Long addressId) {
 
         // 1. Lấy danh sách giỏ hàng trực tiếp theo Account ID
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(acc.getId());
@@ -49,10 +56,17 @@ public class OrderService {
         }
 
         // 4. Tính phí ship (Trên 1 triệu thì freeship, ngược lại 30k)
-        BigDecimal feeShip = new BigDecimal("30000");
-        if (rawTotal.compareTo(new BigDecimal("1000000")) > 0) {
-            feeShip = BigDecimal.ZERO;
-        }
+//        BigDecimal feeShip = new BigDecimal("30000");
+//        if (rawTotal.compareTo(new BigDecimal("1000000")) > 0) {
+//            feeShip = BigDecimal.ZERO;
+//        }
+        
+        Map<String, Object> shippingResult = shippingService.calculate(addressId, acc);
+        BigDecimal feeShip = BigDecimal.valueOf((Long) shippingResult.get("feeShip"));
+
+        // Lấy Address entity để gắn vào đơn hàng
+        Address address = addressRepository.findById(addressId).orElse(null);
+        
 
         // 5. Tính tổng thanh toán cuối cùng: final = raw - discount + freeship
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
@@ -65,6 +79,7 @@ public class OrderService {
         // 6. Tạo đơn hàng (Lưu ý: Tên model là Orders có 's')
         Orders order = new Orders();
         order.setAccount(acc);
+        order.setAddress(address); 
         order.setCreatedDate(new Date());
         order.setTotal(finalTotal);
         order.setStatus(0); // 0: Chờ xác nhận

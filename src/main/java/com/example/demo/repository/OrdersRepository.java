@@ -1,69 +1,131 @@
 package com.example.demo.repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import com.example.demo.model.Orders;
 import com.example.demo.model.Products;
-import com.example.demo.model.OrderDetail;
 
 @Repository
-public interface OrdersRepository extends JpaRepository<Orders, Integer> { // Sửa Long -> Integer
+public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
-    // --- CÁC HÀM MỚI THÊM CHO CONTROLLER ---
-    // Tìm đơn hàng theo Account ID và sắp xếp ngày tạo giảm dần (Mới nhất)
-    List<Orders> findByAccount_IdOrderByCreatedDateDesc(Integer accountId);
+	// ===================== AUTO TASK (FIX LỖI) =====================
+	List<Orders> findByStatusAndCreatedDateBefore(int status, LocalDateTime date);
 
-    // Tìm đơn hàng theo Account ID và sắp xếp ngày tạo tăng dần (Cũ nhất)
-    List<Orders> findByAccount_IdOrderByCreatedDateAsc(Integer accountId);
-    // ---------------------------------------
+	// 1. Tìm đơn hàng theo tài khoản
+	List<Orders> findByAccount_IdOrderByCreatedDateDesc(Integer accountId);
 
-    // 1. Đếm tổng số đơn hàng đã hoàn tất (Status = 3)
-    @Query("SELECT COUNT(o) FROM Orders o WHERE o.status = 3")
-    long countCompletedOrders();
+	List<Orders> findByAccount_IdOrderByCreatedDateAsc(Integer accountId);
 
-    // 2. Thống kê doanh thu theo Danh mục (Dựa trên đơn hoàn tất status = 3)
-    // Sử dụng d.price (giá lúc mua) thay vì p.price (giá hiện tại) để chính xác doanh thu thực tế
-    @Query("SELECT c.name, SUM(d.quantity * d.price) " +
-           "FROM OrderDetail d " + 
-           "JOIN d.order o " +
-           "JOIN d.product p " +
-           "JOIN p.category c " +
-           "WHERE o.status = 3 " + 
-           "GROUP BY c.name")
-    List<Object[]> getRevenueByCategory();
+	// 2. Đếm số đơn hàng
+	@Query("SELECT COUNT(o) FROM Orders o WHERE o.account.id = :accountId")
+	Long countByAccountId(@Param("accountId") Integer accountId);
 
-    // 3. Thống kê doanh thu theo từng tháng của năm chỉ định
-    @Query("SELECT MONTH(o.createdDate), SUM(d.quantity * d.price) " +
-           "FROM OrderDetail d " + 
-           "JOIN d.order o " +
-           "WHERE YEAR(o.createdDate) = ?1 AND o.status = 3 " + 
-           "GROUP BY MONTH(o.createdDate) " +
-           "ORDER BY MONTH(o.createdDate)")
-    List<Object[]> getRevenueByMonth(int year);
-    
-    // 4. Tổng doanh thu toàn thời gian
-    @Query("SELECT SUM(d.quantity * d.price) " +
-           "FROM OrderDetail d " + 
-           "JOIN d.order o " +
-           "WHERE o.status = 3")
-    Long getTotalRevenue();
-    
-    // 5. Top bán chạy (Dựa trên số lượng đã bán trong các đơn hoàn tất)
-    @Query("SELECT p FROM OrderDetail d " +
-           "JOIN d.product p " +
-           "JOIN d.order o " +
-           "WHERE o.status = 3 " +
-           "GROUP BY p " +
-           "ORDER BY SUM(d.quantity) DESC")
-    List<Products> findTopSellingProduct(org.springframework.data.domain.Pageable pageable);
+	// 3. Tổng chi tiêu (FIX OVERFLOW)
+	@Query("""
+			    SELECT SUM(CAST(o.total AS big_decimal))
+			    FROM Orders o
+			    WHERE o.account.id = :accountId AND o.status = 4
+			""")
+	BigDecimal sumTotalByAccountAndStatus(@Param("accountId") Integer accountId);
 
-    // 6. Đếm số đơn theo tháng trong năm nay
-    @Query("SELECT MONTH(o.createdDate), COUNT(o) " +
-           "FROM Orders o " +
-           "WHERE YEAR(o.createdDate) = YEAR(CURRENT_DATE) AND o.status = 3 " +
-           "GROUP BY MONTH(o.createdDate) " +
-           "ORDER BY MONTH(o.createdDate)")
-    List<Object[]> countOrdersPerMonth();
+	// ===================== STATS =====================
+
+	@Query("""
+			    SELECT COUNT(o) FROM Orders o
+			    WHERE o.status >= 3
+			    AND (:from IS NULL OR o.createdDate >= :from)
+			    AND (:to IS NULL OR o.createdDate <= :to)
+			""")
+	Long countCompletedOrdersByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+	@Query("""
+			    SELECT FUNCTION('MONTH', o.createdDate), COUNT(o)
+			    FROM Orders o
+			    WHERE FUNCTION('YEAR', o.createdDate) = :year AND o.status >= 3
+			    GROUP BY FUNCTION('MONTH', o.createdDate)
+			    ORDER BY FUNCTION('MONTH', o.createdDate)
+			""")
+	List<Object[]> countOrdersPerMonthByYear(@Param("year") int year);
+
+	@Query("""
+			    SELECT FUNCTION('MONTH', o.createdDate), COUNT(o)
+			    FROM Orders o
+			    WHERE o.status >= 3
+			    AND (:from IS NULL OR o.createdDate >= :from)
+			    AND (:to IS NULL OR o.createdDate <= :to)
+			    GROUP BY FUNCTION('MONTH', o.createdDate)
+			    ORDER BY FUNCTION('MONTH', o.createdDate)
+			""")
+	List<Object[]> countOrdersPerMonthByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+	// ✅ FIX OVERFLOW
+	@Query("""
+			    SELECT SUM(CAST(d.quantity * d.price AS big_decimal))
+			    FROM OrderDetail d JOIN d.order o
+			    WHERE o.status >= 3
+			    AND (:from IS NULL OR o.createdDate >= :from)
+			    AND (:to IS NULL OR o.createdDate <= :to)
+			""")
+	BigDecimal getTotalRevenueByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+	// ✅ FIX OVERFLOW
+	@Query("""
+			    SELECT FUNCTION('MONTH', o.createdDate),
+			           SUM(CAST(d.quantity * d.price AS big_decimal))
+			    FROM OrderDetail d JOIN d.order o
+			    WHERE o.status >= 3
+			    AND (:from IS NULL OR o.createdDate >= :from)
+			    AND (:to IS NULL OR o.createdDate <= :to)
+			    GROUP BY FUNCTION('MONTH', o.createdDate)
+			    ORDER BY FUNCTION('MONTH', o.createdDate)
+			""")
+	List<Object[]> getRevenueByMonthByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+	// ✅ FIX OVERFLOW
+	@Query("""
+			    SELECT FUNCTION('MONTH', o.createdDate),
+			           SUM(CAST(d.quantity * d.price AS big_decimal))
+			    FROM OrderDetail d JOIN d.order o
+			    WHERE FUNCTION('YEAR', o.createdDate) = :year AND o.status >= 3
+			    GROUP BY FUNCTION('MONTH', o.createdDate)
+			    ORDER BY FUNCTION('MONTH', o.createdDate)
+			""")
+	List<Object[]> getRevenueByMonth(@Param("year") int year);
+
+	// ✅ FIX OVERFLOW
+	@Query("""
+			    SELECT c.name, SUM(CAST(d.quantity * d.price AS big_decimal))
+			    FROM OrderDetail d JOIN d.order o JOIN d.product p JOIN p.category c
+			    WHERE o.status >= 3
+			    GROUP BY c.name
+			""")
+	List<Object[]> getRevenueByCategory();
+
+	// ✅ FIX OVERFLOW
+	@Query("""
+			    SELECT c.name, SUM(CAST(d.quantity * d.price AS big_decimal))
+			    FROM OrderDetail d JOIN d.order o JOIN d.product p JOIN p.category c
+			    WHERE o.status >= 3
+			    AND (:from IS NULL OR o.createdDate >= :from)
+			    AND (:to IS NULL OR o.createdDate <= :to)
+			    GROUP BY c.name
+			""")
+	List<Object[]> getRevenueByCategoryByDate(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+	@Query("""
+			    SELECT p
+			    FROM OrderDetail d JOIN d.product p JOIN d.order o
+			    WHERE o.status >= 3
+			    GROUP BY p
+			    ORDER BY SUM(d.quantity) DESC
+			""")
+	List<Products> findTopSellingProduct(Pageable pageable);
 }
