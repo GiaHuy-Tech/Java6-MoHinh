@@ -1,13 +1,6 @@
 package com.example.demo.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,46 +16,69 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ===== RELATION =====
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @Column(name = "recipient_name",columnDefinition = "nvarchar(255)")
+    // ===== INFO =====
+    @Column(name = "recipient_name", columnDefinition = "nvarchar(255)")
     private String recipientName;
 
     @Column(name = "recipient_phone")
     private String recipientPhone;
 
+    // ===== LOCATION =====
     @Column(columnDefinition = "nvarchar(255)")
     private String province;
-    
+
     @Column(columnDefinition = "nvarchar(255)")
     private String district;
-    
-    @Column(columnDefinition = "nvarchar(MAX)") // detail thường dài nên để MAX hoặc 500
-    private String detail;
+
+    @Column(columnDefinition = "nvarchar(255)")
+    private String ward; // 🔥 THÊM (GHN có ward)
 
     @Column(name = "ward_code")
-    private String wardCode;
+    private String wardCode; // GHN API dùng code
 
+    @Column(columnDefinition = "nvarchar(MAX)")
+    private String detail;
+
+    // ===== GPS (🔥 xịn hơn tính distance chuẩn) =====
+    private Double latitude;
+    private Double longitude;
+
+    // ===== FLAG =====
     @Column(name = "is_default")
     private Boolean isDefault;
 
-    // --- Đã sửa: Nối chuỗi để tạo địa chỉ hoàn chỉnh ---
+    @Column(name = "is_active")
+    private Boolean isActive = true; // 🔥 tránh xoá cứng
+
+    // ===== AUTO FIX DATA =====
+    @PrePersist
+    @PreUpdate
+    public void normalize() {
+        if (recipientName != null) recipientName = recipientName.trim();
+        if (recipientPhone != null) recipientPhone = recipientPhone.trim();
+        if (province != null) province = province.trim();
+        if (district != null) district = district.trim();
+        if (ward != null) ward = ward.trim();
+        if (detail != null) detail = detail.trim();
+    }
+
+    // ===== FULL ADDRESS =====
     public String getFullAddress() {
-        String fullAddress = "";
-        
-        if (detail != null && !detail.trim().isEmpty()) {
-            fullAddress += detail.trim();
-        }
-        if (district != null && !district.trim().isEmpty()) {
-            fullAddress += (fullAddress.isEmpty() ? "" : ", ") + district.trim();
-        }
-        if (province != null && !province.trim().isEmpty()) {
-            fullAddress += (fullAddress.isEmpty() ? "" : ", ") + province.trim();
-        }
-        
-        // Nếu tất cả đều trống thì trả về câu thông báo mặc định
-        return fullAddress.isEmpty() ? "Chưa có thông tin chi tiết" : fullAddress;
+        StringBuilder sb = new StringBuilder();
+
+        if (detail != null && !detail.isBlank()) sb.append(detail.trim());
+        if (ward != null && !ward.isBlank())
+            sb.append((sb.length() > 0 ? ", " : "") + ward.trim());
+        if (district != null && !district.isBlank())
+            sb.append((sb.length() > 0 ? ", " : "") + district.trim());
+        if (province != null && !province.isBlank())
+            sb.append((sb.length() > 0 ? ", " : "") + province.trim());
+
+        return sb.length() > 0 ? sb.toString() : "Chưa có địa chỉ";
     }
 }

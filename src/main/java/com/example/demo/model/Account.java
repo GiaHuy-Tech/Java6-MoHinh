@@ -43,7 +43,8 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "membership_id")
     private Membership membership;
-
+    
+    
     @OneToMany(mappedBy = "account")
     private List<Address> addresses;
 
