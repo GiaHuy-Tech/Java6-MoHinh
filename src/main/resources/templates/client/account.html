@@ -29,7 +29,8 @@
 }
 
 body {
-	background-color: var(--bg-body); color: var(--text-light);
+	background-color: var(--bg-body);
+	color: var(--text-light);
 	font-family: 'Be Vietnam Pro', sans-serif;
 	transition: background-color 0.3s, color 0.3s;
 	overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column;
@@ -43,17 +44,24 @@ body {
 .badge-count { position: absolute; top: -6px; right: -8px; background: var(--accent-red); color: #fff; font-size: 0.65rem; padding: 2px 5px; border-radius: 50%; font-weight: 900; border: 2px solid var(--bg-nav);}
 
 /* UI CARDS */
-.account-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; box-shadow: 0 8px 30px var(--shadow); height: 100%; }
+.account-card {
+	background: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: 20px;
+	padding: 35px;
+	box-shadow: 0 10px 40px var(--shadow);
+	height: 100%;
+}
 .section-title { font-family: 'Montserrat'; font-weight: 800; color: var(--text-light); letter-spacing: 0.5px; border-left: 4px solid var(--text-main); padding-left: 10px; margin-bottom: 20px; font-size: 1.1rem;}
 
 /* AVATAR */
-.avatar-section { position: relative; width: 120px; margin: 0 auto 15px; }
-.avatar-display { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 0 3px var(--text-main), 0 8px 15px var(--shadow); transition: 0.3s; cursor: pointer; }
+.avatar-section { position: relative; width: 130px; margin: 0 auto 15px; }
+.avatar-display { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 0 3px var(--text-main), 0 8px 15px var(--shadow); transition: 0.3s; cursor: pointer; }
 .avatar-display:hover { filter: brightness(0.7); }
-.camera-icon { position: absolute; bottom: 0; right: 0; background: var(--text-main); color: #000; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); font-size: 1rem; pointer-events: none;}
+.camera-icon { position: absolute; bottom: 0px; right: 0px; background: var(--text-main); color: #000; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); font-size: 1rem; pointer-events: none;}
 
 /* STATS WIDGETS */
-.stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; transition: 0.3s; height: 100%; display: flex; flex-direction: column; justify-content: center;}
+.stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 10px; transition: 0.3s; height: 100%; display: flex; flex-direction: column; justify-content: center;}
 .stat-box:hover { border-color: var(--text-main); transform: translateY(-2px);}
 .stat-title { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--text-dim); margin-bottom: 5px;}
 .stat-value { font-size: 1.2rem; font-weight: 900; color: var(--text-light); font-family: 'Montserrat';}
@@ -93,7 +101,7 @@ body {
 .danger-zone .btn:hover { background: #e02454;}
 .danger-zone .form-control:focus { border-color: var(--accent-red) !important; box-shadow: 0 0 0 3px rgba(255, 46, 99, 0.1); }
 
-footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); padding: 20px 0; margin-top: auto; }
+footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); padding: 30px 0; margin-top: auto; }
 </style>
 </head>
 <body>
@@ -131,7 +139,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 		</div>
 	</nav>
 
-	<div class="container py-4">
+	<div class="container py-5 mb-5">
 		<div class="row g-4">
 			
 			<!-- CỘT TRÁI: PROFILE WIDGET -->
@@ -167,148 +175,16 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 							</div>
 						</div>
 						<div class="col-12">
-<<<<<<< HEAD
-							<form th:action="@{/account/update-phone}" method="post">
-								<label class="form-label">Số điện thoại liên lạc</label>
-								<div class="input-group">
-									<input type="text" name="phone" class="form-control"
-										th:value="${account.phone}"
-										placeholder="Nhập số điện thoại...">
-									<button class="btn btn-update px-4">LƯU</button>
-								</div>
-							</form>
-						</div>
-						<div class="col-12 mt-4">
-    <h5 class="fw-bold text-main mb-3">
-        <i class="bi bi-geo-alt me-2"></i>ĐỊA CHỈ GIAO HÀNG
-    </h5>
-
-    <!-- LIST ADDRESS -->
-    <div th:if="${addresses != null}">
-        <div th:each="addr : ${addresses}" class="p-3 mb-3 rounded-3 border"
-             style="border-color: var(--border-color); background: rgba(255,255,255,0.02)">
-
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="fw-bold text-white">
-                        <i class="bi bi-person me-1"></i>
-                        <span th:text="${addr.recipientName}"></span>
-                    </div>
-
-                    <div class="text-light small">
-                        <i class="bi bi-telephone me-1"></i>
-                        <span th:text="${addr.recipientPhone}"></span>
-                    </div>
-
-                    <div class="text-dim small mt-1">
-                        <i class="bi bi-geo me-1"></i>
-                        <span th:text="${addr.fullAddress}"></span>
-                    </div>
-
-                    <span th:if="${addr.isDefault}" 
-                          class="badge bg-success mt-2">Mặc định</span>
-                </div>
-
-                <div class="d-flex gap-2">
-
-                    <!-- SET DEFAULT -->
-                    <form th:action="@{/account/set-default}" method="post">
-                        <input type="hidden" name="id" th:value="${addr.id}">
-                        <button class="btn btn-sm btn-outline-info">Mặc định</button>
-                    </form>
-
-                    <!-- DELETE -->
-                    <form th:action="@{/account/delete-address}" method="post">
-                        <input type="hidden" name="id" th:value="${addr.id}">
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </form>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD NEW ADDRESS -->
-    <div class="mt-4 p-4 rounded-4"
-     style="background: rgba(69,162,158,0.05); border:1px dashed var(--accent-cyan)">
-
-    <form th:action="@{/account/add-address}" method="post">
-        <div class="row g-3">
-
-            <div class="col-md-6">
-                <label class="form-label">Người nhận</label>
-                <input type="text" name="recipientName" class="form-control" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">SĐT người nhận</label>
-                <input type="text" name="recipientPhone" class="form-control" required>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Tỉnh/Thành</label>
-                <select id="province" name="province" class="form-control" required>
-                    <option value="">-- Chọn tỉnh --</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Quận/Huyện</label>
-                <select id="district" name="district" class="form-control" required>
-                    <option value="">-- Chọn quận --</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Phường/Xã</label>
-                <select id="ward" name="ward" class="form-control">
-                    <option value="">-- Chọn phường --</option>
-                </select>
-            </div>
-
-            <div class="col-md-12">
-                <label class="form-label">Chi tiết</label>
-                <input type="text" name="detail" class="form-control"
-                       placeholder="Số nhà, tên đường..." required>
-            </div>
-
-            <div class="col-12 text-end">
-                <button class="btn btn-update">
-                    <i class="bi bi-plus-circle me-1"></i>Thêm địa chỉ
-                </button>
-            </div>
-
-        </div>
-    </form>
-</div>
-</div>
-						<div class="col-12 mt-5">
-							<div class="p-4 rounded-4"
-								style="background: rgba(255, 46, 99, 0.03); border: 1px dashed var(--accent-red);">
-								<form th:action="@{/account/update-password}" method="post">
-									<label class="form-label text-danger">Bảo mật & Mật
-										khẩu</label>
-									<div class="input-group">
-										<input type="password" name="password" class="form-control"
-											placeholder="Nhập mật khẩu mới">
-										<button class="btn btn-danger px-4 fw-bold">ĐỔI MẬT
-											KHẨU</button>
-									</div>
-								</form>
-=======
 							<div class="stat-box flex-row align-items-center justify-content-between p-3">
 								<div class="stat-title mb-0"><i class="bi bi-wallet2 text-success me-1"></i> TỔNG CHI</div>
 								<div class="stat-value text-main fs-5" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
->>>>>>> GiaHuy
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- CỘT PHẢI: GỘP TẤT CẢ VÀO 1 CARD LỚN -->
+			<!-- CỘT PHẢI: GỘP TẤT CẢ VÀO 1 CARD LỚN DUY NHẤT -->
 			<div class="col-xl-8 col-lg-8">
 				
 				<!-- Thông báo -->
@@ -319,10 +195,10 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 					<i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
 				</div>
 
-				<!-- CARD TỔNG BAO GỒM 3 PHẦN -->
+				<!-- TẤT CẢ NẰM TRONG ĐÂY -->
 				<div class="account-card">
-                    
-					<!-- PHẦN 1: THÔNG TIN CÁ NHÂN -->
+					
+					<!-- 1. THÔNG TIN CÁ NHÂN -->
 					<h6 class="section-title"><i class="bi bi-person-lines-fill me-2 text-main"></i> THÔNG TIN CÁ NHÂN</h6>
 					<div class="row g-3">
 						<div class="col-md-6">
@@ -347,18 +223,19 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 						</div>
 					</div>
 
-                    <!-- Đường phân cách -->
-                    <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
+					<hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
 
-					<!-- PHẦN 2: SỔ ĐỊA CHỈ -->
+					<!-- 2. SỔ ĐỊA CHỈ NHẬN HÀNG -->
 					<div class="d-flex justify-content-between align-items-center mb-3">
 						<h6 class="section-title mb-0"><i class="bi bi-geo-alt-fill me-2 text-main"></i> SỔ ĐỊA CHỈ</h6>
-						<button class="btn btn-sm btn-outline-info rounded-pill fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">
+						<!-- Nút Collapse Mở Form -->
+						<button class="btn btn-sm btn-outline-info rounded-pill fw-bold px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">
 							<i class="bi bi-plus-lg"></i> Thêm mới
 						</button>
 					</div>
 
-                    <div th:if="${addresses != null and !addresses.isEmpty()}" class="row g-2 mb-3">
+                    <!-- DANH SÁCH ĐỊA CHỈ -->
+                    <div th:if="${addresses != null and !addresses.isEmpty()}" class="row g-3 mb-3">
                         <div th:each="addr : ${addresses}" class="col-md-6">
 							<div class="address-card h-100" th:classappend="${addr.isDefault} ? 'is-default' : ''">
 								<div class="d-flex justify-content-between mb-1">
@@ -382,6 +259,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
                         </div>
                     </div>
 
+                    <!-- FORM THÊM ĐỊA CHỈ MỚI (Collapse) -->
 					<div class="collapse" id="collapseAddAddress">
 						<div class="add-address-zone mt-2 shadow-sm">
 							<h6 class="fw-bold mb-3 small" style="color: var(--text-light);"><i class="bi bi-pencil-square me-2 text-main"></i> Nhập thông tin địa chỉ mới</h6>
@@ -414,17 +292,16 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 										<input type="text" name="detail" class="form-control form-control-sm" placeholder="Số nhà, ngõ, tên đường, phường/xã..." required>
 									</div>
 									<div class="col-12 mt-3 text-end">
-										<button class="btn btn-update py-2 px-4"><i class="bi bi-save me-1"></i> LƯU</button>
+										<button class="btn btn-update py-2 px-4"><i class="bi bi-save me-1"></i> LƯU ĐỊA CHỈ NÀY</button>
 									</div>
 								</div>
 							</form>
 						</div>
 					</div>
 
-                    <!-- Đường phân cách -->
-                    <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
+					<hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
 
-					<!-- PHẦN 3: ĐỔI MẬT KHẨU -->
+					<!-- 3. ĐỔI MẬT KHẨU -->
 					<div class="danger-zone">
 						<h6 class="section-title border-danger text-danger mb-3"><i class="bi bi-shield-lock-fill me-2"></i> BẢO MẬT TÀI KHOẢN</h6>
 						<form th:action="@{/account/update-password}" method="post">
@@ -437,7 +314,8 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 						</form>
 					</div>
 
-				</div> <!-- End Card Tổng -->
+				</div> <!-- KẾT THÚC CARD TỔNG -->
+
 			</div>
 		</div>
 	</div>
@@ -460,66 +338,6 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
             localStorage.setItem('theme', newTheme);
         }
 
-<<<<<<< HEAD
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const icon = document.getElementById('themeIcon');
-        if(icon) icon.className = savedTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-    });
-    const provinceSelect = document.getElementById("province");
-    const districtSelect = document.getElementById("district");
-    const wardSelect = document.getElementById("ward");
-
-    fetch("https://provinces.open-api.vn/api/?depth=1")
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(p => {
-                provinceSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-            });
-        });
-
-    provinceSelect.addEventListener("change", () => {
-        const provinceName = provinceSelect.value;
-
-        districtSelect.innerHTML = `<option value="">-- Chọn quận --</option>`;
-        wardSelect.innerHTML = `<option value="">-- Chọn phường --</option>`;
-
-        fetch("https://provinces.open-api.vn/api/?depth=2")
-            .then(res => res.json())
-            .then(data => {
-                const province = data.find(p => p.name === provinceName);
-                if (!province) return;
-
-                province.districts.forEach(d => {
-                    districtSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
-                });
-            });
-    });
-
-    districtSelect.addEventListener("change", () => {
-        const provinceName = provinceSelect.value;
-        const districtName = districtSelect.value;
-
-        wardSelect.innerHTML = `<option value="">-- Chọn phường --</option>`;
-
-        fetch("https://provinces.open-api.vn/api/?depth=3")
-            .then(res => res.json())
-            .then(data => {
-                const province = data.find(p => p.name === provinceName);
-                if (!province) return;
-
-                const district = province.districts.find(d => d.name === districtName);
-                if (!district) return;
-
-                district.wards.forEach(w => {
-                    wardSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
-                });
-            });
-    });
-    
-</script>
-=======
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -566,6 +384,5 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
             });
         });
     </script>
->>>>>>> GiaHuy
 </body>
 </html>
