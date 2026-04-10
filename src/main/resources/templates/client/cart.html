@@ -630,14 +630,17 @@ footer .form-control:focus {
 							th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
 					</div>
 					<div class="d-flex justify-content-between mb-3">
-						<span class="opacity-75">Phí vận chuyển:</span> <span
-							class="text-success fw-bold">Miễn phí</span>
+						<span class="text-success">Phí vận chuyển:</span> <span
+							id="feeShipText" class="text-success fw-bold"
+							th:text="${feeShip == 0 ? 'MIỄN PHÍ' : #numbers.formatDecimal(feeShip, 0, 'COMMA', 0, 'POINT') + '₫'}">
+						</span>
 					</div>
 					<hr class="border-secondary">
 					<div class="d-flex justify-content-between align-items-center mb-4">
-						<span class="fw-bold">TỔNG CỘNG:</span> <span
-							class="fs-3 fw-bold text-main"
-							th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
+						<span class="fw-bold">TỔNG CỘNG:</span> <span id="finalTotalText"
+							class="price-text fs-4 fw-bold"
+							th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')} + '₫'">
+						</span>
 					</div>
 					<a th:href="${#lists.isEmpty(cartDetails) ? '#' : '/checkout'}"
 						class="btn-checkout-giant d-block text-center text-decoration-none shadow-sm"
@@ -737,6 +740,23 @@ footer .form-control:focus {
         fetch(url, { method: method })
             .then(() => location.reload());
     }
+    
+    document.getElementById("addressSelect")?.addEventListener("change", function () {
+        const addressId = this.value;
+
+        fetch(`/api/shipping/calculate?addressId=` + addressId)
+            .then(res => res.json())
+            .then(data => {
+                // update phí ship
+                document.getElementById("feeShipText").innerText =
+                    data.feeShip === 0 ? "MIỄN PHÍ" : data.feeShip.toLocaleString() + "₫";
+
+                // update tổng tiền
+                document.getElementById("finalTotalText").innerText =
+                    data.finalTotal.toLocaleString() + "₫";
+            })
+            .catch(err => console.error(err));
+    });
 
     // Điều khiển Mega Menu
     const btnMega = document.getElementById('btnMegaMenu');

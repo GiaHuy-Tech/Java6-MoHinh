@@ -3,20 +3,25 @@ package com.example.demo.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import java.nio.file.Paths;
 
 @Configuration
 public class StaticResourceConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Thêm ./ để chỉ định thư mục gốc project
+        // Lấy chính xác đường dẫn tuyệt đối (Absolute Path) từ ổ cứng máy tính
+        String avatarPath = Paths.get("uploads/avatar").toAbsolutePath().toUri().toString();
+        String categoriesPath = Paths.get("uploads/categories").toAbsolutePath().toUri().toString();
+        String productsPath = Paths.get("uploads/products").toAbsolutePath().toUri().toString();
+
         registry.addResourceHandler("/images/avatar/**")
-                .addResourceLocations("file:./uploads/avatar/");
+                .addResourceLocations(avatarPath);
 
         registry.addResourceHandler("/images/categories/**")
-                .addResourceLocations("file:./uploads/categories/");
+                .addResourceLocations(categoriesPath);
 
         registry.addResourceHandler("/images/products/**")
-                .addResourceLocations("file:./uploads/products/");
+                .addResourceLocations(productsPath);
     }
 }
