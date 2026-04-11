@@ -65,10 +65,10 @@ public class AccountController {
         }
         accountRepo.save(account);
 
-<<<<<<< HEAD
-=======
+
+
         // LẤY DANH SÁCH ĐỊA CHỈ
->>>>>>> GiaHuy
+
         List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
 
         model.addAttribute("account", account);

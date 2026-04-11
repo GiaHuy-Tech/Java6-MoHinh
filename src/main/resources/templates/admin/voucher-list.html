@@ -2,445 +2,309 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quản lý Voucher - MODEL WORLD</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý Voucher</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <style>
-        :root {
-            --bg-body: #050b14; 
-            --bg-sidebar: #02060a;
-            --bg-card: #06121e;
-            --text-main: #e0fbfc;
-            --text-muted: #8b9bb4;
-            --accent-cyan: #00f2ff;
-            --accent-hover: #00c3cc;
-            --sidebar-width: 260px;
-        }
+<style>
+body{
+    background:#f5f6f8;
+    font-family:Arial,sans-serif;
+    color:#333;
+}
 
-        body {
-            background: var(--bg-body);
-            color: var(--text-main);
-            font-family: 'Be Vietnam Pro', sans-serif;
-            overflow-x: hidden;
-            font-size: 0.95rem;
-        }
+/* Layout */
+#wrapper{
+    display:flex;
+    min-height:100vh;
+}
 
-        /* ------------------ WRAPPER & SIDEBAR ------------------ */
-        #wrapper { 
-            display: flex; 
-            width: 100%; 
-            overflow-x: hidden; /* Quan trọng: ẩn nội dung bị tràn khi menu thụt vào */
-        }
+#sidebar-wrapper{
+    width:240px;
+    background:#fff;
+    border-right:1px solid #ddd;
+    position:fixed;
+    height:100%;
+    overflow-y:auto;
+}
 
-        #sidebar-wrapper {
-            min-width: var(--sidebar-width);
-            max-width: var(--sidebar-width);
-            background: var(--bg-sidebar);
-            border-right: 1px solid rgba(0, 242, 255, 0.2);
-            min-height: 100vh;
-            position: fixed;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            transition: margin 0.3s ease-in-out; /* Thêm hiệu ứng trượt mượt mà */
-        }
+#page-content-wrapper{
+    margin-left:240px;
+    width:100%;
+}
 
-        .sidebar-heading {
-            padding: 1.5rem 1rem;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-            text-align: center;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.2);
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
+/* Sidebar */
+.sidebar-heading{
+    padding:20px;
+    font-size:20px;
+    font-weight:bold;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+    background:#f8f9fa;
+}
 
-        .list-group-item {
-            background: transparent;
-            color: var(--text-main);
-            border: none;
-            padding: 1.2rem 1.5rem;
-            border-left: 4px solid transparent; 
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: 0.2s ease;
-        }
+.list-group-item{
+    border:none;
+    padding:14px 20px;
+    color:#333;
+}
 
-        .list-group-item i { font-size: 1.2rem; }
+.list-group-item:hover,
+.list-group-item.active{
+    background:#e9ecef;
+    color:#000;
+    font-weight:bold;
+}
 
-        .list-group-item:hover,
-        .list-group-item.active {
-            color: var(--accent-cyan);
-            background: rgba(0, 242, 255, 0.05);
-            border-left-color: var(--accent-cyan);
-        }
+/* Navbar */
+.top-navbar{
+    background:#fff;
+    border-bottom:1px solid #ddd;
+    padding:15px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        /* ------------------ NAVBAR & TRẠNG THÁI TOGGLE ------------------ */
-        #page-content-wrapper {
-            width: 100%;
-            margin-left: var(--sidebar-width);
-            transition: margin 0.3s ease-in-out; /* Thêm hiệu ứng trượt mượt mà */
-        }
+.navbar-title{
+    font-size:20px;
+    font-weight:bold;
+    margin:0;
+}
 
-        /* CLASS XỬ LÝ KHI BẤM NÚT TOGGLE */
-        #wrapper.toggled #sidebar-wrapper {
-            margin-left: calc(var(--sidebar-width) * -1); /* Đẩy menu sang trái để giấu đi */
-        }
+.admin-profile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
 
-        #wrapper.toggled #page-content-wrapper {
-            margin-left: 0; /* Mở rộng nội dung ra full màn hình */
-        }
+.admin-avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:#dee2e6;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+}
 
-        .top-navbar {
-            background: var(--bg-sidebar);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.2);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+/* Main content */
+.page-content{
+    padding:25px;
+}
 
-        .nav-title-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+.main-card{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:20px;
+    margin-bottom:20px;
+}
 
-        .btn-menu-toggle {
-            background: transparent;
-            border: 1px solid rgba(0, 242, 255, 0.4);
-            color: var(--accent-cyan);
-            border-radius: 6px;
-            padding: 5px 10px;
-            font-size: 1.2rem;
-            transition: 0.3s;
-        }
-        
-        .btn-menu-toggle:hover {
-            background: rgba(0, 242, 255, 0.1);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
-        }
+/* Form */
+.form-label{
+    font-weight:bold;
+    margin-bottom:6px;
+}
 
-        .navbar-title {
-            color: var(--accent-cyan);
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin: 0;
-            letter-spacing: 0.5px;
-        }
+/* Table */
+.table th{
+    background:#f8f9fa;
+}
 
-        .admin-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            text-align: right;
-        }
-        
-        .admin-info p { margin: 0; font-size: 0.85rem; font-weight: 600; color: #fff; }
-        .admin-info span { font-size: 0.75rem; color: var(--accent-cyan); }
-        .admin-avatar {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 242, 255, 0.2);
-            border: 1px solid var(--accent-cyan);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-cyan);
-            font-size: 1.2rem;
-        }
+.status-active{
+    color:green;
+    font-weight:bold;
+}
 
-        /* ------------------ CONTAINERS & FORMS ------------------ */
-        .page-content { padding: 25px; }
+.status-hidden{
+    color:red;
+    font-weight:bold;
+}
 
-        .cyber-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 4px;
-            padding: 20px;
-            height: 100%;
-        }
-
-        .form-label {
-            color: #fff;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .form-control-custom, .form-select-custom {
-            background: transparent !important;
-            border: 1px solid rgba(0, 242, 255, 0.4);
-            color: #fff !important;
-            border-radius: 4px;
-            padding: 10px 15px;
-        }
-
-        .form-control-custom:focus, .form-select-custom:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 8px rgba(0, 242, 255, 0.2);
-            outline: none;
-        }
-
-        .form-select-custom option {
-            background-color: var(--bg-card);
-            color: #fff;
-        }
-
-        /* ------------------ BUTTONS ------------------ */
-        .btn-cyber {
-            background: transparent;
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            border-radius: 4px;
-        }
-
-        .btn-cyber:hover {
-            background: var(--accent-cyan);
-            color: #000;
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
-        }
-
-        /* ------------------ TABLE ------------------ */
-        .table {
-            --bs-table-bg: transparent;
-            --bs-table-color: #fff;
-            margin-top: 15px;
-        }
-
-        .table thead th {
-            color: var(--accent-cyan);
-            font-weight: 700;
-            font-size: 1rem;
-            border-bottom: 1px solid var(--accent-cyan);
-            padding-bottom: 15px;
-            white-space: nowrap;
-        }
-
-        .table tbody td {
-            vertical-align: middle;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.1);
-            padding: 15px 10px;
-            font-weight: 500;
-        }
-
-        .btn-action {
-            width: 35px;
-            height: 35px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: transparent;
-            border-radius: 4px;
-            transition: 0.2s;
-        }
-        
-        .btn-edit { border: 1px solid #ffc107; color: #ffc107; }
-        .btn-edit:hover { background: #ffc107; color: #000; }
-        
-        .btn-hide { border: 1px solid #dc3545; color: #dc3545; }
-        .btn-hide:hover { background: #dc3545; color: #fff; }
-
-        .btn-show { border: 1px solid #198754; color: #198754; }
-        .btn-show:hover { background: #198754; color: #fff; }
-
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .status-active { border: 1px solid #198754; color: #198754; }
-        .status-hidden { border: 1px solid #dc3545; color: #dc3545; }
-
-        /* ------------------ RAIN EFFECT ------------------ */
-        .raindrop {
-            position: fixed;
-            width: 2px;
-            height: 15px;
-            background: var(--accent-cyan);
-            opacity: 0.6;
-            animation: fall linear infinite;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        @keyframes fall {
-            0% { transform: translateY(-20px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(100vh); opacity: 0; }
-        }
-    </style>
+.btn-action{
+    width:35px;
+    height:35px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+</style>
 </head>
 
 <body>
 
-<div id="rain"></div>
-
 <div id="wrapper">
 
+    <!-- Sidebar -->
     <div id="sidebar-wrapper">
         <div class="sidebar-heading">
-            <i class="bi bi-box-seam"></i>
-            <span>MODEL<br>WORLD</span>
+            MODEL WORLD
         </div>
-        <div class="list-group list-group-flush mt-2 flex-grow-1">
-            <a href="/stats" class="list-group-item list-group-item-action"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="/cata-mana" class="list-group-item list-group-item-action"><i class="bi bi-tags"></i> Quản lý Danh mục</a>
-            <a href="/product-mana" class="list-group-item list-group-item-action"><i class="bi bi-box-seam"></i> Quản lý Sản phẩm</a>
-            <a href="/admin/vouchers" class="list-group-item list-group-item-action active"><i class="bi bi-ticket-perforated"></i> Quản lý Voucher</a>
-            <a href="/orders-mana" class="list-group-item list-group-item-action"><i class="bi bi-receipt"></i> Quản lý Đơn hàng</a>
-            <a href="/user-mana" class="list-group-item list-group-item-action"><i class="bi bi-people"></i> Quản lý Người dùng</a>
-            <a href="/admin/cart" class="list-group-item list-group-item-action"><i class="bi bi-cart3"></i> Giỏ hàng Admin</a>
-            
-            <div class="mt-auto pb-4">
-                <div class="px-4 mb-2">
-                    <small class="fw-bold" style="color: var(--accent-cyan); font-size: 0.75rem;">HỆ THỐNG</small>
-                </div>
-                <a href="/logout" class="list-group-item list-group-item-action" style="color: #ff4d4d;">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
-            </div>
+
+        <div class="list-group list-group-flush">
+            <a href="/stats" class="list-group-item">
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
+            </a>
+            <a href="/cata-mana" class="list-group-item">
+                <i class="bi bi-tags me-2"></i> Quản lý Danh mục
+            </a>
+            <a href="/product-mana" class="list-group-item">
+                <i class="bi bi-box-seam me-2"></i> Quản lý Sản phẩm
+            </a>
+            <a href="/admin/vouchers" class="list-group-item active">
+                <i class="bi bi-ticket-perforated me-2"></i> Quản lý Voucher
+            </a>
+            <a href="/orders-mana" class="list-group-item">
+                <i class="bi bi-receipt me-2"></i> Quản lý Đơn hàng
+            </a>
+            <a href="/user-mana" class="list-group-item">
+                <i class="bi bi-people me-2"></i> Quản lý Người dùng
+            </a>
+            <a href="/admin/cart" class="list-group-item">
+                <i class="bi bi-cart3 me-2"></i> Giỏ hàng Admin
+            </a>
+            <a href="/logout" class="list-group-item text-danger">
+                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+            </a>
         </div>
     </div>
 
+    <!-- Content -->
     <div id="page-content-wrapper">
-        
+
+        <!-- Navbar -->
         <nav class="top-navbar">
-            <div class="nav-title-area">
-                <button class="btn-menu-toggle" id="menu-toggle"><i class="bi bi-list"></i></button>
-                <h5 class="navbar-title">Quản lý Voucher</h5>
-            </div>
-            
+            <h4 class="navbar-title">Quản lý Voucher</h4>
+
             <div class="admin-profile">
-                <div class="admin-info">
-                    <p>Admin User</p>
-                    <span>Super Admin</span>
-                </div>
+                <span>Admin User</span>
                 <div class="admin-avatar">
                     <i class="bi bi-person-fill"></i>
                 </div>
             </div>
         </nav>
 
+        <!-- Page Content -->
         <div class="page-content">
             <div class="row g-4">
 
+                <!-- Form -->
                 <div class="col-lg-4">
-                    <div class="cyber-card">
+                    <div class="main-card">
                         <form method="post" th:action="@{/admin/vouchers/save}">
                             <input type="hidden" name="id" th:value="${voucher.id}">
-                            
-                            <div class="mb-4">
-                                <label class="form-label">MÃ VOUCHER</label>
-                                <input type="text" name="code" class="form-control form-control-custom" th:value="${voucher.code}" placeholder="Nhập mã code..." required>
+
+                            <div class="mb-3">
+                                <label class="form-label">Mã Voucher</label>
+                                <input type="text" name="code" class="form-control"
+                                       th:value="${voucher.code}" required>
                             </div>
-                            
+
                             <div class="row">
-                                <div class="col-6 mb-4">
-                                    <label class="form-label">GIẢM %</label>
-                                    <input type="number" name="discountPercent" class="form-control form-control-custom" th:value="${voucher.discountPercent}" placeholder="VD: 10">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Giảm %</label>
+                                    <input type="number" name="discountPercent"
+                                           class="form-control"
+                                           th:value="${voucher.discountPercent}">
                                 </div>
-                                <div class="col-6 mb-4">
-                                    <label class="form-label">GIẢM TIỀN (VNĐ)</label>
-                                    <input type="number" name="discountAmount" class="form-control form-control-custom" th:value="${voucher.discountAmount}" placeholder="VD: 50000">
-                                </div>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label">NGÀY HẾT HẠN</label>
-                                <input type="datetime-local" name="expiredAt" class="form-control form-control-custom" th:value="${voucher.expiredAt}">
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label class="form-label">HẠNG ÁP DỤNG</label>
-                                <select name="membershipId" class="form-select form-select-custom">
-                                    <option value="0">Tất cả hạng thành viên</option>
-                                    <option th:each="m:${memberships}" th:value="${m.id}" th:text="${m.name}" th:selected="${voucher.membership != null and voucher.membership.id == m.id}"></option>
-                                </select>
-                            </div>
-                            
-                            <div class="d-flex gap-4 mb-4 mt-2">
-                                <div class="form-check">
-                                    <input type="checkbox" id="checkFreeShip" name="isFreeShipping" class="form-check-input" style="border-color: var(--accent-cyan); background-color: transparent;" th:checked="${voucher.isFreeShipping}">
-                                    <label for="checkFreeShip" class="form-check-label text-light" style="font-size: 0.9rem;">Miễn phí vận chuyển</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" id="checkBDay" name="isBirthday" class="form-check-input" style="border-color: var(--accent-cyan); background-color: transparent;" th:checked="${voucher.isBirthday}">
-                                    <label for="checkBDay" class="form-check-label text-light" style="font-size: 0.9rem;">Voucher sinh nhật</label>
+
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Giảm tiền</label>
+                                    <input type="number" name="discountAmount"
+                                           class="form-control"
+                                           th:value="${voucher.discountAmount}">
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-cyber w-100 py-2 mt-2">
-                                <i class="bi bi-box-arrow-in-down"></i> LƯU DỮ LIỆU
+                            <div class="mb-3">
+                                <label class="form-label">Ngày hết hạn</label>
+                                <input type="datetime-local" name="expiredAt"
+                                       class="form-control"
+                                       th:value="${voucher.expiredAt}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Hạng áp dụng</label>
+                                <select name="membershipId" class="form-select">
+                                    <option value="0">Tất cả hạng thành viên</option>
+                                    <option th:each="m:${memberships}"
+                                            th:value="${m.id}"
+                                            th:text="${m.name}"
+                                            th:selected="${voucher.membership != null and voucher.membership.id == m.id}">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input type="checkbox" name="isFreeShipping"
+                                       class="form-check-input"
+                                       th:checked="${voucher.isFreeShipping}">
+                                <label class="form-check-label">Miễn phí vận chuyển</label>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input type="checkbox" name="isBirthday"
+                                       class="form-check-input"
+                                       th:checked="${voucher.isBirthday}">
+                                <label class="form-check-label">Voucher sinh nhật</label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                Lưu dữ liệu
                             </button>
-                            
-                            <a th:if="${voucher.id != null}" th:href="@{/admin/vouchers}" class="btn w-100 mt-3" style="border: 1px solid #8b9bb4; color: #8b9bb4; border-radius: 4px;">Hủy chỉnh sửa</a>
+
+                            <a th:if="${voucher.id != null}"
+                               th:href="@{/admin/vouchers}"
+                               class="btn btn-secondary w-100 mt-2">
+                                Hủy chỉnh sửa
+                            </a>
                         </form>
                     </div>
                 </div>
 
+                <!-- Table -->
                 <div class="col-lg-8">
-                    <div class="cyber-card">
-                        
-                        <form method="get" th:action="@{/admin/vouchers}" class="row g-3 mb-4 border-bottom border-info pb-4" style="border-color: rgba(0,242,255,0.2) !important;">
+                    <div class="main-card">
+
+                        <!-- Filter -->
+                        <form method="get" th:action="@{/admin/vouchers}" class="row g-3 mb-4">
                             <div class="col-md-3">
-                                <input type="text" name="keyword" class="form-control form-control-custom" placeholder="Tìm mã voucher..." th:value="${keyword}">
+                                <input type="text" name="keyword" class="form-control"
+                                       placeholder="Tìm mã voucher..." th:value="${keyword}">
                             </div>
-                            <div class="col-md-2">
-                                <select name="discountType" class="form-select form-select-custom">
+
+                            <div class="col-md-3">
+                                <select name="discountType" class="form-select">
                                     <option value="">Loại giảm giá</option>
-                                    <option value="percent" th:selected="${discountType == 'percent'}">Giảm %</option>
-                                    <option value="amount" th:selected="${discountType == 'amount'}">Giảm tiền</option>
-                                    <option value="freeship" th:selected="${discountType == 'freeship'}">FreeShip</option>
+                                    <option value="percent">Giảm %</option>
+                                    <option value="amount">Giảm tiền</option>
+                                    <option value="freeship">FreeShip</option>
                                 </select>
                             </div>
+
                             <div class="col-md-3">
-                                <select name="filterMembershipId" class="form-select form-select-custom">
-                                    <option value="">Hạng thành viên</option>
-                                    <option value="0" th:selected="${filterMembershipId == 0}">Tất cả (All)</option>
-                                    <option th:each="m : ${memberships}" th:value="${m.id}" th:text="${m.name}" th:selected="${filterMembershipId == m.id}"></option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <select name="status" class="form-select form-select-custom">
+                                <select name="status" class="form-select">
                                     <option value="">Trạng thái</option>
-                                    <option value="active" th:selected="${status == 'active'}">Active</option>
-                                    <option value="hidden" th:selected="${status == 'hidden'}">Hidden</option>
+                                    <option value="active">Active</option>
+                                    <option value="hidden">Hidden</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 d-flex gap-2">
-                                <button type="submit" class="btn btn-cyber flex-grow-1" title="Lọc"><i class="bi bi-search"></i> LỌC</button>
-                                <a th:href="@{/admin/vouchers}" class="btn btn-action btn-hide" title="Xóa lọc"><i class="bi bi-arrow-counterclockwise"></i></a>
+
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Lọc
+                                </button>
                             </div>
                         </form>
 
+                        <!-- Voucher Table -->
                         <div class="table-responsive">
-                            <table class="table text-center">
+                            <table class="table table-bordered table-hover text-center">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -452,41 +316,56 @@
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     <tr th:if="${#lists.isEmpty(vouchers)}">
-                                        <td colspan="7" class="py-5" style="color: var(--text-muted);">
-                                            <i class="bi bi-box-seam fs-2 d-block mb-2"></i> Không có dữ liệu voucher.
-                                        </td>
+                                        <td colspan="7">Không có dữ liệu voucher.</td>
                                     </tr>
+
                                     <tr th:each="v:${vouchers}">
-                                        <td th:text="'#' + ${v.id}"></td>
-                                        <td class="fw-bold text-white" th:text="${v.code}"></td>
-                                        <td style="color: var(--accent-cyan);">
-                                            <span th:if="${v.discountPercent != null}" th:text="${v.discountPercent + '%'}"></span>
-                                            <span th:if="${v.discountAmount != null}" th:text="${#numbers.formatDecimal(v.discountAmount, 0, 'POINT', 0, 'POINT')} + ' ₫'"></span>
-                                            <span th:if="${v.isFreeShipping}" class="text-warning">FreeShip</span>
-                                        </td>
+                                        <td th:text="${v.id}"></td>
+                                        <td th:text="${v.code}"></td>
+
                                         <td>
-                                            <span th:if="${v.membership != null}" th:text="${v.membership.name}"></span>
-                                            <span th:unless="${v.membership != null}">Tất cả</span>
+                                            <span th:if="${v.discountPercent != null}"
+                                                  th:text="${v.discountPercent + '%'}"></span>
+                                            <span th:if="${v.discountAmount != null}"
+                                                  th:text="${v.discountAmount + ' ₫'}"></span>
+                                            <span th:if="${v.isFreeShipping}">FreeShip</span>
                                         </td>
+
+                                        <td>
+                                            <span th:if="${v.membership != null}"
+                                                  th:text="${v.membership.name}"></span>
+                                            <span th:unless="${v.membership != null}">
+                                                Tất cả
+                                            </span>
+                                        </td>
+
                                         <td th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy HH:mm')}"></td>
+
                                         <td>
-                                            <span th:if="${v.active}" class="status-badge status-active">Active</span>
-                                            <span th:unless="${v.active}" class="status-badge status-hidden">Hidden</span>
+                                            <span th:if="${v.active}" class="status-active">Active</span>
+                                            <span th:unless="${v.active}" class="status-hidden">Hidden</span>
                                         </td>
+
                                         <td>
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <a th:href="@{'/admin/vouchers/edit/' + ${v.id}}" class="btn-action btn-edit" title="Sửa">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
-                                                <a th:if="${v.active}" th:href="@{'/admin/vouchers/hide/' + ${v.id}}" class="btn-action btn-hide" title="Ẩn">
-                                                    <i class="bi bi-eye-slash"></i>
-                                                </a>
-                                                <a th:unless="${v.active}" th:href="@{'/admin/vouchers/show/' + ${v.id}}" class="btn-action btn-show" title="Hiện">
-                                                    <i class="bi bi-eye"></i>
-                                                </a>
-                                            </div>
+                                            <a th:href="@{'/admin/vouchers/edit/' + ${v.id}}"
+                                               class="btn btn-sm btn-warning btn-action">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <a th:if="${v.active}"
+                                               th:href="@{'/admin/vouchers/hide/' + ${v.id}}"
+                                               class="btn btn-sm btn-danger btn-action">
+                                                <i class="bi bi-eye-slash"></i>
+                                            </a>
+
+                                            <a th:unless="${v.active}"
+                                               th:href="@{'/admin/vouchers/show/' + ${v.id}}"
+                                               class="btn btn-sm btn-success btn-action">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -500,26 +379,6 @@
         </div>
     </div>
 </div>
-
-<script>
-    // 1. Script cho hiệu ứng mưa (giữ nguyên)
-    const rain = document.getElementById('rain')
-    for(let i=0; i<40; i++){
-        const drop = document.createElement('div')
-        drop.classList.add('raindrop')
-        drop.style.left = Math.random() * 100 + 'vw'
-        drop.style.animationDuration = (Math.random() * 1.5 + 0.5) + 's'
-        drop.style.animationDelay = Math.random() * 5 + 's'
-        rain.appendChild(drop)
-    }
-
-    // 2. SCRIPT MỚI CHO NÚT THỤT RA THỤT VÔ MENU
-    document.getElementById("menu-toggle").addEventListener("click", function (e) {
-        e.preventDefault(); // Ngăn chặn load lại trang
-        // Toggle class 'toggled' cho thẻ cha bọc ngoài cùng (#wrapper)
-        document.getElementById("wrapper").classList.toggle("toggled");
-    });
-</script>
 
 </body>
 </html>

@@ -167,7 +167,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 							</div>
 						</div>
 						<div class="col-12">
-<<<<<<< HEAD
+
 							<form th:action="@{/account/update-phone}" method="post">
 								<label class="form-label">Số điện thoại liên lạc</label>
 								<div class="input-group">
@@ -297,11 +297,11 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 											KHẨU</button>
 									</div>
 								</form>
-=======
+
 							<div class="stat-box flex-row align-items-center justify-content-between p-3">
 								<div class="stat-title mb-0"><i class="bi bi-wallet2 text-success me-1"></i> TỔNG CHI</div>
 								<div class="stat-value text-main fs-5" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
->>>>>>> GiaHuy
+
 							</div>
 						</div>
 					</div>
@@ -460,7 +460,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
             localStorage.setItem('theme', newTheme);
         }
 
-<<<<<<< HEAD
+
     document.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -519,7 +519,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
     });
     
 </script>
-=======
+
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -566,6 +566,6 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
             });
         });
     </script>
->>>>>>> GiaHuy
+
 </body>
 </html>
