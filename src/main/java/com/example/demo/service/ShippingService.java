@@ -17,14 +17,13 @@ public class ShippingService {
 
     // ─────────────────────────────────────────────────
     // HÀM NỘI BỘ 1: getZone
-    // Tra zone từ tên tỉnh — hardcode, không cần DB
+    // Tra zone từ tên tỉnh — dùng để phân loại vùng địa lý
     // ─────────────────────────────────────────────────
     private int getZone(String province) {
         if (province == null) return 3;
         String p = province.trim().toLowerCase();
 
-        if (p.contains("hồ chí minh") || p.contains("hcm")
-         || p.contains("hà nội")) {
+        if (p.contains("hồ chí minh") || p.contains("hcm") || p.contains("hà nội")) {
             return 1;
         }
         if (p.contains("bình dương") || p.contains("đồng nai")
@@ -38,13 +37,10 @@ public class ShippingService {
     }
 
     // ─────────────────────────────────────────────────
-    // HÀM NỘI BỘ 2: calculateFee
-    // Tính phí theo zone + tổng cân nặng
-    // Zone 1: 15k base + 5k/500g vượt
-    // Zone 2: 25k base + 7k/500g vượt
-    // Zone 3: 35k base + 10k/500g vượt
+    // HÀM NỘI BỘ 2: calculateLogic
+    // Tính số tiền dựa trên zone + tổng cân nặng
     // ─────────────────────────────────────────────────
-    private long calculateFee(int zone, double totalWeightGram) {
+    private long calculateLogic(int zone, double totalWeightGram) {
         long baseFee;
         long extraPer500g;
 
@@ -54,45 +50,44 @@ public class ShippingService {
             default -> { baseFee = 35_000; extraPer500g = 10_000; }
         }
 
-        // Số block 500g vượt quá 500g đầu
-        // VD: 1300g → vượt 800g → ceil(800/500)=2 block → +2×extra
-        long extraBlocks = (long) Math.max(0,
-            Math.ceil((totalWeightGram - 500) / 500.0));
+        // Mặc định 500g đầu tiên tính phí baseFee
+        // Mỗi 500g tiếp theo tính thêm extraPer500g
+        long extraBlocks = (long) Math.max(0, Math.ceil((totalWeightGram - 500) / 500.0));
 
         return baseFee + (extraBlocks * extraPer500g);
     }
 
     // ─────────────────────────────────────────────────
-    // HÀM NỘI BỘ 3: tính tổng cân từ danh sách CartDetail
+    // HÀM NỘI BỘ 3: tính tổng cân nặng từ giỏ hàng
     // ─────────────────────────────────────────────────
     private double getTotalWeight(List<CartDetail> cartItems) {
+        if (cartItems == null) return 0;
         return cartItems.stream()
             .mapToDouble(item -> {
                 Double w = item.getProduct().getWeight();
                 int qty  = item.getQuantity();
-                return (w != null ? w : 300.0) * qty;
+                return (w != null ? w : 300.0) * qty; // Mặc định 300g nếu ko có cân nặng
             })
             .sum();
     }
 
     // ─────────────────────────────────────────────────
-    // PUBLIC 1: calculateShipping
-    // CheckoutController (GET + POST) gọi hàm này
-    // Nhận thẳng cartList + address, trả về BigDecimal
+    // PUBLIC 1: calculateFee (DÙNG TRONG CHECKOUT CONTROLLER)
+    // Tên hàm này đã được đổi để khớp với CheckoutController của bạn
     // ─────────────────────────────────────────────────
-    public BigDecimal calculateShipping(List<CartDetail> cartList, Address address) {
-        if (address == null) return BigDecimal.valueOf(30_000); // fallback
+    public BigDecimal calculateFee(Address address, List<CartDetail> cartList) {
+        // Nếu chưa chọn địa chỉ, trả về phí mặc định 30k
+        if (address == null) return BigDecimal.valueOf(30_000);
 
         int zone = getZone(address.getProvince());
         double totalWeight = getTotalWeight(cartList);
-        long fee = calculateFee(zone, totalWeight);
+        long fee = calculateLogic(zone, totalWeight);
 
         return BigDecimal.valueOf(fee);
     }
 
     // ─────────────────────────────────────────────────
-    // PUBLIC 2: calculate
-    // ShippingController (API endpoint) gọi hàm này
+    // PUBLIC 2: calculate (DÙNG CHO AJAX/API TRONG GIỎ HÀNG)
     // Nhận addressId + account, trả về Map JSON
     // ─────────────────────────────────────────────────
     public Map<String, Object> calculate(Long addressId, Account account) {
@@ -103,7 +98,8 @@ public class ShippingService {
         List<CartDetail> cartItems = cartDetailRepository
             .findByAccount_Id(account.getId());
 
-        BigDecimal feeShip = calculateShipping(cartItems, address);
+        // Gọi lại hàm calculateFee ở trên
+        BigDecimal feeShip = calculateFee(address, cartItems);
 
         BigDecimal rawTotal = cartItems.stream()
             .map(i -> i.getProduct().getPrice()

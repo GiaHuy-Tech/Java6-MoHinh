@@ -15,10 +15,10 @@ import java.util.Map;
 public class OrderService {
 	
 	@Autowired
-	ShippingService shippingService;   // thêm dòng này
+	ShippingService shippingService;
 
 	@Autowired
-	AddressRepository addressRepository; // thêm dòng này
+	AddressRepository addressRepository;
 
     @Autowired
     CartDetailRepository cartDetailRepo;
@@ -29,9 +29,10 @@ public class OrderService {
     @Autowired
     OrdersDetailRepository orderDetailRepo;
 
-    public void createOrder(Account acc, String voucherCode,  Long addressId) {
+    // 1. Hàm tạo đơn hàng (đã có của bạn)
+    public void createOrder(Account acc, String voucherCode, Long addressId) {
 
-        // 1. Lấy danh sách giỏ hàng trực tiếp theo Account ID
+        // Lấy danh sách giỏ hàng trực tiếp theo Account ID
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(acc.getId());
         
         // Nếu giỏ hàng trống thì dừng luôn
@@ -39,7 +40,7 @@ public class OrderService {
             return;
         }
 
-        // 2. Tính tổng tiền gốc bằng BigDecimal
+        // Tính tổng tiền gốc bằng BigDecimal
         BigDecimal rawTotal = BigDecimal.ZERO;
         for (CartDetail item : cartList) {
             BigDecimal price = item.getProduct().getPrice();
@@ -48,27 +49,21 @@ public class OrderService {
             rawTotal = rawTotal.add(price.multiply(quantity));
         }
 
-        // 3. Tính tiền giảm giá (VD: voucher SALE10 giảm 10%)
+        // Tính tiền giảm giá (VD: voucher SALE10 giảm 10%)
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && voucherCode.equalsIgnoreCase("SALE10")) {
             // discount = rawTotal * 0.1
             discount = rawTotal.multiply(new BigDecimal("0.1")); 
         }
-
-        // 4. Tính phí ship (Trên 1 triệu thì freeship, ngược lại 30k)
-//        BigDecimal feeShip = new BigDecimal("30000");
-//        if (rawTotal.compareTo(new BigDecimal("1000000")) > 0) {
-//            feeShip = BigDecimal.ZERO;
-//        }
         
+        // Tính phí ship từ ShippingService
         Map<String, Object> shippingResult = shippingService.calculate(addressId, acc);
         BigDecimal feeShip = BigDecimal.valueOf((Long) shippingResult.get("feeShip"));
 
         // Lấy Address entity để gắn vào đơn hàng
         Address address = addressRepository.findById(addressId).orElse(null);
-        
 
-        // 5. Tính tổng thanh toán cuối cùng: final = raw - discount + freeship
+        // Tính tổng thanh toán cuối cùng: final = raw - discount + freeship
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
         
         // Đảm bảo tổng tiền không bị âm
@@ -76,7 +71,7 @@ public class OrderService {
             finalTotal = BigDecimal.ZERO;
         }
 
-        // 6. Tạo đơn hàng (Lưu ý: Tên model là Orders có 's')
+        // Tạo đơn hàng
         Orders order = new Orders();
         order.setAccount(acc);
         order.setAddress(address); 
@@ -94,7 +89,7 @@ public class OrderService {
         // Lưu đơn hàng vào DB
         orderRepo.save(order);
 
-        // 7. Tạo chi tiết đơn hàng
+        // Tạo chi tiết đơn hàng
         for (CartDetail cd : cartList) {
             OrderDetail od = new OrderDetail();
             od.setOrder(order);
@@ -106,7 +101,19 @@ public class OrderService {
             orderDetailRepo.save(od);
         }
 
-        // 8. Xóa giỏ hàng sau khi đặt thành công
+        // Xóa giỏ hàng sau khi đặt thành công
         cartDetailRepo.deleteAll(cartList);
+    }
+
+    // 2. HÀM MỚI BỔ SUNG: Hoàn thành đơn hàng
+    public void completeOrder(Orders order) {
+        // Cập nhật trạng thái thành Đã hoàn thành/Đã nhận hàng (Giả sử là status = 4)
+        order.setStatus(4); 
+        
+        // Cập nhật trạng thái thanh toán thành true (Nếu nhận hàng thì coi như đã thanh toán xong)
+        order.setPaymentStatus(true); 
+
+        // Lưu bản ghi đã cập nhật vào Database
+        orderRepo.save(order);
     }
 }
