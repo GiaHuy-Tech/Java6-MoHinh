@@ -3,7 +3,6 @@ package com.example.demo.controllers;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,8 +15,8 @@ import com.example.demo.repository.*;
 import com.example.demo.service.VNPayService;
 import com.example.demo.service.ShippingService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 @Controller
 @RequestMapping("/checkout")
@@ -31,13 +30,14 @@ public class CheckoutController {
     @Autowired private AddressRepository addressRepo;
     @Autowired private VNPayService vnPayService;
     @Autowired private ShippingService shippingService;
+    @Autowired private ProductRepository productRepo;
 
-    // ================== VIEW ==================
+    // ================== VIEW CHECKOUT ==================
     @GetMapping
     public String viewCheckout(HttpSession session,
-                              @RequestParam(required = false) String voucherCode,
-                              @RequestParam(required = false) Long addressId,
-                              Model model) {
+                               @RequestParam(required = false) String voucherCode,
+                               @RequestParam(required = false) Long addressId,
+                               Model model) {
 
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
@@ -61,7 +61,6 @@ public class CheckoutController {
                     .orElse(null);
         }
 
-        // nếu chưa chọn → lấy default
         if (selectedAddress == null) {
             selectedAddress = addresses.stream()
                     .filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
@@ -69,7 +68,7 @@ public class CheckoutController {
                     .orElse(null);
         }
 
-        // ===== SHIP (FIX CHUẨN) =====
+        // ===== SHIPPING =====
         BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList);
 
         // ===== VOUCHER =====
@@ -92,7 +91,6 @@ public class CheckoutController {
                 .distinct()
                 .toList();
 
-        // ===== APPLY VOUCHER =====
         BigDecimal discount = BigDecimal.ZERO;
 
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
@@ -112,13 +110,15 @@ public class CheckoutController {
                 }
 
                 if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
-                if (Boolean.TRUE.equals(v.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
+
+                if (Boolean.TRUE.equals(v.getIsFreeShipping())) {
+                    feeShip = BigDecimal.ZERO;
+                }
             }
         }
 
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
 
-        // ===== MODEL =====
         model.addAttribute("cartList", cartList);
         model.addAttribute("addresses", addresses);
         model.addAttribute("selectedAddressId", addressId);
@@ -133,12 +133,13 @@ public class CheckoutController {
         return "client/checkout";
     }
 
-    // ================== CONFIRM ==================
+    // ================== CONFIRM ORDER ==================
     @PostMapping("/confirm")
+    @Transactional
     public String confirmOrder(HttpSession session,
-            @RequestParam(required = false) String voucherCode,
-            @RequestParam("addressId") Long addressId,
-            @RequestParam("paymentMethod") String paymentMethod) {
+                               @RequestParam(required = false) String voucherCode,
+                               @RequestParam("addressId") Long addressId,
+                               @RequestParam("paymentMethod") String paymentMethod) {
 
         Account account = getAccount(session);
         if (account == null) return "redirect:/login";
@@ -156,12 +157,12 @@ public class CheckoutController {
                 .findByIdAndAccount_Id(addressId, account.getId())
                 .orElse(null);
 
-        // ===== SHIP (FIX CHUẨN) =====
+        // ===== SHIPPING =====
         BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList);
 
         BigDecimal discount = BigDecimal.ZERO;
 
-        // ===== VOUCHER =====
+        // ===== APPLY VOUCHER =====
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Optional<Voucher> vOpt = voucherRepo.findAll().stream()
                     .filter(v -> v.getCode().equals(voucherCode.trim())
@@ -180,7 +181,10 @@ public class CheckoutController {
                 }
 
                 if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
-                if (Boolean.TRUE.equals(v.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
+
+                if (Boolean.TRUE.equals(v.getIsFreeShipping())) {
+                    feeShip = BigDecimal.ZERO;
+                }
 
                 voucherDetailRepo.findValidVoucherForAccount(account.getId(), voucherCode.trim())
                         .ifPresent(vd -> {
@@ -193,6 +197,7 @@ public class CheckoutController {
         }
 
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
+
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
@@ -217,17 +222,49 @@ public class CheckoutController {
 
         ordersRepo.save(order);
 
+        // ===== CREATE ORDER DETAILS + TRỪ KHO =====
         for (CartDetail item : cartList) {
+
+            Products product = productRepo.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+            Integer buyQty = item.getQuantity();
+
+            // CHECK tồn kho
+            if (product.getQuantity() < buyQty) {
+                throw new RuntimeException(
+                        "Sản phẩm " + product.getName() + " không đủ số lượng trong kho");
+            }
+
+            // TRỪ KHO
+            int newQty = product.getQuantity() - buyQty;
+            product.setQuantity(newQty);
+
+            // TĂNG SOLD
+            Integer sold = product.getSold() == null ? 0 : product.getSold();
+            product.setSold(sold + buyQty);
+
+            // HẾT HÀNG
+            if (newQty <= 0) {
+                product.setAvailable(false);
+            }
+
+            productRepo.saveAndFlush(product);
+
+            // ORDER DETAIL
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
-            detail.setProduct(item.getProduct());
-            detail.setQuantity(item.getQuantity());
-            detail.setPrice(item.getProduct().getPrice());
+            detail.setProduct(product);
+            detail.setQuantity(buyQty);
+            detail.setPrice(product.getPrice());
+
             orderDetailRepo.save(detail);
         }
 
+        // ===== XÓA CART =====
         cartDetailRepo.deleteAll(cartList);
 
+        // ===== VNPAY =====
         if ("VNPAY".equalsIgnoreCase(paymentMethod)) {
             long amount = finalTotal.longValue() * 100;
 
@@ -243,9 +280,12 @@ public class CheckoutController {
         return "redirect:/orders";
     }
 
+    // ================== GET ACCOUNT ==================
     private Account getAccount(HttpSession session) {
         Account account = (Account) session.getAttribute("account");
-        if (account == null) account = (Account) session.getAttribute("user");
+        if (account == null) {
+            account = (Account) session.getAttribute("user");
+        }
         return account;
     }
 }
