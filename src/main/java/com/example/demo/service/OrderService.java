@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.model.*;
 import com.example.demo.repository.*;
@@ -9,111 +10,193 @@ import com.example.demo.repository.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class OrderService {
-	
-	@Autowired
-	ShippingService shippingService;
-
-	@Autowired
-	AddressRepository addressRepository;
 
     @Autowired
-    CartDetailRepository cartDetailRepo;
+    private CartDetailRepository cartDetailRepo;
 
     @Autowired
-    OrdersRepository orderRepo;
+    private OrdersRepository orderRepo;
 
     @Autowired
-    OrdersDetailRepository orderDetailRepo;
+    private OrdersDetailRepository orderDetailRepo;
 
-    // 1. Hàm tạo đơn hàng (đã có của bạn)
-    public void createOrder(Account acc, String voucherCode, Long addressId) {
+    @Autowired
+    private ProductRepository productRepo;
 
-        // Lấy danh sách giỏ hàng trực tiếp theo Account ID
+    // =====================================================
+    // 1. TẠO ĐƠN HÀNG - CHECKOUT
+    // =====================================================
+    @Transactional
+    public void createOrder(Account acc, String voucherCode) {
+
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(acc.getId());
-        
-        // Nếu giỏ hàng trống thì dừng luôn
+
         if (cartList == null || cartList.isEmpty()) {
             return;
         }
 
-        // Tính tổng tiền gốc bằng BigDecimal
         BigDecimal rawTotal = BigDecimal.ZERO;
+
+        // ===============================
+        // CHECK TỒN KHO + TÍNH TỔNG TIỀN
+        // ===============================
         for (CartDetail item : cartList) {
-            BigDecimal price = item.getProduct().getPrice();
-            BigDecimal quantity = BigDecimal.valueOf(item.getQuantity());
-            // Cộng dồn: rawTotal = rawTotal + (price * quantity)
-            rawTotal = rawTotal.add(price.multiply(quantity));
+
+            Products product = productRepo.findById(item.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+            Integer buyQty = item.getQuantity();
+
+            // Kiểm tra tồn kho
+            if (product.getQuantity() < buyQty) {
+                throw new RuntimeException(
+                        "Sản phẩm " + product.getName() + " không đủ số lượng trong kho");
+            }
+
+            BigDecimal price = product.getPrice();
+            rawTotal = rawTotal.add(price.multiply(BigDecimal.valueOf(buyQty)));
         }
 
-        // Tính tiền giảm giá (VD: voucher SALE10 giảm 10%)
+        // ===============================
+        // TÍNH GIẢM GIÁ
+        // ===============================
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && voucherCode.equalsIgnoreCase("SALE10")) {
-            // discount = rawTotal * 0.1
-            discount = rawTotal.multiply(new BigDecimal("0.1")); 
+            discount = rawTotal.multiply(new BigDecimal("0.1"));
         }
-        
-        // Tính phí ship từ ShippingService
-        Map<String, Object> shippingResult = shippingService.calculate(addressId, acc);
-        BigDecimal feeShip = BigDecimal.valueOf((Long) shippingResult.get("feeShip"));
 
-        // Lấy Address entity để gắn vào đơn hàng
-        Address address = addressRepository.findById(addressId).orElse(null);
+        // ===============================
+        // TÍNH PHÍ SHIP
+        // ===============================
+        BigDecimal feeShip = new BigDecimal("30000");
+        if (rawTotal.compareTo(new BigDecimal("1000000")) > 0) {
+            feeShip = BigDecimal.ZERO;
+        }
 
-        // Tính tổng thanh toán cuối cùng: final = raw - discount + freeship
+        // ===============================
+        // TỔNG THANH TOÁN
+        // ===============================
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
-        
-        // Đảm bảo tổng tiền không bị âm
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
 
-        // Tạo đơn hàng
+        // ===============================
+        // TẠO ORDER
+        // ===============================
         Orders order = new Orders();
         order.setAccount(acc);
-        order.setAddress(address); 
         order.setCreatedDate(new Date());
         order.setTotal(finalTotal);
-        order.setStatus(0); // 0: Chờ xác nhận
+        order.setStatus(0); // Chờ xác nhận
         order.setFeeship(feeShip);
         order.setMoneyDiscounted(discount);
         order.setPaymentStatus(false);
-        
+
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             order.setVoucherCode(voucherCode);
         }
 
-        // Lưu đơn hàng vào DB
         orderRepo.save(order);
 
-        // Tạo chi tiết đơn hàng
+        // ===============================
+        // TẠO ORDER DETAIL + TRỪ KHO
+        // ===============================
         for (CartDetail cd : cartList) {
+
+            Products product = productRepo.findById(cd.getProduct().getId())
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+
+            Integer buyQty = cd.getQuantity();
+
+            // Trừ số lượng kho
+            product.setQuantity(product.getQuantity() - buyQty);
+
+            // Tăng sold
+            Integer sold = product.getSold() == null ? 0 : product.getSold();
+            product.setSold(sold + buyQty);
+
+            // Nếu hết hàng -> unavailable
+            if (product.getQuantity() <= 0) {
+                product.setAvailable(false);
+            }
+
+            productRepo.save(product);
+
+            // Lưu chi tiết đơn hàng
             OrderDetail od = new OrderDetail();
             od.setOrder(order);
-            od.setProduct(cd.getProduct());
-            od.setQuantity(cd.getQuantity());
-            od.setPrice(cd.getProduct().getPrice());
-            
-            // Lưu chi tiết đơn hàng
+            od.setProduct(product);
+            od.setQuantity(buyQty);
+            od.setPrice(product.getPrice());
+
             orderDetailRepo.save(od);
         }
 
-        // Xóa giỏ hàng sau khi đặt thành công
+        // ===============================
+        // XÓA GIỎ HÀNG
+        // ===============================
         cartDetailRepo.deleteAll(cartList);
     }
 
-    // 2. HÀM MỚI BỔ SUNG: Hoàn thành đơn hàng
+    // =====================================================
+    // 2. HOÀN TẤT ĐƠN HÀNG
+    // =====================================================
+    @Transactional
     public void completeOrder(Orders order) {
-        // Cập nhật trạng thái thành Đã hoàn thành/Đã nhận hàng (Giả sử là status = 4)
-        order.setStatus(4); 
-        
-        // Cập nhật trạng thái thanh toán thành true (Nếu nhận hàng thì coi như đã thanh toán xong)
-        order.setPaymentStatus(true); 
 
-        // Lưu bản ghi đã cập nhật vào Database
-        orderRepo.save(order);
+        // Chỉ cập nhật trạng thái, KHÔNG trừ kho nữa
+        if (order.getStatus() < 4) {
+            order.setStatus(4); // Hoàn tất
+            order.setPaymentStatus(true);
+            orderRepo.save(order);
+
+            System.out.println("Đơn hàng " + order.getId() + " đã hoàn tất.");
+        }
+    }
+
+    // =====================================================
+    // 3. HỦY ĐƠN HÀNG - HOÀN KHO
+    // =====================================================
+    @Transactional
+    public void cancelOrder(Orders order) {
+
+        // Chỉ hoàn kho nếu đơn chưa hoàn tất và chưa hủy
+        if (order.getStatus() == 0 || order.getStatus() == 1) {
+
+            List<OrderDetail> details = order.getOrderDetails();
+
+            if (details != null) {
+                for (OrderDetail detail : details) {
+
+                    Products product = detail.getProduct();
+
+                    if (product != null) {
+
+                        // Hoàn lại kho
+                        product.setQuantity(product.getQuantity() + detail.getQuantity());
+
+                        // Giảm sold
+                        Integer sold = product.getSold() == null ? 0 : product.getSold();
+                        product.setSold(Math.max(0, sold - detail.getQuantity()));
+
+                        // Có hàng lại -> available
+                        if (product.getQuantity() > 0) {
+                            product.setAvailable(true);
+                        }
+
+                        productRepo.save(product);
+                    }
+                }
+            }
+
+            order.setStatus(5); // Đã hủy
+            orderRepo.save(order);
+
+            System.out.println("Đơn hàng " + order.getId() + " đã bị hủy và hoàn kho.");
+        }
     }
 }

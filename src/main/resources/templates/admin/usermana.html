@@ -1,596 +1,360 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quản lý Người dùng - MODEL WORLD</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- COPY TỪ DASHBOARD --- */
-        :root {
-            --bg-body: #020609;       
-            --bg-sidebar: #05111a;    
-            --bg-card: #081a26;       
-            --bg-input: #0f2435;
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý Người dùng</title>
 
-            --text-main: #e0fbfc;     
-            --text-sub: #a0b1c5; 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-            --accent-cyan: #00f2ff;   
-            --accent-green: #00ff9d;
-            --accent-red: #ff4757;
-            --accent-yellow: #ffa502;
-            
-            --border-color: #00f2ff;  
-            --sidebar-width: 260px;
-        }
+<style>
+body{
+    background:#f5f6f8;
+    font-family:Arial, sans-serif;
+    color:#333;
+}
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main); 
-            font-family: 'Be Vietnam Pro', sans-serif;
-            overflow-x: hidden;
-        }
+#wrapper{
+    display:flex;
+    min-height:100vh;
+}
 
-        /* --- WRAPPER & SIDEBAR LAYOUT --- */
-        #wrapper { display: flex; width: 100%; overflow: hidden; }
+#sidebar-wrapper{
+    width:240px;
+    background:#fff;
+    border-right:1px solid #ddd;
+    position:fixed;
+    height:100%;
+    overflow-y:auto;
+}
 
-        #sidebar-wrapper {
-            min-width: var(--sidebar-width);
-            max-width: var(--sidebar-width);
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid rgba(0, 242, 255, 0.3); 
-            min-height: 100vh;
-            position: fixed;
-            z-index: 1000;
-            height: 100%;
-            overflow-y: auto;
-            transition: margin-left 0.3s ease-out;
-        }
+#page-content-wrapper{
+    margin-left:240px;
+    width:100%;
+}
 
-        #page-content-wrapper {
-            width: 100%;
-            margin-left: var(--sidebar-width);
-            transition: margin-left 0.3s ease-out;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
+.sidebar-heading{
+    padding:20px;
+    font-size:20px;
+    font-weight:bold;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+    background:#f8f9fa;
+}
 
-        body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
-        body.toggled #page-content-wrapper { margin-left: 0; }
+.list-group-item{
+    border:none;
+    padding:14px 20px;
+    color:#333;
+}
 
-        /* Sidebar Styling */
-        .sidebar-heading {
-            padding: 1.5rem 1.25rem;
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 900;
-            font-size: 1.5rem;
-            color: var(--accent-cyan);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-            text-align: center;
-            background: rgba(0, 242, 255, 0.1);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.7); 
-            letter-spacing: 1px;
-        }
+.list-group-item:hover,
+.list-group-item.active{
+    background:#e9ecef;
+    color:#000;
+    font-weight:bold;
+}
 
-        .list-group-item {
-            background-color: transparent;
-            color: var(--text-main); 
-            border: none;
-            padding: 1rem 1.5rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            border-left: 3px solid transparent;
-            display: flex;
-            align-items: center;
-        }
+.top-navbar{
+    background:#fff;
+    border-bottom:1px solid #ddd;
+    padding:15px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
 
-        .list-group-item:hover, .list-group-item.active {
-            color: var(--accent-cyan); 
-            background-color: rgba(0, 242, 255, 0.1);
-            border-left-color: var(--accent-cyan);
-            text-shadow: 0 0 5px var(--accent-cyan);
-        }
-        .list-group-item i { margin-right: 12px; font-size: 1.2rem; }
+.page-title{
+    font-size:20px;
+    font-weight:bold;
+    margin:0;
+}
 
-        /* Navbar */
-        .top-navbar {
-            background: rgba(5, 17, 26, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-            padding: 15px 30px;
-            position: sticky; top: 0; z-index: 990;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.user-profile{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
 
-        .btn-toggle {
-            background: transparent; border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan); padding: 5px 12px; border-radius: 6px; transition: 0.3s;
-            box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
-            cursor: pointer;
-        }
-        .btn-toggle:hover { 
-            background: var(--accent-cyan); color: #000; 
-            box-shadow: 0 0 15px var(--accent-cyan);
-        }
+.user-avatar-top{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+}
 
-        .page-title {
-            font-family: 'Orbitron', sans-serif;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-        }
+.main-card{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:20px;
+    margin-top:20px;
+}
 
-        .user-profile {
-            display: flex; align-items: center; gap: 15px;
-        }
-        .user-avatar-top {
-            width: 40px; height: 40px; border-radius: 50%;
-            border: 2px solid var(--accent-cyan); padding: 2px;
-            background: #000;
-        }
+.table th{
+    background:#f8f9fa;
+}
 
-        /* --- CONTENT STYLING --- */
-        .cyber-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        .cyber-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-            box-shadow: 0 0 10px var(--accent-cyan);
-        }
+.user-avatar-table{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    object-fit:cover;
+}
 
-        /* Table Styles */
-        .table {
-            color: var(--text-main);
-            vertical-align: middle;
-            margin-bottom: 0;
-            --bs-table-bg: transparent;
-        }
+.btn-icon{
+    width:34px;
+    height:34px;
+    display:inline-flex;
+    justify-content:center;
+    align-items:center;
+}
 
-        .table thead th {
-            background-color: rgba(0, 242, 255, 0.05);
-            color: var(--accent-cyan);
-            font-family: 'Orbitron', sans-serif;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-            padding: 15px;
-            border-top: none;
-        }
-
-        .table tbody td {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            font-size: 0.95rem;
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(0, 242, 255, 0.05);
-        }
-
-        .user-avatar-table {
-            width: 40px; height: 40px; border-radius: 50%;
-            object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .badge-cyber {
-            padding: 5px 10px; border-radius: 4px;
-            font-weight: 500; font-size: 0.75rem;
-            border: 1px solid currentColor; background: transparent;
-        }
-        .badge-cyan { color: var(--accent-cyan); background: rgba(0, 242, 255, 0.1); }
-        .badge-green { color: var(--accent-green); background: rgba(0, 255, 157, 0.1); }
-        .badge-red { color: var(--accent-red); background: rgba(255, 71, 87, 0.1); }
-        .badge-yellow { color: var(--accent-yellow); background: rgba(255, 165, 2, 0.1); }
-
-        /* Buttons & Inputs */
-        .form-control, .form-select {
-            background-color: var(--bg-input);
-            border: 1px solid rgba(0, 242, 255, 0.2);
-            color: var(--text-main);
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--bg-input);
-            color: var(--text-main);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
-        }
-        
-        /* Thay đổi màu input disabled */
-        .form-control:disabled { 
-            background-color: #050d14; 
-            color: var(--text-sub); 
-            border-color: rgba(255,255,255,0.1); 
-            opacity: 1;
-        }
-
-        .btn-neon {
-            background: transparent; border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan); font-family: 'Orbitron', sans-serif;
-            font-size: 0.8rem; transition: 0.3s;
-        }
-        .btn-neon:hover {
-            background: var(--accent-cyan); color: #000;
-            box-shadow: 0 0 15px var(--accent-cyan);
-        }
-        
-        .btn-icon {
-            width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(255,255,255,0.05); color: var(--text-main); transition: 0.2s;
-        }
-        .btn-icon:hover {
-            color: var(--accent-cyan); border-color: var(--accent-cyan);
-            background: rgba(0, 242, 255, 0.1);
-        }
-
-        /* Modals */
-        .modal-content {
-            background-color: var(--bg-card);
-            border: 1px solid var(--accent-cyan);
-            color: var(--text-main);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-        .modal-header, .modal-footer { border-color: rgba(0, 242, 255, 0.2); }
-        .modal-title { font-family: 'Orbitron', sans-serif; color: var(--accent-cyan); }
-        .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-body); }
-        ::-webkit-scrollbar-thumb { background: #1a3c5a; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
-    </style>
+.modal-content{
+    border-radius:10px;
+}
+</style>
 </head>
-
 <body>
 
 <div id="wrapper">
-    
+
+    <!-- Sidebar -->
     <div id="sidebar-wrapper">
         <div class="sidebar-heading">
-            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
+            MODEL WORLD
         </div>
-        
-        <div class="list-group list-group-flush mt-2">
+
+        <div class="list-group list-group-flush">
             <a href="/stats" class="list-group-item">
-                <i class="bi bi-speedometer2"></i> Dashboard
+                <i class="bi bi-speedometer2 me-2"></i> Dashboard
             </a>
             <a href="/cata-mana" class="list-group-item">
-                <i class="bi bi-tags"></i> Quản lý Danh mục
+                <i class="bi bi-tags me-2"></i> Quản lý Danh mục
             </a>
             <a href="/product-mana" class="list-group-item">
-                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+                <i class="bi bi-box-seam me-2"></i> Quản lý Sản phẩm
             </a>
             <a href="/admin/vouchers" class="list-group-item">
-                <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+                <i class="bi bi-ticket-perforated me-2"></i> Quản lý Voucher
             </a>
             <a href="/orders-mana" class="list-group-item">
-                <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+                <i class="bi bi-receipt me-2"></i> Quản lý Đơn hàng
             </a>
             <a href="/user-mana" class="list-group-item active">
-                <i class="bi bi-people"></i> Quản lý Người dùng
+                <i class="bi bi-people me-2"></i> Quản lý Người dùng
             </a>
             <a href="/admin/cart" class="list-group-item">
-                <i class="bi bi-cart3"></i> Giỏ hàng Admin
+                <i class="bi bi-cart3 me-2"></i> Giỏ hàng Admin
             </a>
-            
-            <div class="mt-4 px-4 mb-2 text-white-50 text-uppercase small fw-bold" style="letter-spacing: 1px;">Hệ thống</div>
             <a href="/logout" class="list-group-item text-danger">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
             </a>
         </div>
     </div>
 
+    <!-- Content -->
     <div id="page-content-wrapper">
-        
+
+        <!-- Navbar -->
         <nav class="top-navbar">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-toggle" id="menu-toggle">
-                    <i class="bi bi-list"></i>
-                </button>
-                <h4 class="page-title d-none d-md-block">Quản Lý Người Dùng</h4>
-            </div>
+            <h4 class="page-title">Quản lý Người dùng</h4>
 
             <div class="user-profile">
-                <div class="text-end d-none d-sm-block">
-                    <div class="fw-bold" style="font-size: 0.9rem;">Admin User</div>
-                    <div style="font-size: 0.75rem; color: var(--accent-cyan);">Super Admin</div>
-                </div>
-                <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" alt="Avatar" class="user-avatar-top">
+                <span>Admin User</span>
+                <img src="https://cdn-icons-png.flaticon.com/512/2202/2202112.png" class="user-avatar-top">
             </div>
         </nav>
 
+        <!-- Main -->
         <div class="container-fluid px-4 pb-4">
-            
-            <div th:if="${param.success}" class="alert alert-success bg-transparent text-success border-success mt-4 mb-0 p-2 d-flex align-items-center">
-                <i class="bi bi-check-circle-fill me-2"></i> Cập nhật thành công!
-            </div>
 
-            <div class="cyber-card">
-                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                    <h5 class="m-0 text-white font-monospace d-flex align-items-center">
-                        <i class="bi bi-list-stars me-2" style="color: var(--accent-cyan)"></i>
-                        DANH SÁCH TÀI KHOẢN
-                    </h5>
-                    
+            <div class="main-card">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Danh sách tài khoản</h5>
+
                     <div class="d-flex gap-2">
-                         <input type="text" class="form-control form-control-sm" placeholder="Tìm kiếm..." style="width: 250px;">
-                         <button class="btn btn-sm btn-neon"><i class="bi bi-search"></i></button>
+                        <input type="text" class="form-control" placeholder="Tìm kiếm..." style="width:250px;">
+                        <button class="btn btn-primary">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </div>
                 </div>
 
+                <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-bordered table-hover align-middle">
+
                         <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Avatar</th>
-                                <th>Thông tin cá nhân</th>
-                                <th>Vai trò</th>
-                                <th>Hạng TV</th>
-                                <th>Chi tiêu</th>
-                                <th>Địa chỉ</th>
-                                <th>Trạng thái</th>
-                                <th class="text-end">Hành động</th>
-                            </tr>
+                        <tr>
+                            <th>ID</th>
+                            <th>Avatar</th>
+                            <th>Thông tin</th>
+                            <th>Vai trò</th>
+                            <th>Hạng TV</th>
+                            <th>Chi tiêu</th>
+                            <th>Địa chỉ</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Hành động</th>
+                        </tr>
                         </thead>
+
                         <tbody>
-                            <tr th:each="acc : ${accounts}">
-                                <td class="fw-bold" style="color: var(--accent-cyan)" th:text="'#' + ${acc.id}"></td>
+                        <tr th:each="acc : ${accounts}">
+                            <td th:text="${acc.id}"></td>
 
-                                <td>
-                                    <img th:src="${acc.avatar != null && acc.avatar != ''} ? ${acc.avatar} : '/images/user-default.png'"
-                                         class="user-avatar-table" 
-                                         onerror="this.src='https://cdn-icons-png.flaticon.com/512/149/149071.png'">
-                                </td>
+                            <td>
+                                <img th:src="${acc.avatar}" class="user-avatar-table">
+                            </td>
 
-                                <td>
-                                    <div class="fw-bold text-white" th:text="${acc.fullName}"></div>
-                                    <div class="small text-white-50" th:text="${acc.email}"></div>
-                                </td>
+                            <td>
+                                <div th:text="${acc.fullName}"></div>
+                                <small class="text-muted" th:text="${acc.email}"></small>
+                            </td>
 
-                                <td>
-                                    <span th:if="${acc.role}" class="badge badge-cyber badge-yellow">ADMIN</span>
-                                    <span th:unless="${acc.role}" class="badge badge-cyber badge-cyan">USER</span>
-                                </td>
+                            <td>
+                                <span th:if="${acc.role}" class="badge bg-warning text-dark">ADMIN</span>
+                                <span th:unless="${acc.role}" class="badge bg-primary">USER</span>
+                            </td>
 
-                                <td>
-                                    <span th:if="${acc.membership != null}" th:text="${acc.membership.name}" class="text-white small"></span>
-                                    <span th:unless="${acc.membership != null}" class="text-white-50 small">---</span>
-                                </td>
+                            <td>
+                                <span th:text="${acc.membership != null ? acc.membership.name : '---'}"></span>
+                            </td>
 
-                                <td class="fw-bold" style="color: var(--accent-green);" 
-                                    th:text="${acc.totalSpending != null} ? ${#numbers.formatDecimal(acc.totalSpending,0,'COMMA',0,'POINT')} + ' ₫' : '0 ₫'">
-                                </td>
+                            <td th:text="${acc.totalSpending} + ' ₫'"></td>
 
-                                <td>
-                                    <button th:if="${acc.addresses != null and !acc.addresses.isEmpty()}"
-                                            class="btn btn-sm btn-icon" style="width: auto; padding: 0 10px;"
-                                            data-bs-toggle="modal"
-                                            th:attr="data-bs-target='#addressModal_' + ${acc.id}">
-                                        <i class="bi bi-geo-alt me-1"></i> <span th:text="${#lists.size(acc.addresses)}"></span>
-                                    </button>
-                                    <span th:unless="${acc.addresses != null and !acc.addresses.isEmpty()}" class="text-white-50 small">---</span>
+                            <td>
+                                <span th:text="${acc.addresses != null ? #lists.size(acc.addresses) : 0} + ' địa chỉ'"></span>
+                            </td>
 
-                                    <div class="modal fade" th:id="'addressModal_' + ${acc.id}" tabindex="-1">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h6 class="modal-title">Địa chỉ: <span class="text-white" th:text="${acc.fullName}"></span></h6>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <ul class="list-group list-group-flush">
-                                                        <li class="list-group-item bg-transparent text-secondary border-secondary p-2" 
-                                                            th:each="addr : ${acc.addresses}">
-                                                            <i class="bi bi-pin-map-fill me-2" style="color: var(--accent-cyan)"></i>
-                                                            <span th:text="${addr.fullAddress}" class="text-light"></span>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
+                            <td>
+                                <span th:if="${acc.active}" class="badge bg-success">Active</span>
+                                <span th:unless="${acc.active}" class="badge bg-danger">Locked</span>
+                            </td>
 
-                                <td>
-                                    <span th:if="${acc.active}" class="badge badge-cyber badge-green">Active</span>
-                                    <span th:unless="${acc.active}" class="badge badge-cyber badge-red">Locked</span>
-                                </td>
+                            <!-- ACTION -->
+                            <td class="text-end">
 
-                                <td class="text-end">
-                                    <button class="btn btn-icon me-1" title="Sửa"
-                                            data-bs-toggle="modal" data-bs-target="#editModal"
-                                            th:attr="data-id=${acc.id}, data-fullname=${acc.fullName}, data-email=${acc.email}, 
-                                                     data-phone=${acc.phone}, data-gender=${acc.gender}, data-role=${acc.role}, 
-                                                     data-active=${acc.active}, data-birthday=${acc.birthDay}, 
-                                                     data-avatar=${acc.avatar},
-                                                     data-membership-name=${acc.membership != null ? acc.membership.name : 'Chưa có hạng'},
-                                                     data-total-spending=${acc.totalSpending != null ? #numbers.formatDecimal(acc.totalSpending, 0, 'COMMA', 0, 'POINT') : '0'}">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </button>
+                                <!-- Nút sửa -->
+                                <button class="btn btn-sm btn-outline-primary btn-icon"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editModal">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
 
-                                    <span th:if="${!acc.role}"> 
-                                        <a th:if="${acc.active}" th:href="@{'/user-mana/lock/' + ${acc.id}}" class="btn btn-icon text-danger" title="Khóa">
-                                            <i class="bi bi-lock"></i>
-                                        </a>
-                                        <a th:unless="${acc.active}" th:href="@{'/user-mana/unlock/' + ${acc.id}}" class="btn btn-icon text-success" title="Mở">
-                                            <i class="bi bi-unlock"></i>
-                                        </a>
-                                    </span>
-                                </td>
-                            </tr>
+                                <!-- Chỉ USER mới khóa/mở được -->
+                                <span th:if="${!acc.role}">
+                                    <a th:if="${acc.active}"
+                                       th:href="@{'/user-mana/lock/' + ${acc.id}}"
+                                       class="btn btn-sm btn-outline-danger btn-icon"
+                                       onclick="return confirm('Bạn có chắc muốn khóa tài khoản này?')">
+                                        <i class="bi bi-lock"></i>
+                                    </a>
+
+                                    <a th:unless="${acc.active}"
+                                       th:href="@{'/user-mana/unlock/' + ${acc.id}}"
+                                       class="btn btn-sm btn-outline-success btn-icon"
+                                       onclick="return confirm('Bạn có chắc muốn mở khóa tài khoản này?')">
+                                        <i class="bi bi-unlock"></i>
+                                    </a>
+                                </span>
+
+                                <!-- Admin không được khóa -->
+                                <span th:if="${acc.role}" class="text-muted ms-2">
+                                    
+                                </span>
+
+                            </td>
+                        </tr>
                         </tbody>
+
                     </table>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal Edit -->
 <div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <form id="editForm" method="post" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-gear-wide-connected me-2"></i>CẬP NHẬT THÔNG TIN</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
 
-                <div class="modal-body">
-                    <input type="hidden" name="active" id="active">
-                    
-                    <div class="row g-4">
-                        <div class="col-md-4 text-center border-end" style="border-color: rgba(255,255,255,0.1) !important;">
-                            <label class="form-label d-block mb-3">Ảnh Đại Diện</label>
-                            <div class="position-relative d-inline-block mb-3">
-                                <img id="preview" src="/images/user-default.png" 
-                                     class="rounded-circle border border-info shadow" 
-                                     style="width: 140px; height: 140px; object-fit: cover; box-shadow: 0 0 15px var(--accent-cyan);">
-                            </div>
-                            <input type="file" name="file" class="form-control form-control-sm bg-dark text-light" 
-                                   accept="image/*" onchange="document.getElementById('preview').src = window.URL.createObjectURL(this.files[0])">
-                        </div>
+<form method="post" enctype="multipart/form-data">
 
-                        <div class="col-md-8">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Họ và tên</label>
-                                    <input type="text" name="fullName" id="fullName" class="form-control" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Email (Read-only)</label>
-                                    <input type="email" name="email" id="email" class="form-control" readonly disabled>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Số điện thoại</label>
-                                    <input type="text" name="phone" id="phone" class="form-control">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Ngày sinh</label>
-                                    <input type="date" name="birthDay" id="birthDay" class="form-control">
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    <label class="form-label">Hạng thành viên</label>
-                                    <input type="text" id="membershipName" class="form-control fw-bold" 
-                                           style="color: var(--accent-yellow) !important; background-color: rgba(255, 165, 2, 0.05);" readonly disabled>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Tổng chi tiêu</label>
-                                    <div class="input-group">
-                                        <input type="text" id="totalSpending" class="form-control text-end fw-bold" 
-                                               style="color: var(--accent-green) !important; background-color: rgba(0, 255, 157, 0.05);" readonly disabled>
-                                        <span class="input-group-text bg-transparent text-secondary border-start-0" 
-                                              style="border-color: rgba(0, 242, 255, 0.2)">₫</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Giới tính</label>
-                                    <div class="d-flex gap-4 pt-2">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="gender" value="true" id="genderMale">
-                                            <label class="form-check-label text-light" for="genderMale">Nam</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="gender" value="false" id="genderFemale">
-                                            <label class="form-check-label text-light" for="genderFemale">Nữ</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label text-warning"><i class="bi bi-shield-lock me-1"></i>Vai trò (Không thể sửa)</label>
-                                    <input type="text" id="roleDisplay" class="form-control text-warning fw-bold" readonly disabled>
-                                    <input type="hidden" name="role" id="roleHidden">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="modal-header">
+    <h5 class="modal-title">Cập nhật thông tin</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-neon px-4">Lưu thay đổi</button>
-                </div>
-            </form>
+<div class="modal-body">
+
+<div class="row g-3">
+
+<div class="col-md-4 text-center">
+    <img id="preview"
+         src="/images/user-default.png"
+         class="rounded-circle border"
+         style="width:120px;height:120px;object-fit:cover;">
+    <input type="file" class="form-control mt-3" name="file">
+</div>
+
+<div class="col-md-8">
+    <div class="row g-3">
+
+        <div class="col-md-6">
+            <label>Họ và tên</label>
+            <input type="text" class="form-control" name="fullName">
         </div>
+
+        <div class="col-md-6">
+            <label>Email</label>
+            <input type="email" class="form-control" readonly>
+        </div>
+
+        <div class="col-md-6">
+            <label>Số điện thoại</label>
+            <input type="text" class="form-control" name="phone">
+        </div>
+
+        <div class="col-md-6">
+            <label>Ngày sinh</label>
+            <input type="date" class="form-control" name="birthDay">
+        </div>
+
+        <div class="col-md-6">
+            <label>Giới tính</label>
+            <select class="form-select" name="gender">
+                <option value="true">Nam</option>
+                <option value="false">Nữ</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Vai trò</label>
+            <input type="text" class="form-control" readonly>
+        </div>
+
     </div>
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+</div>
+
+</form>
+
+</div>
+</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Toggle Sidebar
-    const toggleButton = document.getElementById("menu-toggle");
-    toggleButton.onclick = function (e) {
-        e.preventDefault();
-        document.body.classList.toggle("toggled");
-    };
-
-    // Modal Edit Logic
-    const editModal = document.getElementById('editModal');
-    editModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const id = button.getAttribute('data-id');
-        const form = document.getElementById('editForm');
-        form.action = '/user-mana/update/' + id;
-
-        // Fill basic data
-        ['fullName', 'email', 'phone', 'birthDay', 'active'].forEach(field => {
-            const val = button.getAttribute('data-' + field.toLowerCase());
-            if(document.getElementById(field)) document.getElementById(field).value = val || '';
-        });
-
-        // Fill Hạng thành viên & Chi tiêu
-        const memName = button.getAttribute('data-membership-name');
-        document.getElementById('membershipName').value = memName;
-
-        const spending = button.getAttribute('data-total-spending');
-        document.getElementById('totalSpending').value = spending;
-
-        // Giới tính
-        const gender = button.getAttribute('data-gender');
-        if (gender === 'true') document.getElementById('genderMale').checked = true;
-        else document.getElementById('genderFemale').checked = true;
-
-        // Vai trò
-        const role = button.getAttribute('data-role');
-        const roleDisplay = document.getElementById('roleDisplay');
-        const roleHidden = document.getElementById('roleHidden');
-        
-        if (role === 'true') {
-            roleDisplay.value = 'QUẢN TRỊ VIÊN (ADMIN)';
-            roleHidden.value = 'true';
-        } else {
-            roleDisplay.value = 'NGƯỜI DÙNG (USER)';
-            roleHidden.value = 'false';
-        }
-
-        // Avatar
-        const avatar = button.getAttribute('data-avatar');
-        const preview = document.getElementById('preview');
-        preview.src = (avatar && avatar.trim() !== '') ? avatar : '/images/user-default.png';
-        preview.onerror = function() { this.src = 'https://cdn-icons-png.flaticon.com/512/149/149071.png'; };
-    });
-</script>
-
 </body>
 </html>
