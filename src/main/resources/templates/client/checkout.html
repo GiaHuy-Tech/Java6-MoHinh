@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thanh toán - MODEL WORLD</title>
+
+<script>
+    (function() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+</script>
 
 <link
 	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -12,226 +19,245 @@
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
 	rel="stylesheet">
 <link
-	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&family=Orbitron:wght@700&display=swap"
+	href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@700;900&display=swap"
 	rel="stylesheet">
 
 <style>
 :root {
 	--bg-body: #0b0c10;
-	--bg-card: #141b26;
+	--bg-card: #1f2833;
+	--bg-nav: #0b0c10;
 	--text-main: #66fcf1;
 	--text-light: #c5c6c7;
 	--accent-cyan: #45a29e;
 	--border-color: #2d3238;
-	--sidebar-width: 260px;
+	--shadow: rgba(0, 0, 0, 0.5);
+	--card-hover: #232d39;
 	--accent-red: #ff2e63;
+}
+
+[data-theme="light"] {
+	--bg-body: #f8f9fa;
+	--bg-card: #ffffff;
+	--bg-nav: #ffffff;
+	--text-main: #00adb5;
+	--text-light: #222831;
+	--accent-cyan: #393e46;
+	--border-color: #dee2e6;
+	--shadow: rgba(0, 0, 0, 0.1);
+	--card-hover: #f1f3f5;
 }
 
 body {
 	background-color: var(--bg-body);
 	color: var(--text-light);
 	font-family: 'Be Vietnam Pro', sans-serif;
-	margin: 0;
+	transition: 0.3s;
 	overflow-x: hidden;
 }
 
-/* --- LAYOUT STRUCTURE --- */
-#wrapper {
-	display: flex;
-	width: 100%;
-	transition: all 0.3s;
-	flex-grow: 1;
-}
-
-#sidebar-wrapper {
-	min-width: var(--sidebar-width);
-	max-width: var(--sidebar-width);
-	background: #050505;
-	border-right: 1px solid var(--border-color);
-	min-height: 100vh;
-	position: fixed;
-	z-index: 1000;
-	height: 100%;
-	transition: all 0.3s;
-}
-
-#page-content-wrapper {
-	width: 100%;
-	margin-left: var(--sidebar-width);
-	transition: margin 0.3s ease-out;
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-}
-
-body.toggled #sidebar-wrapper {
-	margin-left: calc(-1 * var(--sidebar-width));
-}
-
-body.toggled #page-content-wrapper {
-	margin-left: 0;
-	width: 100%;
-}
-
-/* --- SIDEBAR --- */
-.sidebar-heading {
-	padding: 2.5rem 1.5rem;
-	font-family: 'Orbitron';
-	font-size: 1.4rem;
-	font-weight: 900;
-	color: var(--text-main);
-	text-decoration: none;
-	display: block;
-	text-align: center;
-	letter-spacing: 2px;
-}
-
-.list-group-item {
-	background: transparent;
-	color: #888;
-	border: none;
-	padding: 15px 25px;
-	transition: 0.3s;
-	border-left: 4px solid transparent;
-	font-weight: 500;
-}
-
-.list-group-item:hover, .list-group-item.active {
-	color: var(--text-main);
-	background: rgba(102, 252, 241, 0.05);
-	border-left: 4px solid var(--text-main);
-}
-
+/* NAVBAR */
 .top-navbar {
-	background: rgba(31, 40, 51, 0.95);
-	backdrop-filter: blur(10px);
+	background: var(--bg-nav);
 	border-bottom: 1px solid var(--border-color);
-	padding: 15px 30px;
 	position: sticky;
 	top: 0;
-	z-index: 999;
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-	width: 100%;
+	z-index: 2000;
+	padding: 10px 0;
+	box-shadow: 0 2px 10px var(--shadow);
 }
 
-#menu-toggle {
-	color: var(--text-main);
-	border-color: var(--accent-cyan);
-	background: transparent;
-}
-
-#menu-toggle:hover {
-	background: var(--accent-cyan);
-	color: #000;
-}
-
-.nav-logo {
-	font-family: var(--font-title);
-	text-decoration: none;
-	font-size: 1.4rem;
-	font-weight: 900;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	letter-spacing: 1px;
-	margin-left: 15px;
-}
-
-.nav-logo i {
-	color: var(--text-main);
-	font-size: 1.6rem;
+.nav-holder {
+	position: relative;
 }
 
 .nav-logo span {
-	background: linear-gradient(90deg, var(--text-main), #fff);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
+	font-family: 'Montserrat';
+	font-weight: 900;
+	color: var(--text-main);
+	font-size: 1.7rem;
 }
 
-.search-box {
+.nav-icon-link {
+	color: var(--text-light);
+	font-size: 1.4rem;
+	transition: 0.3s;
 	position: relative;
-	max-width: 600px;
-	width: 100%;
-	margin: 0 auto;
-	flex-grow: 1;
-}
-
-.search-box input {
-	border-radius: 50px;
-	padding: 10px 45px 10px 20px;
-	border: 1px solid var(--border-color);
-	width: 100%;
-	background: #0b0c10;
-	color: #fff;
-}
-
-.search-box input:focus {
-	outline: none;
-	border-color: var(--accent-cyan);
-	box-shadow: 0 0 0 2px rgba(102, 252, 241, 0.2);
-}
-
-.search-box button {
-	position: absolute;
-	right: 5px;
-	top: 50%;
-	transform: translateY(-50%);
-	border-radius: 50%;
-	width: 34px;
-	height: 34px;
+	text-decoration: none;
 	border: none;
-	background: var(--accent-cyan);
-	color: #0b0c10;
+	background: none;
+	cursor: pointer;
+}
+
+.nav-icon-link:hover {
+	color: var(--text-main);
+}
+
+/* SEARCH BAR TƯƠNG THÍCH */
+.search-container {
+	position: relative;
+	max-width: 450px;
+}
+
+#liveSearchInput {
+	background-color: var(--bg-card) !important;
+	color: var(--text-light) !important;
+	border-color: var(--border-color);
+}
+
+.search-results {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: 12px;
+	margin-top: 8px;
+	display: none;
+	z-index: 3000;
+	overflow: hidden;
+	box-shadow: 0 10px 30px var(--shadow);
+	width: 100%;
+}
+
+.search-item {
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	gap: 10px;
+	padding: 10px;
+	text-decoration: none;
+	color: var(--text-light);
+	border-bottom: 1px solid var(--border-color);
 }
 
-.search-box button:hover {
-	background: var(--accent-hover);
+.search-item:hover {
+	background: var(--text-main);
+	color: #000;
 }
 
-/* --- CHECKOUT CARDS --- */
+.search-item img {
+	width: 40px;
+	height: 40px;
+	object-fit: contain;
+	background: #fff;
+	border-radius: 5px;
+}
+
+/* MEGA MENU */
+.mega-menu-content {
+	position: absolute;
+	top: calc(100% + 15px);
+	left: 50%;
+	transform: translateX(-50%);
+	width: 92vw;
+	max-width: 1300px;
+	background: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-top: 4px solid var(--text-main);
+	display: none;
+	z-index: 1500;
+	padding: 0;
+	box-shadow: 0 30px 60px var(--shadow);
+	border-radius: 0 0 15px 15px;
+}
+
+.mega-menu-content.active {
+	display: block;
+	animation: slideIn 0.3s ease forwards;
+}
+
+.mega-sidebar {
+	background: rgba(0, 0, 0, 0.03);
+	padding: 25px;
+	min-height: 400px;
+}
+
+.mega-main-content {
+	padding: 30px;
+}
+
+.mega-cat-link {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 15px;
+	color: var(--text-light);
+	text-decoration: none;
+	border-radius: 8px;
+	transition: 0.2s;
+	cursor: pointer;
+}
+
+.mega-cat-link:hover, .mega-cat-link.active {
+	background: var(--text-main);
+	color: #000 !important;
+	font-weight: 700;
+}
+
+/* --- CHECKOUT FORM --- */
 .checkout-card {
 	background: var(--bg-card);
 	border: 1px solid var(--border-color);
-	border-radius: 15px;
-	overflow: hidden;
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .card-header-custom {
-	background: rgba(102, 252, 241, 0.03);
+	background: transparent;
 	padding: 18px 25px;
 	border-bottom: 1px solid var(--border-color);
 	font-weight: 800;
 	color: var(--text-main);
-	font-family: 'Orbitron';
+	font-family: 'Be Vietnam Pro', sans-serif;
 	text-transform: uppercase;
-	font-size: 0.9rem;
+	font-size: 1rem;
 }
 
-.form-select-dark {
-	background-color: #363636 !important;
-	color: var(--text-main) !important;
+.form-select-custom {
+	background-color: var(--input-bg) !important;
+	color: var(--text-light) !important;
 	border: 1px solid var(--border-color) !important;
 	padding: 12px;
-	background-image:
-		url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2366fcf1' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e")
-		!important;
+	font-size: 0.95rem;
 }
 
-.alert-black {
-	border: 1px solid rgba(255, 193, 7, 0.3) !important;
-	color: #ffc107 !important;
+.form-select-custom:focus {
+	border-color: var(--text-main) !important;
+	box-shadow: 0 0 0 0.25rem rgba(79, 248, 210, 0.15) !important;
 }
 
-.price-text {
-	font-family: 'Orbitron';
-	font-weight: 700;
-	color: var(--text-main);
+/* Nút chọn Phương thức thanh toán (Custom) */
+.payment-option {
+	border: 1px solid var(--border-color);
+	background: transparent;
+	color: var(--text-light);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s ease;
 }
 
+.payment-option:hover {
+	border-color: #4a5568;
+}
+
+.payment-option i {
+	color: var(--text-sub);
+	transition: 0.3s;
+}
+/* Hiệu ứng khi được chọn */
+.btn-check:checked+.payment-option {
+	border-color: var(--text-main) !important;
+	background: rgba(79, 248, 210, 0.08) !important;
+	/* Lớp nền sáng nhẹ mờ mờ */
+	color: var(--text-light);
+}
+
+.btn-check:checked+.payment-option i {
+	color: var(--text-main) !important; /* Đổi màu icon sang xanh cyan */
+}
+
+/* Nút Đặt hàng */
 .btn-confirm {
 	background: var(--text-main);
 	color: #000;
@@ -241,391 +267,552 @@ body.toggled #page-content-wrapper {
 	border-radius: 8px;
 	transition: 0.3s;
 	text-transform: uppercase;
+	font-size: 1.05rem;
+	letter-spacing: 0.5px;
 }
 
 .btn-confirm:hover:not(:disabled) {
 	background: #fff;
-	box-shadow: 0 0 20px var(--text-main);
+	box-shadow: 0 0 15px rgba(79, 248, 210, 0.5);
 	transform: translateY(-2px);
 }
 
-/* --- FOOTER & SOCIALS --- */
+.btn-confirm:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* --- VOUCHER BOX --- */
+.voucher-box {
+	background: var(--input-bg);
+	border: 1px dashed var(--border-color);
+	padding: 15px;
+	border-radius: 8px;
+}
+
+/* --- FOOTER --- */
 footer {
-	background: #050505 !important;
-	border-top: 1px solid var(--border-color) !important;
-	color: #888;
+	background: var(--bg-nav);
+	border-top: 1px solid var(--border-color);
 	margin-top: auto;
 	width: 100%;
 }
 
-footer h5, footer h6 {
-	color: var(--text-main);
-	font-family: var(--font-title);
-	letter-spacing: 1px;
+.footer-title {
+	color: #ffffff;
+	font-weight: 700;
 	text-transform: uppercase;
-	font-weight: 800;
+	font-size: 1rem;
+	letter-spacing: 0.5px;
+}
+
+.footer-link {
+	color: var(--text-sub);
+	text-decoration: none;
+	transition: 0.3s;
+}
+
+.footer-link:hover {
+	color: #ffffff;
+}
+
+.footer-social {
+	color: var(--text-sub);
+	font-size: 1.3rem;
+	transition: 0.3s;
+}
+
+.footer-social:hover {
+	color: var(--text-main);
+}
+
+.newsletter-input {
+	background: var(--input-bg) !important;
+	border: 1px solid var(--border-color) !important;
+	color: #fff !important;
+}
+
+.newsletter-input:focus {
+	border-color: var(--text-main) !important;
+	box-shadow: none !important;
+}
+
+.btn-subscribe {
+	background: var(--text-main);
+	color: #000;
+	font-weight: bold;
+	border: none;
+}
+
+.btn-subscribe:hover {
+	background: #fff;
+}
+
+footer {
+	background: var(--bg-nav);
+	border-top: 1px solid var(--border-color);
+	color: var(--text-light);
 }
 
 footer a {
-	color: #888;
-	transition: 0.2s;
+	color: var(--text-light);
+	opacity: 0.7;
+	transition: 0.3s;
 }
 
 footer a:hover {
-	color: var(--accent-cyan);
+	color: var(--text-main);
+	opacity: 1;
 }
 
-.floating-socials {
-	position: fixed;
-	right: 20px;
-	bottom: 100px;
-	z-index: 9999;
-	display: flex;
-	flex-direction: column;
-	gap: 15px;
-}
-
-.social-btn {
-	width: 45px;
-	height: 45px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+footer .form-control:focus {
+	background: #111;
+	border-color: var(--text-main);
 	color: #fff;
-	font-size: 20px;
-	text-decoration: none;
-	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-	transition: 0.3s;
-	position: relative;
-}
-
-.social-btn:hover {
-	transform: scale(1.1);
-	color: #fff;
-}
-
-.social-btn.zalo {
-	background: #0068ff;
-}
-
-.social-btn.messenger {
-	background: #0084ff;
-}
-
-.social-btn.phone {
-	background: var(--accent-red);
-	animation: pulse 2s infinite;
-}
-
-@keyframes pulse { 
-0% {
-	box-shadow: 0 0 0 0 rgba(255, 46, 99, 0.7);
-}
-
-70%{
-box-shadow:00010px
-rgba(255,46,99,0);
-}
-100%{
-box-shadow:0000
-rgba(255,46,99,0);
+	box-shadow: none;
 }
 </style>
 </head>
 <body>
 
-	<div id="wrapper">
-		<div id="sidebar-wrapper">
-			<a href="/" class="sidebar-heading">MODEL WORLD</a>
-			<div class="list-group list-group-flush px-2">
-				<a href="/" class="list-group-item"><i
-					class="bi bi-house-door me-3"></i>Trang chủ</a> <a href="/products"
-					class="list-group-item"><i class="bi bi-box me-3"></i>Sản phẩm</a>
-				<a href="/cart" class="list-group-item active"><i
-					class="bi bi-cart3 me-3"></i>Giỏ hàng</a> <a href="/orders"
-					class="list-group-item"><i class="bi bi-bag-check me-3"></i>Đơn
-					hàng</a>
-				<hr class="border-secondary mx-3">
-				<a href="/account" class="list-group-item"><i
-					class="bi bi-person me-3"></i>Tài khoản</a>
-			</div>
-		</div>
+	<input type="hidden" id="isLoggedIn"
+		th:value="${user != null ? 'true' : 'false'}">
 
-		<div id="page-content-wrapper">
-			<nav
-				class="top-navbar d-flex justify-content-between align-items-center">
-				<div class="d-flex align-items-center gap-2 w-100 me-3">
-					<button class="btn btn-outline-secondary border-0" id="menu-toggle">
-						<i class="bi bi-list fs-4"></i>
-					</button>
+	<nav class="top-navbar">
+		<div class="container-fluid px-lg-5 nav-holder">
+			<div class="d-flex align-items-center justify-content-between">
+				<div class="d-flex align-items-center gap-4">
+					<a href="/" class="text-decoration-none nav-logo"><span>MODEL
+							WORLD</span></a>
+					<div class="position-static">
+						<button class="btn btn-info rounded-pill px-4 fw-bold"
+							id="btnMegaMenu">
+							<i class="bi bi-grid-3x3-gap-fill me-2"></i> DANH MỤC
+						</button>
+						<div class="mega-menu-content shadow-lg" id="megaMenu">
+							<div class="row g-0">
+								<div class="col-md-3 mega-sidebar border-end">
+									<span class="fw-bold mb-3 d-block"
+										style="color: var(--text-main)">DANH MỤC</span>
+									<div class="d-flex flex-column" id="categoryList">
+										<th:block th:each="cat : ${featuredCategories}">
+											<div class="mega-cat-link"
+												th:attr="data-target='cat-content-' + ${cat.id}">
+												<img th:src="${cat.image}" width="35" height="35"
+													style="object-fit: contain; background: #fff; border-radius: 5px; margin-right: 10px;">
+												<span th:text="${cat.name}">Category</span>
+											</div>
+										</th:block>
+									</div>
+								</div>
+								<div class="col-md-9 mega-main-content">
+									<span class="fw-bold mb-4 d-block"
+										style="color: var(--text-main)">SẢN PHẨM NỔI BẬT</span>
+									<th:block th:each="cat : ${featuredCategories}">
+										<div class="cat-product-pane d-none"
+											th:id="'cat-content-' + ${cat.id}">
+											<div class="row g-4">
+												<th:block th:each="p, i : ${latestProducts}"
+													th:if="${p.category?.id == cat.id and i.index < 6}">
+													<div class="col-md-4">
+														<a th:href="@{'/product-detail/' + ${p.id}}"
+															class="d-flex align-items-center gap-3 p-2 border rounded text-decoration-none hover-bg">
+															<img th:src="${p.mainImage}"
+															style="width: 55px; height: 55px; background: #fff; border-radius: 5px; object-fit: contain;">
+															<div class="overflow-hidden">
+																<div class="small fw-bold text-truncate text-light"
+																	th:text="${p.name}">Product</div>
+																<div class="text-danger small fw-bold"
+																	th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+															</div>
+														</a>
+													</div>
+												</th:block>
+											</div>
+										</div>
+									</th:block>
+								</div>
+							</div>
+						</div>
+					</div>
+					<a href="/products"
+						class="nav-icon-link d-none d-lg-flex align-items-center gap-2"
+						style="font-size: 1rem; font-weight: 600;"><i
+						class="bi bi-box-seam"></i> SẢN PHẨM</a>
+				</div>
 
-					<a href="/" class="nav-logo d-none d-sm-flex"> <i
-						class="bi bi-box-seam-fill"></i> <span>MODEL WORLD</span>
-					</a>
-
-					<div class="search-box d-none d-md-block ms-md-4" id="searchBox">
+				<div class="search-container flex-grow-1 mx-5 d-none d-md-block">
+					<div class="input-group">
 						<input type="text" id="liveSearchInput"
-							placeholder="Tìm kiếm Gunpla, Figure, Tool...">
-						<button>
+							class="form-control rounded-start-pill px-4 py-2"
+							placeholder="Tìm kiếm mô hình...">
+						<button
+							class="btn btn-outline-info rounded-end-pill border-secondary border-start-0 bg-dark px-3"
+							id="btnMainSearch">
 							<i class="bi bi-search"></i>
 						</button>
 					</div>
+					<div class="search-results shadow-lg" id="searchResultList"></div>
 				</div>
 
-				<div class="d-flex align-items-center gap-3">
-					<th:block th:if="${user == null}">
-						<a href="/login" class="text-decoration-none fw-bold text-nowrap"
-							style="color: var(--text-main);">Đăng nhập</a>
-						<a href="/register"
-							class="btn btn-sm rounded-pill px-3 text-nowrap"
-							style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
-							ký</a>
-					</th:block>
-					<th:block th:if="${user != null}">
-						<div class="dropdown">
-							<a href="#"
-								class="d-flex align-items-center text-decoration-none dropdown-toggle"
-								data-bs-toggle="dropdown" style="color: var(--text-light);">
-								<img
-								th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-								class="rounded-circle me-2 border border-secondary" width="35"
-								height="35" style="object-fit: cover;"> <span
-								class="d-none d-sm-block fw-bold small"
-								th:text="${user.fullName ?: user.username}">User</span>
-							</a>
-							<ul
-								class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow mt-2 border-secondary">
-								<li><a class="dropdown-item" href="/account"><i
-										class="bi bi-person me-2"></i>Hồ sơ</a></li>
-								<li><hr class="dropdown-divider"></li>
-								<li><a class="dropdown-item text-danger" href="/logout"><i
-										class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a></li>
-							</ul>
+				<div class="d-flex align-items-center gap-4">
+					<div class="theme-toggle nav-icon-link" onclick="toggleTheme()"
+						style="cursor: pointer;">
+						<i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+					</div>
+					<a href="/wishlist" class="nav-icon-link" id="btnWishlistNav"><i
+						class="bi bi-heart"></i></a>
+					<div class="dropdown">
+						<div class="nav-icon-link position-relative" id="cartIconNav"
+							data-bs-toggle="dropdown">
+							<i class="bi bi-cart3"></i><span class="badge-count"
+								th:if="${cartSize > 0}" th:text="${cartSize}">0</span>
 						</div>
-					</th:block>
-				</div>
-			</nav>
-
-			<div class="container-fluid py-5 px-4">
-				<div class="row g-4">
-					<div class="col-lg-7">
-						<div class="checkout-card mb-4">
-							<div class="card-header-custom">
-								<i class="bi bi-truck me-2"></i> Thông tin giao hàng
+						<div
+							class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg"
+							style="width: 350px;">
+							<div
+								class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
+								<span>GIỎ HÀNG CỦA BẠN</span><span
+									class="badge bg-info text-dark" th:text="${cartSize + ' món'}"></span>
 							</div>
-							<div class="card-body p-4">
-								<form th:action="@{/checkout/confirm}" method="post"
-									id="checkoutForm">
-									<input type="hidden" name="voucherCode"
-										th:value="${voucherCode}" />
-									<div class="mb-4">
-										<label class="form-label text-info fw-bold small">ĐỊA
-											CHỈ NHẬN HÀNG</label>
-										<div th:if="${addresses.isEmpty()}"
-											class="alert alert-black small d-flex align-items-center">
-											<i class="bi bi-exclamation-triangle me-2"></i> <span>Bạn
-												chưa có địa chỉ. <a href="/account"
-												class="fw-bold text-decoration-none">Thêm ngay</a>
-											</span>
-										</div>
+							<div id="mini-cart-body"
+								style="max-height: 300px; overflow-y: auto;">
 
-										<select id="addressSelect"
-											class="form-select form-select-dark" name="addressId"
-											required th:unless="${addresses.isEmpty()}">
-											<option value="" disabled selected>-- Chọn địa chỉ
-												nhận hàng --</option>
-											<option th:each="addr : ${addresses}" th:value="${addr.id}"
-												th:text="${addr.recipientName + ' | ' + addr.recipientPhone + ' | ' + addr.getFullAddress()}"
-												th:selected="${addr.isDefault}"></option>
-										</select>
-									</div>
-									<div class="mb-4">
-										<label
-											class="form-label text-info fw-bold small text-uppercase">Phương
-											thức thanh toán</label>
-										<div class="d-grid gap-2">
-											<input type="radio" class="btn-check" name="paymentMethod"
-												id="payVNPAY" value="VNPAY" checked autocomplete="off">
-											<label class="btn btn-outline-info text-start p-3"
-												for="payVNPAY"> <i class="bi bi-qr-code-scan me-2"></i>
-												Chuyển khoản VNPAY (ATM/Visa/QR)
-											</label> <input type="radio" class="btn-check" name="paymentMethod"
-												id="payCOD" value="COD" autocomplete="off"> <label
-												class="btn btn-outline-info text-start p-3" for="payCOD">
-												<i class="bi bi-cash-stack me-2"></i> Thanh toán khi nhận
-												hàng (COD)
-											</label>
+								<div th:if="${cart != null and !cart.isEmpty()}">
+									<div th:each="item : ${cart}"
+										class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
+
+										<img th:src="${item.product.mainImage}" width="45" height="45"
+											style="background: #fff; object-fit: contain; border-radius: 6px;">
+
+										<div class="flex-grow-1">
+											<div class="small fw-bold text-truncate"
+												th:text="${item.product.name}"></div>
+
+											<div class="text-danger small fw-bold"
+												th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+
+											<div class="d-flex align-items-center mt-1">
+
+												<button type="button"
+													class="btn btn-sm btn-outline-secondary p-1 minus-btn"
+													th:attr="data-id=${item.id}" style="width: 25px;">
+													-</button>
+
+												<span class="fw-bold mx-2" th:text="${item.quantity}">1</span>
+
+												<button type="button"
+													class="btn btn-sm btn-outline-info p-1 plus-btn"
+													th:attr="data-id=${item.id}" style="width: 25px;">
+													+</button>
+
+												<button type="button"
+													class="text-danger ms-2 delete-btn border-0 bg-transparent"
+													th:attr="data-id=${item.id}"
+													onclick="return confirm('Xóa khỏi giỏ hàng?');">
+													<i class="bi bi-trash"></i>
+												</button>
+
+											</div>
 										</div>
 									</div>
-									<button type="submit" class="btn btn-confirm w-100"
-										th:disabled="${addresses.isEmpty()}">
-										TIẾN HÀNH ĐẶT HÀNG <i class="bi bi-chevron-right ms-2"></i>
-									</button>
-								</form>
+								</div>
+
+								<div th:if="${cart == null or cart.isEmpty()}"
+									class="text-center text-muted py-4">
+									<i class="bi bi-cart-x fs-1"></i>
+									<div>Không có sản phẩm nào</div>
+								</div>
+
+							</div>
+							<div class="p-3 bg-dark">
+								<a href="/cart"
+									class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM
+									CHI TIẾT GIỎ HÀNG</a>
 							</div>
 						</div>
 					</div>
-					<div class="col-lg-5">
-						<div class="checkout-card">
-							<div class="card-header-custom">
-								<i class="bi bi-bag-check me-2"></i> Tóm tắt đơn hàng
+					<div class="dropdown" th:if="${user != null}">
+						<div class="d-flex align-items-center gap-2 cursor-pointer"
+							data-bs-toggle="dropdown">
+							<img
+								th:src="${user.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+								class="rounded-circle border border-info" width="38" height="38"
+								style="object-fit: cover;"><i
+								class="bi bi-chevron-down small text-light"></i>
+						</div>
+						<ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
+							<li><a class="dropdown-item py-2" href="/account"><i
+									class="bi bi-person me-2"></i> Hồ sơ</a></li>
+							<li><a class="dropdown-item py-2" href="/orders"><i
+									class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
+							<li><hr class="dropdown-divider"></li>
+							<li><a class="dropdown-item py-2 text-danger" href="/logout"><i
+									class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+						</ul>
+					</div>
+					<a th:if="${user == null}" href="/login"
+						class="btn btn-sm btn-outline-info rounded-pill px-4">Đăng
+						nhập</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container py-5">
+
+		<div class="d-flex align-items-center gap-2 mb-4">
+			<div
+				style="width: 5px; height: 28px; background: var(--text-main); border-radius: 2px;"></div>
+			<h3 class="fw-bold mb-0 text-uppercase"
+				style="letter-spacing: 1px; color: var(--text-light);">Thanh
+				Toán Đơn Hàng</h3>
+		</div>
+
+		<div class="row g-4">
+			<div class="col-lg-7">
+				<div class="checkout-card mb-4">
+					<div class="card-header-custom">
+						<i class="bi bi-truck me-2"></i> Thông tin giao hàng
+					</div>
+					<div class="card-body p-4">
+						<form th:action="@{/checkout/confirm}" method="post"
+							id="checkoutForm">
+							<input type="hidden" name="voucherCode" th:value="${voucherCode}" />
+
+							<div class="mb-4">
+								<label class="form-label fw-bold small"
+									style="color: var(--text-sub);">ĐỊA CHỈ NHẬN HÀNG</label>
+								<div th:if="${addresses.isEmpty()}"
+									class="alert small d-flex align-items-center"
+									style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); color: #ffc107;">
+									<i class="bi bi-exclamation-triangle me-2"></i> <span>Bạn
+										chưa có địa chỉ. <a href="/account"
+										class="fw-bold text-warning text-decoration-none">Thêm
+											ngay</a>
+									</span>
+								</div>
+
+								<select id="addressSelect"
+									class="form-select form-select-custom shadow-none"
+									name="addressId" required th:unless="${addresses.isEmpty()}">
+									<option value="" disabled selected>-- Chọn địa chỉ
+										nhận hàng --</option>
+									<option th:each="addr : ${addresses}" th:value="${addr.id}"
+										th:text="${addr.recipientName + ' | ' + addr.recipientPhone + ' | ' + addr.getFullAddress()}"
+										th:selected="${addr.isDefault}"></option>
+								</select>
 							</div>
-							<div class="card-body p-4">
-								<div class="mb-4 overflow-auto" style="max-height: 300px;">
-									<div th:each="item : ${cartList}"
-										class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-secondary">
-										<img
-											th:src="${item.product.mainImage != null ? '/uploads/' + item.product.mainImage : 'https://via.placeholder.com/60'}"
-											class="cart-item-img">
-										<div class="flex-grow-1">
-											<div class="fw-bold small text-white"
-												th:text="${item.product.name}">Tên SP</div>
-											<div class="small text-info">
-												SL: <span th:text="${item.quantity}">1</span>
-											</div>
-										</div>
-										<div class="price-text small"
-											th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></div>
+
+							<div class="mb-4">
+								<label class="form-label fw-bold small text-uppercase"
+									style="color: var(--text-sub);">Phương thức thanh toán</label>
+								<div class="d-grid gap-3">
+									<input type="radio" class="btn-check" name="paymentMethod"
+										id="payVNPAY" value="VNPAY" checked autocomplete="off">
+									<label
+										class="btn text-start p-3 payment-option d-flex align-items-center"
+										for="payVNPAY"> <i
+										class="bi bi-qr-code-scan fs-4 me-3"></i> <span
+										class="fw-semibold">Chuyển khoản VNPAY (ATM/Visa/QR)</span>
+									</label> <input type="radio" class="btn-check" name="paymentMethod"
+										id="payCOD" value="COD" autocomplete="off"> <label
+										class="btn text-start p-3 payment-option d-flex align-items-center"
+										for="payCOD"> <i class="bi bi-cash-stack fs-4 me-3"></i>
+										<span class="fw-semibold">Thanh toán khi nhận hàng
+											(COD)</span>
+									</label>
+								</div>
+							</div>
+
+							<button type="submit" class="btn btn-confirm w-100 mt-3"
+								th:disabled="${addresses.isEmpty()}">
+								TIẾN HÀNH ĐẶT HÀNG <i class="bi bi-chevron-right ms-2 fw-bold"></i>
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-lg-5">
+				<div class="checkout-card">
+					<div class="card-header-custom">
+						<i class="bi bi-bag-check me-2"></i> Tóm tắt đơn hàng
+					</div>
+					<div class="card-body p-4">
+						<div class="mb-4 overflow-auto pe-2" style="max-height: 300px;">
+							<div th:each="item : ${cartList}"
+								class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom"
+								style="border-color: var(--border-color) !important;">
+								<img
+									th:src="${item.product.mainImage != null ? '/uploads/' + item.product.mainImage : 'https://via.placeholder.com/60'}"
+									style="width: 65px; height: 65px; border-radius: 8px; object-fit: contain; background: #fff; padding: 2px;">
+								<div class="flex-grow-1">
+									<div class="fw-bold small" style="color: var(--text-light);"
+										th:text="${item.product.name}">Tên SP</div>
+									<div class="small mt-1" style="color: var(--text-sub);">
+										SL: <span th:text="${item.quantity}">1</span>
 									</div>
 								</div>
+								<div class="fw-bold small" style="color: var(--text-light);"
+									th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></div>
+							</div>
+						</div>
 
-								<div class="p-3 rounded mb-4"
-									style="background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-color);">
-									<label class="form-label text-white small fw-bold">MÃ
-										GIẢM GIÁ</label>
-									<form action="/checkout" method="get" class="input-group">
-										<select class="form-select form-select-dark shadow-none"
-											name="voucherCode">
-											<option value="" class="text-muted">Chọn Voucher của
-												bạn</option>
-											<option th:each="vd : ${savedVouchers}"
-												th:value="${vd.voucher.code}"
-												th:text="${vd.voucher.code + ' (-' + (vd.voucher.discountPercent != null ? vd.voucher.discountPercent + '%' : #numbers.formatDecimal(vd.voucher.discountAmount, 0, 'COMMA', 0, 'POINT') + '₫') + ')'}"
-												th:selected="${voucherCode == vd.voucher.code}"></option>
-										</select>
-										<button class="btn btn-info px-3" type="submit">Áp
-											dụng</button>
-									</form>
+						<div class="voucher-box mb-4">
+							<label class="form-label small fw-bold"
+								style="color: var(--text-light);">MÃ GIẢM GIÁ</label>
+							<form action="/checkout" method="get" class="input-group mt-1">
+								<select class="form-select form-select-custom shadow-none"
+									name="voucherCode">
+									<option value="" class="text-muted">Chọn Voucher của
+										bạn</option>
+									<option th:each="vd : ${savedVouchers}"
+										th:value="${vd.voucher.code}"
+										th:text="${vd.voucher.code + ' (-' + (vd.voucher.discountPercent != null ? vd.voucher.discountPercent + '%' : #numbers.formatDecimal(vd.voucher.discountAmount, 0, 'COMMA', 0, 'POINT') + '₫') + ')'}"
+										th:selected="${voucherCode == vd.voucher.code}"></option>
+								</select>
+								<button class="btn px-3 fw-bold" type="submit"
+									style="background: var(--text-main); color: #000;">Áp
+									dụng</button>
+							</form>
+							<div th:if="${discount > 0}" class="small mt-2 fw-bold"
+								style="color: var(--text-main);">
+								<i class="bi bi-patch-check-fill"></i> Đã giảm thành công!
+							</div>
+						</div>
 
-									<div th:if="${discount > 0}" class="text-main small mt-2">
-										<i class="bi bi-patch-check-fill"></i> Đã giảm thành công!
-									</div>
-								</div>
-								<div class="small">
-									<div class="d-flex justify-content-between mb-2">
-										<span class="text-info">Tạm tính:</span> <span
-											class="text-white"
-											th:text="${#numbers.formatDecimal(rawTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-									</div>
-									<div class="d-flex justify-content-between mb-2"
-										th:if="${discount > 0}">
-
-										<span class="text-info">Giảm giá:</span> <span
-											class="text-danger fw-bold"
-											th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-									</div>
-									<div class="d-flex justify-content-between mb-3">
-										<span class="text-success">Phí vận chuyển :</span> <span
-											id="feeShipText" class="text-success fw-bold"
-											th:text="${feeShip == 0 ? 'MIỄN PHÍ' : #numbers.formatDecimal(feeShip, 0, 'COMMA', 0, 'POINT') + '₫'}">
-										</span>
-									</div>
-									<hr class="border-secondary">
-									<div class="d-flex justify-content-between align-items-center">
-										<span class="fw-bold text-white fs-5">TỔNG CỘNG:</span> <span
-											id="finalTotalText" class="price-text fs-4"
-											th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')} + '₫'">
-										</span>
-									</div>
-								</div>
+						<div class="small">
+							<div class="d-flex justify-content-between mb-2">
+								<span style="color: var(--text-sub);">Tạm tính:</span> <span
+									class="fw-bold" style="color: var(--text-light);"
+									th:text="${#numbers.formatDecimal(rawTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+							</div>
+							<div class="d-flex justify-content-between mb-2"
+								th:if="${discount > 0}">
+								<span style="color: var(--text-sub);">Giảm giá:</span> <span
+									class="text-danger fw-bold"
+									th:text="'- ' + ${#numbers.formatDecimal(discount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+							</div>
+							<div class="d-flex justify-content-between mb-3">
+								<span style="color: var(--text-sub);">Phí vận chuyển:</span> <span
+									id="feeShipText"
+									class="fw-bold text-success"
+									th:text="${feeShip == 0 ? 'MIỄN PHÍ' : #numbers.formatDecimal(feeShip, 0, 'COMMA', 0, 'POINT') + '₫'}"></span>
+							</div>
+							<hr style="border-color: var(--border-color);">
+							<div
+								class="d-flex justify-content-between align-items-center mt-3">
+								<span class="fw-bold fs-6" style="color: var(--text-light);">TỔNG
+									CỘNG:</span> <span id="finalTotalText" class="fs-4 fw-bold text-success"
+									th:text="${#numbers.formatDecimal(finalTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<footer class="py-5">
-				<div class="container-fluid px-4">
-					<div class="row g-4">
-						<div class="col-lg-4 col-md-6">
-							<h5 class="fw-bold mb-3">MODEL WORLD</h5>
-							<p class="small" style="color: #aaa;">Hệ thống phân phối mô
-								hình chính hãng hàng đầu Việt Nam. Đam mê của bạn là sứ mệnh của
-								chúng tôi.</p>
-							<div class="d-flex gap-3 mt-3">
-								<a href="#" class="text-light fs-5"><i
-									class="bi bi-facebook"></i></a> <a href="#" class="text-light fs-5"><i
-									class="bi bi-youtube"></i></a> <a href="#" class="text-light fs-5"><i
-									class="bi bi-instagram"></i></a>
-							</div>
-						</div>
-						<div class="col-lg-2 col-md-3 col-6">
-							<h6 class="fw-bold mb-3">Về chúng tôi</h6>
-							<ul class="list-unstyled small lh-lg">
-								<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
-								<li><a href="#" class="text-decoration-none">Hệ thống
-										cửa hàng</a></li>
-								<li><a href="#" class="text-decoration-none">Tuyển dụng</a></li>
-							</ul>
-						</div>
-						<div class="col-lg-2 col-md-3 col-6">
-							<h6 class="fw-bold mb-3">Chính sách</h6>
-							<ul class="list-unstyled small lh-lg">
-								<li><a href="#" class="text-decoration-none">Chính sách
-										đổi trả</a></li>
-								<li><a href="#" class="text-decoration-none">Chính sách
-										bảo hành</a></li>
-								<li><a href="#" class="text-decoration-none">Chính sách
-										bảo mật</a></li>
-							</ul>
-						</div>
-						<div class="col-lg-4 col-md-12">
-							<h6 class="fw-bold mb-3">Đăng ký nhận tin Khuyến Mãi</h6>
-							<div class="input-group">
-								<input type="text" class="form-control"
-									placeholder="Nhập email của bạn..."
-									style="background: #111; border: 1px solid #333; color: #fff;">
-								<button class="btn"
-									style="background: var(--accent-cyan); color: #000; font-weight: bold;">Đăng
-									ký</button>
-							</div>
-						</div>
-					</div>
-					<div
-						class="text-center mt-5 pt-3 border-top border-secondary small">
-						© 2026 Model World. All rights reserved.</div>
-				</div>
-			</footer>
 		</div>
 	</div>
 
-	<div class="floating-socials">
-		<a href="tel:0909123456" class="social-btn phone"><i
-			class="bi bi-telephone-fill"></i></a> <a href="#" class="social-btn zalo"><i
-			class="bi bi-chat-dots-fill"></i></a> <a href="#"
-			class="social-btn messenger"><i class="bi bi-messenger"></i></a>
-	</div>
+	<footer class="py-5">
+		<div class="container-fluid px-lg-5">
+			<div class="row g-4">
+				<div class="col-lg-4 col-md-6">
+					<h4 class="fw-bold mb-3"
+						style="font-family: 'Montserrat'; color: var(--text-main);">MODEL
+						WORLD</h4>
+					<p class="small" style="color: var(--text-light); opacity: 0.8;">
+						Hệ thống phân phối mô hình chính hãng hàng đầu Việt Nam. Nơi hội
+						tụ niềm đam mê của những nhà sưu tầm chuyên nghiệp.</p>
+					<div class="d-flex gap-3 mt-4">
+						<a href="#" class="fs-4"><i class="bi bi-facebook"></i></a> <a
+							href="#" class="fs-4"><i class="bi bi-youtube"></i></a> <a
+							href="#" class="fs-4"><i class="bi bi-instagram"></i></a> <a
+							href="#" class="fs-4"><i class="bi bi-tiktok"></i></a>
+					</div>
+				</div>
+
+				<div class="col-lg-2 col-md-3 col-6">
+					<h6 class="fw-bold mb-3 text-uppercase"
+						style="letter-spacing: 1px;">Về chúng tôi</h6>
+					<ul class="list-unstyled small lh-lg">
+						<li><a href="#" class="text-decoration-none">Giới thiệu</a></li>
+						<li><a href="#" class="text-decoration-none">Hệ thống cửa
+								hàng</a></li>
+						<li><a href="#" class="text-decoration-none">Tin tức
+								Hobby</a></li>
+						<li><a href="#" class="text-decoration-none">Tuyển dụng</a></li>
+					</ul>
+				</div>
+
+				<div class="col-lg-2 col-md-3 col-6">
+					<h6 class="fw-bold mb-3 text-uppercase"
+						style="letter-spacing: 1px;">Chính sách</h6>
+					<ul class="list-unstyled small lh-lg">
+						<li><a href="#" class="text-decoration-none">Chính sách
+								đổi trả</a></li>
+						<li><a href="#" class="text-decoration-none">Chính sách
+								bảo hành</a></li>
+						<li><a href="#" class="text-decoration-none">Vận chuyển &
+								Giao hàng</a></li>
+						<li><a href="#" class="text-decoration-none">Điều khoản
+								dịch vụ</a></li>
+					</ul>
+				</div>
+
+				<div class="col-lg-4 col-md-12">
+					<h6 class="fw-bold mb-3 text-uppercase"
+						style="letter-spacing: 1px;">Đăng ký nhận khuyến mãi</h6>
+					<p class="small mb-3">Đừng bỏ lỡ những mẫu Figure giới hạn và
+						mã giảm giá độc quyền.</p>
+					<div class="input-group">
+						<input type="email" class="form-control border-secondary"
+							placeholder="Email của bạn..."
+							style="background: rgba(255, 255, 255, 0.05);">
+						<button class="btn btn-info fw-bold px-4" style="color: #000;">ĐĂNG
+							KÝ</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="text-center mt-5 pt-4 border-top border-secondary-subtle">
+				<p class="small mb-0 opacity-50">© 2026 MODEL WORLD - THE
+					ULTIMATE HOBBY STORE. All rights reserved.</p>
+			</div>
+		</div>
+	</footer>
 
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
-document.getElementById("addressSelect")?.addEventListener("change", function () {
-    const addressId = this.value;
+    function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById('themeIcon');
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        icon.className = newTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+    }
 
-    fetch(`/api/shipping/calculate?addressId=` + addressId)
-        .then(res => res.json())
-        .then(data => {
-            // update phí ship
-            document.getElementById("feeShipText").innerText =
-                data.feeShip === 0 ? "MIỄN PHÍ" : data.feeShip.toLocaleString() + "₫";
+    window.addEventListener('DOMContentLoaded', () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        document.getElementById('themeIcon').className = theme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+    });
 
-            // update tổng tiền
-            document.getElementById("finalTotalText").innerText =
-                data.finalTotal.toLocaleString() + "₫";
-        })
-        .catch(err => console.error(err));
-});
-</script>
+    document.getElementById("addressSelect")?.addEventListener("change", function () {
+        const addressId = this.value;
+        fetch(`/api/shipping/calculate?addressId=` + addressId)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("feeShipText").innerText =
+                    data.feeShip === 0 ? "MIỄN PHÍ" : data.feeShip.toLocaleString() + "₫";
+                document.getElementById("finalTotalText").innerText =
+                    data.finalTotal.toLocaleString() + "₫";
+            })
+            .catch(err => console.error(err));
+    });
+	</script>
 </body>
 </html>
