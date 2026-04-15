@@ -43,23 +43,23 @@ body {
 .badge-count { position: absolute; top: -6px; right: -8px; background: var(--accent-red); color: #fff; font-size: 0.65rem; padding: 2px 5px; border-radius: 50%; font-weight: 900; border: 2px solid var(--bg-nav);}
 
 /* UI CARDS */
-.account-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 25px; box-shadow: 0 8px 30px var(--shadow); height: 100%; }
-.section-title { font-family: 'Montserrat'; font-weight: 800; color: var(--text-light); letter-spacing: 0.5px; border-left: 4px solid var(--text-main); padding-left: 10px; margin-bottom: 20px; font-size: 1.1rem;}
+.account-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 30px; box-shadow: 0 8px 30px var(--shadow); height: 100%; }
+.section-title { font-family: 'Montserrat'; font-weight: 800; color: var(--text-light); letter-spacing: 0.5px; border-left: 4px solid var(--text-main); padding-left: 12px; margin-bottom: 25px; font-size: 1.15rem; text-transform: uppercase;}
 
 /* AVATAR */
-.avatar-section { position: relative; width: 120px; margin: 0 auto 15px; }
-.avatar-display { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 0 3px var(--text-main), 0 8px 15px var(--shadow); transition: 0.3s; cursor: pointer; }
+.avatar-section { position: relative; width: 130px; margin: 0 auto 20px; }
+.avatar-display { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 0 3px var(--text-main), 0 8px 15px var(--shadow); transition: 0.3s; cursor: pointer; }
 .avatar-display:hover { filter: brightness(0.7); }
-.camera-icon { position: absolute; bottom: 0; right: 0; background: var(--text-main); color: #000; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); font-size: 1rem; pointer-events: none;}
+.camera-icon { position: absolute; bottom: 0; right: 0; background: var(--text-main); color: #000; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); font-size: 1.1rem; pointer-events: none;}
 
 /* STATS WIDGETS */
-.stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; transition: 0.3s; height: 100%; display: flex; flex-direction: column; justify-content: center;}
-.stat-box:hover { border-color: var(--text-main); transform: translateY(-2px);}
-.stat-title { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: var(--text-dim); margin-bottom: 5px;}
-.stat-value { font-size: 1.2rem; font-weight: 900; color: var(--text-light); font-family: 'Montserrat';}
+.stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; transition: 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;}
+.stat-box:hover { border-color: var(--text-main); transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow);}
+.stat-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-dim); margin-bottom: 5px;}
+.stat-value { font-size: 1.3rem; font-weight: 900; color: var(--text-light); font-family: 'Montserrat';}
 
 /* RANK TAGS */
-.rank-tag { font-family: 'Montserrat', sans-serif; font-size: 0.75rem; font-weight: 800; padding: 5px 15px; border-radius: 50px; display: inline-block; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+.rank-tag { font-family: 'Montserrat', sans-serif; font-size: 0.8rem; font-weight: 800; padding: 6px 20px; border-radius: 50px; display: inline-block; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; }
 .rank-kim-cuong { background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); background-size: 200% auto; color: #fff !important; animation: shine_diamond 2s linear infinite; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3); }
 .rank-vang { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000 !important; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3); }
 .rank-bac { background: linear-gradient(45deg, #bdc3c7, #95a5a6); color: #000 !important; }
@@ -67,24 +67,24 @@ body {
 @keyframes shine_diamond { to { background-position:200% center; } }
 
 /* FORMS */
-.form-label { color: var(--text-dim); font-weight: 600; font-size: 0.8rem; margin-bottom: 5px; }
-.form-control, .form-select { background-color: var(--input-bg) !important; color: var(--text-light) !important; border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 10px 15px; transition: 0.3s; font-size: 0.9rem;}
+.form-label { color: var(--text-dim); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; }
+.form-control, .form-select { background-color: var(--input-bg) !important; color: var(--text-light) !important; border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 12px 15px; transition: 0.3s; font-size: 0.95rem;}
 .form-control:focus, .form-select:focus { border-color: var(--text-main) !important; box-shadow: 0 0 0 3px rgba(102, 252, 241, 0.1); }
 .input-group .btn-update { border-radius: 0 10px 10px 0; border: 1px solid var(--text-main); margin-left: -1px; z-index: 5;}
-.input-group .form-control { border-radius: 10px 0 0 10px; border-right: none !important;}
+.input-group .form-control, .input-group .input-group-text { border-radius: 10px 0 0 10px; }
 
 /* BUTTONS */
-.btn-update { background: var(--text-main); color: #000; font-weight: 800; padding: 10px 20px; border-radius: 10px; transition: 0.3s; border: none; font-size: 0.9rem;}
+.btn-update { background: var(--text-main); color: #000; font-weight: 800; padding: 10px 25px; border-radius: 10px; transition: 0.3s; border: none; font-size: 0.95rem;}
 .btn-update:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 252, 241, 0.3); }
 
 /* ADDRESS CARDS */
-.address-card { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; transition: 0.3s; position: relative; overflow: hidden;}
+.address-card { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden;}
 .address-card:hover { border-color: var(--accent-cyan); box-shadow: 0 4px 15px var(--shadow);}
-.address-card.is-default { border-color: var(--text-main); background: rgba(102, 252, 241, 0.02);}
-.address-card.is-default::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--text-main);}
-.badge-default { background: rgba(102, 252, 241, 0.1); color: var(--text-main); border: 1px solid var(--text-main); font-size: 0.65rem; padding: 3px 8px; border-radius: 50px; font-weight: 700;}
+.address-card.is-default { border-color: var(--text-main); background: rgba(102, 252, 241, 0.03);}
+.address-card.is-default::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--text-main);}
+.badge-default { background: rgba(102, 252, 241, 0.15); color: var(--text-main); border: 1px solid var(--text-main); font-size: 0.7rem; padding: 4px 10px; border-radius: 50px; font-weight: 800;}
 
-.add-address-zone { background: transparent; border: 1px dashed var(--border-color); border-radius: 15px; padding: 20px; transition: 0.3s;}
+.add-address-zone { background: transparent; border: 1px dashed var(--border-color); border-radius: 15px; padding: 25px; transition: 0.3s;}
 .add-address-zone:focus-within { border-color: var(--text-main); background: rgba(102, 252, 241, 0.02);}
 
 /* DANGER ZONE */
@@ -131,29 +131,38 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 		</div>
 	</nav>
 
-	<div class="container py-4">
+	<div class="container py-5">
 		<div class="row g-4">
 			
-			<!-- CỘT TRÁI: PROFILE WIDGET -->
+			<!-- ============================================== -->
+			<!-- CỘT TRÁI: WIDGET TÓM TẮT THÔNG TIN (GỌN GÀNG)  -->
+			<!-- ============================================== -->
 			<div class="col-xl-4 col-lg-4">
-				<div class="account-card text-center">
-					<form id="avatarForm" th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data">
-						<div class="avatar-section">
-							<label for="avatarInput" title="Thay đổi ảnh đại diện"> 
-								<img th:src="${account.avatar != null ? (account.avatar.startsWith('http') ? account.avatar : '/images/avatar/' + account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar-display">
-								<div class="camera-icon shadow"><i class="bi bi-camera-fill"></i></div>
-							</label> 
-							<input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none" onchange="document.getElementById('avatarForm').submit()">
-						</div>
-					</form>
+				<div class="account-card">
+					<div class="text-center">
+						<!-- Avatar -->
+						<form id="avatarForm" th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data">
+							<div class="avatar-section">
+								<label for="avatarInput" title="Thay đổi ảnh đại diện"> 
+									<img th:src="${account.avatar != null ? (account.avatar.startsWith('http') ? account.avatar : '/images/avatar/' + account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="avatar-display">
+									<div class="camera-icon shadow"><i class="bi bi-camera-fill"></i></div>
+								</label> 
+								<input type="file" id="avatarInput" name="avatar" accept="image/*" style="display: none" onchange="document.getElementById('avatarForm').submit()">
+							</div>
+						</form>
 
-					<h5 class="fw-bold mb-1" style="color: var(--text-light);" th:text="${account.fullName ?: account.username}">Họ tên</h5>
-					<p class="mb-3 small fw-medium" style="color: var(--text-dim)" th:text="${account.email}">email@example.com</p>
+						<!-- Thông tin cơ bản -->
+						<h5 class="fw-bold mb-1" style="color: var(--text-light);" th:text="${account.fullName ?: account.username}">Họ tên</h5>
+						<p class="mb-3 small fw-medium" style="color: var(--text-dim)" th:text="${account.email}">email@example.com</p>
 
-					<div class="rank-tag shadow" th:classappend="${membershipName == 'Kim Cương' ? 'rank-kim-cuong' : (membershipName == 'Vàng' ? 'rank-vang' : (membershipName == 'Bạc' ? 'rank-bac' : 'rank-dong'))}" th:text="${membershipName ?: 'Thành viên'}">Hạng</div>
+						<!-- Rank -->
+						<div class="rank-tag shadow" th:classappend="${membershipName == 'Kim Cương' ? 'rank-kim-cuong' : (membershipName == 'Vàng' ? 'rank-vang' : (membershipName == 'Bạc' ? 'rank-bac' : 'rank-dong'))}" th:text="${membershipName ?: 'Thành viên'}">Hạng</div>
+					</div>
 
-					<!-- THỐNG KÊ -->
-					<div class="row g-2 mt-1">
+					<hr class="my-4" style="border-color: var(--border-color);">
+
+					<!-- Thống kê -->
+					<div class="row g-3">
 						<div class="col-6">
 							<div class="stat-box">
 								<div class="stat-title"><i class="bi bi-box-seam text-info me-1"></i> Đơn hàng</div>
@@ -167,169 +176,38 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 							</div>
 						</div>
 						<div class="col-12">
-
-							<form th:action="@{/account/update-phone}" method="post">
-								<label class="form-label">Số điện thoại liên lạc</label>
-								<div class="input-group">
-									<input type="text" name="phone" class="form-control"
-										th:value="${account.phone}"
-										placeholder="Nhập số điện thoại...">
-									<button class="btn btn-update px-4">LƯU</button>
-								</div>
-							</form>
-						</div>
-						<div class="col-12 mt-4">
-    <h5 class="fw-bold text-main mb-3">
-        <i class="bi bi-geo-alt me-2"></i>ĐỊA CHỈ GIAO HÀNG
-    </h5>
-
-    <!-- LIST ADDRESS -->
-    <div th:if="${addresses != null}">
-        <div th:each="addr : ${addresses}" class="p-3 mb-3 rounded-3 border"
-             style="border-color: var(--border-color); background: rgba(255,255,255,0.02)">
-
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="fw-bold text-white">
-                        <i class="bi bi-person me-1"></i>
-                        <span th:text="${addr.recipientName}"></span>
-                    </div>
-
-                    <div class="text-light small">
-                        <i class="bi bi-telephone me-1"></i>
-                        <span th:text="${addr.recipientPhone}"></span>
-                    </div>
-
-                    <div class="text-dim small mt-1">
-                        <i class="bi bi-geo me-1"></i>
-                        <span th:text="${addr.fullAddress}"></span>
-                    </div>
-
-                    <span th:if="${addr.isDefault}" 
-                          class="badge bg-success mt-2">Mặc định</span>
-                </div>
-
-                <div class="d-flex gap-2">
-
-                    <!-- SET DEFAULT -->
-                    <form th:action="@{/account/set-default}" method="post">
-                        <input type="hidden" name="id" th:value="${addr.id}">
-                        <button class="btn btn-sm btn-outline-info">Mặc định</button>
-                    </form>
-
-                    <!-- DELETE -->
-                    <form th:action="@{/account/delete-address}" method="post">
-                        <input type="hidden" name="id" th:value="${addr.id}">
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </form>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD NEW ADDRESS -->
-    <div class="mt-4 p-4 rounded-4"
-     style="background: rgba(69,162,158,0.05); border:1px dashed var(--accent-cyan)">
-
-    <form th:action="@{/account/add-address}" method="post">
-        <div class="row g-3">
-
-            <div class="col-md-6">
-                <label class="form-label">Người nhận</label>
-                <input type="text" name="recipientName" class="form-control" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label">SĐT người nhận</label>
-                <input type="text" name="recipientPhone" class="form-control" required>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Tỉnh/Thành</label>
-                <select id="province" name="province" class="form-control" required>
-                    <option value="">-- Chọn tỉnh --</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Quận/Huyện</label>
-                <select id="district" name="district" class="form-control" required>
-                    <option value="">-- Chọn quận --</option>
-                </select>
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Phường/Xã</label>
-                <select id="ward" name="ward" class="form-control">
-                    <option value="">-- Chọn phường --</option>
-                </select>
-            </div>
-
-            <div class="col-md-12">
-                <label class="form-label">Chi tiết</label>
-                <input type="text" name="detail" class="form-control"
-                       placeholder="Số nhà, tên đường..." required>
-            </div>
-
-            <div class="col-12 text-end">
-                <button class="btn btn-update">
-                    <i class="bi bi-plus-circle me-1"></i>Thêm địa chỉ
-                </button>
-            </div>
-
-        </div>
-    </form>
-</div>
-</div>
-						<div class="col-12 mt-5">
-							<div class="p-4 rounded-4"
-								style="background: rgba(255, 46, 99, 0.03); border: 1px dashed var(--accent-red);">
-								<form th:action="@{/account/update-password}" method="post">
-									<label class="form-label text-danger">Bảo mật & Mật
-										khẩu</label>
-									<div class="input-group">
-										<input type="password" name="password" class="form-control"
-											placeholder="Nhập mật khẩu mới">
-										<button class="btn btn-danger px-4 fw-bold">ĐỔI MẬT
-											KHẨU</button>
-									</div>
-								</form>
-
-							<div class="stat-box flex-row align-items-center justify-content-between p-3">
-								<div class="stat-title mb-0"><i class="bi bi-wallet2 text-success me-1"></i> TỔNG CHI</div>
+							<div class="stat-box flex-row justify-content-between p-3">
+								<div class="stat-title mb-0"><i class="bi bi-wallet2 text-success me-1"></i> Tổng chi</div>
 								<div class="stat-value text-main fs-5" th:text="${#numbers.formatDecimal(totalSpent, 0, 'COMMA', 0, 'POINT')} + '₫'">0₫</div>
-
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- CỘT PHẢI: GỘP TẤT CẢ VÀO 1 CARD LỚN -->
+			<!-- ============================================== -->
+			<!-- CỘT PHẢI: KHU VỰC CÁC FORM CHỈNH SỬA           -->
+			<!-- ============================================== -->
 			<div class="col-xl-8 col-lg-8">
 				
-				<!-- Thông báo -->
-				<div th:if="${success}" class="alert alert-success border-success bg-success bg-opacity-10 text-success fw-bold rounded-3 mb-3 py-2">
+				<!-- Thông báo Hệ thống -->
+				<div th:if="${success}" class="alert alert-success border-success bg-success bg-opacity-10 text-success fw-bold rounded-3 mb-4 py-3">
 					<i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
 				</div>
-				<div th:if="${error}" class="alert alert-danger border-danger bg-danger bg-opacity-10 text-danger fw-bold rounded-3 mb-3 py-2">
+				<div th:if="${error}" class="alert alert-danger border-danger bg-danger bg-opacity-10 text-danger fw-bold rounded-3 mb-4 py-3">
 					<i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
 				</div>
 
-				<!-- CARD TỔNG BAO GỒM 3 PHẦN -->
 				<div class="account-card">
                     
 					<!-- PHẦN 1: THÔNG TIN CÁ NHÂN -->
 					<h6 class="section-title"><i class="bi bi-person-lines-fill me-2 text-main"></i> THÔNG TIN CÁ NHÂN</h6>
-					<div class="row g-3">
+					<div class="row g-4 mb-4">
 						<div class="col-md-6">
 							<form th:action="@{/account/update-fullname}" method="post">
 								<label class="form-label">Họ và tên hiển thị</label>
 								<div class="input-group">
-									<span class="input-group-text border-end-0 bg-transparent" style="border-color: var(--border-color); color: var(--text-dim); border-radius: 10px 0 0 10px;"><i class="bi bi-person"></i></span>
+									<span class="input-group-text border-end-0 bg-transparent" style="border-color: var(--border-color); color: var(--text-dim);"><i class="bi bi-person"></i></span>
 									<input type="text" name="fullName" class="form-control border-start-0 ps-0" th:value="${account.fullName}" placeholder="Nhập họ tên...">
 									<button class="btn btn-update">LƯU</button>
 								</div>
@@ -339,7 +217,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 							<form th:action="@{/account/update-phone}" method="post">
 								<label class="form-label">Số điện thoại liên lạc</label>
 								<div class="input-group">
-									<span class="input-group-text border-end-0 bg-transparent" style="border-color: var(--border-color); color: var(--text-dim); border-radius: 10px 0 0 10px;"><i class="bi bi-telephone"></i></span>
+									<span class="input-group-text border-end-0 bg-transparent" style="border-color: var(--border-color); color: var(--text-dim);"><i class="bi bi-telephone"></i></span>
 									<input type="tel" name="phone" class="form-control border-start-0 ps-0" th:value="${account.phone}" placeholder="Nhập số điện thoại...">
 									<button class="btn btn-update">LƯU</button>
 								</div>
@@ -347,92 +225,96 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 						</div>
 					</div>
 
-                    <!-- Đường phân cách -->
                     <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
 
 					<!-- PHẦN 2: SỔ ĐỊA CHỈ -->
-					<div class="d-flex justify-content-between align-items-center mb-3">
-						<h6 class="section-title mb-0"><i class="bi bi-geo-alt-fill me-2 text-main"></i> SỔ ĐỊA CHỈ</h6>
-						<button class="btn btn-sm btn-outline-info rounded-pill fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">
-							<i class="bi bi-plus-lg"></i> Thêm mới
+					<div class="d-flex justify-content-between align-items-center mb-4">
+						<h6 class="section-title mb-0"><i class="bi bi-geo-alt-fill me-2 text-main"></i> SỔ ĐỊA CHỈ GIAO HÀNG</h6>
+						<button class="btn btn-sm btn-outline-info rounded-pill fw-bold px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">
+							<i class="bi bi-plus-lg me-1"></i> Thêm địa chỉ mới
 						</button>
 					</div>
 
-                    <div th:if="${addresses != null and !addresses.isEmpty()}" class="row g-2 mb-3">
+					<!-- Danh sách địa chỉ đã lưu -->
+                    <div th:if="${addresses != null and !addresses.isEmpty()}" class="row g-3 mb-4">
                         <div th:each="addr : ${addresses}" class="col-md-6">
-							<div class="address-card h-100" th:classappend="${addr.isDefault} ? 'is-default' : ''">
-								<div class="d-flex justify-content-between mb-1">
-									<div class="fw-bold" style="color: var(--text-light); font-size: 0.95rem;"><i class="bi bi-person me-1 text-dim"></i> <span th:text="${addr.recipientName}"></span></div>
+							<div class="address-card h-100 d-flex flex-column" th:classappend="${addr.isDefault} ? 'is-default' : ''">
+								<div class="d-flex justify-content-between align-items-start mb-2">
+									<div class="fw-bold" style="color: var(--text-light); font-size: 1rem;"><i class="bi bi-person me-1 text-dim"></i> <span th:text="${addr.recipientName}"></span></div>
 									<span th:if="${addr.isDefault}" class="badge-default"><i class="bi bi-check2-circle"></i> Mặc định</span>
 								</div>
-								<div class="small fw-medium mb-1" style="color: var(--text-dim);"><i class="bi bi-telephone me-1"></i> <span th:text="${addr.recipientPhone}"></span></div>
-								<div class="small lh-base mb-2" style="color: var(--text-light);"><i class="bi bi-geo me-1 text-dim"></i> <span th:text="${addr.fullAddress}"></span></div>
+								<div class="small fw-medium mb-2" style="color: var(--text-dim);"><i class="bi bi-telephone me-1"></i> <span th:text="${addr.recipientPhone}"></span></div>
+								<div class="small lh-base mb-3 flex-grow-1" style="color: var(--text-light);"><i class="bi bi-geo me-1 text-dim"></i> <span th:text="${addr.fullAddress}"></span></div>
 								
-								<div class="d-flex gap-2 mt-auto pt-2 border-top" style="border-color: var(--border-color) !important;">
+								<div class="d-flex gap-2 mt-auto pt-3 border-top" style="border-color: var(--border-color) !important;">
 									<form th:if="${!addr.isDefault}" th:action="@{/account/set-default}" method="post" class="flex-grow-1">
 										<input type="hidden" name="id" th:value="${addr.id}">
-										<button class="btn btn-sm btn-outline-info w-100 fw-bold rounded-2 py-1" style="font-size: 0.8rem;">Mặc định</button>
+										<button class="btn btn-sm btn-outline-info w-100 fw-bold rounded-2 py-2" style="font-size: 0.85rem;">Đặt mặc định</button>
 									</form>
-									<form th:action="@{/account/delete-address}" method="post">
+									<form th:action="@{/account/delete-address}" method="post" th:classappend="${addr.isDefault} ? 'w-100' : ''">
 										<input type="hidden" name="id" th:value="${addr.id}">
-										<button class="btn btn-sm btn-outline-danger rounded-2 px-3 py-1" title="Xóa"><i class="bi bi-trash3"></i></button>
+										<button class="btn btn-sm btn-outline-danger rounded-2 py-2 w-100" title="Xóa địa chỉ"><i class="bi bi-trash3"></i> Xóa</button>
 									</form>
 								</div>
 							</div>
                         </div>
                     </div>
 
+					<!-- Form Thêm Địa Chỉ Mới (Ẩn/Hiện) -->
 					<div class="collapse" id="collapseAddAddress">
 						<div class="add-address-zone mt-2 shadow-sm">
-							<h6 class="fw-bold mb-3 small" style="color: var(--text-light);"><i class="bi bi-pencil-square me-2 text-main"></i> Nhập thông tin địa chỉ mới</h6>
-							<form th:action="@{/account/add-address}" method="post">
-								<div class="row g-2">
+							<h6 class="fw-bold mb-3" style="color: var(--text-light);"><i class="bi bi-pencil-square me-2 text-main"></i> Thông tin người nhận mới</h6>
+<form th:action="@{/account/add-address}" method="post" accept-charset="UTF-8">								<div class="row g-3">
 									<div class="col-md-6">
 										<label class="form-label">Tên người nhận</label>
-										<input type="text" name="recipientName" class="form-control form-control-sm" placeholder="Nguyễn Văn A" required>
+										<input type="text" name="recipientName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
 									</div>
 									<div class="col-md-6">
 										<label class="form-label">Số điện thoại</label>
-										<input type="text" name="recipientPhone" class="form-control form-control-sm" placeholder="09xxxxxxx" required>
+										<input type="text" name="recipientPhone" class="form-control" placeholder="09xxxxxxx" required>
 									</div>
-									<div class="col-md-6">
+									<div class="col-md-4">
 										<label class="form-label">Tỉnh / Thành phố</label>
-										<select id="provinceSelect" class="form-select form-select-sm" required>
-											<option value="" selected disabled>Chọn Tỉnh/Thành</option>
+										<select id="province" name="province" class="form-select" required>
+											<option value="" selected disabled>-- Chọn Tỉnh --</option>
 										</select>
-										<input type="hidden" name="province" id="provinceName">
 									</div>
-									<div class="col-md-6">
+									<div class="col-md-4">
 										<label class="form-label">Quận / Huyện</label>
-										<select id="districtSelect" class="form-select form-select-sm" required disabled>
-											<option value="" selected disabled>Chọn Quận/Huyện</option>
+										<select id="district" name="district" class="form-select" required>
+											<option value="" selected disabled>-- Chọn Quận --</option>
 										</select>
-										<input type="hidden" name="district" id="districtName">
+									</div>
+									<div class="col-md-4">
+										<label class="form-label">Phường / Xã</label>
+										<select id="ward" name="ward" class="form-select">
+											<option value="" selected disabled>-- Chọn Phường --</option>
+										</select>
 									</div>
 									<div class="col-12">
 										<label class="form-label">Địa chỉ chi tiết</label>
-										<input type="text" name="detail" class="form-control form-control-sm" placeholder="Số nhà, ngõ, tên đường, phường/xã..." required>
+										<input type="text" name="detail" class="form-control" placeholder="Số nhà, ngõ, tên đường..." required>
 									</div>
-									<div class="col-12 mt-3 text-end">
-										<button class="btn btn-update py-2 px-4"><i class="bi bi-save me-1"></i> LƯU</button>
+									<div class="col-12 mt-4 text-end">
+										<button type="button" class="btn btn-outline-secondary px-4 me-2" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">Hủy</button>
+										<button type="submit" class="btn btn-update px-4"><i class="bi bi-save me-1"></i> LƯU ĐỊA CHỈ</button>
 									</div>
 								</div>
 							</form>
 						</div>
 					</div>
 
-                    <!-- Đường phân cách -->
                     <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
 
-					<!-- PHẦN 3: ĐỔI MẬT KHẨU -->
+					<!-- PHẦN 3: BẢO MẬT & ĐỔI MẬT KHẨU -->
 					<div class="danger-zone">
-						<h6 class="section-title border-danger text-danger mb-3"><i class="bi bi-shield-lock-fill me-2"></i> BẢO MẬT TÀI KHOẢN</h6>
+						<h6 class="section-title border-danger text-danger mb-4"><i class="bi bi-shield-lock-fill me-2"></i> BẢO MẬT TÀI KHOẢN</h6>
 						<form th:action="@{/account/update-password}" method="post">
 							<label class="form-label text-danger fw-bold">Cập nhật mật khẩu mới</label>
 							<div class="input-group">
 								<span class="input-group-text bg-transparent border-danger text-danger border-end-0" style="border-radius: 10px 0 0 10px;"><i class="bi bi-key"></i></span>
-								<input type="password" name="password" class="form-control border-danger border-start-0 ps-0 text-danger" placeholder="Nhập mật khẩu an toàn..." required minlength="6">
-								<button class="btn px-4 fw-bold">CẬP NHẬT</button>
+								<input type="password" name="password" class="form-control border-danger border-start-0 ps-0 text-danger" placeholder="Nhập mật khẩu an toàn mới..." required minlength="6">
+								<button class="btn px-4 fw-bold">ĐỔI MẬT KHẨU</button>
 							</div>
 						</form>
 					</div>
@@ -450,6 +332,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 	
 	<!-- SCRIPT QUẢN LÝ THEME & ĐỊA CHỈ API -->
 	<script>
+        // 1. Quản lý Theme (Dark/Light Mode)
         function toggleTheme() {
             const h = document.documentElement;
             const icon = document.getElementById('themeIcon');
@@ -460,112 +343,64 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
             localStorage.setItem('theme', newTheme);
         }
 
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        const icon = document.getElementById('themeIcon');
-        if(icon) icon.className = savedTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
-    });
-    const provinceSelect = document.getElementById("province");
-    const districtSelect = document.getElementById("district");
-    const wardSelect = document.getElementById("ward");
-
-    fetch("https://provinces.open-api.vn/api/?depth=1")
-        .then(res => res.json())
-        .then(data => {
-            data.forEach(p => {
-                provinceSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-            });
-        });
-
-    provinceSelect.addEventListener("change", () => {
-        const provinceName = provinceSelect.value;
-
-        districtSelect.innerHTML = `<option value="">-- Chọn quận --</option>`;
-        wardSelect.innerHTML = `<option value="">-- Chọn phường --</option>`;
-
-        fetch("https://provinces.open-api.vn/api/?depth=2")
-            .then(res => res.json())
-            .then(data => {
-                const province = data.find(p => p.name === provinceName);
-                if (!province) return;
-
-                province.districts.forEach(d => {
-                    districtSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
-                });
-            });
-    });
-
-    districtSelect.addEventListener("change", () => {
-        const provinceName = provinceSelect.value;
-        const districtName = districtSelect.value;
-
-        wardSelect.innerHTML = `<option value="">-- Chọn phường --</option>`;
-
-        fetch("https://provinces.open-api.vn/api/?depth=3")
-            .then(res => res.json())
-            .then(data => {
-                const province = data.find(p => p.name === provinceName);
-                if (!province) return;
-
-                const district = province.districts.find(d => d.name === districtName);
-                if (!district) return;
-
-                district.wards.forEach(w => {
-                    wardSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
-                });
-            });
-    });
-    
-</script>
-
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const icon = document.getElementById('themeIcon');
             if(icon) icon.className = savedTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
             
-            // API Địa chỉ
-            const provinceSelect = document.getElementById("provinceSelect");
-            const districtSelect = document.getElementById("districtSelect");
-            const provinceNameInput = document.getElementById("provinceName");
-            const districtNameInput = document.getElementById("districtName");
+            // 2. Tích hợp API Tỉnh/Quận/Phường (Đã gộp và tối ưu)
+            const provinceSelect = document.getElementById("province");
+            const districtSelect = document.getElementById("district");
+            const wardSelect = document.getElementById("ward");
 
-            fetch("https://provinces.open-api.vn/api/p/")
-                .then(response => response.json())
+            // Lấy danh sách Tỉnh/Thành
+            fetch("https://provinces.open-api.vn/api/?depth=1")
+                .then(res => res.json())
                 .then(data => {
-                    data.forEach(province => {
-                        let option = document.createElement("option");
-                        option.value = province.code; 
-                        option.text = province.name;  
-                        provinceSelect.add(option);
+                    data.forEach(p => {
+                        provinceSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
                     });
-                }).catch(err => console.error(err));
+                })
+                .catch(err => console.error("Lỗi lấy dữ liệu tỉnh:", err));
 
-            provinceSelect.addEventListener("change", function() {
-                provinceNameInput.value = this.options[this.selectedIndex].text;
-                districtSelect.innerHTML = '<option value="" selected disabled>Chọn Quận/Huyện</option>';
-                districtSelect.disabled = false;
-                districtNameInput.value = ""; 
-                
-                fetch(`https://provinces.open-api.vn/api/p/${this.value}?depth=2`)
-                    .then(response => response.json())
+            // Khi chọn Tỉnh -> Load Quận/Huyện
+            provinceSelect.addEventListener("change", () => {
+                const provinceName = provinceSelect.value;
+                districtSelect.innerHTML = `<option value="" selected disabled>-- Chọn Quận --</option>`;
+                wardSelect.innerHTML = `<option value="" selected disabled>-- Chọn Phường --</option>`;
+
+                fetch("https://provinces.open-api.vn/api/?depth=2")
+                    .then(res => res.json())
                     .then(data => {
-                        data.districts.forEach(district => {
-                            let option = document.createElement("option");
-                            option.value = district.code;
-                            option.text = district.name;
-                            districtSelect.add(option);
+                        const province = data.find(p => p.name === provinceName);
+                        if (!province) return;
+                        province.districts.forEach(d => {
+                            districtSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
                         });
-                    }).catch(err => console.error(err));
+                    });
             });
 
-            districtSelect.addEventListener("change", function() {
-                districtNameInput.value = this.options[this.selectedIndex].text;
+            // Khi chọn Quận -> Load Phường/Xã
+            districtSelect.addEventListener("change", () => {
+                const provinceName = provinceSelect.value;
+                const districtName = districtSelect.value;
+                wardSelect.innerHTML = `<option value="" selected disabled>-- Chọn Phường --</option>`;
+
+                fetch("https://provinces.open-api.vn/api/?depth=3")
+                    .then(res => res.json())
+                    .then(data => {
+                        const province = data.find(p => p.name === provinceName);
+                        if (!province) return;
+                        const district = province.districts.find(d => d.name === districtName);
+                        if (!district) return;
+                        district.wards.forEach(w => {
+                            wardSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+                        });
+                    });
             });
         });
-    </script>
+	</script>
 
 </body>
 </html>

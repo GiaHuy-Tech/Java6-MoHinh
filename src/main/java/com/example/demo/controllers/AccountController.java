@@ -65,10 +65,7 @@ public class AccountController {
         }
         accountRepo.save(account);
 
-
-
         // LẤY DANH SÁCH ĐỊA CHỈ
-
         List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
 
         model.addAttribute("account", account);
@@ -99,9 +96,52 @@ public class AccountController {
             accountRepo.save(dbAcc);
 
             session.setAttribute("account", dbAcc);
+            redirect.addFlashAttribute("success", "Cập nhật ảnh đại diện thành công!");
         } catch (IOException e) {
             redirect.addFlashAttribute("error", "Lỗi upload!");
         }
+        return "redirect:/account";
+    }
+
+    // ================= UPDATE INFO (MỚI BỔ SUNG) =================
+    @PostMapping("/update-fullname")
+    public String updateFullName(@RequestParam("fullName") String fullName, RedirectAttributes redirect) {
+        Account sessionAcc = getSessionAccount();
+        if (sessionAcc == null) return "redirect:/login";
+
+        Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+        dbAcc.setFullName(fullName);
+        accountRepo.save(dbAcc);
+        
+        session.setAttribute("account", dbAcc);
+        redirect.addFlashAttribute("success", "Cập nhật họ tên thành công!");
+        return "redirect:/account";
+    }
+
+    @PostMapping("/update-phone")
+    public String updatePhone(@RequestParam("phone") String phone, RedirectAttributes redirect) {
+        Account sessionAcc = getSessionAccount();
+        if (sessionAcc == null) return "redirect:/login";
+
+        Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+        dbAcc.setPhone(phone);
+        accountRepo.save(dbAcc);
+        
+        session.setAttribute("account", dbAcc);
+        redirect.addFlashAttribute("success", "Cập nhật số điện thoại thành công!");
+        return "redirect:/account";
+    }
+
+    @PostMapping("/update-password")
+    public String updatePassword(@RequestParam("password") String password, RedirectAttributes redirect) {
+        Account sessionAcc = getSessionAccount();
+        if (sessionAcc == null) return "redirect:/login";
+
+        Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+        dbAcc.setPassword(password); // Lưu ý: Nếu có dùng Bcrypt thì nhớ hash password ở đây
+        accountRepo.save(dbAcc);
+        
+        redirect.addFlashAttribute("success", "Đổi mật khẩu thành công!");
         return "redirect:/account";
     }
 
@@ -113,7 +153,8 @@ public class AccountController {
             @RequestParam String detail,
             @RequestParam String district,
             @RequestParam String province,
-            @RequestParam(required = false) String ward) {
+            @RequestParam(required = false) String ward,
+            RedirectAttributes redirect) {
 
         Account acc = getSessionAccount();
         if (acc == null) return "redirect:/login";
@@ -126,28 +167,33 @@ public class AccountController {
         address.setDistrict(district);
         address.setProvince(province);
         address.setWard(ward);
-        address.setIsDefault(false);
+        
+        // Nếu là địa chỉ đầu tiên thì set mặc định
+        List<Address> addresses = addressRepo.findByAccount_Id(acc.getId());
+        address.setIsDefault(addresses.isEmpty()); 
         address.setIsActive(true);
 
         addressRepo.save(address);
+        redirect.addFlashAttribute("success", "Thêm địa chỉ mới thành công!");
         return "redirect:/account";
     }
 
     // ================= DELETE =================
     @PostMapping("/delete-address")
-    public String deleteAddress(@RequestParam Long id) {
+    public String deleteAddress(@RequestParam Long id, RedirectAttributes redirect) {
         Account acc = getSessionAccount();
         if (acc == null) return "redirect:/login";
 
         addressRepo.findByIdAndAccount_Id(id, acc.getId())
                 .ifPresent(addressRepo::delete);
-
+        
+        redirect.addFlashAttribute("success", "Xóa địa chỉ thành công!");
         return "redirect:/account";
     }
 
     // ================= SET DEFAULT =================
     @PostMapping("/set-default")
-    public String setDefault(@RequestParam Long id) {
+    public String setDefault(@RequestParam Long id, RedirectAttributes redirect) {
         Account acc = getSessionAccount();
         if (acc == null) return "redirect:/login";
 
@@ -158,6 +204,7 @@ public class AccountController {
         }
 
         addressRepo.saveAll(list);
+        redirect.addFlashAttribute("success", "Đã đặt làm địa chỉ mặc định!");
         return "redirect:/account";
     }
 
