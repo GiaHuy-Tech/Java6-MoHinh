@@ -1,12 +1,13 @@
 package com.example.demo.service;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.example.demo.model.Orders;
 import com.example.demo.model.OrderDetail;
 import com.example.demo.model.Products;
@@ -26,13 +27,10 @@ public class OrderTaskService {
     @Scheduled(cron = "0 0 * * * *")
     @Transactional
     public void autoConfirmOrders() {
-        // 1. Lấy thời điểm cách đây 2 ngày
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.DAY_OF_MONTH, -2);
-        Date twoDaysAgo = cal.getTime();
+        // 1. Lấy thời điểm cách đây 2 ngày (Đã sửa thành LocalDateTime để khớp với Repository)
+        LocalDateTime twoDaysAgo = LocalDateTime.now().minusDays(2);
 
         // 2. Tìm các đơn hàng có Status = 3 (Đã giao hàng) và ngày tạo <= cách đây 2 ngày
-        // Lưu ý: Tốt nhất là so sánh với ngày ADMIN giao hàng, ở đây tạm dùng createdDate
         List<Orders> overdueOrders = orderRepo.findByStatusAndCreatedDateBefore(3, twoDaysAgo);
 
         for (Orders order : overdueOrders) {
@@ -58,5 +56,6 @@ public class OrderTaskService {
             order.setPaymentStatus(true);
             orderRepo.save(order);
         }
-    }
-}
+    } // Đóng hàm autoConfirmOrders
+    
+} // Đóng class OrderTaskService

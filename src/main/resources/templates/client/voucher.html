@@ -94,7 +94,7 @@
         .btn-claim:hover { background: var(--text-main); color: #000; }
 
         /* Trạng thái khóa */
-        .voucher-locked { opacity: 0.6; filter: grayscale(0.8); }
+        .voucher-locked { opacity: 0.6; filter: grayscale(0.8); pointer-events: none; }
         .locked-overlay { position: absolute; top: 10px; right: 10px; color: var(--accent-red); font-size: 1.2rem; }
 
         .search-results {
@@ -170,7 +170,6 @@
                         <i class="bi bi-chevron-down small text-light"></i>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 bg-dark">
-                        <!-- Đổi sang /account thay vì /profile -->
                         <li><a class="dropdown-item py-2 text-white" href="/account"><i class="bi bi-person me-2 text-info"></i> Hồ sơ</a></li>
                         <li><a class="dropdown-item py-2 text-white" href="/orders"><i class="bi bi-bag-check me-2 text-info"></i> Đơn hàng</a></li>
                         <li><hr class="dropdown-divider"></li>
@@ -189,7 +188,6 @@
         <p class="opacity-75">Tích lũy chi tiêu để mở khóa các Voucher giá trị cao hơn</p>
         
         <div th:if="${user != null}" class="mt-3">
-            <!-- Badge hạng hiện tại có màu riêng -->
             <span class="rank-badge px-4 py-2 fs-6 shadow"
                   th:classappend="${user.membership?.name == 'Kim Cương' ? 'rank-kim-cuong' : 
                                    (user.membership?.name == 'Vàng' ? 'rank-vang' : 
@@ -206,12 +204,15 @@
     <div class="row g-4 mt-2">
         <th:block th:each="v : ${availableVouchers}">
             <div class="col-md-6 col-lg-4">
+                <!-- THÊM ĐIỀU KIỆN KHÓA NẾU CHƯA TỚI SINH NHẬT HOẶC CHƯA ĐỦ ĐIỂM -->
                 <div class="voucher-card shadow" 
-                     th:with="userPoints=${user?.membership?.pointRequired ?: 0}, 
-                              reqPoints=${v.membership?.pointRequired ?: 0}"
-                     th:classappend="${userPoints < reqPoints ? 'voucher-locked' : ''}">
+                     th:with="userPoints=${user?.membership?.pointRequired ?: 0}, reqPoints=${v.membership?.pointRequired ?: 0}"
+                     th:classappend="${(userPoints < reqPoints) or (v.isBirthday == true and !isBirthdayToday) ? 'voucher-locked' : ''}">
                     
-                    <div class="locked-overlay" th:if="${userPoints < reqPoints}"><i class="bi bi-lock-fill"></i></div>
+                    <!-- HIỆN ICON Ổ KHÓA -->
+                    <div class="locked-overlay" th:if="${(userPoints < reqPoints) or (v.isBirthday == true and !isBirthdayToday)}">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
 
                     <div class="voucher-left">
                         <div class="discount-val">
@@ -224,27 +225,45 @@
                         <div class="discount-label">GIẢM GIÁ</div>
                     </div>
 
-                    <div class="voucher-right">
+                    <div class="voucher-right flex-grow-1 p-3 d-flex flex-column justify-content-between">
                         <div>
-                            <!-- Badge hạng trong Voucher -->
+                            <!-- Badge Hạng -->
                             <span class="rank-badge mb-2" 
                                   th:classappend="${v.membership?.name == 'Kim Cương' ? 'rank-kim-cuong' : 
                                                    (v.membership?.name == 'Vàng' ? 'rank-vang' : 
                                                    (v.membership?.name == 'Bạc' ? 'rank-bac' : 
                                                    (v.membership?.name == 'Đồng' ? 'rank-dong' : 'rank-all')))}"
                                   th:text="${v.membership?.name ?: 'Mọi thành viên'}"></span>
+                                  
+                            <!-- Bổ sung thêm Badge Sinh Nhật (Nếu có) -->
+                            <span class="rank-badge mb-2 ms-1" style="background-color: var(--accent-red); color: white;" th:if="${v.isBirthday == true}">
+                                <i class="bi bi-gift-fill"></i> QUÀ SINH NHẬT
+                            </span>
 
-                            <div class="voucher-title" th:text="${'Mã: ' + v.code}">Code</div>
+                            <div class="voucher-title fw-bold" th:text="${'Mã: ' + v.code}">Code</div>
                             <div class="small opacity-75 mt-1" th:if="${v.membership != null}" 
                                  th:text="${'Yêu cầu tích lũy: ' + #numbers.formatDecimal(v.membership.pointRequired, 0, 'COMMA', 0, 'POINT') + 'đ'}"></div>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-end">
+                        <div class="d-flex justify-content-between align-items-end mt-2">
                             <div class="small text-info">HSD: <span th:text="${#temporals.format(v.expiredAt,'dd/MM/yyyy')}"></span></div>
-                            <form th:if="${userPoints >= reqPoints}" th:action="@{/voucher/claim}" method="post">
-                                <input type="hidden" name="voucherId" th:value="${v.id}"><button type="submit" class="btn btn-claim shadow-sm">Lưu mã</button>
+                            
+                            <!-- LOGIC HIỂN THỊ NÚT BẤM DỰA VÀO ĐIỀU KIỆN -->
+                            <!-- 1. Bị khóa do chưa tới Sinh Nhật -->
+                            <button th:if="${v.isBirthday == true and !isBirthdayToday}" class="btn btn-outline-secondary btn-sm" style="font-size: 0.75rem;" disabled>
+                                Chưa tới sinh nhật
+                            </button>
+
+                            <!-- 2. Bị khóa do thiếu điểm hạng thành viên (Và không rơi vào TH sinh nhật ở trên) -->
+                            <button th:if="${userPoints < reqPoints and !(v.isBirthday == true and !isBirthdayToday)}" class="btn btn-outline-secondary btn-sm" style="font-size: 0.75rem;" disabled>
+                                Chưa đủ hạng
+                            </button>
+
+                            <!-- 3. Hợp lệ (Đủ điểm + Đúng ngày sinh nhật / Hoặc không phải voucher sinh nhật) -->
+                            <form th:if="${userPoints >= reqPoints and !(v.isBirthday == true and !isBirthdayToday)}" th:action="@{/voucher/claim}" method="post">
+                                <input type="hidden" name="voucherId" th:value="${v.id}">
+                                <button type="submit" class="btn btn-claim shadow-sm">Lưu mã</button>
                             </form>
-                            <button th:if="${userPoints < reqPoints}" class="btn btn-outline-secondary btn-sm" style="font-size: 0.75rem;" disabled>Chưa đủ hạng</button>
                         </div>
                     </div>
                 </div>
