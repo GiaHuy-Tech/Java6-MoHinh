@@ -32,62 +32,58 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) {
-        // 1. Lấy thông tin thô từ Google trả về
+        System.out.println("DEBUG GOOGLE: Bắt đầu loadUser từ Google...");
+
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        
+
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
         String picture = oAuth2User.getAttribute("picture");
 
-        // 2. TÌM TÀI KHOẢN TRONG DB (VD: ad@gmail.com)
+        System.out.println("DEBUG GOOGLE: Thông tin lấy về - Email: " + email + ", Name: " + name);
+
         Optional<Account> optionalAccount = accountRepo.findByEmail(email);
         Account account;
 
         if (optionalAccount.isPresent()) {
-            // ĐÃ CÓ SẴN: Lấy thông tin tài khoản cũ ra
+            System.out.println("DEBUG GOOGLE: Đã tìm thấy tài khoản cũ -> Update thông tin.");
             account = optionalAccount.get();
-            
-            // Cập nhật lại Avatar và Tên từ Google cho đồng bộ (Không bắt buộc, nhưng nên làm)
+
             if (account.getAvatar() == null || account.getAvatar().startsWith("http")) {
                 account.setAvatar(picture);
             }
             if (account.getFullName() == null || account.getFullName().isEmpty()) {
                 account.setFullName(name);
             }
-            
-            // BẢO HIỂM MẬT KHẨU: Nếu tài khoản cũ chưa có mk (lỗi hiếm), set mk ngẫu nhiên để Spring ko báo lỗi
             if (account.getPassword() == null || account.getPassword().isEmpty()) {
                 account.setPassword(UUID.randomUUID().toString());
             }
-            
-            System.out.println("===> Đã tìm thấy tài khoản có sẵn: " + email);
         } else {
-            // CHƯA CÓ: Tạo mới hoàn toàn
+            System.out.println("DEBUG GOOGLE: Tài khoản chưa tồn tại -> Tạo mới.");
             account = new Account();
             account.setEmail(email);
             account.setFullName(name);
             account.setAvatar(picture);
-            account.setPassword(UUID.randomUUID().toString()); 
+            account.setPassword(UUID.randomUUID().toString());
             account.setRole(false); // ROLE_USER
             account.setActive(true);
             account.setTotalSpending(BigDecimal.ZERO);
-            account.setGender(true); 
+            account.setGender(true);
             account.setBirthDay(LocalDate.now());
             account.setPhone("0000000000");
-            
-            System.out.println("===> Đang tạo tài khoản mới từ Google: " + email);
         }
 
-        // 3. LƯU LẠI VÀO DATABASE
         Account savedAccount = accountRepo.save(account);
+        System.out.println("DEBUG GOOGLE: Tài khoản đã lưu vào DB thành công.");
 
-        // 4. LƯU VÀO SESSION (Để giao diện Thymeleaf gọi được ${session.account})
+        // Lưu vào session
         session.setAttribute("account", savedAccount);
         session.setAttribute("user", savedAccount);
 
-        // 5. Trả về cho Spring Security với quyền (Role) lấy từ DB
         String roleName = (Boolean.TRUE.equals(savedAccount.getRole())) ? "ROLE_ADMIN" : "ROLE_USER";
-        
+
+        System.out.println("DEBUG GOOGLE: Trả về OAuth2User với role: " + roleName);
+
         return new DefaultOAuth2User(
             Collections.singletonList(new SimpleGrantedAuthority(roleName)),
             oAuth2User.getAttributes(),

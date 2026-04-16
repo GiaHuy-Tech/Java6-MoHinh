@@ -47,6 +47,6 @@ public class VoucherDetail {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "received_at")
     private Date receivedAt;
-    
+
 
 }

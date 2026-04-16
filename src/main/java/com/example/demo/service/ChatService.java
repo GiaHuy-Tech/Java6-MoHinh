@@ -1,12 +1,13 @@
 package com.example.demo.service;
 
-import com.example.demo.model.Products;
-import com.example.demo.repository.ProductRepository;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
+import com.example.demo.model.Products;
+import com.example.demo.repository.ProductRepository;
 
 @Service
 public class ChatService {
@@ -67,7 +68,9 @@ public class ChatService {
                     .max(Comparator.comparingInt(p -> p.getSold() == null ? 0 : p.getSold()))
                     .orElse(null);
 
-            if (top == null) return "Chưa có dữ liệu 😅";
+            if (top == null) {
+				return "Chưa có dữ liệu 😅";
+			}
 
             return "🔥 Sản phẩm bán chạy nhất:\n"
                     + top.getName()
@@ -105,7 +108,9 @@ public class ChatService {
                     .max(Comparator.comparingInt(p -> p.getSold() == null ? 0 : p.getSold()))
                     .orElse(null);
 
-            if (fav == null) return "Chưa có dữ liệu 😅";
+            if (fav == null) {
+				return "Chưa có dữ liệu 😅";
+			}
 
             return "❤️ Sản phẩm được yêu thích nhất:\n"
                     + fav.getName()

@@ -7,7 +7,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.Account;
@@ -32,10 +35,12 @@ public class VoucherController {
         if (sessionAcc == null) {
             sessionAcc = (Account) session.getAttribute("user");
         }
-        if (sessionAcc == null) return "redirect:/login";
+        if (sessionAcc == null) {
+			return "redirect:/login";
+		}
 
         Account currentAccount = accountRepo.findById(sessionAcc.getId()).orElse(sessionAcc);
-        model.addAttribute("user", currentAccount); 
+        model.addAttribute("user", currentAccount);
 
         // 1. KIỂM TRA HÔM NAY CÓ PHẢI SINH NHẬT USER KHÔNG
         boolean isBirthdayToday = false;
@@ -71,8 +76,10 @@ public class VoucherController {
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         Account account = (Account) session.getAttribute("account");
-        if (account == null) return "redirect:/login";
-        
+        if (account == null) {
+			return "redirect:/login";
+		}
+
         // Cập nhật lại account từ DB để có birthday chuẩn nhất
         account = accountRepo.findById(account.getId()).orElse(account);
 

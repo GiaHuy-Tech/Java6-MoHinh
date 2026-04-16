@@ -3,8 +3,18 @@ package com.example.demo.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 import org.hibernate.annotations.Nationalized; // THÊM DÒNG NÀY
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
@@ -45,7 +55,7 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "membership_id")
     private Membership membership;
-    
+
     @OneToMany(mappedBy = "account")
     private List<Address> addresses;
 

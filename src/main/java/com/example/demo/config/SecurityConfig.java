@@ -1,7 +1,5 @@
 package com.example.demo.config;
 
-import java.io.IOException;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -12,19 +10,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.demo.filter.JwtFilter;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.CustomOAuth2UserService;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Configuration
 @EnableWebSecurity
@@ -34,15 +24,10 @@ public class SecurityConfig {
     private final CustomSuccessHandler successHandler;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomOAuth2UserService oAuth2UserService;
-    
-    // BỔ SUNG: Tiêm Class xử lý thành công cho Google Login
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-    // BỔ SUNG: Thêm OAuth2LoginSuccessHandler vào Constructor
-    public SecurityConfig(AccountService userService,
-                          CustomSuccessHandler successHandler,
-                          CustomAccessDeniedHandler accessDeniedHandler,
-                          CustomOAuth2UserService oAuth2UserService,
+    public SecurityConfig(AccountService userService, CustomSuccessHandler successHandler,
+                          CustomAccessDeniedHandler accessDeniedHandler, CustomOAuth2UserService oAuth2UserService,
                           OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         this.userService = userService;
         this.successHandler = successHandler;
@@ -52,10 +37,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
-        // LƯU Ý: Chỉ dùng cho môi trường Dev. Production nên dùng BCryptPasswordEncoder
-        return NoOpPasswordEncoder.getInstance(); 
-    }
+    PasswordEncoder passwordEncoder() { return NoOpPasswordEncoder.getInstance(); }
 
     @Bean
     AuthenticationProvider authenticationProvider() {
@@ -66,95 +48,29 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationFailureHandler authFailureHandler() {
-        return new AuthenticationFailureHandler() {
-            @Override
-            public void onAuthenticationFailure(HttpServletRequest request,
-                                                HttpServletResponse response,
-                                                AuthenticationException exception)
-                    throws IOException, ServletException {
-                
-                String redirectUrl = "/login?error";
-                
-                if (exception instanceof LockedException) {
-                    redirectUrl = "/login?locked";
-                } else if (exception instanceof UsernameNotFoundException) {
-                    redirectUrl = "/login?notfound";
-                }
-                
-                response.sendRedirect(redirectUrl);
-            }
-        };
-    }
-
-    @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // 1. QUAN TRỌNG: Cho phép truy cập trang lỗi để tránh vòng lặp "Response already committed"
-                        .requestMatchers("/error").permitAll()
-
-                        // 2. Tài nguyên tĩnh (CSS, JS, Images...)
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/vendor/**", "/assets/**", "/webjars/**").permitAll()
-
-                        // 3. Các trang công khai (Home, Login, Register, API Search...)
-                        .requestMatchers("/", "/home", "/login", "/register", "/forgot", "/api/products/search").permitAll()
-
-                        // 4. VNPay CALLBACK
-                        .requestMatchers("/checkout/vnpay-return").permitAll()
-
-                        // 5. Các trang USER & ADMIN
-                        .requestMatchers("/account/**", "/cart/**", "/checkout/**").hasAnyRole("USER", "ADMIN")
-
-                        // 6. Các trang chỉ ADMIN
-                        .requestMatchers("/stats/**",
-                                         "/product-mana/**",
-                                         "/orders-mana/**", // Đã thêm trang quản lý đơn hàng
-                                         "/admin/vouchers/**", // Đã thêm trang voucher
-                                         "/admin/cart/**",
-                                         "/user-mana/**",
-                                         "/cata-mana/**").hasRole("ADMIN")
-
-                        // Còn lại bắt buộc đăng nhập
+                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
-                // Thêm JwtFilter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
-                // Cấu hình Form Login
                 .formLogin(form -> form
                         .loginPage("/login")
+                        .loginProcessingUrl("/login") // Action trong form phải khớp với cái này
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(successHandler)
-                        .failureHandler(authFailureHandler())
                         .permitAll()
                 )
-
-                // Cấu hình OAuth2 (Google)
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserService)
-                        )
-                        // BỔ SUNG QUAN TRỌNG: Gọi Handler xử lý lưu Session sau khi Google trả về thành công
+                        .userInfoEndpoint(u -> u.userService(oAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
                 )
-
-                // Cấu hình Logout
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true) // Hủy session
-                        .deleteCookies("JSESSIONID") // Xóa cookie
-                        .permitAll()
-                )
-
-                // Xử lý lỗi 403 (Không có quyền truy cập)
+                .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/login?logout").permitAll())
                 .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
-                
                 .build();
     }
 }

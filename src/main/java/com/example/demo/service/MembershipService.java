@@ -39,18 +39,20 @@ public class MembershipService {
         } else {
             levelName = "Đồng";
         }
-        
+
         // ĐÃ SỬA LỖI DÒNG 38: Tìm Object Membership từ DB và gán vào Account
         Membership membership = membershipRepo.findByName(levelName).orElse(null);
         if (membership != null) {
-            account.setMembership(membership); 
+            account.setMembership(membership);
         }
     }
 
     // 2. Lấy ưu đãi theo hạng (Ví dụ % giảm giá)
     public int getDiscountPercent(String level) {
-        if (level == null) return 0;
-        
+        if (level == null) {
+			return 0;
+		}
+
         return switch (level) {
             case "Kim Cương" -> 15; // Giảm 15%
             case "Vàng" -> 10;      // Giảm 10%
@@ -61,7 +63,9 @@ public class MembershipService {
 
     // 3. Lấy lời chúc và quà sinh nhật
     public String getBirthdayMessage(LocalDate birthday) {
-        if (birthday == null) return null;
+        if (birthday == null) {
+			return null;
+		}
 
         LocalDate today = LocalDate.now();
 
@@ -72,6 +76,6 @@ public class MembershipService {
             return "🎂 Chúc mừng sinh nhật! MODEL WORLD tặng bạn mã giảm giá 20%: HPBD" + today.getYear();
         }
 
-        return null; 
+        return null;
     }
 }

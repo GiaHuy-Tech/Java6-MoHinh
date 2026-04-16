@@ -1,12 +1,18 @@
 package com.example.demo.service;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.example.demo.model.Account;
+import com.example.demo.model.Address;
+import com.example.demo.model.CartDetail;
+import com.example.demo.repository.AddressRepository;
+import com.example.demo.repository.CartDetailRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +26,9 @@ public class ShippingService {
     // Tra zone từ tên tỉnh — dùng để phân loại vùng địa lý
     // ─────────────────────────────────────────────────
     private int getZone(String province) {
-        if (province == null) return 3;
+        if (province == null) {
+			return 3;
+		}
         String p = province.trim().toLowerCase();
 
         if (p.contains("hồ chí minh") || p.contains("hcm") || p.contains("hà nội")) {
@@ -61,7 +69,9 @@ public class ShippingService {
     // HÀM NỘI BỘ 3: tính tổng cân nặng từ giỏ hàng
     // ─────────────────────────────────────────────────
     private double getTotalWeight(List<CartDetail> cartItems) {
-        if (cartItems == null) return 0;
+        if (cartItems == null) {
+			return 0;
+		}
         return cartItems.stream()
             .mapToDouble(item -> {
                 Double w = item.getProduct().getWeight();
@@ -77,7 +87,9 @@ public class ShippingService {
     // ─────────────────────────────────────────────────
     public BigDecimal calculateFee(Address address, List<CartDetail> cartList) {
         // Nếu chưa chọn địa chỉ, trả về phí mặc định 30k
-        if (address == null) return BigDecimal.valueOf(30_000);
+        if (address == null) {
+			return BigDecimal.valueOf(30_000);
+		}
 
         int zone = getZone(address.getProvince());
         double totalWeight = getTotalWeight(cartList);

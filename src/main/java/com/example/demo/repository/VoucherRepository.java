@@ -1,6 +1,5 @@
 package com.example.demo.repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +21,7 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
     Optional<Voucher> findByIdAndAccountIsNull(Integer id);
 
     boolean existsByAccount_IdAndCode(Integer accountId, String code);
-    
+
  // Thêm vào interface VoucherRepository
     List<Voucher> findByIsBirthdayTrueAndAccountIsNull();
 

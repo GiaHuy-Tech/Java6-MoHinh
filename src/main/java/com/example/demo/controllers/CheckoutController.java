@@ -2,19 +2,39 @@ package com.example.demo.controllers;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.config.VNPayConfig;
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
-import com.example.demo.service.VNPayService;
+import com.example.demo.model.Account;
+import com.example.demo.model.Address;
+import com.example.demo.model.CartDetail;
+import com.example.demo.model.OrderDetail;
+import com.example.demo.model.Orders;
+import com.example.demo.model.Products;
+import com.example.demo.model.Voucher;
+import com.example.demo.model.VoucherDetail;
+import com.example.demo.repository.AddressRepository;
+import com.example.demo.repository.CartDetailRepository;
+import com.example.demo.repository.OrdersDetailRepository;
+import com.example.demo.repository.OrdersRepository;
+import com.example.demo.repository.ProductRepository;
+import com.example.demo.repository.VoucherDetailRepository;
+import com.example.demo.repository.VoucherRepository;
 import com.example.demo.service.ShippingService;
+import com.example.demo.service.VNPayService;
 
+import jakarta.servlet.http.HttpServletRequest; // Bổ sung import này để dùng request
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
@@ -40,10 +60,14 @@ public class CheckoutController {
                                Model model) {
 
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
-        if (cartList.isEmpty()) return "redirect:/cart";
+        if (cartList.isEmpty()) {
+			return "redirect:/cart";
+		}
 
         BigDecimal rawTotal = cartList.stream()
                 .map(item -> item.getProduct().getPrice()
@@ -109,7 +133,9 @@ public class CheckoutController {
                     discount = BigDecimal.valueOf(v.getDiscountAmount());
                 }
 
-                if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
+                if (discount.compareTo(rawTotal) > 0) {
+					discount = rawTotal;
+				}
 
                 if (Boolean.TRUE.equals(v.getIsFreeShipping())) {
                     feeShip = BigDecimal.ZERO;
@@ -142,10 +168,14 @@ public class CheckoutController {
                                @RequestParam("paymentMethod") String paymentMethod) {
 
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
-        if (cartList.isEmpty()) return "redirect:/cart";
+        if (cartList.isEmpty()) {
+			return "redirect:/cart";
+		}
 
         BigDecimal rawTotal = cartList.stream()
                 .map(item -> item.getProduct().getPrice()
@@ -180,7 +210,9 @@ public class CheckoutController {
                     discount = BigDecimal.valueOf(v.getDiscountAmount());
                 }
 
-                if (discount.compareTo(rawTotal) > 0) discount = rawTotal;
+                if (discount.compareTo(rawTotal) > 0) {
+					discount = rawTotal;
+				}
 
                 if (Boolean.TRUE.equals(v.getIsFreeShipping())) {
                     feeShip = BigDecimal.ZERO;
@@ -278,6 +310,39 @@ public class CheckoutController {
         }
 
         return "redirect:/orders";
+    }
+
+    // ================== VNPAY RETURN (Đã thêm để fix lỗi 404 & Type Mismatch) ==================
+    @GetMapping("/vnpay-return")
+    @Transactional
+    public String vnpayReturn(HttpServletRequest request) {
+
+        String vnp_ResponseCode = request.getParameter("vnp_ResponseCode");
+        String orderIdStr = request.getParameter("vnp_TxnRef");
+
+        if (orderIdStr != null && !orderIdStr.isEmpty()) {
+            try {
+                // Đã chuyển thành Integer để khớp với id của model Orders
+                Integer orderId = Integer.parseInt(orderIdStr);
+                Orders order = ordersRepo.findById(orderId).orElse(null);
+
+                if (order != null) {
+                    if ("00".equals(vnp_ResponseCode)) {
+                        order.setPaymentStatus(true);
+                        ordersRepo.save(order);
+                        return "redirect:/orders?payment=success";
+                    } else {
+                        order.setPaymentStatus(false);
+                        ordersRepo.save(order);
+                        return "redirect:/orders?payment=failed";
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return "redirect:/";
     }
 
     // ================== GET ACCOUNT ==================

@@ -15,7 +15,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Products;
-import com.example.demo.repository.*;
+import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.LikeRepository;
+import com.example.demo.repository.MembershipRepository;
+import com.example.demo.repository.OrdersRepository;
+import com.example.demo.repository.ProductRepository;
 
 @Controller
 public class StatsController {
@@ -78,7 +83,9 @@ public class StatsController {
                     .map(r -> (BigDecimal) (r[1] != null ? r[1] : BigDecimal.ZERO))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+        if (totalRevenue == null) {
+			totalRevenue = BigDecimal.ZERO;
+		}
 
         model.addAttribute("totalRevenue", totalRevenue);
 
@@ -111,7 +118,9 @@ public class StatsController {
         }
 
         List<String> monthlyLabels = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) monthlyLabels.add("Tháng " + i);
+        for (int i = 1; i <= 12; i++) {
+			monthlyLabels.add("Tháng " + i);
+		}
 
         model.addAttribute("revenueMonthLabels", monthlyLabels);
         model.addAttribute("revenueMonthData", monthlyRevenueData);
@@ -136,7 +145,9 @@ public class StatsController {
         }
 
         List<String> months = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) months.add("Tháng " + i);
+        for (int i = 1; i <= 12; i++) {
+			months.add("Tháng " + i);
+		}
 
         model.addAttribute("months", months);
         model.addAttribute("orderCounts", orderCounts);

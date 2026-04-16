@@ -8,11 +8,19 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.Account;
+import com.example.demo.model.Comment;
+import com.example.demo.model.Orders;
+import com.example.demo.repository.CommentRepository;
+import com.example.demo.repository.OrdersRepository;
+import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.OrderService;
+
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -25,11 +33,13 @@ public class OrderController {
     @Autowired private ProductRepository productRepo;
 
     @GetMapping("/orders")
-    public String viewOrders(Model model, 
+    public String viewOrders(Model model,
                              @RequestParam(name = "sort", defaultValue = "newest") String sort,
                              @RequestParam(name = "reviewSuccess", required = false) String reviewSuccess) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         List<Orders> orders;
         if ("oldest".equals(sort)) {
@@ -50,7 +60,7 @@ public class OrderController {
         model.addAttribute("sort", sort);
         model.addAttribute("user", account);
         model.addAttribute("reviewSuccess", reviewSuccess);
-        
+
         return "client/orders";
     }
 
@@ -60,11 +70,13 @@ public class OrderController {
                                @RequestParam("rating") Integer rating,
                                @RequestParam("content") String content) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         // Kiểm tra xem đã đánh giá cho SẢN PHẨM này trong ĐƠN HÀNG này chưa
         boolean exists = commentRepo.existsByAccount_IdAndProduct_IdAndOrderId(account.getId(), productId, orderId);
-        
+
         if (!exists) {
             Comment comment = new Comment();
             comment.setAccount(account);
@@ -83,7 +95,9 @@ public class OrderController {
     @PostMapping("/orders/confirm/{id}")
     public String confirmOrder(@PathVariable("id") Integer orderId) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
         Optional<Orders> optionalOrder = orderRepo.findById(orderId);
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();
@@ -97,7 +111,9 @@ public class OrderController {
     @PostMapping("/orders/cancel/{id}")
     public String cancelOrder(@PathVariable("id") Integer orderId) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
         Optional<Orders> optionalOrder = orderRepo.findById(orderId);
         if (optionalOrder.isPresent()) {
             Orders order = optionalOrder.get();

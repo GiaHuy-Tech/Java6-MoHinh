@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.demo.model.Orders;
 import com.example.demo.model.OrderDetail;
+import com.example.demo.model.Orders;
 import com.example.demo.model.Products;
 import com.example.demo.repository.OrdersRepository;
 import com.example.demo.repository.ProductRepository;
@@ -35,7 +35,7 @@ public class OrderTaskService {
 
         for (Orders order : overdueOrders) {
             System.out.println("Tự động hoàn tất đơn hàng ID: " + order.getId());
-            
+
             // Xử lý logic giống hệt lúc bấm xác nhận
             // 1. Trừ kho
             List<OrderDetail> details = order.getOrderDetails();
@@ -45,7 +45,9 @@ public class OrderTaskService {
                     if (product != null) {
                         int newQty = Math.max(0, product.getQuantity() - detail.getQuantity());
                         product.setQuantity(newQty);
-                        if (newQty <= 0) product.setAvailable(false);
+                        if (newQty <= 0) {
+							product.setAvailable(false);
+						}
                         productRepo.save(product);
                     }
                 }
@@ -57,5 +59,5 @@ public class OrderTaskService {
             orderRepo.save(order);
         }
     } // Đóng hàm autoConfirmOrders
-    
+
 } // Đóng class OrderTaskService

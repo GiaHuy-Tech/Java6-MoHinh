@@ -7,7 +7,18 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -43,7 +54,7 @@ public class Products {
 
     @Column(columnDefinition = "nvarchar(MAX)")
     private String description;
-    
+
     private Integer sold;
     public Integer getSold() {
         return sold;
@@ -123,7 +134,9 @@ public class Products {
 
     // Nếu cần kiểm tra sản phẩm mới
     public boolean isNewProduct() {
-        if (createdDate == null) return false;
+        if (createdDate == null) {
+			return false;
+		}
         long diff = new Date().getTime() - createdDate.getTime();
         long days = diff / (1000 * 60 * 60 * 24);
         return days <= 7;

@@ -1,19 +1,26 @@
 package com.example.demo.controllers;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List; // QUAN TRỌNG: Thêm dòng này
-import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.demo.model.Category;
 import com.example.demo.model.ProductImage;
 import com.example.demo.model.Products;
 import com.example.demo.repository.CategoryRepository;
@@ -54,12 +61,16 @@ public class ProductManaController {
         // 2. Logic sắp xếp (Sửa lỗi BigDecimal .compareTo)
         if ("priceAsc".equals(sort)) {
             list.sort((p1, p2) -> {
-                if (p1.getPrice() == null || p2.getPrice() == null) return 0;
+                if (p1.getPrice() == null || p2.getPrice() == null) {
+					return 0;
+				}
                 return p1.getPrice().compareTo(p2.getPrice());
             });
         } else if ("priceDesc".equals(sort)) {
             list.sort((p1, p2) -> {
-                if (p1.getPrice() == null || p2.getPrice() == null) return 0;
+                if (p1.getPrice() == null || p2.getPrice() == null) {
+					return 0;
+				}
                 return p2.getPrice().compareTo(p1.getPrice());
             });
         } else {
@@ -70,7 +81,7 @@ public class ProductManaController {
         model.addAttribute("list", list);
         model.addAttribute("product", new Products());
         model.addAttribute("categories", categoryRepo.findAll());
-        
+
         // Gửi lại các giá trị để giữ trạng thái trên Form lọc
         model.addAttribute("keywords", keywords);
         model.addAttribute("selectedCata", categoryId);
@@ -100,13 +111,17 @@ public class ProductManaController {
         product.setCreatedDate(new Date());
         product.setQuantity(product.getQuantity() == null ? 0 : product.getQuantity());
         product.setAvailable(product.getQuantity() > 0);
-        if (product.getWeight() == null || product.getWeight() <= 0) product.setWeight(0.5);
+        if (product.getWeight() == null || product.getWeight() <= 0) {
+			product.setWeight(0.5);
+		}
 
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             product.setCategory(categoryRepo.findById(product.getCategory().getId()).orElse(null));
         }
 
-        if (product.getImages() == null) product.setImages(new ArrayList<>());
+        if (product.getImages() == null) {
+			product.setImages(new ArrayList<>());
+		}
         saveImages(product, files, thumbnailIndex);
 
         productRepo.save(product);
@@ -130,14 +145,18 @@ public class ProductManaController {
     ) throws IOException {
 
         Products old = productRepo.findById(product.getId()).orElse(null);
-        if (old == null) return "redirect:/product-mana";
+        if (old == null) {
+			return "redirect:/product-mana";
+		}
 
         old.setName(product.getName());
         old.setPrice(product.getPrice());
         old.setDescription(product.getDescription());
         old.setQuantity(product.getQuantity() == null ? 0 : product.getQuantity());
         old.setAvailable(old.getQuantity() > 0);
-        if (product.getWeight() != null) old.setWeight(product.getWeight());
+        if (product.getWeight() != null) {
+			old.setWeight(product.getWeight());
+		}
 
         if (product.getCategory() != null && product.getCategory().getId() != null) {
             old.setCategory(categoryRepo.findById(product.getCategory().getId()).orElse(null));
@@ -156,7 +175,9 @@ public class ProductManaController {
 
     private void saveImages(Products product, MultipartFile[] files, int thumbnailIndex) throws IOException {
         Path uploadPath = Paths.get(UPLOAD_DIRECTORY);
-        if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+        if (!Files.exists(uploadPath)) {
+			Files.createDirectories(uploadPath);
+		}
 
         for (int i = 0; i < files.length; i++) {
             MultipartFile f = files[i];

@@ -24,19 +24,19 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws ServletException, IOException {
-        
+
         // 1. Lấy thông tin user vừa đăng nhập Google thành công
         DefaultOAuth2User oauthUser = (DefaultOAuth2User) authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
-        
+
         // 2. Tìm trong DB (chắc chắn có vì CustomOAuth2UserService đã lưu trước đó)
         Account account = accountRepo.findByEmail(email).orElse(null);
-        
+
         // 3. LƯU VÀO SESSION AN TOÀN TẠI ĐÂY
         if (account != null) {
             request.getSession().setAttribute("account", account);
         }
-        
+
         // 4. Chuyển hướng về trang chủ (hoặc trang trước khi bấm đăng nhập)
         this.setAlwaysUseDefaultTargetUrl(true);
         this.setDefaultTargetUrl("/"); // Trả về trang chủ sau khi login

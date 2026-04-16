@@ -68,6 +68,20 @@
 </nav>
 
 <div class="container py-5 flex-grow-1">
+    
+    <!-- THÊM ĐOẠN NÀY ĐỂ BÁO KẾT QUẢ TỪ VNPAY TRẢ VỀ -->
+    <div th:if="${param.payment != null}">
+        <div th:if="${param.payment[0] == 'success'}" class="alert alert-success alert-dismissible fade show rounded-pill px-4 mb-4 fw-bold shadow-sm">
+            <i class="bi bi-check-circle-fill me-2"></i> Giao dịch VNPay thành công! Đơn hàng đã được cập nhật.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${param.payment[0] == 'failed'}" class="alert alert-danger alert-dismissible fade show rounded-pill px-4 mb-4 fw-bold shadow-sm">
+            <i class="bi bi-x-circle-fill me-2"></i> Giao dịch VNPay bị hủy hoặc thất bại!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+    <!-- KẾT THÚC THÊM -->
+
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h3 style="font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); text-transform: uppercase; border-left: 5px solid var(--accent-cyan); padding-left: 15px;">
             ĐƠN HÀNG CỦA TÔI
@@ -131,9 +145,17 @@
         </div>
 
         <div class="p-4 pt-0 d-flex flex-wrap justify-content-between align-items-center">
+            
+            <!-- ĐÃ THÊM PHƯƠNG THỨC THANH TOÁN ĐỂ HIỂN THỊ RÕ RÀNG HƠN -->
             <div class="small fw-bold">
-                <span th:if="${order.paymentStatus}" class="text-success"><i class="bi bi-cash-stack me-1"></i> ĐÃ THANH TOÁN</span>
-                <span th:unless="${order.paymentStatus}" class="text-warning"><i class="bi bi-hourglass-split me-1"></i> CHƯA THANH TOÁN</span>
+                <span th:if="${order.paymentStatus}" class="text-success">
+                    <i class="bi bi-cash-stack me-1"></i> ĐÃ THANH TOÁN 
+                    <span class="badge bg-success ms-1" th:text="${order.paymentMethod}"></span>
+                </span>
+                <span th:unless="${order.paymentStatus}" class="text-warning">
+                    <i class="bi bi-hourglass-split me-1"></i> CHƯA THANH TOÁN 
+                    <span class="badge bg-secondary ms-1" th:text="${order.paymentMethod}"></span>
+                </span>
             </div>
             
             <div class="d-flex align-items-center gap-4">
@@ -163,6 +185,7 @@
 </div>
 
 <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <!-- ... Giữ nguyên modal ... -->
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-white shadow-lg">
             <form th:action="@{/orders/submit-review}" method="post">

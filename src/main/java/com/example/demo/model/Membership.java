@@ -3,7 +3,13 @@ package com.example.demo.model;
 import java.io.Serializable;
 import java.util.List;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,9 +29,9 @@ public class Membership implements Serializable {
     private String name;
 
     private Integer discount;
-    
+
     private Boolean freeShipping;
-    
+
     @Column(name = "point_required")
     private Integer pointRequired;
 
