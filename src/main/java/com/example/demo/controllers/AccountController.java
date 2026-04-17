@@ -222,7 +222,7 @@ public class AccountController {
         return "redirect:/account";
     }
 
-    // ================= SET DEFAULT =================  //
+    // ================= SET DEFAULT =================  ////
     @PostMapping("/set-default")
     public String setDefault(@RequestParam Long id, RedirectAttributes redirect) {
         Account acc = getSessionAccount();
