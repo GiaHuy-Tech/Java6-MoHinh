@@ -1,20 +1,27 @@
 package com.example.demo.config;
 
+import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.*;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.demo.filter.JwtFilter;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.CustomOAuth2UserService;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -47,6 +54,22 @@ public class SecurityConfig {
         return provider;
     }
 
+    // HANDLER BẮT LỖI
+    @Bean
+    public AuthenticationFailureHandler authFailureHandler() {
+        return (request, response, exception) -> {
+            String redirectUrl = "/login?error";
+            if (exception instanceof DisabledException && "GOOGLE_USER".equals(exception.getMessage())) {
+                redirectUrl = "/login?google";
+            } else if (exception instanceof LockedException) {
+                redirectUrl = "/login?locked";
+            } else if (exception instanceof UsernameNotFoundException) {
+                redirectUrl = "/login?notfound";
+            }
+            response.sendRedirect(redirectUrl);
+        };
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
         return http
@@ -58,10 +81,11 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .loginProcessingUrl("/login") // Action trong form phải khớp với cái này
+                        .loginProcessingUrl("/login")
                         .usernameParameter("email")
                         .passwordParameter("password")
                         .successHandler(successHandler)
+                        .failureHandler(authFailureHandler()) // <--- GẮN HANDLER VÀO ĐÂY
                         .permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
