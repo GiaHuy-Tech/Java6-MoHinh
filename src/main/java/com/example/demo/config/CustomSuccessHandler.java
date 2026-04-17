@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpSession;
 
 @Component
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
-
+//
     private final AccountService accountService;
 
     public CustomSuccessHandler(AccountService accountService) {
