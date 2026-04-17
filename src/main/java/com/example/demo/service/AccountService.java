@@ -32,7 +32,7 @@ public class AccountService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Account acc = accountRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy tài khoản: " + email));
-
+//
         // 1. CHẶN TÀI KHOẢN GOOGLE (Password dài 36 ký tự)
         // Chúng ta dùng DisabledException để ném ra, AuthenticationFailureHandler sẽ bắt nó
         if (acc.getPassword() != null && acc.getPassword().length() == 36) {

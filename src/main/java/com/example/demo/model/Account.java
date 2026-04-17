@@ -36,7 +36,7 @@ public class Account {
     private String fullName;
 
     private Boolean gender;
-
+//
     @Column(columnDefinition = "nvarchar(255)")
     private String password;
 
