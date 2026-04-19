@@ -34,7 +34,7 @@ public class OrderService {
     private ProductRepository productRepo;
 
     // =====================================================
-    // 1. TẠO ĐƠN HÀNG - CHECKOUT
+    // 1. TẠO ĐƠN HÀNG
     // =====================================================
     @Transactional
     public void createOrder(Account acc, String voucherCode) {
@@ -47,9 +47,7 @@ public class OrderService {
 
         BigDecimal rawTotal = BigDecimal.ZERO;
 
-        // ===============================
-        // CHECK TỒN KHO + TÍNH TỔNG TIỀN
-        // ===============================
+        // ===== CHECK TỒN KHO =====
         for (CartDetail item : cartList) {
 
             Products product = productRepo.findById(item.getProduct().getId())
@@ -57,7 +55,6 @@ public class OrderService {
 
             Integer buyQty = item.getQuantity();
 
-            // Kiểm tra tồn kho
             if (product.getQuantity() < buyQty) {
                 throw new RuntimeException(
                         "Sản phẩm " + product.getName() + " không đủ số lượng trong kho");
@@ -67,38 +64,30 @@ public class OrderService {
             rawTotal = rawTotal.add(price.multiply(BigDecimal.valueOf(buyQty)));
         }
 
-        // ===============================
-        // TÍNH GIẢM GIÁ
-        // ===============================
+        // ===== DISCOUNT =====
         BigDecimal discount = BigDecimal.ZERO;
         if (voucherCode != null && voucherCode.equalsIgnoreCase("SALE10")) {
             discount = rawTotal.multiply(new BigDecimal("0.1"));
         }
 
-        // ===============================
-        // TÍNH PHÍ SHIP
-        // ===============================
+        // ===== SHIPPING =====
         BigDecimal feeShip = new BigDecimal("30000");
         if (rawTotal.compareTo(new BigDecimal("1000000")) > 0) {
             feeShip = BigDecimal.ZERO;
         }
 
-        // ===============================
-        // TỔNG THANH TOÁN
-        // ===============================
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
+
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
 
-        // ===============================
-        // TẠO ORDER
-        // ===============================
+        // ===== CREATE ORDER =====
         Orders order = new Orders();
         order.setAccount(acc);
         order.setCreatedDate(new Date());
         order.setTotal(finalTotal);
-        order.setStatus(0); // Chờ xác nhận
+        order.setStatus(0);
         order.setFeeship(feeShip);
         order.setMoneyDiscounted(discount);
         order.setPaymentStatus(false);
@@ -109,9 +98,7 @@ public class OrderService {
 
         orderRepo.save(order);
 
-        // ===============================
-        // TẠO ORDER DETAIL + TRỪ KHO
-        // ===============================
+        // ===== CREATE ORDER DETAILS + TRỪ KHO =====
         for (CartDetail cd : cartList) {
 
             Products product = productRepo.findById(cd.getProduct().getId())
@@ -119,21 +106,22 @@ public class OrderService {
 
             Integer buyQty = cd.getQuantity();
 
-            // Trừ số lượng kho
-            product.setQuantity(product.getQuantity() - buyQty);
+            // Trừ kho
+            int newQty = product.getQuantity() - buyQty;
+            product.setQuantity(newQty);
 
             // Tăng sold
             Integer sold = product.getSold() == null ? 0 : product.getSold();
             product.setSold(sold + buyQty);
 
-            // Nếu hết hàng -> unavailable
-            if (product.getQuantity() <= 0) {
+            // Nếu hết hàng
+            if (newQty <= 0) {
                 product.setAvailable(false);
             }
 
-            productRepo.save(product);
+            productRepo.saveAndFlush(product);
 
-            // Lưu chi tiết đơn hàng
+            // Tạo order detail
             OrderDetail od = new OrderDetail();
             od.setOrder(order);
             od.setProduct(product);
@@ -143,67 +131,69 @@ public class OrderService {
             orderDetailRepo.save(od);
         }
 
-        // ===============================
-        // XÓA GIỎ HÀNG
-        // ===============================
+        // Xóa cart
         cartDetailRepo.deleteAll(cartList);
     }
 
     // =====================================================
-    // 2. HOÀN TẤT ĐƠN HÀNG
+    // 2. HOÀN TẤT ĐƠN
     // =====================================================
     @Transactional
     public void completeOrder(Orders order) {
 
-        // Chỉ cập nhật trạng thái, KHÔNG trừ kho nữa
         if (order.getStatus() < 4) {
-            order.setStatus(4); // Hoàn tất
+            order.setStatus(4);
             order.setPaymentStatus(true);
             orderRepo.save(order);
-
-            System.out.println("Đơn hàng " + order.getId() + " đã hoàn tất.");
         }
     }
 
     // =====================================================
-    // 3. HỦY ĐƠN HÀNG - HOÀN KHO
+    // 3. HỦY ĐƠN -> HOÀN KHO
     // =====================================================
     @Transactional
     public void cancelOrder(Orders order) {
 
+        // Load lại order mới nhất từ DB
+        Orders dbOrder = orderRepo.findById(order.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
         // Chỉ hoàn kho nếu đơn chưa hoàn tất và chưa hủy
-        if (order.getStatus() == 0 || order.getStatus() == 1) {
+        if (dbOrder.getStatus() == 0 || dbOrder.getStatus() == 1) {
 
-            List<OrderDetail> details = order.getOrderDetails();
+            List<OrderDetail> details = dbOrder.getOrderDetails();
 
-            if (details != null) {
+            if (details != null && !details.isEmpty()) {
+
                 for (OrderDetail detail : details) {
 
-                    Products product = detail.getProduct();
+                    Products product = productRepo.findById(
+                            detail.getProduct().getId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
-                    if (product != null) {
+                    Integer qtyReturn = detail.getQuantity();
 
-                        // Hoàn lại kho
-                        product.setQuantity(product.getQuantity() + detail.getQuantity());
+                    // ===== HOÀN LẠI KHO =====
+                    product.setQuantity(product.getQuantity() + qtyReturn);
 
-                        // Giảm sold
-                        Integer sold = product.getSold() == null ? 0 : product.getSold();
-                        product.setSold(Math.max(0, sold - detail.getQuantity()));
+                    // ===== GIẢM SOLD =====
+                    Integer sold = product.getSold() == null ? 0 : product.getSold();
+                    product.setSold(Math.max(0, sold - qtyReturn));
 
-                        // Có hàng lại -> available
-                        if (product.getQuantity() > 0) {
-                            product.setAvailable(true);
-                        }
-
-                        productRepo.save(product);
+                    // ===== CÓ HÀNG LẠI =====
+                    if (product.getQuantity() > 0) {
+                        product.setAvailable(true);
                     }
+
+                    productRepo.saveAndFlush(product);
                 }
             }
 
-            order.setStatus(5); // Đã hủy
-            orderRepo.save(order);
+            // ===== UPDATE ORDER STATUS =====
+            dbOrder.setStatus(5); // 5 = Đã hủy
+            orderRepo.saveAndFlush(dbOrder);
 
-            System.out.println("Đơn hàng " + order.getId() + " đã bị hủy và hoàn kho.");
+            System.out.println("Đơn hàng " + dbOrder.getId() + " đã hủy và hoàn kho.");
         }
     }
 }
