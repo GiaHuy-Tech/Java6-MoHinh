@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
     <meta charset="UTF-8">
@@ -30,14 +30,14 @@
         
         body { background-color: var(--bg-body); color: var(--text-light); font-family: 'Be Vietnam Pro', sans-serif; transition: 0.3s; overflow-x: hidden; }
 
-        /* NAV\BAR */
+        /* NAVBAR ĐỒNG BỘ INDEX */
         .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 10px 0; box-shadow: 0 2px 10px var(--shadow); }
         .nav-holder { position: relative; }
         .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
         .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; text-decoration: none; border:none; background:none; cursor: pointer; }
         .nav-icon-link:hover { color: var(--text-main); }
 
-        /* LIVE SEARCH UI */
+        /* LIVE SEARCH UI ĐỒNG BỘ INDEX */
         .search-container { position: relative; max-width: 450px; }
         #liveSearchInput { background-color: var(--bg-card) !important; color: var(--text-light) !important; border: 1px solid var(--border-color); }
         .search-results {
@@ -63,7 +63,13 @@
         .mega-cat-link { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: var(--text-light); text-decoration: none; border-radius: 8px; transition: 0.2s; cursor: pointer; }
         .mega-cat-link:hover, .mega-cat-link.active { background: var(--text-main); color: #000 !important; font-weight: 700; }
 
-        /* --- SLIDESHOW (SPLIT LAYOUT) --- */
+        /* MINI CART ĐỒNG BỘ INDEX */
+        .cart-dropdown-menu { background: var(--bg-card) !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; }
+        .cart-dropdown-menu .border-bottom { border-color: var(--border-color) !important; }
+        .cart-dropdown-menu .text-light { color: var(--text-light) !important; }
+        .cart-dropdown-menu .bg-dark { background-color: var(--bg-body) !important; }
+
+        /* --- SLIDESHOW PHONG CÁCH KHÁC (SPLIT LAYOUT) --- */
         .products-slideshow { margin: 20px 0 30px; border-radius: 24px; overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-color); }
         .hero-slide-item { height: 450px; display: flex !important; align-items: center; }
         .slide-text { flex: 1; padding: 0 60px; }
@@ -74,7 +80,7 @@
         }
         .slide-image img { max-width: 80%; max-height: 85%; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2)); }
 
-        /* --- BANNER VOUCHER CHUYÊN NGHIỆP (MỚI) --- */
+        /* --- BANNER VOUCHER CHUYÊN NGHIỆP --- */
         .voucher-premium-box {
             background: linear-gradient(135deg, #1f2833 0%, #000 100%);
             border: 1px solid var(--accent-red);
@@ -95,19 +101,26 @@
         .v-btn { background: var(--accent-red); color: #fff; padding: 10px 30px; border-radius: 50px; font-weight: 800; border: none; transition: 0.3s; }
         .voucher-premium-box:hover .v-btn { background: var(--text-main); color: #000; transform: scale(1.1); }
 
-        /* --- PRODUCT CARD THEO MẪU GỬI --- */
+        /* --- PRODUCT CARD --- */
         .product-card { 
             background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; 
             overflow: hidden; height: 100%; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; padding: 15px;
             box-shadow: 0 4px 15px var(--shadow);
         }
         .product-card:hover { transform: translateY(-10px); box-shadow: 0 12px 30px var(--shadow); border-color: var(--text-main); }
+        .product-card.out-of-stock { opacity: 0.8; filter: grayscale(0.5); }
+        .product-card.out-of-stock .product-img-holder::before {
+            content: "HẾT HÀNG"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7); color: #fff; font-weight: 800; font-size: 0.9rem;
+            padding: 8px 16px; z-index: 10; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
+            letter-spacing: 1px; backdrop-filter: blur(2px);
+        }
         
         .stock-label { position: absolute; top: 20px; left: 20px; color: #ff2e63; font-weight: 800; z-index: 5; font-size: 0.85rem; text-transform: uppercase; }
         
-        .product-img-holder { background: #fff; height: 250px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border-radius: 4px; overflow: hidden; border: 1px solid #eee; }
+        .product-img-holder { background: #fff; height: 250px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border-radius: 4px; overflow: hidden; border: 1px solid #eee; position: relative; }
         .product-img-holder img { max-width: 90%; max-height: 90%; object-fit: contain; transition: 0.5s; }
-        .product-card:hover .product-img-holder img { transform: scale(1.1); }
+        .product-card:hover:not(.out-of-stock) .product-img-holder img { transform: scale(1.1); }
 
         .product-info-name { 
             font-size: 1.1rem; font-weight: 700; color: var(--text-light); 
@@ -136,15 +149,23 @@
         .filter-box { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 25px; position: sticky; top: 100px; box-shadow: 0 5px 15px var(--shadow); }
         .filter-title { color: var(--text-main); font-weight: 800; margin-bottom: 20px; border-left: 4px solid var(--accent-red); padding-left: 10px; text-transform: uppercase; }
         footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); padding: 50px 0; margin-top: 100px; }
+        
+        /* HIỆU ỨNG BAY GIỎ HÀNG */
         .badge-count { position: absolute; top: -5px; right: -8px; background: #ff4757; color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
-        .fly-item { position: fixed; z-index: 9999; pointer-events: none; transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); border-radius: 50%; object-fit: contain; background: #fff; }
+        .fly-item { position: fixed; z-index: 9999; pointer-events: none; transition: all 0.8s cubic-bezier(.13,.71,.31,.94); border-radius: 10px; object-fit: contain; background: #fff; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        
+        /* QUICK VIEW MODAL */
+        .modal-content { background: var(--bg-card); color: var(--text-light); }
+        .modal-header-blue { background: #0072bc; color: #fff; position: relative; justify-content: center; }
+        .modal-header-blue .btn-close { position: absolute; right: 20px; filter: invert(1); }
+        .quickview-img-main { width: 100%; height: 350px; object-fit: contain; background: #fff; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <input type="hidden" id="isLoggedIn" th:value="${session.account != null ? 'true' : 'false'}">
 
-<!-- Navbar -->
+<!-- NAVBAR ĐỒNG BỘ INDEX Y CHANG -->
 <nav class="top-navbar">
     <div class="container-fluid px-lg-5 nav-holder">
         <div class="d-flex align-items-center justify-content-between">
@@ -158,14 +179,31 @@
                                 <span class="fw-bold mb-3 d-block" style="color: var(--text-main)">DANH MỤC</span>
                                 <div class="d-flex flex-column" id="categoryList">
                                     <th:block th:each="cat : ${categories}">
-                                        <div class="mega-cat-link" th:attr="data-target='cat-content-' + ${cat.id}"><img th:src="${cat.image}" width="35" height="35" style="object-fit:contain; background:#fff; border-radius:5px; margin-right:10px;"><span th:text="${cat.name}">Category</span></div>
+                                        <div class="mega-cat-link" th:attr="data-target='cat-content-' + ${cat.id}">
+                                            <img th:src="${cat.image}" width="35" height="35" style="object-fit:contain; background:#fff; border-radius:5px; margin-right:10px;">
+                                            <span th:text="${cat.name}">Category</span>
+                                        </div>
                                     </th:block>
                                 </div>
                             </div>
                             <div class="col-md-9 mega-main-content">
                                 <span class="fw-bold mb-4 d-block" style="color: var(--text-main)">SẢN PHẨM NỔI BẬT</span>
                                 <th:block th:each="cat : ${categories}">
-                                    <div class="cat-product-pane d-none" th:id="'cat-content-' + ${cat.id}"><div class="row g-4"><th:block th:each="p, i : ${products}" th:if="${p.category?.id == cat.id and i.index < 6}"><div class="col-md-4"><a th:href="@{'/product-detail/' + ${p.id}}" class="d-flex align-items-center gap-3 p-2 border rounded text-decoration-none hover-bg"><img th:src="${p.mainImage}" style="width:55px; height:55px; background:#fff; border-radius:5px; object-fit:contain;"><div class="overflow-hidden"><div class="small fw-bold text-truncate text-light" th:text="${p.name}">Product</div><div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></div></div></a></div></th:block></div></div>
+                                    <div class="cat-product-pane d-none" th:id="'cat-content-' + ${cat.id}">
+                                        <div class="row g-4">
+                                            <th:block th:each="p, i : ${products}" th:if="${p.category?.id == cat.id and i.index < 6}">
+                                                <div class="col-md-4">
+                                                    <a th:href="@{'/product-detail/' + ${p.id}}" class="d-flex align-items-center gap-3 p-2 border rounded text-decoration-none hover-bg">
+                                                        <img th:src="${p.mainImage}" style="width:55px; height:55px; background:#fff; border-radius:5px; object-fit:contain;">
+                                                        <div class="overflow-hidden">
+                                                            <div class="small fw-bold text-truncate text-light" th:text="${p.name}">Product</div>
+                                                            <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </th:block>
+                                        </div>
+                                    </div>
                                 </th:block>
                             </div>
                         </div>
@@ -174,9 +212,10 @@
                 <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;"><i class="bi bi-box-seam"></i> SẢN PHẨM</a>
             </div>
 
+            <!-- LIVE SEARCH ĐỒNG BỘ INDEX -->
             <div class="search-container flex-grow-1 mx-5 d-none d-md-block">
                 <div class="input-group">
-                    <input type="text" id="liveSearchInput" class="form-control rounded-start-pill bg-dark border-secondary text-white px-4 py-2" placeholder="Tìm kiếm mô hình chuyên nghiệp...">
+                    <input type="text" id="liveSearchInput" class="form-control rounded-start-pill px-4 py-2" placeholder="Tìm kiếm mô hình chuyên nghiệp...">
                     <button class="btn btn-outline-info rounded-end-pill border-secondary border-start-0 bg-dark px-3" id="btnMainSearch"><i class="bi bi-search"></i></button>
                 </div>
                 <div class="search-results shadow-lg" id="searchResultList"></div>
@@ -185,18 +224,48 @@
             <div class="d-flex align-items-center gap-4">
                 <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
                 <a href="/wishlist" class="nav-icon-link" id="btnWishlistNav"><i class="bi bi-heart"></i></a>
+                
+                <!-- DROPDOWN MINI CART ĐỒNG BỘ INDEX -->
                 <div class="dropdown">
-                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown"><i class="bi bi-cart3"></i><span class="badge-count" th:if="${cartSize > 0}" th:text="${cartSize}">0</span></div>
+                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown">
+                        <i class="bi bi-cart3"></i>
+                        <span class="badge-count" id="cartBadgeNav" th:style="${cartSize > 0 ? '' : 'display:none;'}" th:text="${cartSize}">0</span>
+                    </div>
                     <div class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg" style="width: 350px;">
-                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center"><span>GIỎ HÀNG</span><span class="badge bg-info text-dark" th:text="${cartSize + ' món'}"></span></div>
-                        <div style="max-height: 300px; overflow-y: auto;">
-                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg"><img th:src="${item.product.mainImage}" width="40" height="40" style="background:#fff; object-fit:contain;"><div class="overflow-hidden flex-grow-1"><div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div><div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div></div></div>
+                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
+                            <span>GIỎ HÀNG</span>
+                            <span class="badge bg-info text-dark" id="cartBadgeMenu" th:text="${cartSize + ' món'}"></span>
                         </div>
-                        <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT GIỎ HÀNG</a></div>
+                        
+                        <!-- KHU VỰC CẬP NHẬT AJAX CHỨA NÚT TĂNG GIẢM -->
+                        <div id="miniCartContent" style="max-height: 300px; overflow-y: auto;">
+                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
+                                <img th:src="${item.product.mainImage}" width="40" height="40" style="background:#fff; object-fit:contain;">
+                                <div class="overflow-hidden flex-grow-1">
+                                    <div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div>
+                                    <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+                                    <!-- Nút Tăng/Giảm -->
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" style="font-size: 0.7rem;" th:onclick="'miniCartAction(\'/cart/minus/' + ${item.id} + '\')'">-</button>
+                                        <span class="small fw-bold text-light" th:text="${item.quantity}"></span>
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" style="font-size: 0.7rem;" th:onclick="'miniCartAction(\'/cart/plus/' + ${item.id} + '\')'">+</button>
+                                    </div>
+                                </div>
+                                <!-- Nút Xóa -->
+                                <button class="btn btn-sm text-danger" th:onclick="'miniCartAction(\'/cart/delete/' + ${item.id} + '\')'"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT</a></div>
                     </div>
                 </div>
+                
+                <!-- AVATAR FIX ĐỒNG BỘ -->
                 <div class="dropdown" th:if="${session.account != null}">
-                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown"><img th:src="${session.account.avatar ?: 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;"><i class="bi bi-chevron-down small text-light"></i></div>
+                    <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                        <img th:src="${session.account.avatar != null ? (session.account.avatar.startsWith('http') ? session.account.avatar : '/images/avatar/' + session.account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                        <i class="bi bi-chevron-down small text-light"></i>
+                    </div>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
                         <li><a class="dropdown-item py-2" href="/profile"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
                         <li><a class="dropdown-item py-2" href="/orders"><i class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
@@ -210,7 +279,7 @@
     </div>
 </nav>
 
-<!-- Slideshow -->
+<!-- Slideshow (PHONG CÁCH SPLIT LAYOUT ĐẸP CỦA TRANG PRODUCTS) -->
 <div class="container">
     <div id="productSpotlight" class="carousel slide carousel-fade products-slideshow shadow-lg" data-bs-ride="carousel">
         <div class="carousel-inner">
@@ -233,7 +302,7 @@
     </div>
 </div>
 
-<!-- Professional Voucher Banner (Below First Banner) -->
+<!-- Professional Voucher Banner -->
 <div class="container my-4">
     <a href="/voucher" class="voucher-premium-box" id="voucherTilt">
         <div class="v-text">
@@ -244,9 +313,10 @@
     </a>
 </div>
 
-<!-- Main Area -->
+<!-- Main Area (GIỮ NGUYÊN) -->
 <div class="container-fluid px-4 py-5 flex-grow-1">
     <div class="row g-5">
+        <!-- FILTER BOX -->
         <div class="col-lg-3">
             <div class="filter-box">
                 <form method="get" action="/products">
@@ -272,6 +342,7 @@
             </div>
         </div>
 
+        <!-- PRODUCT GRID -->
         <div class="col-lg-9">
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <h4 style="font-family:'Montserrat'; font-weight:900; color:var(--text-main); border-left: 5px solid var(--accent-red); padding-left:15px;">TẤT CẢ SẢN PHẨM</h4>
@@ -283,9 +354,7 @@
                 </div>
                 <th:block th:each="p : ${products}">
                     <div class="col-xl-4 col-md-6 col-sm-6">
-                        <!-- CARD MẪU MỚI -->
                         <div th:class="${p.quantity == 0 ? 'product-card out-of-stock shadow' : 'product-card shadow'}">
-                            <span th:if="${p.quantity == 0}" class="stock-label">Hết hàng</span>
                             <div class="product-img-holder">
                                 <a th:href="@{'/product-detail/' + ${p.id}}"><img th:src="${p.mainImage}" th:id="'img-' + ${p.id}" alt="Product"></a>
                             </div>
@@ -295,15 +364,17 @@
                             <span class="product-price-new" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
                             
                             <div class="card-actions">
-                        <button class="btn-action" th:onclick="'openQuickView(' + ${p.id} + ')'" title="Xem nhanh"><i class="bi bi-search"></i></button>
-                        <button class="btn-add-to-cart-icon" th:disabled="${p.quantity == 0}" th:onclick="'flyToCart(this, ' + ${p.id} + ')'" title="Thêm vào giỏ"><i class="bi bi-cart-plus"></i></button>
-                        <button class="btn-action product-wishlist" th:onclick="'toggleWishlist(this, ' + ${p.id} + ')'" title="Yêu thích"><i class="bi bi-heart"></i></button>
-                    </div>
+                                <button class="btn-action" th:onclick="'openQuickView(' + ${p.id} + ')'" title="Xem nhanh"><i class="bi bi-search"></i></button>
+                                <!-- ĐÃ ĐỒNG BỘ: CHỈ HIỂN THỊ ICON GIỎ HÀNG NHƯ YÊU CẦU -->
+                                <button class="btn-add-to-cart-icon" th:disabled="${p.quantity == 0}" th:onclick="'flyToCart(this, ' + ${p.id} + ')'" title="Thêm vào giỏ"><i class="bi bi-cart-plus"></i></button>
+                                <button class="btn-action product-wishlist" th:onclick="'toggleWishlist(this, ' + ${p.id} + ')'" title="Yêu thích"><i class="bi bi-heart"></i></button>
+                            </div>
                         </div>
                     </div>
                 </th:block>
             </div>
-            <!-- Pagination ... -->
+            
+            <!-- Pagination -->
             <nav th:if="${productPage != null && productPage.totalPages > 1}" class="mt-5">
                 <ul class="pagination justify-content-center gap-2">
                     <li class="page-item" th:classappend="${productPage.first} ? 'disabled'"><a class="page-link rounded-circle border-secondary bg-dark text-white" th:href="@{/products(page=${productPage.number - 1}, categoryId=${selectedCategory}, keyword=${keyword}, sort=${selectedSort}, minPrice=${minPrice}, maxPrice=${maxPrice})}"><i class="bi bi-chevron-left"></i></a></li>
@@ -317,274 +388,168 @@
 
 <!-- Modal Auth & Quick View -->
 <div class="modal fade" id="authModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered" style="max-width: 400px;"><div class="modal-content modal-custom-content"><div class="modal-custom-icon">!</div><div class="modal-custom-text">Bạn cần đăng nhập để thực hiện giao dịch</div><button class="btn-custom-ok shadow" id="btnAuthOk">OK</button></div></div></div>
-<div class="modal fade" id="quickViewModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content border-0 shadow-lg"><div class="modal-header modal-header-blue"><h5 class="modal-title fw-bold">THÔNG TIN SẢN PHẨM</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="row"><div class="col-md-6"><img id="qv-img-main" class="quickview-img-main" src=""></div><div class="col-md-6"><h4 id="qv-name" class="fw-bold mb-2"></h4><div id="qv-price" class="qv-price"></div><div class="qv-meta"><b>Nhà cung cấp:</b> <span id="qv-brand"></span></div><div class="qv-meta"><b>Tình trạng:</b> <span id="qv-status"></span></div><hr class="my-3 border-secondary"><p id="qv-desc" class="qv-desc"></p><button id="qv-btn-action" class="btn btn-info w-100 fw-bold text-white py-2 mt-4"></button></div></div></div></div></div></div>
+<div class="modal fade" id="quickViewModal" tabindex="-1"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content border-0 shadow-lg"><div class="modal-header modal-header-blue"><h5 class="modal-title fw-bold">THÔNG TIN SẢN PHẨM</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="row"><div class="col-md-6"><img id="qv-img-main" class="quickview-img-main" src=""></div><div class="col-md-6"><h4 id="qv-name" class="fw-bold mb-2"></h4><div id="qv-price" class="qv-price text-danger fw-bold fs-3 mb-3"></div><div class="qv-meta mb-2"><b>Danh mục:</b> <span id="qv-brand"></span></div><div class="qv-meta mb-3"><b>Tình trạng:</b> <span id="qv-status"></span></div><hr class="my-3 border-secondary"><p id="qv-desc" class="qv-desc opacity-75"></p><button id="qv-btn-action" class="btn btn-info w-100 fw-bold text-white py-2 mt-4"></button></div></div></div></div></div></div>
 
+<!-- FOOTER ĐỒNG BỘ INDEX -->
 <footer class="py-5 bg-dark border-top border-secondary text-center"><p class="text-white small">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JAVASCRIPT ĐỒNG BỘ CHUẨN XÁC TỪ INDEX -->
 <script>
     const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
 
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+    function showAuthModal() { new bootstrap.Modal(document.getElementById('authModal')).show(); document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login'; }
+    function executeSearch() { const q = document.getElementById('liveSearchInput').value.trim(); if (q) window.location.href = `/products?keyword=${encodeURIComponent(q)}`; }
 
-    function showAuthModal() {
-        new bootstrap.Modal(document.getElementById('authModal')).show();
-        document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login';
-    }
+    // HÀM CHUYÊN BIỆT BÓC TÁCH HTML CHO MINI CART (AJAX HOÀN HẢO TỪ INDEX)
+    function updateMiniCartFromHTML(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
 
-    function executeSearch() {
-        const q = document.getElementById('liveSearchInput').value.trim();
-        if (q) window.location.href = `/products?keyword=${encodeURIComponent(q)}`;
-    }
+        const newBadgeNav = doc.getElementById('cartBadgeNav');
+        const newBadgeMenu = doc.getElementById('cartBadgeMenu');
+        const newMiniCartContent = doc.getElementById('miniCartContent');
 
-    // ================= QUICK VIEW =================
-    function openQuickView(pid) {
-        fetch(`/api/products/${pid}`)
-            .then(res => res.json())
-            .then(p => {
-                document.getElementById('qv-name').innerText = p.name;
-                document.getElementById('qv-price').innerText = new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
-                document.getElementById('qv-desc').innerText = p.description || 'Chưa có mô tả.';
-                document.getElementById('qv-brand').innerText = p.category ? p.category.name : 'Đang cập nhật';
-                document.getElementById('qv-img-main').src = p.mainImage;
-
-                const statusEl = document.getElementById('qv-status');
-                const btnAction = document.getElementById('qv-btn-action');
-
-                if (p.quantity > 0) {
-                    statusEl.innerText = 'Còn hàng';
-                    statusEl.className = 'text-success fw-bold';
-                    btnAction.innerText = 'THÊM VÀO GIỎ';
-                    btnAction.disabled = false;
-                    btnAction.onclick = () => flyToCart(null, p.id);
-                } else {
-                    statusEl.innerText = 'Hết hàng';
-                    statusEl.className = 'text-danger fw-bold';
-                    btnAction.innerText = 'HẾT HÀNG';
-                    btnAction.disabled = true;
-                }
-
-                new bootstrap.Modal(document.getElementById('quickViewModal')).show();
-            });
-    }
-
-    // ================= LIVE SEARCH =================
-    const searchInput = document.getElementById('liveSearchInput');
-    const searchResultList = document.getElementById('searchResultList');
-
-    if (searchInput) {
-        searchInput.oninput = function () {
-            const q = this.value.trim();
-            if (q.length < 2) {
-                searchResultList.style.display = 'none';
-                return;
+        if (newBadgeNav && document.getElementById('cartBadgeNav')) {
+            document.getElementById('cartBadgeNav').outerHTML = newBadgeNav.outerHTML;
+        }
+        if (newBadgeMenu && document.getElementById('cartBadgeMenu')) {
+            document.getElementById('cartBadgeMenu').outerHTML = newBadgeMenu.outerHTML;
+        }
+        if (newMiniCartContent && document.getElementById('miniCartContent')) {
+            document.getElementById('miniCartContent').outerHTML = newMiniCartContent.outerHTML;
+            
+            const updatedContent = document.getElementById('miniCartContent');
+            if (updatedContent.children.length === 0) {
+                updatedContent.innerHTML = '<div class="p-4 text-center opacity-50">Giỏ hàng trống</div>';
             }
-
-            fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        let headerHtml = `
-                            <div class="p-2 border-bottom small fw-bold" 
-                                 style="background: var(--bg-nav); color: var(--text-main);">
-                                Tìm thấy ${data.length} sản phẩm
-                            </div>`;
-
-                        searchResultList.innerHTML = headerHtml + data.map(p => `
-                            <a href="/product-detail/${p.id}" class="search-item">
-                                <img src="${p.mainImage}">
-                                <div class="overflow-hidden">
-                                    <div class="small fw-bold text-truncate">${p.name}</div>
-                                    <div class="text-danger small fw-bold">
-                                        ${new Intl.NumberFormat('vi-VN').format(p.price)}₫
-                                    </div>
-                                </div>
-                            </a>
-                        `).join('');
-
-                        searchResultList.style.display = 'block';
-                    } else {
-                        searchResultList.style.display = 'none';
-                    }
-                });
-        };
-
-        searchInput.onkeypress = (e) => {
-            if (e.key === 'Enter') executeSearch();
-        };
+        }
     }
 
-    document.getElementById('btnMainSearch').onclick = executeSearch;
+    // GỌI HÀNH ĐỘNG TĂNG/GIẢM/XÓA BẰNG AJAX
+    function miniCartAction(url) {
+        fetch(url, { headers: { 'Cache-Control': 'no-cache' } })
+            .then(() => fetch(window.location.href, { headers: { 'Cache-Control': 'no-cache' } }))
+            .then(res => res.text())
+            .then(html => updateMiniCartFromHTML(html))
+            .catch(err => console.error("Lỗi cập nhật:", err));
+    }
 
-    document.addEventListener('click', (e) => {
-        if (searchInput && !searchInput.contains(e.target)) {
-            searchResultList.style.display = 'none';
+    // HIỆU ỨNG BAY VÀO GIỎ & THÊM SẢN PHẨM
+    function flyToCart(btn, pid) {
+        if (!isLoggedIn) { showAuthModal(); return; }
+        const cart = document.getElementById('cartIconNav'); 
+        const img = document.getElementById('img-' + pid);
+        
+        if (img) {
+            const clone = img.cloneNode(); const start = img.getBoundingClientRect(); const end = cart.getBoundingClientRect();
+            clone.classList.add('fly-item'); clone.style.top = start.top + 'px'; clone.style.left = start.left + 'px';
+            clone.style.width = start.width + 'px'; clone.style.height = start.height + 'px';
+            document.body.appendChild(clone);
+            setTimeout(() => { clone.style.top = end.top + 'px'; clone.style.left = end.left + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0'; }, 10);
+            
+            setTimeout(() => { 
+                clone.remove(); 
+                fetch(`/cart/add/${pid}?quantity=1`, { method: 'POST', headers: { 'Cache-Control': 'no-cache' } })
+                    .then(res => res.text())
+                    .then(status => {
+                        if (status === 'success') {
+                            fetch(window.location.href, { headers: { 'Cache-Control': 'no-cache' } })
+                                .then(r => r.text())
+                                .then(html => updateMiniCartFromHTML(html));
+                        } else if (status.startsWith('limit:')) {
+                            alert("Số lượng sản phẩm trong kho đã đạt giới hạn tối đa!");
+                        } else if (status === 'out_of_stock') {
+                            alert("Sản phẩm đã hết hàng!");
+                        }
+                    }); 
+            }, 800);
+        }
+    }
+
+    // QUICK VIEW
+    function openQuickView(pid) {
+        fetch(`/api/products/${pid}`).then(res => res.json()).then(p => {
+            document.getElementById('qv-name').innerText = p.name;
+            document.getElementById('qv-price').innerText = new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
+            document.getElementById('qv-desc').innerText = p.description || 'Chưa có mô tả.';
+            document.getElementById('qv-brand').innerText = p.category ? p.category.name : 'Đang cập nhật';
+            document.getElementById('qv-img-main').src = p.mainImage;
+            const statusEl = document.getElementById('qv-status'); const btnAction = document.getElementById('qv-btn-action');
+            if(p.quantity > 0) { statusEl.innerText = 'Còn hàng'; statusEl.className = 'text-success fw-bold'; btnAction.innerText = 'THÊM VÀO GIỎ'; btnAction.disabled = false; btnAction.onclick = () => flyToCart(null, p.id); }
+            else { statusEl.innerText = 'Hết hàng'; statusEl.className = 'text-danger fw-bold'; btnAction.innerText = 'HẾT HÀNG'; btnAction.disabled = true; }
+            new bootstrap.Modal(document.getElementById('quickViewModal')).show();
+        });
+    }
+
+    // LIVE SEARCH HOẠT ĐỘNG HOÀN HẢO TỪ INDEX
+    const searchInput = document.getElementById('liveSearchInput'); const searchResultList = document.getElementById('searchResultList');
+    if (searchInput) {
+        searchInput.oninput = function() {
+            const q = this.value.trim(); if (q.length < 2) { searchResultList.style.display = 'none'; return; }
+            fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`).then(res => res.json()).then(data => {
+                if (data.length > 0) {
+                    searchResultList.innerHTML = data.map(p => `<a href="/product-detail/${p.id}" class="search-item"><img src="${p.mainImage}"><div class="overflow-hidden"><div class="small fw-bold text-truncate">${p.name}</div><div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div></div></a>`).join('');
+                    searchResultList.style.display = 'block';
+                } else { searchResultList.style.display = 'none'; }
+            });
+        };
+        searchInput.onkeypress = (e) => { if(e.key === 'Enter') executeSearch(); };
+    }
+    document.getElementById('btnMainSearch').onclick = executeSearch;
+    document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
+
+    // XỬ LÝ LỌC GIÁ KHI THAY ĐỔI DROPDOWN
+    document.getElementById('priceRangeSelect').addEventListener('change', function() {
+        const val = this.value;
+        if(val === 'all') {
+            document.getElementById('minPriceHidden').value = '';
+            document.getElementById('maxPriceHidden').value = '';
+        } else {
+            const parts = val.split('-');
+            document.getElementById('minPriceHidden').value = parts[0];
+            document.getElementById('maxPriceHidden').value = parts[1];
         }
     });
 
-    // ================= UPDATE MINI CART =================
-    function updateMiniCart() {
-    fetch('/cart/api/mini-cart')
-        .then(res => {
-            if (res.status === 401) return [];
-            return res.json();
-        })
-        .then(data => {
-
-            // ===== BADGE =====
-            let badge = document.querySelector('.badge-count');
-
-            if (!badge && data.length > 0) {
-                badge = document.createElement('span');
-                badge.className = 'badge-count';
-                document.getElementById('cartIconNav').appendChild(badge);
-            }
-
-            if (badge) {
-                badge.innerText = data.length;
-                if (data.length === 0) badge.remove();
-            }
-
-            // ===== TITLE =====
-            const title = document.querySelector('.cart-dropdown-menu .badge');
-            if (title) {
-                title.innerText = data.length + ' món';
-            }
-
-            // ===== LIST =====
-            const container = document.querySelector('.cart-dropdown-menu div[style*="overflow-y"]');
-            if (!container) return;
-
-            if (data.length === 0) {
-                container.innerHTML = `
-                    <div class="p-3 text-center text-muted">
-                        Giỏ hàng trống
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = data.map(item => `
-                <div class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
-                    <img src="${item.product.mainImage}" width="40" height="40" style="background:#fff;">
-                    <div class="overflow-hidden flex-grow-1">
-                        <div class="small text-truncate fw-bold text-light">
-                            ${item.product.name}
-                        </div>
-                        <div class="text-danger small fw-bold">
-                            ${new Intl.NumberFormat('vi-VN').format(item.product.price)}₫
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        });
-}
-
-    // ================= FLY TO CART (FIXED) =================
-    function flyToCart(btn, pid) {
-    if (!isLoggedIn) {
-        showAuthModal();
-        return;
-    }
-
-    const cart = document.getElementById('cartIconNav');
-    const img = document.getElementById('img-' + pid);
-
-    if (img) {
-        const clone = img.cloneNode();
-        const start = img.getBoundingClientRect();
-        const end = cart.getBoundingClientRect();
-
-        clone.classList.add('fly-item');
-        clone.style.top = start.top + 'px';
-        clone.style.left = start.left + 'px';
-        clone.style.width = start.width + 'px';
-        clone.style.height = start.height + 'px';
-
-        document.body.appendChild(clone);
-
-        setTimeout(() => {
-            clone.style.top = end.top + 'px';
-            clone.style.left = end.left + 'px';
-            clone.style.width = '20px';
-            clone.style.height = '20px';
-            clone.style.opacity = '0';
-        }, 10);
-
-        setTimeout(() => {
-            clone.remove();
-
-            fetch(`/cart/add/${pid}`, {
-                method: 'POST',
-                headers: {
-                    [csrfHeader]: csrfToken
-                }
-            })
-            .then(res => res.text())
-            .then(status => {
-                if (status === 'success') {
-                    updateMiniCart(); // ✅ realtime
-                } else if (status === 'unauthorized') {
-                    showAuthModal();
-                }
-            });
-
-        }, 800);
-    }
-}
-
-    // ================= THEME =================
+    // THEME & WISHLIST
     function toggleTheme() {
-        const h = document.documentElement;
-        const icon = document.getElementById('themeIcon');
-
+        const h = document.documentElement; const icon = document.getElementById('themeIcon');
         const isDark = h.getAttribute('data-theme') === 'dark';
-
         h.setAttribute('data-theme', isDark ? 'light' : 'dark');
         icon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
     }
-
-    // ================= WISHLIST =================
+    
     function toggleWishlist(btn, pid) {
-        if (!isLoggedIn) {
-            showAuthModal();
-            return;
+        if (!isLoggedIn) { showAuthModal(); return; }
+        fetch(`/wishlist/toggle/${pid}`).then(res => res.text()).then(status => {
+            if(status === 'added') btn.classList.add('active'); else btn.classList.remove('active');
+        });
+    }
+
+    // MEGA MENU
+    const btnMega = document.getElementById('btnMegaMenu'); const megaMenu = document.getElementById('megaMenu');
+    btnMega.onclick = (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); };
+    document.querySelectorAll('.mega-cat-link').forEach(link => { link.onmouseenter = function() { document.querySelectorAll('.mega-cat-link').forEach(l => l.classList.remove('active')); document.querySelectorAll('.cat-product-pane').forEach(p => p.classList.add('d-none')); this.classList.add('active'); document.getElementById(this.getAttribute('data-target')).classList.remove('d-none'); }; });
+    
+    // Load trạng thái Wishlist & check Giỏ rỗng khi vào trang
+    document.addEventListener("DOMContentLoaded", () => { 
+        if (isLoggedIn) {
+            const updatedContent = document.getElementById('miniCartContent');
+            if (updatedContent && updatedContent.children.length === 0) {
+                updatedContent.innerHTML = '<div class="p-4 text-center opacity-50">Giỏ hàng trống</div>';
+            }
+
+            fetch('/wishlist/my-likes').then(r => r.json()).then(ids => { 
+                document.querySelectorAll('.product-wishlist').forEach(btn => { 
+                    const pid = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]); 
+                    if(ids.includes(pid)) btn.classList.add('active'); 
+                }); 
+            }); 
         }
-
-        fetch(`/wishlist/toggle/${pid}`)
-            .then(res => res.text())
-            .then(status => {
-                if (status === 'added') btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-    }
-
-    // ================= MEGA MENU =================
-    const btnMega = document.getElementById('btnMegaMenu');
-    const megaMenu = document.getElementById('megaMenu');
-
-    btnMega.onclick = (e) => {
-        e.stopPropagation();
-        megaMenu.classList.toggle('active');
-    };
-
-    document.querySelectorAll('.mega-cat-link').forEach(link => {
-        link.onmouseenter = function () {
-            document.querySelectorAll('.mega-cat-link').forEach(l => l.classList.remove('active'));
-            document.querySelectorAll('.cat-product-pane').forEach(p => p.classList.add('d-none'));
-
-            this.classList.add('active');
-            document.getElementById(this.getAttribute('data-target')).classList.remove('d-none');
-        };
     });
-
-    // ================= INIT =================
-   document.addEventListener("DOMContentLoaded", () => {
-    if (isLoggedIn) {
-        updateMiniCart(); // ✅ đảm bảo luôn sync DB
-    }
-});
 </script>
+
 </body>
 </html>

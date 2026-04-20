@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
@@ -197,16 +198,42 @@
             <div class="d-flex align-items-center gap-4">
                 <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
                 <a href="/wishlist" class="nav-icon-link" id="btnWishlistNav"><i class="bi bi-heart"></i></a>
+                
+                <!-- DROPDOWN MINI CART -->
                 <div class="dropdown">
-                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown"><i class="bi bi-cart3"></i><span class="badge-count" th:if="${cartSize > 0}" th:text="${cartSize}">0</span></div>
+                    <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown">
+                        <i class="bi bi-cart3"></i>
+                        <span class="badge-count" id="cartBadgeNav" th:style="${cartSize > 0 ? '' : 'display:none;'}" th:text="${cartSize}">0</span>
+                    </div>
                     <div class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg" style="width: 350px;">
-                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center"><span>GIỎ HÀNG</span><span class="badge bg-info text-dark" th:text="${cartSize + ' món'}"></span></div>
-                        <div style="max-height: 300px; overflow-y: auto;">
-                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg"><img th:src="${item.product.mainImage}" width="40" height="40" style="background:#fff; object-fit:contain;"><div class="overflow-hidden flex-grow-1"><div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div><div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div></div></div>
+                        <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
+                            <span>GIỎ HÀNG</span>
+                            <span class="badge bg-info text-dark" id="cartBadgeMenu" th:text="${cartSize + ' món'}"></span>
                         </div>
+                        
+                        <!-- KHU VỰC CẬP NHẬT AJAX -->
+                        <div id="miniCartContent" style="max-height: 300px; overflow-y: auto;">
+                            <div th:each="item : ${cart}" class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
+                                <img th:src="${item.product.mainImage}" width="40" height="40" style="background:#fff; object-fit:contain;">
+                                <div class="overflow-hidden flex-grow-1">
+                                    <div class="small text-truncate fw-bold text-light" th:text="${item.product.name}"></div>
+                                    <div class="text-danger small fw-bold" th:text="${#numbers.formatDecimal(item.product.price,0,'COMMA',0,'POINT') + '₫'}"></div>
+                                    <!-- Nút Tăng/Giảm -->
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" style="font-size: 0.7rem;" th:onclick="'miniCartAction(\'/cart/minus/' + ${item.id} + '\')'">-</button>
+                                        <span class="small fw-bold text-light" th:text="${item.quantity}"></span>
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" style="font-size: 0.7rem;" th:onclick="'miniCartAction(\'/cart/plus/' + ${item.id} + '\')'">+</button>
+                                    </div>
+                                </div>
+                                <!-- Nút Xóa -->
+                                <button class="btn btn-sm text-danger" th:onclick="'miniCartAction(\'/cart/delete/' + ${item.id} + '\')'"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+
                         <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT</a></div>
                     </div>
                 </div>
+                
                 <div class="dropdown" th:if="${user != null}">
                     <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
                         <img th:src="${user.avatar != null ? (user.avatar.startsWith('http') ? user.avatar : '/images/avatar/' + user.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
@@ -292,6 +319,7 @@
                     <span class="product-price-new" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT') + '₫'}">0₫</span>
                     <div class="card-actions">
                         <button class="btn-action" th:onclick="'openQuickView(' + ${p.id} + ')'" title="Xem nhanh"><i class="bi bi-search"></i></button>
+                        <!-- ĐÃ FIX: CHỈ CÒN ICON, KHÔNG CHỮ "GIỎ HÀNG" ĐỂ NÚT VUÔNG VẮN ĐẸP -->
                         <button class="btn-add-to-cart-icon" th:disabled="${p.quantity == 0}" th:onclick="'flyToCart(this, ' + ${p.id} + ')'" title="Thêm vào giỏ"><i class="bi bi-cart-plus"></i></button>
                         <button class="btn-action product-wishlist" th:onclick="'toggleWishlist(this, ' + ${p.id} + ')'" title="Yêu thích"><i class="bi bi-heart"></i></button>
                     </div>
@@ -310,12 +338,87 @@
 <footer class="py-5 bg-dark border-top border-secondary text-center"><p class="text-white small">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- CÁC SCRIPT CHÍNH (ĐÃ FIX NÚT TĂNG GIẢM MINI CART CHẠY MƯỢT MÀ) -->
 <script>
     const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
 
     function showAuthModal() { new bootstrap.Modal(document.getElementById('authModal')).show(); document.getElementById('btnAuthOk').onclick = () => window.location.href = '/login'; }
     function executeSearch() { const q = document.getElementById('liveSearchInput').value.trim(); if (q) window.location.href = `/products?keyword=${encodeURIComponent(q)}`; }
 
+    // HÀM CHUYÊN BIỆT: Bóc tách HTML từ Server thay vì JSON để tránh lỗi StackOverflow
+    function updateMiniCartFromHTML(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const newBadgeNav = doc.getElementById('cartBadgeNav');
+        const newBadgeMenu = doc.getElementById('cartBadgeMenu');
+        const newMiniCartContent = doc.getElementById('miniCartContent');
+
+        if (newBadgeNav && document.getElementById('cartBadgeNav')) {
+            document.getElementById('cartBadgeNav').outerHTML = newBadgeNav.outerHTML;
+        }
+        if (newBadgeMenu && document.getElementById('cartBadgeMenu')) {
+            document.getElementById('cartBadgeMenu').outerHTML = newBadgeMenu.outerHTML;
+        }
+        if (newMiniCartContent && document.getElementById('miniCartContent')) {
+            document.getElementById('miniCartContent').outerHTML = newMiniCartContent.outerHTML;
+            
+            // Xử lý hiển thị chữ "Giỏ hàng trống" nếu danh sách bị rỗng
+            const updatedContent = document.getElementById('miniCartContent');
+            if (updatedContent.children.length === 0) {
+                updatedContent.innerHTML = '<div class="p-4 text-center opacity-50">Giỏ hàng trống</div>';
+            }
+        }
+    }
+
+    // GỌI HÀNH ĐỘNG TĂNG/GIẢM/XÓA BẰNG AJAX
+    function miniCartAction(url) {
+        // Gửi lệnh xử lý (backend sẽ redirect về /cart)
+        fetch(url, { headers: { 'Cache-Control': 'no-cache' } })
+            .then(() => {
+                // Sau khi xong, fetch lại trang HIỆN TẠI ngầm để lấy số liệu mới nhất
+                return fetch(window.location.href, { headers: { 'Cache-Control': 'no-cache' } });
+            })
+            .then(res => res.text())
+            .then(html => updateMiniCartFromHTML(html))
+            .catch(err => console.error("Lỗi cập nhật:", err));
+    }
+
+    // HIỆU ỨNG BAY VÀO GIỎ & THÊM SẢN PHẨM
+    function flyToCart(btn, pid) {
+        if (!isLoggedIn) { showAuthModal(); return; }
+        const cart = document.getElementById('cartIconNav'); 
+        const img = document.getElementById('img-' + pid);
+        
+        if (img) {
+            const clone = img.cloneNode(); const start = img.getBoundingClientRect(); const end = cart.getBoundingClientRect();
+            clone.classList.add('fly-item'); clone.style.top = start.top + 'px'; clone.style.left = start.left + 'px';
+            clone.style.width = start.width + 'px'; clone.style.height = start.height + 'px';
+            document.body.appendChild(clone);
+            setTimeout(() => { clone.style.top = end.top + 'px'; clone.style.left = end.left + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0'; }, 10);
+            
+            setTimeout(() => { 
+                clone.remove(); 
+                fetch(`/cart/add/${pid}?quantity=1`, { method: 'POST', headers: { 'Cache-Control': 'no-cache' } })
+                    .then(res => res.text())
+                    .then(status => {
+                        if (status === 'success') {
+                            // Load lại Mini Cart ngầm
+                            fetch(window.location.href, { headers: { 'Cache-Control': 'no-cache' } })
+                                .then(r => r.text())
+                                .then(html => updateMiniCartFromHTML(html));
+                        } else if (status.startsWith('limit:')) {
+                            alert("Số lượng sản phẩm trong kho đã đạt giới hạn tối đa!");
+                        } else if (status === 'out_of_stock') {
+                            alert("Sản phẩm đã hết hàng!");
+                        }
+                    }); 
+            }, 800);
+        }
+    }
+
+    // QUICK VIEW
     function openQuickView(pid) {
         fetch(`/api/products/${pid}`).then(res => res.json()).then(p => {
             document.getElementById('qv-name').innerText = p.name;
@@ -330,6 +433,7 @@
         });
     }
 
+    // LIVE SEARCH HOẠT ĐỘNG HOÀN HẢO
     const searchInput = document.getElementById('liveSearchInput'); const searchResultList = document.getElementById('searchResultList');
     if (searchInput) {
         searchInput.oninput = function() {
@@ -346,19 +450,7 @@
     document.getElementById('btnMainSearch').onclick = executeSearch;
     document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
 
-    function flyToCart(btn, pid) {
-        if (!isLoggedIn) { showAuthModal(); return; }
-        const cart = document.getElementById('cartIconNav'); const img = document.getElementById('img-' + pid);
-        if (img) {
-            const clone = img.cloneNode(); const start = img.getBoundingClientRect(); const end = cart.getBoundingClientRect();
-            clone.classList.add('fly-item'); clone.style.top = start.top + 'px'; clone.style.left = start.left + 'px';
-            clone.style.width = start.width + 'px'; clone.style.height = start.height + 'px';
-            document.body.appendChild(clone);
-            setTimeout(() => { clone.style.top = end.top + 'px'; clone.style.left = end.left + 'px'; clone.style.width = '20px'; clone.style.height = '20px'; clone.style.opacity = '0'; }, 10);
-            setTimeout(() => { clone.remove(); fetch(`/cart/add/${pid}`, { method: 'POST' }).then(() => location.reload()); }, 800);
-        }
-    }
-
+    // THEME & WISHLIST
     function toggleTheme() {
         const h = document.documentElement; const icon = document.getElementById('themeIcon');
         const isDark = h.getAttribute('data-theme') === 'dark';
@@ -373,11 +465,27 @@
         });
     }
 
+    // MEGA MENU
     const btnMega = document.getElementById('btnMegaMenu'); const megaMenu = document.getElementById('megaMenu');
     btnMega.onclick = (e) => { e.stopPropagation(); megaMenu.classList.toggle('active'); };
     document.querySelectorAll('.mega-cat-link').forEach(link => { link.onmouseenter = function() { document.querySelectorAll('.mega-cat-link').forEach(l => l.classList.remove('active')); document.querySelectorAll('.cat-product-pane').forEach(p => p.classList.add('d-none')); this.classList.add('active'); document.getElementById(this.getAttribute('data-target')).classList.remove('d-none'); }; });
     
-    document.addEventListener("DOMContentLoaded", () => { if(isLoggedIn) fetch('/wishlist/my-likes').then(r => r.json()).then(ids => { document.querySelectorAll('.product-wishlist').forEach(btn => { const pid = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]); if(ids.includes(pid)) btn.classList.add('active'); }); }); });
+    // Load trạng thái Wishlist & check Giỏ rỗng khi vào trang
+    document.addEventListener("DOMContentLoaded", () => { 
+        if (isLoggedIn) {
+            const updatedContent = document.getElementById('miniCartContent');
+            if (updatedContent && updatedContent.children.length === 0) {
+                updatedContent.innerHTML = '<div class="p-4 text-center opacity-50">Giỏ hàng trống</div>';
+            }
+
+            fetch('/wishlist/my-likes').then(r => r.json()).then(ids => { 
+                document.querySelectorAll('.product-wishlist').forEach(btn => { 
+                    const pid = parseInt(btn.getAttribute('onclick').match(/\d+/)[0]); 
+                    if(ids.includes(pid)) btn.classList.add('active'); 
+                }); 
+            }); 
+        }
+    });
 </script>
 
 </body>
