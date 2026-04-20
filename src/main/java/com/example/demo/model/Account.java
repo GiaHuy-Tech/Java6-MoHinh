@@ -3,7 +3,7 @@ package com.example.demo.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import org.hibernate.annotations.Nationalized; // THÊM DÒNG NÀY
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,30 +11,34 @@ import lombok.Data;
 @Table(name = "accounts")
 @Data
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private Boolean active = true;
+
     private LocalDate birthDay;
 
-    @Column(unique = true, columnDefinition = "nvarchar(255)")
+    // bỏ columnDefinition nvarchar
+    @Column(unique = true, length = 255)
     private String email;
 
-    @Nationalized
-    @Column(columnDefinition = "nvarchar(255)")
+    // bỏ @Nationalized
+    @Column(length = 255)
     private String fullName;
 
     private Boolean gender;
 
-    @Column(columnDefinition = "nvarchar(255)")
+    @Column(length = 255)
     private String password;
 
-    @Column(columnDefinition = "nvarchar(20)")
+    // đây rất dễ là cột gây lỗi convert varchar -> nchar
+    @Column(length = 20)
     private String phone;
 
-    @Nationalized
-    @Column(columnDefinition = "nvarchar(MAX)")
+    // bỏ @Nationalized
+    @Column(length = 1000)
     private String avatar;
 
     private Boolean role = false;
@@ -45,7 +49,7 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "membership_id")
     private Membership membership;
-    
+
     @OneToMany(mappedBy = "account")
     private List<Address> addresses;
 

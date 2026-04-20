@@ -50,11 +50,9 @@ public class CheckoutController {
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // ===== ADDRESS =====
         List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
 
         Address selectedAddress = null;
-
         if (addressId != null) {
             selectedAddress = addressRepo
                     .findByIdAndAccount_Id(addressId, account.getId())
@@ -68,10 +66,8 @@ public class CheckoutController {
                     .orElse(null);
         }
 
-        // ===== SHIPPING =====
         BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList);
 
-        // ===== VOUCHER =====
         List<VoucherDetail> myVoucherDetails =
                 voucherDetailRepo.findByAccount_IdAndIsUsedFalse(account.getId());
 
@@ -152,17 +148,13 @@ public class CheckoutController {
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // ===== ADDRESS =====
         Address selectedAddress = addressRepo
                 .findByIdAndAccount_Id(addressId, account.getId())
                 .orElse(null);
 
-        // ===== SHIPPING =====
         BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList);
-
         BigDecimal discount = BigDecimal.ZERO;
 
-        // ===== APPLY VOUCHER =====
         if (voucherCode != null && !voucherCode.trim().isEmpty()) {
             Optional<Voucher> vOpt = voucherRepo.findAll().stream()
                     .filter(v -> v.getCode().equals(voucherCode.trim())
@@ -197,12 +189,10 @@ public class CheckoutController {
         }
 
         BigDecimal finalTotal = rawTotal.subtract(discount).add(feeShip);
-
         if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
             finalTotal = BigDecimal.ZERO;
         }
 
-        // ===== CREATE ORDER =====
         Orders order = new Orders();
         order.setAccount(account);
         order.setCreatedDate(new Date());
@@ -222,7 +212,6 @@ public class CheckoutController {
 
         ordersRepo.save(order);
 
-        // ===== CREATE ORDER DETAILS + TRỪ KHO =====
         for (CartDetail item : cartList) {
 
             Products product = productRepo.findById(item.getProduct().getId())
@@ -230,28 +219,23 @@ public class CheckoutController {
 
             Integer buyQty = item.getQuantity();
 
-            // CHECK tồn kho
             if (product.getQuantity() < buyQty) {
                 throw new RuntimeException(
                         "Sản phẩm " + product.getName() + " không đủ số lượng trong kho");
             }
 
-            // TRỪ KHO
             int newQty = product.getQuantity() - buyQty;
             product.setQuantity(newQty);
 
-            // TĂNG SOLD
             Integer sold = product.getSold() == null ? 0 : product.getSold();
             product.setSold(sold + buyQty);
 
-            // HẾT HÀNG
             if (newQty <= 0) {
                 product.setAvailable(false);
             }
 
             productRepo.saveAndFlush(product);
 
-            // ORDER DETAIL
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
             detail.setProduct(product);
@@ -261,7 +245,6 @@ public class CheckoutController {
             orderDetailRepo.save(detail);
         }
 
-        // ===== XÓA CART =====
         cartDetailRepo.deleteAll(cartList);
 
         // ===== VNPAY =====
@@ -278,6 +261,47 @@ public class CheckoutController {
         }
 
         return "redirect:/orders";
+    }
+
+    // ================== VNPAY RETURN CALLBACK ==================
+    @GetMapping("/vnpay-return")
+    @Transactional
+    public String vnpayReturn(@RequestParam Map<String, String> params,
+                              Model model) {
+
+        String responseCode = params.get("vnp_ResponseCode");
+        String transactionStatus = params.get("vnp_TransactionStatus");
+        String orderId = params.get("vnp_TxnRef");
+
+        Optional<Orders> orderOpt = ordersRepo.findById(Long.valueOf(orderId));
+
+        if (orderOpt.isEmpty()) {
+            model.addAttribute("message", "Không tìm thấy đơn hàng!");
+            return "client/payment-failed";
+        }
+
+        Orders order = orderOpt.get();
+
+        if ("00".equals(responseCode) && "00".equals(transactionStatus)) {
+
+            order.setPaymentStatus(true);
+            order.setStatus(1); // đã thanh toán
+
+            ordersRepo.save(order);
+
+            model.addAttribute("message", "Thanh toán thành công!");
+            model.addAttribute("order", order);
+
+            return "client/payment-success";
+        } else {
+            order.setPaymentStatus(false);
+            ordersRepo.save(order);
+
+            model.addAttribute("message", "Thanh toán thất bại!");
+            model.addAttribute("order", order);
+
+            return "client/payment-failed";
+        }
     }
 
     // ================== GET ACCOUNT ==================

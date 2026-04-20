@@ -1,695 +1,276 @@
 <!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard - MODEL WORLD</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        :root {
-            --bg-body: #020609;       
-            --bg-sidebar: #05111a;    
-            --bg-card: #081a26;       
-            --text-main: #e0fbfc;     
-            --text-sub: #00f2ff;      
-            
-            --accent-cyan: #00f2ff;
-            --accent-green: #00ff9d;
-            --accent-purple: #bc13fe;
-            --accent-yellow: #fcd34d;
-            --border-color: #00f2ff;  
-            --sidebar-width: 260px;
-        }
+<title>Dashboard - MODEL WORLD</title>
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main); 
-            font-family: 'Be Vietnam Pro', sans-serif;
-            overflow-x: hidden;
-        }
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        /* --- WRAPPER & SIDEBAR --- */
-        #wrapper { display: flex; width: 100%; transition: all 0.3s; }
+<style>
+:root {
+    --bg-body: #f5f6fa;
+    --bg-card: #fff;
+    --border: #ddd;
+}
 
-        #sidebar-wrapper {
-            min-width: var(--sidebar-width);
-            max-width: var(--sidebar-width);
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid rgba(0, 242, 255, 0.3); 
-            min-height: 100vh;
-            position: fixed; z-index: 1000; height: 100%;
-        }
+/* BODY */
+body {
+    background: var(--bg-body);
+}
 
-        #page-content-wrapper {
-            width: 100%; margin-left: var(--sidebar-width); transition: margin 0.3s ease-out;
-        }
+/* ===== SIDEBAR ===== */
+#sidebar-wrapper {
+    width: 260px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #1f2a3a;
+    color: #cfd8e3;
+}
 
-        body.toggled #sidebar-wrapper { margin-left: calc(-1 * var(--sidebar-width)); }
-        body.toggled #page-content-wrapper { margin-left: 0; }
+/* LOGO */
+.sidebar-heading {
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    border-bottom: 1px solid #2c3e50;
+}
 
-        /* Sidebar Items */
-        .sidebar-heading {
-            padding: 1.5rem 1.25rem; font-family: 'Orbitron', sans-serif; font-size: 1.4rem;
-            color: var(--accent-cyan); border-bottom: 1px solid rgba(0, 242, 255, 0.3);
-            text-align: center; background: rgba(0, 242, 255, 0.1);
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.7); 
-        }
+/* MENU */
+.list-group-item {
+    background: transparent;
+    color: #cfd8e3;
+    border: none;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-        .list-group-item {
-            background-color: transparent; color: var(--text-main); border: none;
-            padding: 1rem 1.5rem; font-weight: 500; transition: all 0.2s;
-            border-left: 3px solid transparent;
-        }
+.list-group-item:hover {
+    background: #2a3a50;
+    color: #fff;
+}
 
-        .list-group-item:hover, .list-group-item.active {
-            color: var(--accent-cyan); background-color: rgba(0, 242, 255, 0.1);
-            border-left-color: var(--accent-cyan); text-shadow: 0 0 5px var(--accent-cyan);
-        }
-        .list-group-item i { margin-right: 10px; width: 20px; text-align: center; }
+.list-group-item.active {
+    background: #2f3f57;
+    color: #fff;
+    border-left: 4px solid #4e8cff;
+}
 
-        /* Navbar */
-        .top-navbar {
-            background: rgba(5, 17, 26, 0.95); backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0, 242, 255, 0.3); padding: 15px 30px;
-            position: sticky; top: 0; z-index: 999;
-        }
-        .btn-toggle {
-            background: transparent; border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan); padding: 5px 12px; border-radius: 6px; transition: 0.3s;
-            box-shadow: 0 0 5px rgba(0, 242, 255, 0.2);
-        }
-        .btn-toggle:hover { 
-            background: var(--accent-cyan); color: #000; box-shadow: 0 0 15px var(--accent-cyan);
-        }
+.logout {
+    color: #ff4d4f;
+}
 
-        /* Cards */
-        .stats-card {
-            background: var(--bg-card); border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 8px; padding: 25px; display: flex; align-items: center;
-            transition: transform 0.3s; box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
-            height: 100%;
-        }
-        .stats-card:hover {
-            transform: translateY(-5px); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-            border-color: var(--accent-cyan);
-        }
-        .icon-box {
-            width: 60px; height: 60px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; margin-right: 20px; flex-shrink: 0;
-            border: 1px solid currentColor; 
-        }
-        
-        .bg-icon-primary { background: rgba(0, 242, 255, 0.1); color: var(--accent-cyan); }
-        .bg-icon-success { background: rgba(0, 255, 157, 0.1); color: var(--accent-green); }
-        .bg-icon-warning { background: rgba(255, 255, 0, 0.1); color: #ffff00; }
+/* ===== CONTENT ===== */
+#content {
+    margin-left: 260px;
+    padding: 20px;
+}
 
-        /* Colors */
-        .text-neon { color: var(--accent-cyan) !important; }
-        .text-neon-green { color: var(--accent-green) !important; }
-        .text-bright { color: #ffffff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        
-        /* Tables & Charts */
-        .table-container {
-            background: var(--bg-card); border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 8px; padding: 20px; box-shadow: 0 0 10px rgba(0, 242, 255, 0.1);
-        }
-        .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); }
-        .table thead th { 
-            color: var(--accent-cyan); border-bottom: 1px solid var(--accent-cyan);
-            text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px;
-        }
-        .table td { border-bottom: 1px solid rgba(0, 242, 255, 0.15); vertical-align: middle; color: var(--text-main); }
+/* CARD */
+.card-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    height: 100%;
+}
 
-        /* Custom Modal */
-        .modal-content {
-            background-color: var(--bg-card); border: 1px solid var(--accent-cyan);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
-        }
-        .modal-header { border-bottom: 1px solid rgba(0, 242, 255, 0.3); }
-        .modal-footer { border-top: 1px solid rgba(0, 242, 255, 0.3); }
-        .form-control {
-            background-color: rgba(0,0,0,0.3); border: 1px solid rgba(0, 242, 255, 0.3); color: white;
-        }
-        .form-control:focus {
-            background-color: rgba(0,0,0,0.5); border-color: var(--accent-cyan); color: white; box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
-        }
+/* TABLE */
+.table-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+}
 
-        /* Rain Effect */
-        .raindrop {
-            position: absolute; width: 2px; height: 15px;
-            background: var(--accent-cyan); opacity: 0.8;
-            animation: fall linear infinite; z-index: 1; pointer-events: none;
-            box-shadow: 0 0 5px var(--accent-cyan);
-        }
-        @keyframes fall {
-            0% { transform: translateY(-20px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(100vh); opacity: 0; }
-        }
-    </style>
+/* PROGRESS */
+.progress {
+    height: 6px;
+}
+</style>
 </head>
 
 <body>
 
-<div id="rain" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></div>
+<!-- ===== SIDEBAR ===== -->
+<div id="sidebar-wrapper">
 
-<div id="wrapper">
-    
-    <div id="sidebar-wrapper">
-        <div class="sidebar-heading">
-            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
-        </div>
-        <div class="list-group list-group-flush mt-3">
-            <a href="/stats" class="list-group-item list-group-item-action active">
-                <i class="bi bi-speedometer2"></i> Dashboard
-            </a>
-            <a href="/cata-mana" class="list-group-item list-group-item-action">
-                <i class="bi bi-tags"></i> Quản lý Danh mục
-            </a>
-            <a href="/product-mana" class="list-group-item list-group-item-action">
-                <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
-            </a>
-            <a href="/admin/vouchers" class="list-group-item list-group-item-action">
-                <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
-            </a>
-            <a href="/orders-mana" class="list-group-item list-group-item-action">
-                <i class="bi bi-receipt"></i> Quản lý Đơn hàng
-            </a>
-            <a href="/user-mana" class="list-group-item list-group-item-action">
-                <i class="bi bi-people"></i> Quản lý Người dùng
-            </a>
-            <a href="/admin/cart" class="list-group-item list-group-item-action">
-                <i class="bi bi-cart3"></i> Giỏ hàng Admin
-            </a>
-            <div class="mt-4 px-3">
-                <small class="text-neon fw-bold text-uppercase" style="font-size: 0.7rem;">Hệ thống</small>
-            </div>
-            <a href="/logout" class="list-group-item list-group-item-action text-danger fw-bold">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
-        </div>
+    <div class="sidebar-heading">
+        <i class="bi bi-box-seam me-2"></i> MODEL WORLD
     </div>
 
+    <div class="list-group list-group-flush">
 
+        <a href="/stats" class="list-group-item active">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
 
-    <div id="page-content-wrapper">
-        
-        <nav class="top-navbar d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-toggle" id="menu-toggle">
-                    <i class="bi bi-list fs-5"></i>
-                </button>
-                <h5 class="mb-0 text-neon fw-bold d-none d-md-block" style="letter-spacing: 1px;">Admin Dashboard</h5>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end d-none d-sm-block">
-                    <span class="d-block text-bright small">Admin User</span>
-                    <span class="d-block text-neon" style="font-size: 0.75rem;">Super Admin</span>
-                </div>
-                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="rounded-circle border border-info shadow-sm" width="40" height="40" alt="Avatar">
-            </div>
-        </nav>
+        <a href="/cata-mana" class="list-group-item">
+            <i class="bi bi-tags"></i> Quản lý Danh mục
+        </a>
 
-<!-- ===== FORM LỌC ===== -->
-<form method="get" action="/stats" class="mb-3">
-    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <a href="/product-mana" class="list-group-item">
+            <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+        </a>
 
-        <label>Từ ngày:</label>
-        <input type="date" name="fromDate" th:value="${fromDate}">
+        <a href="/admin/vouchers" class="list-group-item">
+            <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+        </a>
 
-        <label>Đến ngày:</label>
-        <input type="date" name="toDate" th:value="${toDate}">
+        <a href="/orders-mana" class="list-group-item">
+            <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+        </a>
 
-        <label>Năm:</label>
-        <select name="year">
-            <option th:each="y : ${years}"
-                    th:value="${y}"
-                    th:selected="${y == selectedYear}"
-                    th:text="${y}">
-            </option>
-        </select>
+        <a href="/user-mana" class="list-group-item">
+            <i class="bi bi-people"></i> Quản lý Người dùng
+        </a>
 
-        <button type="submit">Lọc</button>
+        <a href="/admin/cart" class="list-group-item">
+            <i class="bi bi-cart3"></i> Giỏ hàng Admin
+        </a>
+
+        <a href="/logout" class="list-group-item logout">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+        </a>
+
     </div>
-</form>
-        <div class="container-fluid p-4">
-            
-            <div class="row g-4 mb-4">
-                <div class="col-md-6 col-lg-4">
-                    <div class="stats-card">
-                        <div class="icon-box bg-icon-primary">
-                            <i class="bi bi-bag-check-fill"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-neon text-uppercase small mb-1">Tổng đơn hàng</h6>
-                            <h3 class="fw-bold text-bright m-0" th:text="${totalOrders}">0</h3>
-                            <small class="text-neon-green fw-bold"><i class="bi bi-arrow-up"></i> (Đã hoàn tất)</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="stats-card">
-                        <div class="icon-box bg-icon-success">
-                            <i class="bi bi-box-seam-fill"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-neon text-uppercase small mb-1">Tổng sản phẩm</h6>
-                            <h3 class="fw-bold text-bright m-0" th:text="${totalProducts}">0</h3>
-                            <small class="text-neon">Đang kinh doanh</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="stats-card">
-                        <div class="icon-box bg-icon-warning">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-                        <div>
-                            <h6 class="text-neon text-uppercase small mb-1">Khách hàng</h6>
-                            <h3 class="fw-bold text-bright m-0" th:text="${totalAccounts}">0</h3>
-                            <small class="text-neon-green fw-bold"><i class="bi bi-arrow-up"></i> + Active users</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-    
-            <div class="row g-4 mb-4">
-                <div class="col-lg-4">
-                    <div class="stats-card flex-column align-items-center text-center h-100 position-relative">
-                        <h6 class="text-neon text-uppercase fw-bold w-100 text-start mb-3">
-                            <i class="bi bi-pie-chart-fill me-2"></i>Doanh thu Danh mục
-                        </h6>
-                        <div style="width: 100%; max-width: 250px; position: relative;">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                        <div class="mt-4 pt-3 w-100" style="border-top: 1px solid var(--accent-cyan);">
-                            <small class="text-neon text-uppercase">Tổng doanh thu toàn thời gian</small>
-                            <h3 class="fw-bold text-neon-green mt-1" 
-                                style="text-shadow: 0 0 10px rgba(0,255,157,0.5);"
-                                th:text="${#numbers.formatDecimal(totalRevenue, 0, 'POINT', 0, 'COMMA')} + ' đ'">
-                                0 đ
-                            </h3>
-                        </div>
-                    </div>
-                </div>
+</div>
 
-                <div class="col-lg-8">
-                    <div class="row g-4 h-100">
-                        <div class="col-md-6">
-                            <div class="stats-card h-100">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon-box text-danger bg-danger bg-opacity-10 me-3" style="border-color: red;">
-                                        <i class="bi bi-heart-fill"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-neon text-uppercase">Được yêu thích nhất</small>
-                                        <div class="fw-bold text-bright fs-5 text-truncate" style="max-width: 200px;" 
-                                             th:text="${topWish != null ? topWish.name : '---'}">---</div>
-                                        <small class="text-danger fw-bold">Rất hot</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+<!-- ===== CONTENT ===== -->
+<div id="content">
 
-                        <div class="col-md-6">
-                            <div class="stats-card h-100">
-                                <div class="d-flex align-items-center">
-                                    <div class="icon-box text-warning bg-warning bg-opacity-10 me-3" style="border-color: yellow;">
-                                        <i class="bi bi-lightning-charge-fill"></i>
-                                    </div>
-                                    <div>
-                                        <small class="text-neon text-uppercase">Bán chạy nhất</small>
-                                        <div class="fw-bold text-bright fs-5 text-truncate" style="max-width: 200px;" 
-                                             th:text="${topSold != null ? topSold.name : '---'}">---</div>
-                                        <small class="text-warning fw-bold">Best Seller</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="p-3 rounded h-100 d-flex justify-content-between align-items-center" 
-                                 style="background: #0b1e2b; border: 1px solid var(--accent-cyan);">
-                                <div>
-                                    <small class="text-neon text-uppercase fw-bold">Đơn tháng này</small>
-                                    <h4 class="fw-bold text-bright mt-1 mb-0" th:text="${monthOrders}">0</h4>
-                                </div>
-                                <i class="bi bi-calendar-month fs-1 text-neon"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded h-100 d-flex justify-content-between align-items-center"
-                                 style="background: #0b1e2b; border: 1px solid var(--accent-green);">
-                                <div>
-                                    <small class="text-neon-green text-uppercase fw-bold">Đơn cả năm</small>
-                                    <h4 class="fw-bold text-bright mt-1 mb-0" th:text="${yearOrders}">0</h4>
-                                </div>
-                                <i class="bi bi-calendar-check fs-1 text-neon-green"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="table-container">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 text-bright">
-                                <i class="bi bi-gem me-2" style="color: var(--accent-purple);"></i>
-                                Quản Lý & Thống Kê Hạng Thành Viên
-                            </h5>
-                            <span class="badge rounded-pill bg-dark border border-light">Cập nhật quyền lợi</span>
-                        </div>
-                        
-                        <div class="row g-4 align-items-center">
-                            <div class="col-md-4 text-center border-end border-secondary">
-                                <div style="max-width: 220px; margin: 0 auto;">
-                                    <canvas id="memberChart"></canvas>
-                                </div>
-                                <p class="text-neon mt-3 small fst-italic">Phân bố thành viên</p>
-                            </div>
-
-                            <div class="col-md-8">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Hạng</th>
-                                                <th>Điều kiện (Điểm)</th>
-                                                <th>Ưu đãi</th>
-                                                <th>Thành viên</th>
-                                                <th class="text-end">Cấu hình</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr th:each="mem, stat : ${memberships}">
-                                                <td>
-                                                    <span class="fw-bold text-neon" th:text="${mem.name}">NAME</span>
-                                                    <div class="small text-white-50" th:text="'ID: ' + ${mem.id}"></div>
-                                                </td>
-                                                <td>
-                                                    <i class="bi bi-star-fill text-warning me-1"></i>
-                                                    <span class="text-bright" th:text="${#numbers.formatDecimal(mem.pointRequired, 0, 'COMMA', 0, 'POINT')}"></span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex flex-column gap-1">
-                                                        <span class="badge bg-transparent border border-success text-success" 
-                                                              th:text="'Giảm ' + ${mem.discount} + '%'"></span>
-                                                        <span th:if="${mem.freeShipping}" class="badge bg-transparent border border-info text-info">Free Ship</span>
-                                                    </div>
-                                                </td>
-                                                <td style="width: 25%;">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="progress flex-grow-1" style="height: 4px; background: rgba(255,255,255,0.1);">
-                                                            <div class="progress-bar" style="background-color: var(--accent-purple);" 
-                                                                 th:style="|width: ${(mem.accounts.size() * 5)}%|"></div>
-                                                        </div>
-                                                        <span class="ms-2 fw-bold text-white" th:text="${mem.accounts.size()}"></span>
-                                                    </div>
-                                                </td>
-                                                <td class="text-end">
-                                                    <button class="btn btn-sm btn-outline-light rounded-circle"
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#membershipModal"
-                                                            th:attr="data-id=${mem.id}, 
-                                                                     data-name=${mem.name}, 
-                                                                     data-point=${mem.pointRequired}, 
-                                                                     data-discount=${mem.discount}, 
-                                                                     data-freeship=${mem.freeShipping}">
-                                                        <i class="bi bi-pencil-square"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        <form method="get" action="/stats" class="mb-3">
-    <div class="d-flex align-items-center gap-2">
-        <label class="text-neon small">Năm:</label>
-        <select name="year" class="form-select form-select-sm w-auto"
-                onchange="this.form.submit()">
-            <option th:each="y : ${years}"
-                    th:value="${y}"
-                    th:selected="${y == selectedYear}"
-                    th:text="${y}">
-            </option>
-        </select>
-    </div>
+<!-- FILTER -->
+<form method="get" action="/stats" class="d-flex gap-2 mb-4">
+    <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
+    <input type="date" name="toDate" class="form-control" th:value="${toDate}">
+    <select name="year" class="form-select">
+        <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
+    </select>
+    <button class="btn btn-primary">Lọc</button>
 </form>
 
-
-
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="table-container">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0 text-bright"><i class="bi bi-graph-up-arrow me-2 text-neon"></i>Biểu đồ Doanh thu theo Tháng</h5>
-                        </div>
-                        <div style="height: 350px;">
-                            <canvas id="monthlyRevenueChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="table-container">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="mb-0 text-bright"><i class="bi bi-bar-chart-line me-2 text-neon"></i>Tiến độ đơn hàng theo tháng</h5>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Tháng</th>
-                                        <th>Trạng thái</th>
-                                        <th>Đơn hàng (Hoàn tất)</th>
-                                        <th>Tiến độ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="month, iStat : ${months}">
-                                        <td class="fw-bold text-bright" th:text="${month}"></td>
-                                        <td>
-                                            <span th:if="${orderCounts[iStat.index] > 5}" class="badge bg-success text-white border border-success">Đạt</span>
-                                            <span th:unless="${orderCounts[iStat.index] > 5}" class="badge border border-info text-info" style="background: rgba(0,242,255,0.1);">Thấp</span>
-                                        </td>
-                                        <td class="fw-bold text-bright" th:text="${orderCounts[iStat.index]}"></td>
-                                        <td style="width: 30%;">
-                                            <div class="d-flex align-items-center">
-                                                <div class="progress flex-grow-1" style="height: 6px; background: rgba(0, 242, 255, 0.2);">
-                                                    <div class="progress-bar bg-info" role="progressbar" 
-                                                         th:style="|width: ${orderCounts[iStat.index] * 5}%; box-shadow: 0 0 5px cyan;|"></div>
-                                                </div>
-                                                <span class="ms-2 small text-neon" th:text="${orderCounts[iStat.index]}"></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div> 
-        
-        <footer class="text-center py-4 text-neon small mt-4" style="background: #05111a; border-top: 1px solid var(--accent-cyan);">
-            © 2025 MODEL WORLD - Admin System
-        </footer>
-
-    </div> 
-</div> 
-
-<div class="modal fade" id="membershipModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form action="/admin/membership/update" method="post">
-                <div class="modal-header">
-                    <h5 class="modal-title text-neon font-monospace">
-                        <i class="bi bi-gear-wide-connected me-2"></i>CẬP NHẬT QUYỀN LỢI
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                
-                <div class="modal-body text-white">
-                    <input type="hidden" name="id" id="modalMemId">
-
-                    <div class="mb-3">
-                        <label class="form-label text-neon small">Tên hạng</label>
-                        <input type="text" class="form-control" name="name" id="modalMemName" required placeholder="Ví dụ: Vàng, Kim Cương...">
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-neon small">Điểm yêu cầu</label>
-                            <input type="number" class="form-control" name="pointRequired" id="modalMemPoint" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label text-neon small">Giảm giá (%)</label>
-                            <input type="number" class="form-control" name="discount" id="modalMemDiscount" min="0" max="100" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 form-check bg-dark p-3 rounded border border-secondary mx-1">
-                        <input type="checkbox" class="form-check-input" name="freeShipping" id="modalMemFreeship" style="background-color: #333; border-color: var(--accent-cyan);">
-                        <label class="form-check-label text-white" for="modalMemFreeship">
-                            <i class="bi bi-truck me-1 text-info"></i> Miễn phí vận chuyển (Free Shipping)
-                        </label>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary btn-sm text-white" data-bs-dismiss="modal">Hủy bỏ</button>
-                    <button type="submit" class="btn btn-info fw-bold btn-sm" style="background: var(--accent-cyan); border: none; color: #000; box-shadow: 0 0 10px var(--accent-cyan);">Lưu thay đổi</button>
-                </div>
-            </form>
+<!-- STATS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card-box">
+            <div>Tổng đơn hàng</div>
+            <h3 th:text="${totalOrders}">0</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-box">
+            <div>Tổng sản phẩm</div>
+            <h3 th:text="${totalProducts}">0</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-box">
+            <div>Khách hàng</div>
+            <h3 th:text="${totalAccounts}">0</h3>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- MAIN -->
+<div class="row g-3 mb-4">
+
+    <div class="col-lg-4">
+        <div class="card-box text-center">
+            <div>Doanh thu danh mục</div>
+            <canvas id="pieChart"></canvas>
+            <h4 class="text-success mt-2"
+                th:text="${#numbers.formatDecimal(totalRevenue,0,'POINT',0,'COMMA')} + ' đ'">
+            </h4>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="row g-3">
+
+            <div class="col-md-6">
+                <div class="card-box">
+                    <div>Sản phẩm yêu thích nhất</div>
+                    <h5 th:text="${topWish != null ? topWish.name : '---'}"></h5>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-box">
+                    <div>Sản phẩm bán chạy nhất</div>
+                    <h5 th:text="${topSold != null ? topSold.name : '---'}"></h5>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-box">
+                    <div>Đơn tháng này</div>
+                    <h4 th:text="${monthOrders}">0</h4>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card-box">
+                    <div>Đơn cả năm</div>
+                    <h4 th:text="${yearOrders}">0</h4>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- CHART -->
+<div class="table-box mb-4">
+    <h5>Doanh thu theo tháng</h5>
+    <canvas id="barChart"></canvas>
+</div>
+
+<!-- TABLE -->
+<div class="table-box">
+    <h5>Tiến độ đơn hàng</h5>
+    <table class="table">
+        <tr th:each="m, i : ${months}">
+            <td th:text="${m}"></td>
+            <td th:text="${orderCounts[i.index]}"></td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar"
+                         th:style="|width:${orderCounts[i.index]*5}%|"></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+</div>
 
 <script th:inline="javascript">
-    const menuToggle = document.getElementById('menu-toggle');
-    const body = document.body;
-    if (menuToggle) {
-        menuToggle.addEventListener('click', e => {
-            e.preventDefault();
-            body.classList.toggle('toggled');
-        });
+new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+        labels: /*[[${chartLabels}]]*/ [],
+        datasets: [{ data: /*[[${chartData}]]*/ [] }]
     }
+});
 
-    // Rain Effect
-    const rainContainer = document.getElementById('rain');
-    for(let i=0; i<30; i++){
-        const drop = document.createElement('div');
-        drop.classList.add('raindrop');
-        drop.style.left = Math.random() * 100 + 'vw';
-        drop.style.animationDuration = (Math.random()*1+0.5) + 's';
-        drop.style.animationDelay = Math.random() * 5 + 's';
-        rainContainer.appendChild(drop);
+new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+        labels: /*[[${revenueMonthLabels}]]*/ [],
+        datasets: [{
+            label: 'Doanh thu',
+            data: /*[[${revenueMonthData}]]*/ []
+        }]
     }
-
-    // --- 1. PIE CHART (Revenue) ---
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    const dbLabels = /*[[${chartLabels}]]*/ []; 
-    const dbData = /*[[${chartData}]]*/ [];
-    const labels = (dbLabels && dbLabels.length > 0) ? dbLabels : ['Chưa có dữ liệu'];
-    const dataValues = (dbData && dbData.length > 0) ? dbData : [0];
-
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: dataValues, 
-                backgroundColor: ['#00f2ff', '#00ff9d', '#00bfff', '#7df9ff', '#50c878', '#e0ffff'],
-                borderColor: '#081a26', borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true, cutout: '75%', 
-            plugins: {
-                legend: { position: 'bottom', labels: { color: '#00f2ff', boxWidth: 8 } }
-            }
-        }
-    });
-
-    // --- 2. BAR CHART (Monthly Revenue) ---
-    const ctxBar = document.getElementById('monthlyRevenueChart').getContext('2d');
-    const barLabels = /*[[${revenueMonthLabels}]]*/ [];
-    const barData = /*[[${revenueMonthData}]]*/ [];
-
-    const gradientBar = ctxBar.createLinearGradient(0, 0, 0, 400);
-    gradientBar.addColorStop(0, 'rgba(0, 242, 255, 0.8)');
-    gradientBar.addColorStop(1, 'rgba(0, 242, 255, 0.1)');
-
-    new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-            labels: barLabels,
-            datasets: [{
-                label: 'Doanh thu', data: barData, backgroundColor: gradientBar,
-                borderColor: '#00f2ff', borderWidth: 1, borderRadius: 4, barPercentage: 0.6
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(0, 242, 255, 0.1)' }, ticks: { color: '#e0fbfc' } },
-                x: { grid: { display: false }, ticks: { color: '#00f2ff' } }
-            }
-        }
-    });
-
-    // --- 3. DOUGHNUT CHART (Membership Stats) - NEW ---
-    const ctxMem = document.getElementById('memberChart').getContext('2d');
-    const memLabels = /*[[${memLabels}]]*/ ['Đồng', 'Bạc', 'Vàng'];
-    const memData = /*[[${memData}]]*/ [10, 5, 2];
-
-    new Chart(ctxMem, {
-        type: 'doughnut',
-        data: {
-            labels: memLabels,
-            datasets: [{
-                data: memData,
-                backgroundColor: ['#bc13fe', '#fcd34d', '#00ff9d', '#00f2ff'], // Màu Tím, Vàng, Xanh
-                borderColor: '#081a26', borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: true, cutout: '60%',
-            plugins: {
-                legend: { display: false }, // Ẩn legend để tiết kiệm chỗ
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return ' ' + context.label + ': ' + context.parsed + ' user';
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // --- 4. MODAL LOGIC ---
-    const memModal = document.getElementById('membershipModal');
-    if (memModal) {
-        memModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-            const point = button.getAttribute('data-point');
-            const discount = button.getAttribute('data-discount');
-            const freeship = button.getAttribute('data-freeship');
-
-            document.getElementById('modalMemId').value = id;
-            document.getElementById('modalMemName').value = name;
-            document.getElementById('modalMemPoint').value = point;
-            document.getElementById('modalMemDiscount').value = discount;
-            
-            const fsCheck = document.getElementById('modalMemFreeship');
-            fsCheck.checked = (freeship === 'true');
-        });
-    }
+});
 </script>
 
 </body>
