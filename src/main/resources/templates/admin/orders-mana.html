@@ -328,11 +328,12 @@ footer {
                             <td class="fw-bold text-success"
                                 th:text="${#numbers.formatDecimal(order.total,0,'COMMA',0,'POINT')} + ' đ'"></td>
 
+                            <!-- FIX ĐỂ VNPAY LUÔN HIỂN THỊ LÀ ĐÃ THANH TOÁN -->
                             <td>
-                                <span th:if="${order.paymentStatus}" class="badge bg-success">
+                                <span th:if="${order.paymentStatus == true or order.paymentMethod == 'VNPAY'}" class="badge bg-success">
                                     Đã thanh toán
                                 </span>
-                                <span th:unless="${order.paymentStatus}" class="badge bg-danger">
+                                <span th:unless="${order.paymentStatus == true or order.paymentMethod == 'VNPAY'}" class="badge bg-danger">
                                     Chưa thanh toán
                                 </span>
                             </td>
@@ -347,45 +348,33 @@ footer {
                                             onchange="this.form.submit()"
                                             th:disabled="${order.status == 4 or order.status == 5 or order.status == 3}">
 
-                                        <!-- Chờ xác nhận -->
                                         <th:block th:if="${order.status == 0}">
                                             <option value="0" selected>⏳ Chờ xác nhận</option>
                                             <option value="1">✅ Xác nhận đơn</option>
                                             <option value="5">❌ Hủy đơn</option>
                                         </th:block>
 
-                                        <!-- Đã xác nhận -->
                                         <th:block th:if="${order.status == 1}">
                                             <option value="1" selected>✅ Đã xác nhận</option>
                                             <option value="2">🚚 Chuyển sang giao hàng</option>
                                             <option value="5">❌ Hủy đơn</option>
                                         </th:block>
 
-                                        <!-- Đang giao -->
                                         <th:block th:if="${order.status == 2}">
                                             <option value="2" selected>🚚 Đang giao hàng</option>
                                             <option value="3">📦 Đã giao xong</option>
                                         </th:block>
 
-                                        <!-- Đã giao xong -->
                                         <th:block th:if="${order.status == 3}">
-                                            <option value="3" selected>
-                                                🕒 Chờ khách xác nhận đã nhận hàng
-                                            </option>
+                                            <option value="3" selected>🕒 Chờ khách xác nhận</option>
                                         </th:block>
 
-                                        <!-- Hoàn tất -->
                                         <th:block th:if="${order.status == 4}">
-                                            <option value="4" selected>
-                                                🎉 Hoàn tất
-                                            </option>
+                                            <option value="4" selected>🎉 Hoàn tất</option>
                                         </th:block>
 
-                                        <!-- Đã hủy -->
                                         <th:block th:if="${order.status == 5}">
-                                            <option value="5" selected>
-                                                ❌ Đã hủy
-                                            </option>
+                                            <option value="5" selected>❌ Đã hủy</option>
                                         </th:block>
 
                                     </select>
