@@ -3,23 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>Dashboard - MODEL WORLD</title>
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* ĐỊNH NGHĨA BIẾN MÀU SẮC DÀNH CHO THEME */
 :root {
-    --bg-body: #f5f6fa;
-    --bg-card: #fff;
-    --border: #ddd;
+    --bg-body: #f4f6f9;
+    --bg-card: #ffffff;
+    --text-main: #333333;
+    --text-muted: #6c757d;
+    --border-color: #e3e6f0;
+    --sidebar-bg: #1f2a3a;
+    --sidebar-hover: #2a3a50;
+    --sidebar-text: #cfd8e3;
+    --topbar-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --table-color: #333333;
+    --table-hover: rgba(0,0,0,0.05);
 }
 
-/* BODY */
+/* KHI CHẾ ĐỘ DARK MODE ĐƯỢC KÍCH HOẠT */
+[data-theme="dark"] {
+    --bg-body: #121418;
+    --bg-card: #1e2126;
+    --text-main: #e0e0e0;
+    --text-muted: #9aa0a6;
+    --border-color: #33373d;
+    --sidebar-bg: #14171a;
+    --sidebar-hover: #20242a;
+    --sidebar-text: #b0b8c1;
+    --topbar-bg: #1e2126;
+    --input-bg: #2b2f36;
+    --input-border: #444b54;
+    --table-color: #e0e0e0;
+    --table-hover: rgba(255,255,255,0.05);
+}
+
+/* GENERAL STYLES */
 body {
-    background: var(--bg-body);
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+}
+
+/* FORM ELEMENTS THEME */
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    border-color: var(--input-border);
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+}
+.modal-content {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+.modal-header, .modal-footer {
+    border-color: var(--border-color);
 }
 
 /* ===== SIDEBAR ===== */
@@ -29,38 +77,45 @@ body {
     position: fixed;
     left: 0;
     top: 0;
-    background: #1f2a3a;
-    color: #cfd8e3;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+/* Trạng thái đóng sidebar */
+#sidebar-wrapper.toggled {
+    transform: translateX(-100%);
 }
 
-/* LOGO */
 .sidebar-heading {
     padding: 20px;
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 1.25rem;
+    font-weight: 700;
     color: #fff;
-    border-bottom: 1px solid #2c3e50;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
 }
 
-/* MENU */
 .list-group-item {
     background: transparent;
-    color: #cfd8e3;
+    color: var(--sidebar-text);
     border: none;
-    padding: 14px 20px;
+    padding: 15px 25px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
 .list-group-item:hover {
-    background: #2a3a50;
+    background-color: var(--sidebar-hover);
     color: #fff;
 }
 
 .list-group-item.active {
-    background: #2f3f57;
-    color: #fff;
+    background-color: var(--sidebar-hover);
+    color: #4e8cff;
     border-left: 4px solid #4e8cff;
 }
 
@@ -68,210 +123,454 @@ body {
     color: #ff4d4f;
 }
 
-/* ===== CONTENT ===== */
-#content {
+/* ===== MAIN CONTENT ===== */
+#page-content-wrapper {
     margin-left: 260px;
-    padding: 20px;
+    width: calc(100% - 260px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+/* Trạng thái mở rộng khi sidebar đóng */
+#page-content-wrapper.toggled {
+    margin-left: 0;
+    width: 100%;
 }
 
-/* CARD */
+/* TOP NAVBAR */
+.top-navbar {
+    background-color: var(--topbar-bg);
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--border-color);
+}
+.toggle-btn, .theme-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.container-fluid {
+    padding: 25px;
+}
+
+/* CARDS & PANELS */
 .card-box {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     padding: 20px;
     height: 100%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+}
+.card-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+}
+.card-box .title {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+.card-box h3, .card-box h4 {
+    margin: 0;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
-/* TABLE */
+/* TABLES */
 .table-box {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+.table {
+    color: var(--table-color);
+    border-color: var(--border-color);
+}
+.table tr td, .table tr th {
+    vertical-align: middle;
+    border-color: var(--border-color);
+}
+.table-hover tbody tr:hover {
+    background-color: var(--table-hover);
+    color: var(--table-color);
 }
 
 /* PROGRESS */
 .progress {
-    height: 6px;
+    height: 8px;
+    background-color: var(--border-color);
 }
 </style>
 </head>
-
 <body>
 
 <!-- ===== SIDEBAR ===== -->
 <div id="sidebar-wrapper">
-
     <div class="sidebar-heading">
         <i class="bi bi-box-seam me-2"></i> MODEL WORLD
     </div>
-
-    <div class="list-group list-group-flush">
-
+    <div class="list-group list-group-flush mt-3">
         <a href="/stats" class="list-group-item active">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a>
-
         <a href="/cata-mana" class="list-group-item">
-            <i class="bi bi-tags"></i> Quản lý Danh mục
+            <i class="bi bi-tags"></i> Danh mục
         </a>
-
         <a href="/product-mana" class="list-group-item">
-            <i class="bi bi-box-seam"></i> Quản lý Sản phẩm
+            <i class="bi bi-box-seam"></i> Sản phẩm
         </a>
-
         <a href="/admin/vouchers" class="list-group-item">
-            <i class="bi bi-ticket-perforated"></i> Quản lý Voucher
+            <i class="bi bi-ticket-perforated"></i> Voucher
         </a>
-
         <a href="/orders-mana" class="list-group-item">
-            <i class="bi bi-receipt"></i> Quản lý Đơn hàng
+            <i class="bi bi-receipt"></i> Đơn hàng
         </a>
-
         <a href="/user-mana" class="list-group-item">
-            <i class="bi bi-people"></i> Quản lý Người dùng
+            <i class="bi bi-people"></i> Người dùng
         </a>
-
-        <a href="/admin/cart" class="list-group-item">
-            <i class="bi bi-cart3"></i> Giỏ hàng Admin
-        </a>
-
-        <a href="/logout" class="list-group-item logout">
+        <a href="/logout" class="list-group-item logout mt-5">
             <i class="bi bi-box-arrow-right"></i> Đăng xuất
         </a>
-
     </div>
 </div>
 
-<!-- ===== CONTENT ===== -->
-<div id="content">
-
-<!-- FILTER -->
-<form method="get" action="/stats" class="d-flex gap-2 mb-4">
-    <input type="date" name="fromDate" class="form-control" th:value="${fromDate}">
-    <input type="date" name="toDate" class="form-control" th:value="${toDate}">
-    <select name="year" class="form-select">
-        <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
-    </select>
-    <button class="btn btn-primary">Lọc</button>
-</form>
-
-<!-- STATS -->
-<div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="card-box">
-            <div>Tổng đơn hàng</div>
-            <h3 th:text="${totalOrders}">0</h3>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card-box">
-            <div>Tổng sản phẩm</div>
-            <h3 th:text="${totalProducts}">0</h3>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card-box">
-            <div>Khách hàng</div>
-            <h3 th:text="${totalAccounts}">0</h3>
-        </div>
-    </div>
-</div>
-
-<!-- MAIN -->
-<div class="row g-3 mb-4">
-
-    <div class="col-lg-4">
-        <div class="card-box text-center">
-            <div>Doanh thu danh mục</div>
-            <canvas id="pieChart"></canvas>
-            <h4 class="text-success mt-2"
-                th:text="${#numbers.formatDecimal(totalRevenue,0,'POINT',0,'COMMA')} + ' đ'">
-            </h4>
+<!-- ===== PAGE CONTENT ===== -->
+<div id="page-content-wrapper">
+    
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+        <button class="toggle-btn" id="menu-toggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="d-flex align-items-center gap-3">
+            <span class="fw-bold">Quản trị viên</span>
+            <button class="theme-btn" id="theme-toggle">
+                <i class="bi bi-moon-stars"></i>
+            </button>
         </div>
     </div>
 
-    <div class="col-lg-8">
-        <div class="row g-3">
+    <!-- MAIN DASHBOARD AREA -->
+    <div class="container-fluid">
+        
+        <!-- BỘ LỌC -->
+        <div class="card-box mb-4 pb-3 pt-3">
+            <form method="get" action="/stats" class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label class="form-label mb-0 text-muted small">Từ ngày</label>
+                    <input type="date" name="fromDate" class="form-control form-control-sm" th:value="${fromDate}">
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0 text-muted small">Đến ngày</label>
+                    <input type="date" name="toDate" class="form-control form-control-sm" th:value="${toDate}">
+                </div>
+                <div class="col-auto">
+                    <label class="form-label mb-0 text-muted small">Năm</label>
+                    <select name="year" class="form-select form-select-sm">
+                        <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
+                    </select>
+                </div>
+                <div class="col-auto align-self-end">
+                    <button class="btn btn-primary btn-sm px-4"><i class="bi bi-filter"></i> Lọc</button>
+                </div>
+            </form>
+        </div>
 
-            <div class="col-md-6">
-                <div class="card-box">
-                    <div>Sản phẩm yêu thích nhất</div>
-                    <h5 th:text="${topWish != null ? topWish.name : '---'}"></h5>
+        <!-- STATS CARDS -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card-box border-primary border-start border-4">
+                    <div class="title">Tổng doanh thu</div>
+                    <h3 class="text-primary" th:text="${#numbers.formatDecimal(totalRevenue,0,'POINT',0,'COMMA')} + ' đ'">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-box border-success border-start border-4">
+                    <div class="title">Tổng đơn hàng</div>
+                    <h3 th:text="${totalOrders}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-box border-info border-start border-4">
+                    <div class="title">Tổng sản phẩm</div>
+                    <h3 th:text="${totalProducts}">0</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card-box border-warning border-start border-4">
+                    <div class="title">Khách hàng</div>
+                    <h3 th:text="${totalAccounts}">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARTS & OVERVIEW -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4">
+                <div class="card-box text-center">
+                    <div class="title">Doanh thu theo danh mục</div>
+                    <div style="height: 250px; display:flex; justify-content:center;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="table-box h-100">
+                    <div class="title mb-3">Doanh thu từng tháng năm <span th:text="${selectedYear}"></span></div>
+                    <div style="height: 250px;">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- PRODUCT TOP -->
+            <div class="col-lg-6">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card-box d-flex align-items-center gap-3">
+                            <div class="fs-1 text-danger"><i class="bi bi-heart-fill"></i></div>
+                            <div>
+                                <div class="title">Sản phẩm yêu thích nhất</div>
+                                <h5 class="m-0" th:text="${topWish != null ? topWish.name : 'Chưa có dữ liệu'}"></h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card-box d-flex align-items-center gap-3">
+                            <div class="fs-1 text-warning"><i class="bi bi-star-fill"></i></div>
+                            <div>
+                                <div class="title">Sản phẩm bán chạy nhất</div>
+                                <h5 class="m-0" th:text="${topSold != null ? topSold.name : 'Chưa có dữ liệu'}"></h5>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="col-md-6">
-                <div class="card-box">
-                    <div>Sản phẩm bán chạy nhất</div>
-                    <h5 th:text="${topSold != null ? topSold.name : '---'}"></h5>
+            <!-- TIẾN ĐỘ ĐƠN HÀNG -->
+            <div class="col-lg-6">
+                <div class="table-box h-100" style="max-height: 300px; overflow-y: auto;">
+                    <div class="title">Tiến độ đơn hàng theo tháng</div>
+                    <table class="table table-borderless table-sm mt-3">
+                        <tr th:each="m, i : ${months}">
+                            <td width="20%" class="text-muted small" th:text="${m}"></td>
+                            <td width="15%" class="fw-bold" th:text="${orderCounts[i.index]}"></td>
+                            <td width="65%">
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-success"
+                                         th:style="|width:${totalOrders > 0 ? (orderCounts[i.index] * 100.0 / totalOrders) : 0}%|"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
-
-            <div class="col-md-6">
-                <div class="card-box">
-                    <div>Đơn tháng này</div>
-                    <h4 th:text="${monthOrders}">0</h4>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="card-box">
-                    <div>Đơn cả năm</div>
-                    <h4 th:text="${yearOrders}">0</h4>
-                </div>
-            </div>
-
         </div>
+
+        <!-- QUẢN LÝ QUYỀN LỢI MEMBERSHIP -->
+        <div class="table-box mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="m-0 fw-bold"><i class="bi bi-award me-2 text-warning"></i>Quản lý hạng thành viên & Quyền lợi</h5>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tên Hạng</th>
+                            <th>Số Thành Viên</th>
+                            <th>Điểm Yêu Cầu (1đ = 10k)</th>
+                            <th>Giảm giá (%)</th>
+                            <th>Miễn phí vận chuyển</th>
+                            <th class="text-end">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="m : ${memberships}">
+                            <td>
+                                <span class="badge bg-secondary px-3 py-2" th:if="${m.name == 'Đồng'}" th:text="${m.name}"></span>
+                                <span class="badge bg-secondary px-3 py-2 text-dark" style="background-color: #c0c0c0 !important;" th:if="${m.name == 'Bạc'}" th:text="${m.name}"></span>
+                                <span class="badge bg-warning px-3 py-2 text-dark" th:if="${m.name == 'Vàng'}" th:text="${m.name}"></span>
+                                <span class="badge bg-info px-3 py-2 text-dark" th:if="${m.name == 'Kim Cương'}" th:text="${m.name}"></span>
+                            </td>
+                            <td class="fw-bold fs-5 text-primary">
+                                <span th:text="${membershipUserCounts.get(m.name) != null ? membershipUserCounts.get(m.name) : 0}"></span> 
+                                <i class="bi bi-person-fill small"></i>
+                            </td>
+                            <td th:text="${m.pointRequired} + ' điểm'"></td>
+                            <td th:text="${m.discount} + ' %'"></td>
+                            <td>
+                                <i th:if="${m.freeShipping}" class="bi bi-check-circle-fill text-success fs-5"></i>
+                                <i th:unless="${m.freeShipping}" class="bi bi-x-circle-fill text-danger fs-5"></i>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        th:onclick="openEditModal([[${m.id}]], [[${m.name}]], [[${m.pointRequired}]], [[${m.discount}]], [[${m.freeShipping}]])">
+                                    <i class="bi bi-pencil-square"></i> Sửa
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- CHART -->
-<div class="table-box mb-4">
-    <h5>Doanh thu theo tháng</h5>
-    <canvas id="barChart"></canvas>
+<!-- MODAL CẬP NHẬT MEMBERSHIP -->
+<div class="modal fade" id="editMembershipModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/admin/membership/update" method="post">
+          <div class="modal-header border-bottom">
+            <h5 class="modal-title fw-bold">Chỉnh sửa hạng: <span id="modalMemName" class="text-primary"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--btn-close-filter);"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="modalMemId" name="id">
+            
+            <div class="mb-3">
+                <label class="form-label text-muted small">Mức điểm yêu cầu lên hạng (1 điểm = 10,000 VNĐ)</label>
+                <input type="number" class="form-control" id="modalPoint" name="pointRequired" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label text-muted small">Phần trăm giảm giá Voucher (%)</label>
+                <input type="number" class="form-control" id="modalDiscount" name="discount" min="0" max="100" required>
+            </div>
+            
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="modalFreeShip" name="freeShipping" value="true">
+                <label class="form-check-label" for="modalFreeShip">Tặng kèm FreeShip</label>
+            </div>
+            
+          </div>
+          <div class="modal-footer border-top">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+          </div>
+      </form>
+    </div>
+  </div>
 </div>
 
-<!-- TABLE -->
-<div class="table-box">
-    <h5>Tiến độ đơn hàng</h5>
-    <table class="table">
-        <tr th:each="m, i : ${months}">
-            <td th:text="${m}"></td>
-            <td th:text="${orderCounts[i.index]}"></td>
-            <td>
-                <div class="progress">
-                    <div class="progress-bar"
-                         th:style="|width:${orderCounts[i.index]*5}%|"></div>
-                </div>
-            </td>
-        </tr>
-    </table>
-</div>
-
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
-new Chart(document.getElementById('pieChart'), {
-    type: 'doughnut',
-    data: {
-        labels: /*[[${chartLabels}]]*/ [],
-        datasets: [{ data: /*[[${chartData}]]*/ [] }]
-    }
-});
+    /* HIỆU ỨNG TOGGLE SIDEBAR */
+    document.getElementById("menu-toggle").addEventListener("click", function() {
+        document.getElementById("sidebar-wrapper").classList.toggle("toggled");
+        document.getElementById("page-content-wrapper").classList.toggle("toggled");
+    });
 
-new Chart(document.getElementById('barChart'), {
-    type: 'bar',
-    data: {
-        labels: /*[[${revenueMonthLabels}]]*/ [],
-        datasets: [{
-            label: 'Doanh thu',
-            data: /*[[${revenueMonthData}]]*/ []
-        }]
+    /* HỆ THỐNG LIGHT/DARK MODE TỰ BẢO TOÀN TRẠNG THÁI */
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+    const themeIcon = themeToggleBtn.querySelector('i');
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    htmlElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon(currentTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+        let theme = htmlElement.getAttribute('data-theme');
+        let newTheme = theme === 'dark' ? 'light' : 'dark';
+        
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+        updateChartColors(newTheme); // Update biểu đồ theo màu
+    });
+
+    function updateThemeIcon(theme) {
+        if (theme === 'dark') {
+            themeIcon.className = 'bi bi-sun';
+            document.documentElement.style.setProperty('--btn-close-filter', 'invert(1) grayscale(100%) brightness(200%)');
+        } else {
+            themeIcon.className = 'bi bi-moon-stars';
+            document.documentElement.style.setProperty('--btn-close-filter', 'none');
+        }
     }
-});
+
+    /* MỞ MODAL EDIT MEMBERSHIP */
+    function openEditModal(id, name, points, discount, freeShipping) {
+        document.getElementById('modalMemId').value = id;
+        document.getElementById('modalMemName').innerText = name;
+        document.getElementById('modalPoint').value = points;
+        document.getElementById('modalDiscount').value = discount;
+        document.getElementById('modalFreeShip').checked = freeShipping;
+        
+        var editModal = new bootstrap.Modal(document.getElementById('editMembershipModal'));
+        editModal.show();
+    }
+
+    /* CẤU HÌNH BIỂU ĐỒ CHART.JS */
+    Chart.defaults.color = currentTheme === 'dark' ? '#a0a0a0' : '#6c757d';
+    Chart.defaults.font.family = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: /*[[${chartLabels}]]*/ [],
+            datasets: [{ 
+                data: /*[[${chartData}]]*/ [],
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    const barChart = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: /*[[${revenueMonthLabels}]]*/ [],
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: /*[[${revenueMonthData}]]*/ [],
+                backgroundColor: '#4e8cff',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true, grid: { color: currentTheme === 'dark' ? '#333' : '#e3e6f0' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    /* HÀM CẬP NHẬT MÀU BIỂU ĐỒ KHI ĐỔI THEME */
+    function updateChartColors(theme) {
+        const textColor = theme === 'dark' ? '#a0a0a0' : '#6c757d';
+        const gridColor = theme === 'dark' ? '#33373d' : '#e3e6f0';
+        
+        Chart.defaults.color = textColor;
+        
+        barChart.options.scales.y.grid.color = gridColor;
+        barChart.update();
+        pieChart.update();
+    }
 </script>
-
 </body>
 </html>

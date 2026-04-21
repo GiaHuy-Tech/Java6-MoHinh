@@ -4,303 +4,302 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quản lý Đơn hàng - MODEL WORLD</title>
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
+/* ĐỊNH NGHĨA BIẾN MÀU SẮC DÀNH CHO THEME */
 :root {
-    --sidebar-width: 260px;
-    --bg-body: #f8fafc;
-    --bg-sidebar: #1e293b;
+    --bg-body: #f4f6f9;
     --bg-card: #ffffff;
-    --border-color: #e2e8f0;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
-    --primary: #2563eb;
-    --success: #16a34a;
-    --danger: #dc2626;
+    --text-main: #333333;
+    --text-muted: #6c757d;
+    --border-color: #e3e6f0;
+    --sidebar-bg: #1f2a3a;
+    --sidebar-hover: #2a3a50;
+    --sidebar-text: #cfd8e3;
+    --topbar-bg: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --table-color: #333333;
+    --table-hover: rgba(0,0,0,0.05);
 }
 
-* { box-sizing: border-box; }
+/* KHI CHẾ ĐỘ DARK MODE ĐƯỢC KÍCH HOẠT */
+[data-theme="dark"] {
+    --bg-body: #121418;
+    --bg-card: #1e2126;
+    --text-main: #e0e0e0;
+    --text-muted: #9aa0a6;
+    --border-color: #33373d;
+    --sidebar-bg: #14171a;
+    --sidebar-hover: #20242a;
+    --sidebar-text: #b0b8c1;
+    --topbar-bg: #1e2126;
+    --input-bg: #2b2f36;
+    --input-border: #444b54;
+    --table-color: #e0e0e0;
+    --table-hover: rgba(255,255,255,0.05);
+}
 
+/* GENERAL STYLES */
 body {
-    margin: 0;
-    background: var(--bg-body);
+    background-color: var(--bg-body);
     color: var(--text-main);
-    font-family: 'Be Vietnam Pro', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-#wrapper {
-    display: flex;
-    min-height: 100vh;
+/* FORM ELEMENTS THEME */
+.form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    border-color: var(--input-border);
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+    border-color: #4e8cff;
+    box-shadow: 0 0 0 0.25rem rgba(78, 140, 255, 0.25);
 }
 
+/* PHÂN TRANG (PAGINATION) THEME FIX DÀNH CHO DARK MODE */
+[data-theme="dark"] .page-link {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-main);
+}
+[data-theme="dark"] .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+}
+[data-theme="dark"] .page-item.disabled .page-link {
+    background-color: var(--bg-card);
+    border-color: var(--input-border);
+    color: var(--text-muted);
+}
+
+/* ===== SIDEBAR ===== */
 #sidebar-wrapper {
-    width: var(--sidebar-width);
-    background: var(--bg-sidebar);
+    width: 260px;
+    height: 100vh;
     position: fixed;
-    top: 0;
     left: 0;
-    bottom: 0;
-    color: white;
+    top: 0;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    transition: transform 0.3s ease;
     z-index: 1000;
 }
-
-#page-content-wrapper {
-    margin-left: var(--sidebar-width);
-    width: calc(100% - var(--sidebar-width));
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
-
-body.toggled #sidebar-wrapper {
+#sidebar-wrapper.toggled {
     transform: translateX(-100%);
-    transition: .3s;
 }
 
-body.toggled #page-content-wrapper {
-    margin-left: 0;
-    width: 100%;
-    transition: .3s;
-}
-
-/* Sidebar */
 .sidebar-heading {
-    padding: 22px;
-    text-align: center;
-    font-size: 20px;
+    padding: 20px;
+    font-size: 1.25rem;
     font-weight: 700;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
 }
 
 .list-group-item {
     background: transparent;
-    color: #cbd5e1;
+    color: var(--sidebar-text);
     border: none;
-    padding: 14px 20px;
+    padding: 15px 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-weight: 500;
+    transition: all 0.2s;
 }
 
-.list-group-item:hover,
+.list-group-item:hover {
+    background-color: var(--sidebar-hover);
+    color: #fff;
+}
+
 .list-group-item.active {
-    background: #334155;
-    color: white;
+    background-color: var(--sidebar-hover);
+    color: #4e8cff;
+    border-left: 4px solid #4e8cff;
 }
 
-.list-group-item i {
-    margin-right: 10px;
+.logout { color: #ff4d4f; }
+
+/* ===== MAIN CONTENT ===== */
+#page-content-wrapper {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+#page-content-wrapper.toggled {
+    margin-left: 0;
+    width: 100%;
 }
 
-/* Navbar */
+/* TOP NAVBAR */
 .top-navbar {
-    background: white;
+    background-color: var(--topbar-bg);
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     border-bottom: 1px solid var(--border-color);
-    padding: 16px 28px;
+}
+.toggle-btn, .theme-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-main);
+    cursor: pointer;
 }
 
-.btn-toggle {
+.container-fluid { padding: 25px; flex-grow: 1; }
+
+/* CARDS & TABLES */
+.card-box {
+    background-color: var(--bg-card);
     border: 1px solid var(--border-color);
-    background: white;
-}
-
-/* Card */
-.table-container {
-    background: white;
     border-radius: 12px;
-    border: 1px solid var(--border-color);
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    margin-bottom: 25px;
 }
 
-/* Table */
-.table thead th {
-    background: #f1f5f9;
+.table {
+    color: var(--table-color);
+    border-color: var(--border-color);
+}
+.table th {
+    background-color: transparent;
     color: var(--text-muted);
-    font-size: 13px;
+    font-weight: 600;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--border-color);
+    font-size: 0.85rem;
+    border-bottom-width: 2px;
 }
-
-.table td {
+.table tr td, .table tr th {
     vertical-align: middle;
     border-color: var(--border-color);
 }
-
-/* Form */
-.form-control-custom,
-.form-select {
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    min-height: 44px;
+.table-hover tbody tr:hover {
+    background-color: var(--table-hover);
+    color: var(--table-color);
 }
 
-.form-control-custom:focus,
-.form-select:focus {
-    border-color: var(--primary);
-    box-shadow: none;
-}
+.badge.bg-success { background-color: #198754 !important; color: #fff; }
+.badge.bg-danger { background-color: #dc3545 !important; color: #fff; }
 
-/* Buttons */
-.btn-neon {
-    background: var(--primary);
-    border: none;
-    color: white;
-    border-radius: 8px;
-}
-
-.btn-neon:hover {
-    background: #1d4ed8;
-    color: white;
-}
-
-/* Status */
-.bg-success {
-    background: #dcfce7 !important;
-    color: var(--success) !important;
-    border: 1px solid #bbf7d0;
-}
-
-.bg-danger {
-    background: #fee2e2 !important;
-    color: var(--danger) !important;
-    border: 1px solid #fecaca;
-}
-
-.text-neon {
-    color: var(--primary) !important;
-}
-
-.text-bright {
-    color: var(--text-main) !important;
-}
-
-footer {
-    background: white !important;
-    border-top: 1px solid var(--border-color);
-    color: var(--text-muted);
-}
-
-@media(max-width:992px) {
-    #sidebar-wrapper {
-        transform: translateX(-100%);
-    }
-
-    #page-content-wrapper {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    body.toggled #sidebar-wrapper {
-        transform: translateX(0);
-    }
-}
+footer { color: var(--text-muted); }
 </style>
 </head>
-
 <body>
 
-<div id="wrapper">
+<!-- ===== SIDEBAR ===== -->
+<div id="sidebar-wrapper">
+    <div class="sidebar-heading">
+        <i class="bi bi-box-seam me-2"></i> MODEL WORLD
+    </div>
+    <div class="list-group list-group-flush mt-3">
+        <a href="/stats" class="list-group-item">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+        <a href="/cata-mana" class="list-group-item">
+            <i class="bi bi-tags"></i> Danh mục
+        </a>
+        <a href="/product-mana" class="list-group-item">
+            <i class="bi bi-box-seam"></i> Sản phẩm
+        </a>
+        <a href="/admin/vouchers" class="list-group-item">
+            <i class="bi bi-ticket-perforated"></i> Voucher
+        </a>
+        <a href="/orders-mana" class="list-group-item active">
+            <i class="bi bi-receipt"></i> Đơn hàng
+        </a>
+        <a href="/user-mana" class="list-group-item">
+            <i class="bi bi-people"></i> Người dùng
+        </a>
+        <a href="/logout" class="list-group-item logout mt-5">
+            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+        </a>
+    </div>
+</div>
 
-    <!-- Sidebar -->
-    <div id="sidebar-wrapper">
-        <div class="sidebar-heading">
-            <i class="bi bi-box-seam-fill me-2"></i>MODEL WORLD
+<!-- ===== PAGE CONTENT ===== -->
+<div id="page-content-wrapper">
+    
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+        <div class="d-flex align-items-center gap-3">
+            <button class="toggle-btn" id="menu-toggle">
+                <i class="bi bi-list"></i>
+            </button>
+            <h5 class="mb-0 fw-bold d-none d-sm-block">Quản lý Đơn hàng</h5>
         </div>
-
-        <div class="list-group list-group-flush mt-3">
-            <a href="/stats" class="list-group-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a href="/cata-mana" class="list-group-item"><i class="bi bi-tags"></i> Quản lý Danh mục</a>
-            <a href="/product-mana" class="list-group-item"><i class="bi bi-box-seam"></i> Quản lý Sản phẩm</a>
-            <a href="/admin/vouchers" class="list-group-item"><i class="bi bi-ticket-perforated"></i> Quản lý Voucher</a>
-            <a href="/orders-mana" class="list-group-item active"><i class="bi bi-receipt"></i> Quản lý Đơn hàng</a>
-            <a href="/user-mana" class="list-group-item"><i class="bi bi-people"></i> Quản lý Người dùng</a>
-            <a href="/logout" class="list-group-item text-danger fw-bold"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+        <div class="d-flex align-items-center gap-3">
+            <button class="theme-btn me-2" id="theme-toggle">
+                <i class="bi bi-moon-stars"></i>
+            </button>
+            <span class="fw-bold d-none d-md-inline">Quản trị viên</span>
         </div>
     </div>
 
-    <!-- Content -->
-    <div id="page-content-wrapper">
+    <!-- MAIN AREA -->
+    <div class="container-fluid">
 
-        <!-- Navbar -->
-        <nav class="top-navbar d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-toggle" id="menu-toggle">
-                    <i class="bi bi-list fs-5"></i>
-                </button>
-                <h5 class="mb-0 fw-bold">QUẢN LÝ ĐƠN HÀNG</h5>
+        <div class="card-box">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-list-ul me-2 text-primary"></i>Danh sách Đơn hàng
+                </h5>
+                <span class="badge bg-primary px-3 py-2 rounded-pill" th:text="${#lists.size(ordersList)} + ' đơn hàng'"></span>
             </div>
 
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-end d-none d-sm-block">
-                    <span class="d-block text-bright small">Admin User</span>
-                    <span class="d-block text-muted" style="font-size: 0.75rem;">Super Admin</span>
-                </div>
-                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png"
-                     class="rounded-circle border"
-                     width="40" height="40">
-            </div>
-        </nav>
-
-        <!-- Main -->
-        <div class="container-fluid p-4">
-
-            <div class="table-container">
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0 fw-bold">
-                        <i class="bi bi-list-ul me-2 text-neon"></i>
-                        Danh sách đơn hàng
-                    </h5>
-
-                    <span class="badge bg-light text-dark border"
-                          th:text="${#lists.size(ordersList)} + ' đơn hàng'"></span>
+            <!-- BỘ LỌC -->
+            <form th:action="@{/orders-mana}" method="get" class="row g-3 mb-4 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label text-muted small fw-bold">Tìm kiếm khách hàng / Mã đơn</label>
+                    <input type="text" name="keywords" th:value="${keywords}" class="form-control" placeholder="Nhập từ khóa...">
                 </div>
 
-                <!-- Filter -->
-                <form th:action="@{/orders-mana}" method="get" class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold">Trạng thái đơn</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="0" th:selected="${selectedStatus == 0}">Chờ xác nhận</option>
+                        <option value="1" th:selected="${selectedStatus == 1}">Đã xác nhận</option>
+                        <option value="2" th:selected="${selectedStatus == 2}">Đang giao</option>
+                        <option value="3" th:selected="${selectedStatus == 3}">Đã giao xong</option>
+                        <option value="4" th:selected="${selectedStatus == 4}">Hoàn tất</option>
+                        <option value="5" th:selected="${selectedStatus == 5}">Đã hủy</option>
+                    </select>
+                </div>
 
-                    <div class="col-md-5">
-                        <input type="text"
-                               name="keywords"
-                               th:value="${keywords}"
-                               class="form-control form-control-custom"
-                               placeholder="Tìm tên khách hoặc mã đơn...">
-                    </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill fw-bold">
+                        <i class="bi bi-filter"></i> Lọc dữ liệu
+                    </button>
+                    <a href="/orders-mana" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+            </form>
 
-                    <div class="col-md-3">
-                        <select name="status" class="form-select">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="0" th:selected="${selectedStatus == 0}">Chờ xác nhận</option>
-                            <option value="1" th:selected="${selectedStatus == 1}">Đã xác nhận</option>
-                            <option value="2" th:selected="${selectedStatus == 2}">Đang giao</option>
-                            <option value="3" th:selected="${selectedStatus == 3}">Đã giao xong</option>
-                            <option value="4" th:selected="${selectedStatus == 4}">Hoàn tất</option>
-                            <option value="5" th:selected="${selectedStatus == 5}">Đã hủy</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4 d-flex gap-2">
-                        <button type="submit" class="btn btn-neon flex-fill">
-                            <i class="bi bi-filter"></i> Lọc dữ liệu
-                        </button>
-
-                        <a href="/orders-mana" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </a>
-                    </div>
-                </form>
-
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-
-                        <thead>
+            <!-- BẢNG DỮ LIỆU ĐƠN HÀNG -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Mã Đơn</th>
                             <th>Khách hàng</th>
                             <th>Ngày tạo</th>
                             <th>Phương thức</th>
@@ -309,26 +308,24 @@ footer {
                             <th>Trạng thái & thao tác</th>
                             <th class="text-end">Chi tiết</th>
                         </tr>
-                        </thead>
-
-                        <tbody>
-                        <tr th:each="order : ${ordersList}">
-
-                            <td class="fw-bold text-neon" th:text="'#' + ${order.id}"></td>
-
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- THÊM CLASS 'order-row' CHO JAVASCRIPT XỬ LÝ -->
+                        <tr class="order-row" th:each="order : ${ordersList}">
+                            
+                            <td class="fw-bold text-primary" th:text="'#' + ${order.id}"></td>
+                            
                             <td th:text="${order.account != null ? order.account.fullName : '---'}"></td>
-
+                            
                             <td th:text="${#dates.format(order.createdDate,'dd/MM/yyyy HH:mm')}"></td>
-
+                            
                             <td>
                                 <span th:if="${order.paymentMethod == 'VNPAY'}">VNPay</span>
                                 <span th:unless="${order.paymentMethod == 'VNPAY'}">COD</span>
                             </td>
-
-                            <td class="fw-bold text-success"
-                                th:text="${#numbers.formatDecimal(order.total,0,'COMMA',0,'POINT')} + ' đ'"></td>
-
-                            <!-- FIX ĐỂ VNPAY LUÔN HIỂN THỊ LÀ ĐÃ THANH TOÁN -->
+                            
+                            <td class="fw-bold text-success" th:text="${#numbers.formatDecimal(order.total,0,'COMMA',0,'POINT')} + ' đ'"></td>
+                            
                             <td>
                                 <span th:if="${order.paymentStatus == true or order.paymentMethod == 'VNPAY'}" class="badge bg-success">
                                     Đã thanh toán
@@ -338,16 +335,15 @@ footer {
                                 </span>
                             </td>
 
-                            <!-- FIX STATUS FLOW -->
-                            <td style="min-width:220px;">
-                                <form th:action="@{/orders-mana/updateStatus}" method="post">
+                            <td style="min-width: 200px;">
+                                <form th:action="@{/orders-mana/updateStatus}" method="post" class="m-0">
                                     <input type="hidden" name="id" th:value="${order.id}" />
 
-                                    <select name="status"
-                                            class="form-select form-select-sm"
+                                    <select name="status" 
+                                            class="form-select form-select-sm" 
                                             onchange="this.form.submit()"
                                             th:disabled="${order.status == 4 or order.status == 5 or order.status == 3}">
-
+                                        
                                         <th:block th:if="${order.status == 0}">
                                             <option value="0" selected>⏳ Chờ xác nhận</option>
                                             <option value="1">✅ Xác nhận đơn</option>
@@ -382,41 +378,155 @@ footer {
                             </td>
 
                             <td class="text-end">
-                                <a th:href="@{'/orders-mana/detail/' + ${order.id}}"
-                                   class="btn btn-sm btn-outline-primary">
+                                <a th:href="@{'/orders-mana/detail/' + ${order.id}}" class="btn btn-sm btn-outline-primary rounded-circle">
                                     <i class="bi bi-eye"></i>
                                 </a>
                             </td>
-
                         </tr>
-                        </tbody>
 
-                    </table>
-                </div>
-
+                        <!-- NẾU KHÔNG CÓ ĐƠN HÀNG -->
+                        <tr th:if="${ordersList == null or ordersList.empty}" id="no-data-row">
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Không tìm thấy đơn hàng nào.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+
+            <!-- CHỖ HIỂN THỊ NÚT PHÂN TRANG -->
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-end mb-0" id="js-pagination">
+                    <!-- Script JS sẽ tự động vẽ các nút phân trang vào đây -->
+                </ul>
+            </nav>
 
         </div>
 
-        <footer class="text-center py-4 small">
-            © 2025 MODEL WORLD - Admin System
-        </footer>
-
     </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-3 mt-auto">
+        <small>© 2026 MODEL WORLD - Admin System</small>
+    </footer>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
-const menuToggle = document.getElementById('menu-toggle');
-const body = document.body;
+    /* ----------------------------------------------------
+       JAVASCRIPT XỬ LÝ PHÂN TRANG (20 ĐƠN/TRANG) 
+       ---------------------------------------------------- */
+    document.addEventListener("DOMContentLoaded", function() {
+        const rowsPerPage = 20;
+        const rows = document.querySelectorAll('.order-row');
+        const paginationContainer = document.getElementById('js-pagination');
+        let currentPage = 1;
 
-if(menuToggle){
-    menuToggle.addEventListener('click', function(e){
-        e.preventDefault();
-        body.classList.toggle('toggled');
+        if (rows.length === 0) return; // Nếu danh sách rỗng thì không làm gì cả
+
+        const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+        // Hàm hiển thị dòng dữ liệu theo trang
+        function displayRows(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            rows.forEach((row, index) => {
+                if (index >= start && index < end) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Hàm vẽ thanh phân trang (nút 1, 2, 3...)
+        function setupPagination() {
+            paginationContainer.innerHTML = ''; // Xóa trắng nút cũ
+
+            if (totalPages <= 1) return; // Nếu dưới 20 đơn thì không cần vẽ nút
+
+            // Nút "Trước"
+            let prevDisabled = currentPage === 1 ? 'disabled' : '';
+            paginationContainer.innerHTML += `
+                <li class="page-item ${prevDisabled}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}"><i class="bi bi-chevron-left"></i> Trước</a>
+                </li>
+            `;
+
+            // Nút Số trang (1, 2, 3...)
+            for (let i = 1; i <= totalPages; i++) {
+                let activeClass = currentPage === i ? 'active' : '';
+                paginationContainer.innerHTML += `
+                    <li class="page-item ${activeClass}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Nút "Sau"
+            let nextDisabled = currentPage === totalPages ? 'disabled' : '';
+            paginationContainer.innerHTML += `
+                <li class="page-item ${nextDisabled}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">Sau <i class="bi bi-chevron-right"></i></a>
+                </li>
+            `;
+
+            // Bắt sự kiện Click vào các nút chuyển trang
+            const pageLinks = paginationContainer.querySelectorAll('.page-link');
+            pageLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let targetPage = parseInt(this.getAttribute('data-page'));
+
+                    if (targetPage > 0 && targetPage <= totalPages) {
+                        currentPage = targetPage;
+                        displayRows(currentPage);
+                        setupPagination();
+                    }
+                });
+            });
+        }
+
+        // Khởi chạy khi load web
+        displayRows(currentPage);
+        setupPagination();
     });
-}
+
+
+    /* HIỆU ỨNG TOGGLE SIDEBAR */
+    document.getElementById("menu-toggle").addEventListener("click", function() {
+        document.getElementById("sidebar-wrapper").classList.toggle("toggled");
+        document.getElementById("page-content-wrapper").classList.toggle("toggled");
+    });
+
+    /* HỆ THỐNG LIGHT/DARK MODE TỰ BẢO TOÀN TRẠNG THÁI */
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
+    const themeIcon = themeToggleBtn.querySelector('i');
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    htmlElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon(currentTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+        let theme = htmlElement.getAttribute('data-theme');
+        let newTheme = theme === 'dark' ? 'light' : 'dark';
+        
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        if (theme === 'dark') {
+            themeIcon.className = 'bi bi-sun text-warning';
+        } else {
+            themeIcon.className = 'bi bi-moon-stars';
+        }
+    }
 </script>
 
 </body>
