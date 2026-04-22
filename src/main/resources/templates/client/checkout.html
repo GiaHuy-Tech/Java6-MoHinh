@@ -253,10 +253,10 @@
                             <span class="fw-bold" th:text="${#numbers.formatDecimal(rawTotal, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                         </div>
                         
-                        <!-- CHỈNH SỬA: HIỂN THỊ GIẢM GIÁ THÀNH VIÊN NẾU CÓ -->
-                        <div class="d-flex justify-content-between mb-2" th:if="${memDiscount != null and memDiscount > 0}">
-                            <span class="opacity-75 small">
-                                Ưu đãi đặc quyền Hạng <span class="fw-bold text-warning" th:text="${user.membership.name}"></span>:
+                        <!-- CHỈNH SỬA: HIỂN THỊ GIẢM GIÁ THÀNH VIÊN VỚI BADGE VÀNG NHƯ BÊN DETAIL -->
+                        <div class="d-flex justify-content-between mb-2 align-items-center" th:if="${memDiscount != null and memDiscount > 0}">
+                            <span class="badge bg-warning text-dark shadow-sm" style="font-size: 0.75rem;">
+                                <i class="bi bi-star-fill text-danger me-1"></i> Đặc quyền hạng [[${user.membership.name}]] (-[[${user.membership.discount}]]%)
                             </span>
                             <span class="text-danger fw-bold" th:text="'-' + ${#numbers.formatDecimal(memDiscount, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                         </div>

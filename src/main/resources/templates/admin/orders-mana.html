@@ -81,6 +81,16 @@ body {
     color: var(--text-muted);
 }
 
+/* MODAL THEME */
+.modal-content {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+.modal-header, .modal-footer {
+    border-color: var(--border-color);
+}
+
 /* ===== SIDEBAR ===== */
 #sidebar-wrapper {
     width: 260px;
@@ -341,7 +351,8 @@ footer { color: var(--text-muted); }
 
                                     <select name="status" 
                                             class="form-select form-select-sm" 
-                                            onchange="this.form.submit()"
+                                            onfocus="this.setAttribute('data-old', this.value);"
+                                            onchange="confirmStatusChange(this)"
                                             th:disabled="${order.status == 4 or order.status == 5 or order.status == 3}">
                                         
                                         <th:block th:if="${order.status == 0}">
@@ -413,8 +424,65 @@ footer { color: var(--text-muted); }
 
 </div>
 
+<!-- MODAL XÁC NHẬN THAY ĐỔI TRẠNG THÁI -->
+<div class="modal fade" id="confirmStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-question-circle-fill me-2"></i>Xác nhận thay đổi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--btn-close-filter);"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p class="fs-5 mb-0 text-muted" id="confirmStatusMessage"></p>
+            </div>
+            <div class="modal-footer border-top justify-content-center bg-light rounded-bottom-4" style="background-color: var(--table-hover) !important;">
+                <button type="button" class="btn btn-secondary px-4 fw-bold rounded-pill" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold rounded-pill" id="btn-confirm-status">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    /* ----------------------------------------------------
+       XÁC NHẬN KHI THAY ĐỔI TRẠNG THÁI ĐƠN HÀNG DÙNG MODAL
+       ---------------------------------------------------- */
+    let pendingSelectElement = null;
+    let isConfirmed = false;
+    const confirmModalEl = document.getElementById('confirmStatusModal');
+    const confirmModal = new bootstrap.Modal(confirmModalEl);
+
+    function confirmStatusChange(selectElement) {
+        pendingSelectElement = selectElement;
+        isConfirmed = false; // Reset trạng thái xác nhận
+        
+        let statusText = selectElement.options[selectElement.selectedIndex].text;
+        
+        // Cập nhật nội dung Modal
+        document.getElementById('confirmStatusMessage').innerHTML = 
+            "Bạn có chắc chắn muốn thay đổi đơn hàng thành:<br><strong class='text-primary mt-2 d-block fs-4'>" + statusText + "</strong>";
+        
+        // Hiện Modal
+        confirmModal.show();
+    }
+
+    // Khi bấm Đồng ý
+    document.getElementById('btn-confirm-status').addEventListener('click', function() {
+        isConfirmed = true;
+        if (pendingSelectElement) {
+            pendingSelectElement.form.submit();
+        }
+    });
+
+    // Khi Modal bị đóng (Bấm Hủy, dấu X, Esc hoặc bấm ra ngoài)
+    confirmModalEl.addEventListener('hide.bs.modal', function () {
+        if (!isConfirmed && pendingSelectElement) {
+            // Revert lại giá trị cũ
+            pendingSelectElement.value = pendingSelectElement.getAttribute('data-old');
+        }
+    });
+
     /* ----------------------------------------------------
        JAVASCRIPT XỬ LÝ PHÂN TRANG (20 ĐƠN/TRANG) 
        ---------------------------------------------------- */
@@ -424,11 +492,10 @@ footer { color: var(--text-muted); }
         const paginationContainer = document.getElementById('js-pagination');
         let currentPage = 1;
 
-        if (rows.length === 0) return; // Nếu danh sách rỗng thì không làm gì cả
+        if (rows.length === 0) return;
 
         const totalPages = Math.ceil(rows.length / rowsPerPage);
 
-        // Hàm hiển thị dòng dữ liệu theo trang
         function displayRows(page) {
             const start = (page - 1) * rowsPerPage;
             const end = start + rowsPerPage;
@@ -442,13 +509,11 @@ footer { color: var(--text-muted); }
             });
         }
 
-        // Hàm vẽ thanh phân trang (nút 1, 2, 3...)
         function setupPagination() {
-            paginationContainer.innerHTML = ''; // Xóa trắng nút cũ
+            paginationContainer.innerHTML = '';
 
-            if (totalPages <= 1) return; // Nếu dưới 20 đơn thì không cần vẽ nút
+            if (totalPages <= 1) return;
 
-            // Nút "Trước"
             let prevDisabled = currentPage === 1 ? 'disabled' : '';
             paginationContainer.innerHTML += `
                 <li class="page-item ${prevDisabled}">
@@ -456,7 +521,6 @@ footer { color: var(--text-muted); }
                 </li>
             `;
 
-            // Nút Số trang (1, 2, 3...)
             for (let i = 1; i <= totalPages; i++) {
                 let activeClass = currentPage === i ? 'active' : '';
                 paginationContainer.innerHTML += `
@@ -466,7 +530,6 @@ footer { color: var(--text-muted); }
                 `;
             }
 
-            // Nút "Sau"
             let nextDisabled = currentPage === totalPages ? 'disabled' : '';
             paginationContainer.innerHTML += `
                 <li class="page-item ${nextDisabled}">
@@ -474,7 +537,6 @@ footer { color: var(--text-muted); }
                 </li>
             `;
 
-            // Bắt sự kiện Click vào các nút chuyển trang
             const pageLinks = paginationContainer.querySelectorAll('.page-link');
             pageLinks.forEach(link => {
                 link.addEventListener('click', function(e) {
@@ -490,7 +552,6 @@ footer { color: var(--text-muted); }
             });
         }
 
-        // Khởi chạy khi load web
         displayRows(currentPage);
         setupPagination();
     });
@@ -523,8 +584,10 @@ footer { color: var(--text-muted); }
     function updateThemeIcon(theme) {
         if (theme === 'dark') {
             themeIcon.className = 'bi bi-sun text-warning';
+            document.documentElement.style.setProperty('--btn-close-filter', 'invert(1) grayscale(100%) brightness(200%)');
         } else {
             themeIcon.className = 'bi bi-moon-stars';
+            document.documentElement.style.setProperty('--btn-close-filter', 'none');
         }
     }
 </script>
