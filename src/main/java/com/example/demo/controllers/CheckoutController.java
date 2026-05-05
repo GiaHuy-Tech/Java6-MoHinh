@@ -339,7 +339,7 @@ public class CheckoutController {
                 e.printStackTrace();
             }
         }
-        return "redirect:/";
+        return "redirect:/orders";
     }
 
     // ================== GET ACCOUNT ==================

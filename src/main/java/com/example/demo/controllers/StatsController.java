@@ -43,13 +43,18 @@ public class StatsController {
             @RequestParam(value = "fromDate", required = false) String fromDate,
             @RequestParam(value = "toDate", required = false) String toDate) {
 
-        // ===== DATETIME =====
+        // ===== DATETIME & LOGIC TÁCH BIỆT THÔNG SỐ =====
         LocalDateTime from = (fromDate != null && !fromDate.isEmpty()) ? LocalDate.parse(fromDate).atStartOfDay() : null;
         LocalDateTime to = (toDate != null && !toDate.isEmpty()) ? LocalDate.parse(toDate).plusDays(1).atStartOfDay() : null;
         boolean isFilterByDate = (from != null || to != null);
-        int currentYear = (year != null) ? year : LocalDate.now().getYear();
+        
+        // chartYear: Chỉ áp dụng cho các Biểu Đồ theo năm (Thanh Bar và Tiến độ)
+        int chartYear = (year != null) ? year : LocalDate.now().getYear();
+        
+        // topStatsYear: Giữ tĩnh cho phần thẻ chỉ số Tổng để không bị biến động khi đổi năm của chart 
+        int topStatsYear = LocalDate.now().getYear();
 
-        model.addAttribute("selectedYear", currentYear);
+        model.addAttribute("selectedYear", chartYear);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
 
@@ -60,10 +65,10 @@ public class StatsController {
         }
         model.addAttribute("years", years);
 
-        // ===== TOTAL ORDERS =====
+        // ===== TOTAL ORDERS (KHÔNG BỊ ẢNH HƯỞNG BỞI CHART YEAR) =====
         Long totalOrders = isFilterByDate
                 ? ordersRepo.countCompletedOrdersByDate(from, to)
-                : ordersRepo.countOrdersPerMonthByYear(currentYear)
+                : ordersRepo.countOrdersPerMonthByYear(topStatsYear)
                     .stream().mapToLong(r -> ((Number) r[1]).longValue()).sum();
 
         model.addAttribute("totalOrders", totalOrders != null ? totalOrders : 0);
@@ -73,10 +78,10 @@ public class StatsController {
         model.addAttribute("totalAccounts", accountRepo.count());
         model.addAttribute("totalCategories", categoryRepo.count());
 
-        // ===== REVENUE =====
+        // ===== TOTAL REVENUE (KHÔNG BỊ ẢNH HƯỞNG BỞI CHART YEAR) =====
         BigDecimal totalRevenue = isFilterByDate
                 ? ordersRepo.getTotalRevenueByDate(from, to)
-                : ordersRepo.getRevenueByMonth(currentYear).stream()
+                : ordersRepo.getRevenueByMonth(topStatsYear).stream()
                     .map(r -> (BigDecimal) (r[1] != null ? r[1] : BigDecimal.ZERO))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -85,7 +90,7 @@ public class StatsController {
 		}
         model.addAttribute("totalRevenue", totalRevenue);
 
-        // ===== CATEGORY =====
+        // ===== CATEGORY (PIE CHART) =====
         List<Object[]> revenueByCategory = isFilterByDate ? ordersRepo.getRevenueByCategoryByDate(from, to) : ordersRepo.getRevenueByCategory();
         List<String> chartLabels = new ArrayList<>();
         List<BigDecimal> chartData = new ArrayList<>();
@@ -97,8 +102,9 @@ public class StatsController {
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartData", chartData);
 
-        // ===== MONTHLY REVENUE =====
-        List<Object[]> revenueByMonth = isFilterByDate ? ordersRepo.getRevenueByMonthByDate(from, to) : ordersRepo.getRevenueByMonth(currentYear);
+        // ===== MONTHLY REVENUE (CHỈ BỊ ẢNH HƯỞNG BỞI CHART YEAR) =====
+        // Lấy độc lập theo Năm của biểu đồ chọn ở Dropdown
+        List<Object[]> revenueByMonth = ordersRepo.getRevenueByMonth(chartYear);
         List<BigDecimal> monthlyRevenueData = new ArrayList<>(Collections.nCopies(12, BigDecimal.ZERO));
 
         for (Object[] row : revenueByMonth) {
@@ -120,8 +126,8 @@ public class StatsController {
         List<Products> topSelling = ordersRepo.findTopSellingProduct(PageRequest.of(0, 1));
         model.addAttribute("topSold", topSelling.isEmpty() ? null : topSelling.get(0));
 
-        // ===== ORDERS PER MONTH =====
-        List<Object[]> ordersPerMonth = isFilterByDate ? ordersRepo.countOrdersPerMonthByDate(from, to) : ordersRepo.countOrdersPerMonthByYear(currentYear);
+        // ===== ORDERS PER MONTH (CHỈ BỊ ẢNH HƯỞNG BỞI CHART YEAR) =====
+        List<Object[]> ordersPerMonth = ordersRepo.countOrdersPerMonthByYear(chartYear);
         List<Long> orderCounts = new ArrayList<>(Collections.nCopies(12, 0L));
 
         for (Object[] row : ordersPerMonth) {
@@ -133,7 +139,10 @@ public class StatsController {
 
         int currentMonth = LocalDate.now().getMonthValue();
         model.addAttribute("monthOrders", orderCounts.get(currentMonth - 1));
-        model.addAttribute("yearOrders", totalOrders);
+        
+        // Tính tổng đơn hàng cụ thể của năm đã chọn để fill màu phần trăm (% progress bar)
+        long chartYearTotalOrders = orderCounts.stream().mapToLong(Long::longValue).sum();
+        model.addAttribute("chartYearTotalOrders", chartYearTotalOrders);
 
         // ===== MEMBERSHIP STATS & MANAGEMENT =====
         List<Membership> memberships = membershipRepo.findAll(Sort.by(Sort.Direction.ASC, "pointRequired"));
@@ -147,7 +156,7 @@ public class StatsController {
             Long count = ((Number) row[1]).longValue();
             membershipUserCounts.put(memName, count);
         }
-        model.addAttribute("membershipUserCounts", membershipUserCounts); // Chuyển map ra view để match tên
+        model.addAttribute("membershipUserCounts", membershipUserCounts);
 
         return "admin/stats";
     }
