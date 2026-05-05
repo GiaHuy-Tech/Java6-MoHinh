@@ -30,7 +30,7 @@ public class MembershipService {
 
         // Lấy tất cả hạng mức, sắp xếp theo điểm yêu cầu từ Cao xuống Thấp
         List<Membership> tiers = membershipRepo.findAll(Sort.by(Sort.Direction.DESC, "pointRequired"));
-        
+
         for (Membership tier : tiers) {
             if (currentPoints >= tier.getPointRequired()) {
                 account.setMembership(tier);
@@ -49,7 +49,9 @@ public class MembershipService {
 
     // 3. Logic tặng Voucher Sinh Nhật
     public String getBirthdayVoucherCode(LocalDate birthday) {
-        if (birthday == null) return null;
+        if (birthday == null) {
+			return null;
+		}
 
         LocalDate today = LocalDate.now();
 

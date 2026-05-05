@@ -5,10 +5,13 @@ import java.io.IOException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -22,9 +25,6 @@ import com.example.demo.service.CustomOAuth2UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @Configuration
 @EnableWebSecurity
@@ -48,7 +48,7 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         // LƯU Ý: Chỉ dùng cho môi trường Dev. Production nên dùng BCryptPasswordEncoder
-        return NoOpPasswordEncoder.getInstance(); 
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
@@ -67,15 +67,15 @@ public class SecurityConfig {
                                                 HttpServletResponse response,
                                                 AuthenticationException exception)
                     throws IOException, ServletException {
-                
+
                 String redirectUrl = "/login?error";
-                
+
                 if (exception instanceof LockedException) {
                     redirectUrl = "/login?locked";
                 } else if (exception instanceof UsernameNotFoundException) {
                     redirectUrl = "/login?notfound";
                 }
-                
+
                 response.sendRedirect(redirectUrl);
             }
         };
@@ -147,7 +147,7 @@ public class SecurityConfig {
 
                 // Xử lý lỗi 403 (Không có quyền truy cập)
                 .exceptionHandling(ex -> ex.accessDeniedHandler(accessDeniedHandler))
-                
+
                 .build();
     }
 }

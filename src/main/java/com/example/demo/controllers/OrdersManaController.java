@@ -60,7 +60,7 @@ public class OrdersManaController {
     @PostMapping("/updateStatus")
     public String updateStatus(@RequestParam("id") Integer id, @RequestParam("status") int status) {
         Orders order = ordersRepo.findById(id).orElse(null);
-        
+
 
         // 1. Admin KHÔNG được phép chỉnh trạng thái sang 4 (Hoàn tất)
         // 2. Nếu đơn đã Hoàn tất (4) hoặc Đã hủy (5), không cho phép đổi nữa

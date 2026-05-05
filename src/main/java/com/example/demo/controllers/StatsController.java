@@ -80,7 +80,9 @@ public class StatsController {
                     .map(r -> (BigDecimal) (r[1] != null ? r[1] : BigDecimal.ZERO))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+        if (totalRevenue == null) {
+			totalRevenue = BigDecimal.ZERO;
+		}
         model.addAttribute("totalRevenue", totalRevenue);
 
         // ===== CATEGORY =====
@@ -105,7 +107,9 @@ public class StatsController {
         }
 
         List<String> monthlyLabels = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) monthlyLabels.add("Tháng " + i);
+        for (int i = 1; i <= 12; i++) {
+			monthlyLabels.add("Tháng " + i);
+		}
         model.addAttribute("revenueMonthLabels", monthlyLabels);
         model.addAttribute("revenueMonthData", monthlyRevenueData);
 
@@ -137,7 +141,7 @@ public class StatsController {
 
         List<Object[]> memStats = membershipRepo.countUsersByMembership();
         Map<String, Long> membershipUserCounts = new HashMap<>();
-        
+
         for (Object[] row : memStats) {
             String memName = (String) row[0];
             Long count = ((Number) row[1]).longValue();
@@ -155,7 +159,7 @@ public class StatsController {
             @RequestParam("pointRequired") Integer pointRequired,
             @RequestParam("discount") Integer discount,
             @RequestParam(value = "freeShipping", required = false) Boolean freeShipping) {
-        
+
         Membership m = membershipRepo.findById(id).orElse(null);
         if (m != null) {
             m.setPointRequired(pointRequired);

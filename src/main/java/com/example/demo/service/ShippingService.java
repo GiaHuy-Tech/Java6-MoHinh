@@ -109,7 +109,7 @@ public class ShippingService {
     // PUBLIC 1: calculateFee (DÙNG TRONG CHECKOUT CONTROLLER)
     // ─────────────────────────────────────────────────
     public BigDecimal calculateFee(Address address, List<CartDetail> cartList, Account account) {
-        
+
         // 1. KIỂM TRA MEMBERSHIP (Vàng hoặc Kim Cương -> FREE SHIP)
         if (account != null && account.getMembership() != null) {
             String rank = account.getMembership().getName();
@@ -131,7 +131,7 @@ public class ShippingService {
         // 3. TÍNH KHOẢNG CÁCH (Nếu tìm thấy tọa độ tỉnh đích)
         if (dest != null) {
             double distance = calculateDistance(origin, dest);
-            
+
             if (distance < 50) {
                 baseFee = 20_000;      // Dưới 50km (Ví dụ: Nội thành Cần Thơ, Hậu Giang lân cận)
             } else if (distance < 200) {
@@ -145,7 +145,7 @@ public class ShippingService {
 
         // 4. TÍNH PHÍ CÂN NẶNG
         double totalWeight = getTotalWeight(cartList); // Tính bằng Gram
-        
+
         // Mặc định phí baseFee đã bao gồm 1000g (1kg) đầu tiên.
         // Cứ vượt quá 1000g, mỗi 500g tính thêm 5,000 VND.
         long weightFee = 0;
@@ -190,15 +190,17 @@ public class ShippingService {
     // HÀM NỘI BỘ: Tìm kiếm Tỉnh thông minh
     // ─────────────────────────────────────────────────
     private double[] findCoordinates(String inputProvince) {
-        if (inputProvince == null || inputProvince.trim().isEmpty()) return null;
-        
+        if (inputProvince == null || inputProvince.trim().isEmpty()) {
+			return null;
+		}
+
         // Chuyển thành chữ thường để so sánh (Ví dụ: "Thành phố Cần Thơ" -> "thành phố cần thơ")
         String normalizedInput = inputProvince.toLowerCase().trim();
 
         // Duyệt qua 63 tỉnh
         for (Map.Entry<String, double[]> entry : PROVINCE_MAP.entrySet()) {
             String mapProvince = entry.getKey(); // Key trong map đã là chữ thường
-            
+
             // Nếu người dùng nhập "Thành phố Hồ Chí Minh" chứa chữ "hồ chí minh" -> Match!
             // Hoặc ngược lại (ít gặp) người dùng nhập "HCM", map có "hcm" -> Match!
             if (normalizedInput.contains(mapProvince) || mapProvince.equals(normalizedInput)) {
@@ -233,14 +235,16 @@ public class ShippingService {
     // HÀM NỘI BỘ: Tính tổng cân nặng từ giỏ hàng (Gram)
     // ─────────────────────────────────────────────────
     private double getTotalWeight(List<CartDetail> cartItems) {
-        if (cartItems == null) return 0;
-        
+        if (cartItems == null) {
+			return 0;
+		}
+
         return cartItems.stream()
             .mapToDouble(item -> {
                 Double w = item.getProduct().getWeight();
                 int qty  = item.getQuantity();
                 // Nếu sản phẩm không cấu hình cân nặng, hoặc cân nặng <= 0, mặc định là 500g
-                return (w != null && w > 0 ? w : 500.0) * qty; 
+                return (w != null && w > 0 ? w : 500.0) * qty;
             })
             .sum();
     }

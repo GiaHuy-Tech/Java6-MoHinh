@@ -57,47 +57,47 @@ public class AccountService implements UserDetailsService {
     // =====================================================
     // CRUD CƠ BẢN
     // =====================================================
-    public Page<Account> getAll(Pageable pageable) { 
-        return accountRepo.findAll(pageable); 
+    public Page<Account> getAll(Pageable pageable) {
+        return accountRepo.findAll(pageable);
     }
 
-    public Iterable<Account> findAll() { 
-        return accountRepo.findAll(); 
+    public Iterable<Account> findAll() {
+        return accountRepo.findAll();
     }
 
-    public Optional<Account> findById(Integer id) { 
-        return accountRepo.findById(id); 
+    public Optional<Account> findById(Integer id) {
+        return accountRepo.findById(id);
     }
 
-    public Optional<Account> findByEmail(String email) { 
-        return accountRepo.findByEmail(email); 
+    public Optional<Account> findByEmail(String email) {
+        return accountRepo.findByEmail(email);
     }
 
-    public Account save(Account acc) { 
-        return accountRepo.save(acc); 
+    public Account save(Account acc) {
+        return accountRepo.save(acc);
     }
 
-    public boolean existsByEmail(String email) { 
-        return accountRepo.existsByEmail(email); 
+    public boolean existsByEmail(String email) {
+        return accountRepo.existsByEmail(email);
     }
 
-    public boolean existsByPhone(String phone) { 
-        return accountRepo.existsByPhone(phone); 
+    public boolean existsByPhone(String phone) {
+        return accountRepo.existsByPhone(phone);
     }
 
-    public long count() { 
-        return accountRepo.count(); 
+    public long count() {
+        return accountRepo.count();
     }
 
     // =====================================================
     // DELETE
     // =====================================================
-    public boolean deleteById(Integer id) { 
+    public boolean deleteById(Integer id) {
         if (!accountRepo.existsById(id)) {
             return false;
         }
         accountRepo.deleteById(id);
-        return true; 
+        return true;
     }
 
     // =====================================================

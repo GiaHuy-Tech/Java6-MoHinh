@@ -103,7 +103,9 @@ public class CheckoutController {
         List<VoucherDetail> myVoucherDetails = voucherDetailRepo.findByAccount_IdAndIsUsedFalse(account.getId());
         if (myVoucherDetails != null) {
             for (VoucherDetail vd : myVoucherDetails) {
-                if (vd.getVoucher() != null) availableVouchers.add(vd.getVoucher());
+                if (vd.getVoucher() != null) {
+					availableVouchers.add(vd.getVoucher());
+				}
             }
         }
 
@@ -137,7 +139,9 @@ public class CheckoutController {
                     voucherDiscount = BigDecimal.valueOf(v.getDiscountAmount());
                 }
 
-                if (Boolean.TRUE.equals(v.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
+                if (Boolean.TRUE.equals(v.getIsFreeShipping())) {
+					feeShip = BigDecimal.ZERO;
+				}
             }
         }
 
@@ -149,21 +153,23 @@ public class CheckoutController {
         }
 
         BigDecimal finalTotal = rawTotal.subtract(totalDiscount).add(feeShip);
-        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
+        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+			finalTotal = BigDecimal.ZERO;
+		}
 
         model.addAttribute("cartList", cartList);
         model.addAttribute("addresses", addresses);
         model.addAttribute("selectedAddressId", addressId);
         model.addAttribute("rawTotal", rawTotal);
-        
+
         // Truyền từng loại giảm giá ra view để hiển thị rành mạch
-        model.addAttribute("memDiscount", memDiscount); 
+        model.addAttribute("memDiscount", memDiscount);
         model.addAttribute("voucherDiscount", voucherDiscount);
-        
+
         model.addAttribute("feeShip", feeShip);
         model.addAttribute("finalTotal", finalTotal);
         model.addAttribute("voucherCode", voucherCode);
-        model.addAttribute("savedVouchers", savedVouchers); 
+        model.addAttribute("savedVouchers", savedVouchers);
         model.addAttribute("user", account);
 
         return "client/checkout";
@@ -178,10 +184,14 @@ public class CheckoutController {
                                @RequestParam("paymentMethod") String paymentMethod) {
 
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         List<CartDetail> cartList = cartDetailRepo.findByAccount_Id(account.getId());
-        if (cartList.isEmpty()) return "redirect:/cart";
+        if (cartList.isEmpty()) {
+			return "redirect:/cart";
+		}
 
         BigDecimal rawTotal = cartList.stream()
                 .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
@@ -189,7 +199,7 @@ public class CheckoutController {
 
         Address selectedAddress = addressRepo.findByIdAndAccount_Id(addressId, account.getId()).orElse(null);
         BigDecimal feeShip = shippingService.calculateFee(selectedAddress, cartList, account);
-        
+
         // ===== TÍNH GIẢM GIÁ THÀNH VIÊN =====
         BigDecimal memDiscount = BigDecimal.ZERO;
         if (account.getMembership() != null && account.getMembership().getDiscount() != null) {
@@ -210,18 +220,18 @@ public class CheckoutController {
             if (vdOpt.isPresent() && !Boolean.TRUE.equals(vdOpt.get().getIsUsed())) {
                 VoucherDetail vd = vdOpt.get();
                 appliedVoucher = vd.getVoucher();
-                
+
                 vd.setIsUsed(true);
                 vd.setUsedAt(new Date());
                 vd.setStatus("USED");
                 voucherDetailRepo.save(vd);
-                
+
             } else {
                 List<Voucher> directVouchers = voucherRepo.findByAccount_Id(account.getId());
                 Optional<Voucher> dirOpt = directVouchers.stream()
                         .filter(v -> v.getCode().equals(code) && (v.getActive() == null || v.getActive()))
                         .findFirst();
-                
+
                 if (dirOpt.isPresent()) {
                     appliedVoucher = dirOpt.get();
                     appliedVoucher.setActive(false);
@@ -236,7 +246,9 @@ public class CheckoutController {
                     voucherDiscount = BigDecimal.valueOf(appliedVoucher.getDiscountAmount());
                 }
 
-                if (Boolean.TRUE.equals(appliedVoucher.getIsFreeShipping())) feeShip = BigDecimal.ZERO;
+                if (Boolean.TRUE.equals(appliedVoucher.getIsFreeShipping())) {
+					feeShip = BigDecimal.ZERO;
+				}
             }
         }
 
@@ -247,14 +259,18 @@ public class CheckoutController {
         }
 
         BigDecimal finalTotal = rawTotal.subtract(totalDiscount).add(feeShip);
-        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
+        if (finalTotal.compareTo(BigDecimal.ZERO) < 0) {
+			finalTotal = BigDecimal.ZERO;
+		}
 
         // ===== CREATE ORDER =====
         Orders order = new Orders();
         order.setAccount(account);
         order.setCreatedDate(new Date());
         order.setAddress(selectedAddress);
-        if (selectedAddress != null) order.setPhone(selectedAddress.getRecipientPhone());
+        if (selectedAddress != null) {
+			order.setPhone(selectedAddress.getRecipientPhone());
+		}
         order.setTotal(finalTotal);
         order.setFeeship(feeShip);
         order.setMoneyDiscounted(totalDiscount); // Lưu tổng tiền giảm (Gồm Membership + Voucher)
@@ -270,12 +286,16 @@ public class CheckoutController {
                     .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
 
             Integer buyQty = item.getQuantity();
-            if (product.getQuantity() < buyQty) throw new RuntimeException("Sản phẩm không đủ số lượng: " + product.getName());
+            if (product.getQuantity() < buyQty) {
+				throw new RuntimeException("Sản phẩm không đủ số lượng: " + product.getName());
+			}
 
             int newQty = product.getQuantity() - buyQty;
             product.setQuantity(newQty);
             product.setSold((product.getSold() == null ? 0 : product.getSold()) + buyQty);
-            if (newQty <= 0) product.setAvailable(false);
+            if (newQty <= 0) {
+				product.setAvailable(false);
+			}
             productRepo.saveAndFlush(product);
 
             OrderDetail detail = new OrderDetail();

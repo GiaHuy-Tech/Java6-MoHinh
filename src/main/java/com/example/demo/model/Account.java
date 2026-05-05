@@ -21,6 +21,7 @@ import lombok.Data;
 @Table(name = "accounts")
 @Data
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,19 +32,19 @@ public class Account {
     @Column(unique = true, columnDefinition = "nvarchar(255)")
     private String email;
 
-    @Nationalized
+    // ❌ bỏ @Nationalized
     @Column(columnDefinition = "nvarchar(255)")
     private String fullName;
 
     private Boolean gender;
-//lưu ý: password của tài khoản Google sẽ có độ dài 36 ký tự, chúng ta sẽ dùng điều này để phân biệt tài khoản Google và tài khoản thường
+
     @Column(columnDefinition = "nvarchar(255)")
     private String password;
 
     @Column(columnDefinition = "nvarchar(20)")
     private String phone;
 
-    @Nationalized
+    // ❌ bỏ @Nationalized
     @Column(columnDefinition = "nvarchar(MAX)")
     private String avatar;
 

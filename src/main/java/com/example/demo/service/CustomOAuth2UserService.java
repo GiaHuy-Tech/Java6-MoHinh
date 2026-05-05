@@ -49,17 +49,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             account.setEmail(email);
             account.setPassword("google-login"); // Mật khẩu giả định
             account.setRole(false);              // false = ROLE_USER
-            account.setActive(true);             
-            
+            account.setActive(true);
+
             account.setFullName(name != null ? name : email);
-            account.setPhone(""); 
+            account.setPhone("");
 
             // FIX LỖI TẠI ĐÂY: Vì DB không cho phép NULL, gán mặc định là true (hoặc false)
             // User có thể vào trang cá nhân để sửa lại sau.
-            account.setGender(true); 
+            account.setGender(true);
 
             // Dùng LocalDate.now() hoặc một ngày mặc định
-            account.setBirthDay(LocalDate.now()); 
+            account.setBirthDay(LocalDate.now());
 
             account.setAvatar(picture);
             account.setTotalSpending(BigDecimal.ZERO);

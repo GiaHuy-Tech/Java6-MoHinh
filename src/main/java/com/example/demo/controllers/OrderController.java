@@ -2,8 +2,8 @@ package com.example.demo.controllers;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.example.demo.model.Account;
 import com.example.demo.model.Comment;
 import com.example.demo.model.Orders;
@@ -19,6 +20,7 @@ import com.example.demo.repository.OrdersRepository;
 import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.VNPayService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -36,9 +38,11 @@ public class OrderController {
     public String viewOrders(Model model, @RequestParam(name = "sort", defaultValue = "newest") String sort,
                              @RequestParam(name = "payment", required = false) String payment) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
-        List<Orders> orders = "oldest".equals(sort) 
+        List<Orders> orders = "oldest".equals(sort)
             ? orderRepo.findByAccount_IdOrderByCreatedDateAsc(account.getId())
             : orderRepo.findByAccount_IdOrderByCreatedDateDesc(account.getId());
 
@@ -71,10 +75,12 @@ public class OrderController {
     }
 
     @PostMapping("/orders/submit-review")
-    public String submitReview(@RequestParam("productId") Integer productId, @RequestParam("orderId") Integer orderId, 
+    public String submitReview(@RequestParam("productId") Integer productId, @RequestParam("orderId") Integer orderId,
                                @RequestParam("rating") Integer rating, @RequestParam("content") String content) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
         if (!commentRepo.existsByAccount_IdAndProduct_IdAndOrderId(account.getId(), productId, orderId)) {
             Comment comment = new Comment();
             comment.setAccount(account);
@@ -91,7 +97,9 @@ public class OrderController {
     @PostMapping("/orders/confirm/{id}")
     public String confirmOrder(@PathVariable("id") Integer orderId) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
         orderRepo.findById(orderId).ifPresent(order -> {
             if (order.getAccount().getId().equals(account.getId()) && order.getStatus() == 3) {
                 orderService.completeOrder(order);
@@ -103,7 +111,9 @@ public class OrderController {
     @PostMapping("/orders/cancel/{id}")
     public String cancelOrder(@PathVariable("id") Integer orderId) {
         Account account = getAccount();
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
         orderRepo.findById(orderId).ifPresent(order -> {
             if (order.getAccount().getId().equals(account.getId()) && (order.getStatus() == 0 || order.getStatus() == 1)) {
                 order.setStatus(5);

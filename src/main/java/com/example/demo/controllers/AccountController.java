@@ -68,7 +68,7 @@ public class AccountController {
         // 3. XẾP HẠNG ĐỘNG DỰA VÀO DATABASE CỦA ADMIN
         // Kéo toàn bộ danh sách Hạng từ DB về, sắp xếp từ Điểm Cao Nhất -> Thấp Nhất
         List<Membership> memberships = membershipRepo.findAll(Sort.by(Sort.Direction.DESC, "pointRequired"));
-        
+
         Membership assignedMembership = null;
         for (Membership m : memberships) {
             // So sánh điểm hiện tại của User với mốc điểm Admin cài đặt
