@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Account;
+import com.example.demo.model.OrderDetail;
 import com.example.demo.model.Orders;
+import com.example.demo.model.Products;
 import com.example.demo.repository.OrdersRepository;
+import com.example.demo.repository.ProductRepository;
 import com.example.demo.service.MailService;
 
 @Controller
@@ -23,6 +26,10 @@ public class OrdersManaController {
 
     @Autowired
     private OrdersRepository ordersRepo;
+
+    // Inject thêm ProductRepository để cập nhật kho
+    @Autowired
+    private ProductRepository productRepo;
 
     @Autowired
     private MailService mailService;
@@ -67,6 +74,23 @@ public class OrdersManaController {
         if ((order == null) || (status == 4) || order.getStatus() == 4 || order.getStatus() == 5) {
             return "redirect:/orders-mana";
         }
+
+        // --- XỬ LÝ HOÀN SỐ LƯỢNG VỀ KHO KHI HỦY ĐƠN (STATUS = 5) ---
+        if (status == 5) {
+            for (OrderDetail detail : order.getOrderDetails()) {
+                Products product = detail.getProduct();
+                if (product != null) {
+                    int currentStock = (product.getQuantity() != null) ? product.getQuantity() : 0;
+                    product.setQuantity(currentStock + detail.getQuantity());
+                    
+                    if (product.getQuantity() > 0) {
+                        product.setAvailable(true);
+                    }
+                    productRepo.save(product); // Lưu lại sản phẩm đã được cộng kho
+                }
+            }
+        }
+        // -----------------------------------------------------------
 
         order.setStatus(status);
 

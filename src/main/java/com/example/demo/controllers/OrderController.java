@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.example.demo.model.Account;
 import com.example.demo.model.Comment;
+import com.example.demo.model.OrderDetail; // Đã thêm import này để xử lý hoàn kho
 import com.example.demo.model.Orders;
+import com.example.demo.model.Products; // Đã thêm import này để xử lý hoàn kho
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.OrdersRepository;
 import com.example.demo.repository.ProductRepository;
@@ -54,7 +56,7 @@ public class OrderController {
     }
 
     @GetMapping("/vnpay-return")
-    public String vnpayReturn(HttpServletRequest request) {
+    public String vnpayReturn(HttpServletRequest request, Model model) {
         int status = vnPayService.orderReturn(request);
         if (status == 1) {
             try {
@@ -63,10 +65,18 @@ public class OrderController {
                 if (order != null) {
                     order.setPaymentStatus(true);
                     orderRepo.save(order);
+                    
+                    // Truyền thông tin sang trang order-success
+                    model.addAttribute("orderId", order.getId());
+                    model.addAttribute("total", order.getTotal());
                 }
-            } catch (Exception e) { e.printStackTrace(); }
-            return "redirect:/orders?payment=success";
+            } catch (Exception e) { 
+                e.printStackTrace(); 
+            }
+            // Chuyển hướng đến trang thông báo thành công
+            return "client/order-success"; 
         }
+        // Nếu thất bại vẫn trả về trang orders để hiện Popup SweetAlert lỗi
         return "redirect:/orders?payment=failed";
     }
 
@@ -106,6 +116,22 @@ public class OrderController {
         if (account == null) return "redirect:/login";
         orderRepo.findById(orderId).ifPresent(order -> {
             if (order.getAccount().getId().equals(account.getId()) && (order.getStatus() == 0 || order.getStatus() == 1)) {
+                
+                // --- ĐÃ THÊM LOGIC HOÀN KHO KHI USER HỦY ĐƠN ---
+                for (OrderDetail detail : order.getOrderDetails()) {
+                    Products product = detail.getProduct();
+                    if (product != null) {
+                        int currentStock = (product.getQuantity() != null) ? product.getQuantity() : 0;
+                        product.setQuantity(currentStock + detail.getQuantity());
+                        
+                        if (product.getQuantity() > 0) {
+                            product.setAvailable(true);
+                        }
+                        productRepo.save(product); // Lưu kho
+                    }
+                }
+                // ----------------------------------------------
+                
                 order.setStatus(5);
                 orderRepo.save(order);
             }

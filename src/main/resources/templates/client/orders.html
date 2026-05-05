@@ -322,6 +322,23 @@ body {
 .btn-pulse {
 	animation: pulse-border 2s infinite;
 }
+
+/* THÊM STYLE CHO NÚT CẢNH BÁO HOÀN TIỀN */
+.refund-warning-btn {
+	display: inline-block;
+	padding: 5px 12px;
+	background: rgba(255, 193, 7, 0.1);
+	border: 1px dashed #ffc107;
+	border-radius: 6px;
+	transition: 0.3s;
+	cursor: pointer;
+	user-select: none;
+}
+
+.refund-warning-btn:hover {
+	background: rgba(255, 193, 7, 0.25);
+	transform: translateY(-2px);
+}
 </style>
 </head>
 <body>
@@ -430,22 +447,6 @@ body {
 
 	<div class="container py-5 flex-grow-1">
 
-		<!-- BÁO KẾT QUẢ TỪ VNPAY TRẢ VỀ -->
-		<div th:if="${param.payment != null}">
-			<div th:if="${param.payment[0] == 'success'}"
-				class="alert alert-success alert-dismissible fade show rounded-pill px-4 mb-4 fw-bold shadow-sm">
-				<i class="bi bi-check-circle-fill me-2"></i> Giao dịch VNPay thành
-				công! Đơn hàng đã được cập nhật.
-				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-			</div>
-			<div th:if="${param.payment[0] == 'failed'}"
-				class="alert alert-danger alert-dismissible fade show rounded-pill px-4 mb-4 fw-bold shadow-sm">
-				<i class="bi bi-x-circle-fill me-2"></i> Giao dịch VNPay bị hủy hoặc
-				thất bại!
-				<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-			</div>
-		</div>
-
 		<div class="d-flex justify-content-between align-items-center mb-5">
 			<h3
 				style="font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); text-transform: uppercase; border-left: 5px solid var(--accent-cyan); padding-left: 15px;">
@@ -464,11 +465,19 @@ body {
 				class="p-3 px-4 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center bg-black bg-opacity-10">
 				<div>
 					<span class="text-main fw-bold me-3 fs-5"
-						th:text="'#DH' + ${order.id}"></span> <span
+						th:text="'#DH' + ${order.id}"></span> 
+                    <span
 						style="color: var(--text-dim); font-size: 0.85rem;"> <i
 						class="bi bi-calendar-check me-1"></i> <span
 						th:text="${#dates.format(order.createdDate, 'dd/MM/yyyy HH:mm')}"></span>
 					</span>
+					
+					<!-- DẤU CHẤM THAN CLICK ĐƯỢC KHI HỦY ĐƠN VNPAY -->
+					<div th:if="${order.status == 5 and (order.paymentMethod == 'VNPAY' or order.paymentStatus == true)}" 
+					     class="text-warning mt-2 small fw-bold refund-warning-btn" style="font-size: 0.85rem;"
+					     onclick="showRefundInfo()">
+						<i class="bi bi-exclamation-circle-fill me-1"></i> Vui lòng click vào đây để xem hướng dẫn hoàn tiền
+					</div>
 				</div>
 
 				<div class="d-flex align-items-center gap-3">
@@ -486,7 +495,6 @@ body {
 				<div th:each="detail : ${order.orderDetails}"
 					class="d-flex align-items-center gap-4 mb-3 pb-3 border-bottom border-secondary border-opacity-10">
 					<div class="product-img-box">
-						<!-- FIX ĐƯỜNG DẪN ẢNH SẢN PHẨM THÔNG MINH -->
 						<img
 							th:src="${detail.product.mainImage != null ? (detail.product.mainImage.startsWith('http') or detail.product.mainImage.startsWith('/images/') ? detail.product.mainImage : '/images/products/' + detail.product.mainImage) : 'https://via.placeholder.com/80'}">
 					</div>
@@ -525,8 +533,6 @@ body {
 			<div
 				class="p-4 pt-0 d-flex flex-wrap justify-content-between align-items-center">
 
-				<!-- FIX VNPAY LUÔN HIỂN THỊ ĐÃ THANH TOÁN -->
-				<!-- Tìm đoạn hiển thị thanh toán trong file orders.html và thay thế bằng đoạn này -->
 				<div class="small fw-bold">
 					<span
 						th:if="${order.paymentStatus == true or order.paymentMethod == 'VNPAY'}"
@@ -549,19 +555,23 @@ body {
 					</div>
 
 					<div class="d-flex gap-2">
-						<form th:if="${order.status == 3}"
-							th:action="@{'/orders/confirm/' + ${order.id}}" method="post">
-							<button type="submit"
-								class="btn btn-main btn-pulse rounded-pill px-4"
-								onclick="return confirm('Bạn xác nhận đã cầm trên tay kiện hàng này?')">
-								ĐÃ NHẬN ĐƯỢC HÀNG</button>
+						<!-- Form Xác Nhận -->
+						<form th:if="${order.status == 3}" th:action="@{'/orders/confirm/' + ${order.id}}" method="post">
+							<button type="submit" class="btn btn-main btn-pulse rounded-pill px-4" onclick="return confirm('Bạn xác nhận đã cầm trên tay kiện hàng này?')">ĐÃ NHẬN ĐƯỢC HÀNG</button>
 						</form>
 
-						<form th:if="${order.status == 0 || order.status == 1}"
-							th:action="@{'/orders/cancel/' + ${order.id}}" method="post">
-							<button type="submit"
+						<!-- Form Hủy Đơn bằng SweetAlert2 -->
+						<form th:if="${order.status == 0 || order.status == 1}" th:id="'cancelForm-' + ${order.id}" th:action="@{'/orders/cancel/' + ${order.id}}" method="post">
+							<!-- Nút cho đơn VNPay (Hiện Popup Cảnh báo đặc biệt) -->
+							<button th:if="${order.paymentMethod == 'VNPAY' or order.paymentStatus == true}" type="button"
 								class="btn btn-outline-danger rounded-pill px-4 fw-bold"
-								onclick="return confirm('Bạn muốn hủy đơn hàng này?')">
+								th:onclick="'confirmCancelVNPAY(' + ${order.id} + ')'">
+								HỦY ĐƠN</button>
+								
+							<!-- Nút cho đơn COD (Bình thường) -->
+							<button th:unless="${order.paymentMethod == 'VNPAY' or order.paymentStatus == true}" type="button"
+								class="btn btn-outline-danger rounded-pill px-4 fw-bold"
+								th:onclick="'confirmCancelNormal(' + ${order.id} + ')'">
 								HỦY ĐƠN</button>
 						</form>
 					</div>
@@ -626,12 +636,116 @@ body {
 			HOBBY STORE</p>
 	</footer>
 
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- THƯ VIỆN SWEETALERT2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-	<!-- SCRIPT ĐỒNG BỘ JS MINI CART, SEARCH & THEME TỪ INDEX -->
+    <!-- THYMELEAF INLINE SCRIPT ĐỂ ĐỌC TRỰC TIẾP BIẾN PAYMENT TỪ BACKEND (100% HIỆN) -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", () => {
+            const paymentStatus = /*[[${param.payment != null ? param.payment[0] : null}]]*/ null;
+            if (paymentStatus) {
+                const colors = getSwalThemeColors();
+                if (paymentStatus === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Giao dịch thành công!',
+                        text: 'Thanh toán VNPay hoàn tất. Cảm ơn bạn đã mua sắm tại Model World!',
+                        background: colors.bg,
+                        color: colors.text,
+                        confirmButtonColor: '#45a29e',
+                        confirmButtonText: 'Tuyệt vời'
+                    }).then(() => {
+                        window.history.replaceState(null, '', window.location.pathname);
+                    });
+                } else if (paymentStatus === 'failed') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Giao dịch thất bại!',
+                        text: 'Thanh toán VNPay đã bị hủy hoặc xảy ra sự cố trong quá trình xử lý.',
+                        background: colors.bg,
+                        color: colors.text,
+                        confirmButtonColor: '#ff2e63',
+                        confirmButtonText: 'Đóng'
+                    }).then(() => {
+                        window.history.replaceState(null, '', window.location.pathname);
+                    });
+                }
+            }
+        });
+        /*]]>*/
+    </script>
+
+	<!-- SCRIPT ĐỒNG BỘ JS MINI CART, SEARCH & THEME VÀ CÁC CHỨC NĂNG POPUP -->
 	<script>
     const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+
+    // Hàm lấy màu sắc theo Theme (Cho SweetAlert2)
+    function getSwalThemeColors() {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+            bg: isDark ? '#1f2833' : '#ffffff',
+            text: isDark ? '#c5c6c7' : '#222831'
+        };
+    }
+
+    // HIỂN THỊ POPUP KHI BẤM NÚT HỦY ĐƠN (ĐỐI VỚI VNPAY)
+    function confirmCancelVNPAY(orderId) {
+        const colors = getSwalThemeColors();
+        Swal.fire({
+            title: 'Hủy đơn hàng?',
+            text: 'LƯU Ý: Đơn hàng này đã được thanh toán qua VNPay. Vui lòng liên hệ Admin qua Fanpage/Hotline để được hỗ trợ hoàn tiền sau khi hủy!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff2e63',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Đồng ý hủy',
+            cancelButtonText: 'Đóng',
+            background: colors.bg,
+            color: colors.text
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('cancelForm-' + orderId).submit();
+            }
+        });
+    }
+
+    // HIỂN THỊ POPUP KHI BẤM NÚT HỦY ĐƠN (ĐỐI VỚI COD BÌNH THƯỜNG)
+    function confirmCancelNormal(orderId) {
+        const colors = getSwalThemeColors();
+        Swal.fire({
+            title: 'Xác nhận hủy?',
+            text: 'Bạn có chắc chắn muốn hủy đơn hàng này không?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ff2e63',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Hủy đơn',
+            cancelButtonText: 'Đóng',
+            background: colors.bg,
+            color: colors.text
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('cancelForm-' + orderId).submit();
+            }
+        });
+    }
+
+    // HIỂN THỊ POPUP KHI CLICK VÀO DÒNG CHẤM THAN
+    function showRefundInfo() {
+        const colors = getSwalThemeColors();
+        Swal.fire({
+            title: 'Thông tin hoàn tiền',
+            text: 'Đơn hàng này đã được thanh toán qua VNPay. Do bạn đã hủy đơn, hệ thống cần Admin kiểm tra và đối soát. Vui lòng liên hệ Fanpage hoặc Hotline để được hỗ trợ hoàn tiền về tài khoản ngân hàng của bạn nhé!',
+            icon: 'info',
+            confirmButtonColor: '#45a29e',
+            confirmButtonText: 'Đã hiểu',
+            background: colors.bg,
+            color: colors.text
+        });
+    }
 
     // 1. AJAX CALL CHO TĂNG/GIẢM/XÓA MINI CART
     function updateMiniCart() {
@@ -711,7 +825,7 @@ body {
     document.getElementById('btnMainSearch').onclick = executeSearch;
     document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
 
-    // 3. THEME VÀ MODAL ĐÁNH GIÁ (GIỮ NGUYÊN CỦA TRANG ORDER CŨ)
+    // 3. THEME VÀ MODAL ĐÁNH GIÁ
     document.addEventListener('click', function (e) {
         const trigger = e.target.closest('.btn-review-trigger');
         if (trigger) {
@@ -729,19 +843,16 @@ body {
         document.getElementById('themeIcon').className = isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-info';
     }
 
-    // MEGA MENU (Để tránh lỗi click)
     const btnMega = document.getElementById('btnMegaMenu');
     if (btnMega) {
         btnMega.onclick = (e) => { 
             e.stopPropagation(); 
-            // Nếu có menu content thì toggle
             const megaMenu = document.getElementById('megaMenu');
             if(megaMenu) megaMenu.classList.toggle('active'); 
-            else window.location.href = '/products'; // Fallback nếu không truyền list category sang
+            else window.location.href = '/products'; 
         };
     }
 
-    // KHỞI ĐỘNG
     document.addEventListener("DOMContentLoaded", () => {
         if (isLoggedIn) {
             updateMiniCart();

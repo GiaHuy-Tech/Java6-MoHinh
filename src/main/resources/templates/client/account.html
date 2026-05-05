@@ -91,8 +91,9 @@
 
         /* FORMS */
         .form-label { color: var(--text-dim); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; }
-        .form-control, .form-select { background-color: var(--input-bg) !important; color: var(--text-light) !important; border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 12px 15px; transition: 0.3s; font-size: 0.95rem;}
+        .form-control, .form-select { background-color: var(--input-bg) !important; color: var(--text-light) !important; border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 12px 15px; transition: 0.3s; font-size: 0.95rem; color-scheme: dark;}
         .form-control:focus, .form-select:focus { border-color: var(--text-main) !important; box-shadow: 0 0 0 3px rgba(102, 252, 241, 0.1); }
+        .form-control:read-only { opacity: 0.7; cursor: not-allowed; }
         .input-group .btn-update { border-radius: 0 10px 10px 0; border: 1px solid var(--text-main); margin-left: -1px; z-index: 5;}
         .input-group .form-control, .input-group .input-group-text { border-radius: 10px 0 0 10px; }
 
@@ -121,7 +122,7 @@
 
     <input type="hidden" id="isLoggedIn" th:value="${user != null or account != null ? 'true' : 'false'}">
 
-    <!-- NAVBAR ĐỒNG BỘ INDEX CHUẨN XÁC 100% -->
+    <!-- NAVBAR ĐỒNG BỘ INDEX -->
     <nav class="top-navbar">
         <div class="container-fluid px-lg-5 nav-holder">
             <div class="d-flex align-items-center justify-content-between">
@@ -129,7 +130,6 @@
                     <a href="/" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
                     <div class="position-static">
                         <button class="btn btn-info rounded-pill px-4 fw-bold" id="btnMegaMenu"><i class="bi bi-grid-3x3-gap-fill me-2"></i> DANH MỤC</button>
-                        <!-- Tạm ẩn nội dung MegaMenu do trang này không load list categories, click sẽ chuyển hướng tới Products -->
                     </div>
                     <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;"><i class="bi bi-box-seam"></i> SẢN PHẨM</a>
                 </div>
@@ -158,12 +158,9 @@
                                 <span>GIỎ HÀNG</span>
                                 <span class="badge bg-info text-dark" id="cartBadgeMenu">0 món</span>
                             </div>
-                            
-                            <!-- KHU VỰC CẬP NHẬT AJAX -->
                             <div id="miniCartContent" style="max-height: 300px; overflow-y: auto;">
                                 <div class="p-4 text-center opacity-50">Đang tải...</div>
                             </div>
-
                             <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT</a></div>
                         </div>
                     </div>
@@ -187,7 +184,7 @@
         </div>
     </nav>
 
-    <!-- NỘI DUNG CHÍNH (GIỮ NGUYÊN) -->
+    <!-- NỘI DUNG CHÍNH -->
 	<div class="container py-5 flex-grow-1">
 		<div class="row g-4">
 			<!-- CỘT TRÁI: WIDGET TÓM TẮT -->
@@ -267,6 +264,30 @@
 								</div>
 							</form>
 						</div>
+
+                        <!-- THÊM FORM NGÀY SINH VÀO ĐÂY -->
+                        <div class="col-md-6">
+                            <form th:action="@{/account/update-birthday}" method="post">
+                                <label class="form-label">Ngày sinh <span th:if="${account.birthDay == null}" class="text-warning small ms-1" style="font-size: 0.75rem;">(Chỉ được cập nhật 1 lần)</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text border-end-0 bg-transparent" style="border-color: var(--border-color); color: var(--text-dim);"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="date" name="birthDay" class="form-control border-start-0 ps-0" 
+                                           th:value="${account.birthDay}" 
+                                           th:readonly="${account.birthDay != null}" 
+                                           required>
+                                    
+                                    <!-- Nút Lưu hiển thị khi chưa có ngày sinh -->
+                                    <button th:if="${account.birthDay == null}" class="btn btn-update">LƯU</button>
+                                    
+                                    <!-- Nút Ổ khóa (bị vô hiệu hóa) hiển thị khi đã có ngày sinh -->
+                                    <span th:if="${account.birthDay != null}" class="input-group-text bg-secondary border-secondary text-light px-3" title="Ngày sinh không thể thay đổi" style="border-radius: 0 10px 10px 0;">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- KẾT THÚC FORM NGÀY SINH -->
+
 					</div>
 
                     <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">

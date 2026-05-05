@@ -7,10 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -95,7 +97,7 @@ public class AccountController {
         // 5. LẤY DANH SÁCH SỔ ĐỊA CHỈ
         List<Address> addresses = addressRepo.findByAccount_Id(account.getId());
 
-        // GỬI DATA RA HTML (Đồng bộ 100% với các biến bạn đã viết trên file HTML)
+        // GỬI DATA RA HTML
         model.addAttribute("account", account);
         model.addAttribute("addresses", addresses);
         model.addAttribute("membershipName", membershipName);
@@ -165,6 +167,34 @@ public class AccountController {
 
         session.setAttribute("account", dbAcc);
         redirect.addFlashAttribute("success", "Cập nhật số điện thoại thành công!");
+        return "redirect:/account";
+    }
+
+    // ================= CẬP NHẬT NGÀY SINH (CHỈ 1 LẦN) =================
+    @PostMapping("/update-birthday")
+    public String updateBirthday(
+            @RequestParam("birthDay") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDay, 
+            RedirectAttributes redirect) {
+        
+        Account sessionAcc = getSessionAccount();
+        if (sessionAcc == null) {
+            return "redirect:/login";
+        }
+
+        Account dbAcc = accountRepo.findById(sessionAcc.getId()).get();
+
+        // Kiểm tra bảo mật: Nếu ngày sinh đã được thiết lập thì chặn (tránh ai đó gọi tool POST thẳng vào API)
+        if (dbAcc.getBirthDay() != null) {
+            redirect.addFlashAttribute("error", "Bạn đã cập nhật ngày sinh trước đó, không thể thay đổi lần 2!");
+            return "redirect:/account";
+        }
+
+        // Cập nhật nếu hợp lệ
+        dbAcc.setBirthDay(birthDay);
+        accountRepo.save(dbAcc);
+
+        session.setAttribute("account", dbAcc);
+        redirect.addFlashAttribute("success", "Cập nhật ngày sinh thành công!");
         return "redirect:/account";
     }
 

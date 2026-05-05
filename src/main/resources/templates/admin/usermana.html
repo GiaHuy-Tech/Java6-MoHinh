@@ -323,8 +323,9 @@ footer { color: var(--text-muted); }
                         <tr class="user-row" th:each="acc : ${accounts}">
                             <td class="fw-bold text-primary" th:text="${'#' + acc.id}"></td>
                             
+                            <!-- ĐÃ FIX ĐƯỜNG DẪN ẢNH TẠI ĐÂY -->
                             <td>
-                                <img th:src="${acc.avatar != null and acc.avatar != '' ? acc.avatar : '/images/user-default.png'}" class="user-avatar-table">
+                                <img th:src="${acc.avatar != null and acc.avatar != '' ? '/images/avatar/' + acc.avatar : '/images/user-default.png'}" class="user-avatar-table" alt="Avatar">
                             </td>
 
                             <td>
@@ -352,47 +353,10 @@ footer { color: var(--text-muted); }
                             <!-- NÚT BẤM XEM DANH SÁCH ĐỊA CHỈ -->
                             <td class="text-center">
                                 <button type="button" class="btn btn-sm btn-outline-info rounded-pill fw-bold"
-                                        data-bs-toggle="modal" th:attr="data-bs-target='#addressModal-' + ${acc.id}">
+                                        data-bs-toggle="modal" th:data-bs-target="'#addressModal-' + ${acc.id}">
                                     <i class="bi bi-geo-alt-fill me-1"></i>
                                     <span th:text="${acc.addresses != null ? #lists.size(acc.addresses) : 0}"></span>
                                 </button>
-
-                                <!-- MODAL HIỂN THỊ ĐỊA CHỈ CỦA USER NÀY -->
-                                <div class="modal fade text-start" th:id="'addressModal-' + ${acc.id}" tabindex="-1">
-                                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                        <div class="modal-content shadow-lg">
-                                            <div class="modal-header border-bottom">
-                                                <h5 class="modal-title fw-bold text-primary">Địa chỉ của: <span th:text="${acc.fullName}" class="text-body"></span></h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--btn-close-filter);"></button>
-                                            </div>
-                                            <div class="modal-body p-4">
-                                                
-                                                <!-- Lặp qua từng địa chỉ của người dùng -->
-                                                <div th:if="${acc.addresses != null and !acc.addresses.isEmpty()}">
-                                                    <div th:each="addr : ${acc.addresses}" class="address-card position-relative">
-                                                        <span th:if="${addr.isDefault}" class="badge bg-danger position-absolute top-0 end-0 m-2">Mặc định</span>
-                                                        <div class="fw-bold fs-6 mb-1 text-primary">
-                                                            <i class="bi bi-person-circle me-1"></i> <span th:text="${addr.recipientName}"></span>
-                                                        </div>
-                                                        <div class="text-muted small mb-2">
-                                                            <i class="bi bi-telephone-fill me-1"></i> <span th:text="${addr.recipientPhone}"></span>
-                                                        </div>
-                                                        <div class="small fw-semibold">
-                                                            <i class="bi bi-house-door-fill me-1"></i> <span th:text="${addr.getFullAddress()}"></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Nếu không có địa chỉ -->
-                                                <div th:if="${acc.addresses == null or acc.addresses.isEmpty()}" class="text-center py-4 text-muted">
-                                                    <i class="bi bi-geo-alt-fill fs-1 d-block mb-2 opacity-50"></i>
-                                                    Người dùng chưa thêm địa chỉ nào.
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- KẾT THÚC MODAL ĐỊA CHỈ -->
                             </td>
 
                             <td class="text-center">
@@ -425,7 +389,47 @@ footer { color: var(--text-muted); }
                         </tr>
                     </tbody>
                 </table>
-            </div>
+            </div> <!-- Kết thúc thẻ table-responsive -->
+
+            <!-- ĐƯA VÒNG LẶP MODAL RA BÊN NGOÀI TABLE -->
+            <th:block th:each="acc : ${accounts}">
+                <!-- MODAL HIỂN THỊ ĐỊA CHỈ CỦA USER NÀY -->
+                <div class="modal fade text-start" th:id="'addressModal-' + ${acc.id}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content shadow-lg">
+                            <div class="modal-header border-bottom">
+                                <h5 class="modal-title fw-bold text-primary">Địa chỉ của: <span th:text="${acc.fullName}" class="text-body"></span></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: var(--btn-close-filter);"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                
+                                <!-- Lặp qua từng địa chỉ của người dùng -->
+                                <div th:if="${acc.addresses != null and !acc.addresses.isEmpty()}">
+                                    <div th:each="addr : ${acc.addresses}" class="address-card position-relative">
+                                        <span th:if="${addr.isDefault}" class="badge bg-danger position-absolute top-0 end-0 m-2">Mặc định</span>
+                                        <div class="fw-bold fs-6 mb-1 text-primary">
+                                            <i class="bi bi-person-circle me-1"></i> <span th:text="${addr.recipientName}"></span>
+                                        </div>
+                                        <div class="text-muted small mb-2">
+                                            <i class="bi bi-telephone-fill me-1"></i> <span th:text="${addr.recipientPhone}"></span>
+                                        </div>
+                                        <div class="small fw-semibold">
+                                            <i class="bi bi-house-door-fill me-1"></i> <span th:text="${addr.getFullAddress()}"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Nếu không có địa chỉ -->
+                                <div th:if="${acc.addresses == null or acc.addresses.isEmpty()}" class="text-center py-4 text-muted">
+                                    <i class="bi bi-geo-alt-fill fs-1 d-block mb-2 opacity-50"></i>
+                                    Người dùng chưa thêm địa chỉ nào.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- KẾT THÚC MODAL ĐỊA CHỈ -->
+            </th:block>
 
             <!-- PHÂN TRANG -->
             <nav aria-label="Page navigation" class="mt-4">

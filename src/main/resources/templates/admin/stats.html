@@ -13,7 +13,7 @@
 :root {
     --bg-body: #f4f6f9;
     --bg-card: #ffffff;
-    --text-main: #333333;
+    --text-main: #333333; /* Chữ màu đen khi Light Mode */
     --text-muted: #6c757d;
     --border-color: #e3e6f0;
     --sidebar-bg: #1f2a3a;
@@ -30,8 +30,8 @@
 [data-theme="dark"] {
     --bg-body: #121418;
     --bg-card: #1e2126;
-    --text-main: #e0e0e0;
-    --text-muted: #9aa0a6;
+    --text-main: #ffffff; /* Chữ màu trắng khi Dark Mode */
+    --text-muted: #a0a5ab;
     --border-color: #33373d;
     --sidebar-bg: #14171a;
     --sidebar-hover: #20242a;
@@ -39,7 +39,7 @@
     --topbar-bg: #1e2126;
     --input-bg: #2b2f36;
     --input-border: #444b54;
-    --table-color: #e0e0e0;
+    --table-color: #ffffff;
     --table-hover: rgba(255,255,255,0.05);
 }
 
@@ -50,6 +50,17 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
 }
+
+/* Ép class text-muted ăn theo theme */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Custom Scrollbar cho phần bảng cuộn đẹp hơn */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* FORM ELEMENTS THEME */
 .form-control, .form-select {
@@ -182,9 +193,12 @@ body {
     margin: 0;
     font-weight: 700;
     color: var(--text-main);
+    /* Sửa lỗi tràn số tiền khi thu phóng */
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
-/* TABLES */
+/* FIX TRIỆT ĐỂ BẢNG TRONG DARK/LIGHT MODE */
 .table-box {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -193,16 +207,18 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 .table {
-    color: var(--table-color);
-    border-color: var(--border-color);
+    --bs-table-bg: transparent; /* Ép Bootstrap không tô nền bảng mặc định */
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
 }
-.table tr td, .table tr th {
+.table th, .table td {
+    background-color: transparent !important; /* Ăn theo nền thẻ div bọc ngoài */
+    color: var(--text-main) !important; /* Đen ở light, trắng ở dark */
+    border-color: var(--border-color) !important;
     vertical-align: middle;
-    border-color: var(--border-color);
 }
-.table-hover tbody tr:hover {
-    background-color: var(--table-hover);
-    color: var(--table-color);
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    background-color: var(--table-hover) !important;
 }
 
 /* PROGRESS */
@@ -263,9 +279,12 @@ body {
     <!-- MAIN DASHBOARD AREA -->
     <div class="container-fluid">
         
-        <!-- BỘ LỌC -->
+        <!-- BỘ LỌC TỔNG (KHÔNG CÒN LỌC NĂM) -->
         <div class="card-box mb-4 pb-3 pt-3">
             <form method="get" action="/stats" class="row g-2 align-items-center">
+                <!-- Giữ lại state của năm cho biểu đồ khi bấm lọc ngày -->
+                <input type="hidden" name="year" th:value="${selectedYear}">
+                
                 <div class="col-auto">
                     <label class="form-label mb-0 text-muted small">Từ ngày</label>
                     <input type="date" name="fromDate" class="form-control form-control-sm" th:value="${fromDate}">
@@ -273,12 +292,6 @@ body {
                 <div class="col-auto">
                     <label class="form-label mb-0 text-muted small">Đến ngày</label>
                     <input type="date" name="toDate" class="form-control form-control-sm" th:value="${toDate}">
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-0 text-muted small">Năm</label>
-                    <select name="year" class="form-select form-select-sm">
-                        <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
-                    </select>
                 </div>
                 <div class="col-auto align-self-end">
                     <button class="btn btn-primary btn-sm px-4"><i class="bi bi-filter"></i> Lọc</button>
@@ -326,7 +339,19 @@ body {
             </div>
             <div class="col-lg-8">
                 <div class="table-box h-100">
-                    <div class="title mb-3">Doanh thu từng tháng năm <span th:text="${selectedYear}"></span></div>
+                    <!-- ĐÃ CHUYỂN SELECT NĂM XUỐNG ĐÂY -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="title m-0">Doanh thu từng tháng năm <span th:text="${selectedYear}"></span></div>
+                        <form method="get" action="/stats" class="m-0">
+                            <!-- Giữ lại state của bộ lọc ngày nếu có -->
+                            <input type="hidden" name="fromDate" th:value="${fromDate}">
+                            <input type="hidden" name="toDate" th:value="${toDate}">
+                            <select name="year" class="form-select form-select-sm shadow-none" onchange="this.form.submit()" style="width: 100px; cursor: pointer;">
+                                <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
+                            </select>
+                        </form>
+                    </div>
+                    
                     <div style="height: 250px;">
                         <canvas id="barChart"></canvas>
                     </div>
@@ -361,8 +386,8 @@ body {
 
             <!-- TIẾN ĐỘ ĐƠN HÀNG -->
             <div class="col-lg-6">
-                <div class="table-box h-100" style="max-height: 300px; overflow-y: auto;">
-                    <div class="title">Tiến độ đơn hàng theo tháng</div>
+                <div class="table-box h-100" style="max-height: 300px; overflow-y: auto; padding-right: 15px;">
+                    <div class="title">Tiến độ đơn hàng theo tháng (Năm <span th:text="${selectedYear}"></span>)</div>
                     <table class="table table-borderless table-sm mt-3">
                         <tr th:each="m, i : ${months}">
                             <td width="20%" class="text-muted small" th:text="${m}"></td>
@@ -370,7 +395,7 @@ body {
                             <td width="65%">
                                 <div class="progress mt-1">
                                     <div class="progress-bar bg-success"
-                                         th:style="|width:${totalOrders > 0 ? (orderCounts[i.index] * 100.0 / totalOrders) : 0}%|"></div>
+                                         th:style="|width:${chartYearTotalOrders > 0 ? (orderCounts[i.index] * 100.0 / chartYearTotalOrders) : 0}%|"></div>
                                 </div>
                             </td>
                         </tr>
@@ -400,7 +425,7 @@ body {
                     <tbody>
                         <tr th:each="m : ${memberships}">
                             <td>
-                                <span class="badge bg-secondary px-3 py-2" th:if="${m.name == 'Đồng'}" th:text="${m.name}"></span>
+                                <span class="badge bg-secondary px-3 py-2 text-white" th:if="${m.name == 'Đồng'}" th:text="${m.name}"></span>
                                 <span class="badge bg-secondary px-3 py-2 text-dark" style="background-color: #c0c0c0 !important;" th:if="${m.name == 'Bạc'}" th:text="${m.name}"></span>
                                 <span class="badge bg-warning px-3 py-2 text-dark" th:if="${m.name == 'Vàng'}" th:text="${m.name}"></span>
                                 <span class="badge bg-info px-3 py-2 text-dark" th:if="${m.name == 'Kim Cương'}" th:text="${m.name}"></span>
