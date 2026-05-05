@@ -5,17 +5,27 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.example.demo.model.Membership;
 import com.example.demo.model.Products;
-import com.example.demo.repository.*;
+import com.example.demo.repository.AccountRepository;
+import com.example.demo.repository.CategoryRepository;
+import com.example.demo.repository.LikeRepository;
+import com.example.demo.repository.MembershipRepository;
+import com.example.demo.repository.OrdersRepository;
+import com.example.demo.repository.ProductRepository;
 
 @Controller
 public class StatsController {
@@ -34,16 +44,9 @@ public class StatsController {
             @RequestParam(value = "toDate", required = false) String toDate) {
 
         // ===== DATETIME =====
-        LocalDateTime from = (fromDate != null && !fromDate.isEmpty())
-                ? LocalDate.parse(fromDate).atStartOfDay()
-                : null;
-
-        LocalDateTime to = (toDate != null && !toDate.isEmpty())
-                ? LocalDate.parse(toDate).plusDays(1).atStartOfDay()
-                : null;
-
+        LocalDateTime from = (fromDate != null && !fromDate.isEmpty()) ? LocalDate.parse(fromDate).atStartOfDay() : null;
+        LocalDateTime to = (toDate != null && !toDate.isEmpty()) ? LocalDate.parse(toDate).plusDays(1).atStartOfDay() : null;
         boolean isFilterByDate = (from != null || to != null);
-
         int currentYear = (year != null) ? year : LocalDate.now().getYear();
 
         model.addAttribute("selectedYear", currentYear);
@@ -70,23 +73,18 @@ public class StatsController {
         model.addAttribute("totalAccounts", accountRepo.count());
         model.addAttribute("totalCategories", categoryRepo.count());
 
-        // ===== REVENUE (FIX BIGDECIMAL) =====
+        // ===== REVENUE =====
         BigDecimal totalRevenue = isFilterByDate
                 ? ordersRepo.getTotalRevenueByDate(from, to)
-                : ordersRepo.getRevenueByMonth(currentYear)
-                    .stream()
+                : ordersRepo.getRevenueByMonth(currentYear).stream()
                     .map(r -> (BigDecimal) (r[1] != null ? r[1] : BigDecimal.ZERO))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
-
         model.addAttribute("totalRevenue", totalRevenue);
 
         // ===== CATEGORY =====
-        List<Object[]> revenueByCategory = isFilterByDate
-                ? ordersRepo.getRevenueByCategoryByDate(from, to)
-                : ordersRepo.getRevenueByCategory();
-
+        List<Object[]> revenueByCategory = isFilterByDate ? ordersRepo.getRevenueByCategoryByDate(from, to) : ordersRepo.getRevenueByCategory();
         List<String> chartLabels = new ArrayList<>();
         List<BigDecimal> chartData = new ArrayList<>();
 
@@ -94,15 +92,11 @@ public class StatsController {
             chartLabels.add((String) row[0]);
             chartData.add(row[1] != null ? (BigDecimal) row[1] : BigDecimal.ZERO);
         }
-
         model.addAttribute("chartLabels", chartLabels);
         model.addAttribute("chartData", chartData);
 
         // ===== MONTHLY REVENUE =====
-        List<Object[]> revenueByMonth = isFilterByDate
-                ? ordersRepo.getRevenueByMonthByDate(from, to)
-                : ordersRepo.getRevenueByMonth(currentYear);
-
+        List<Object[]> revenueByMonth = isFilterByDate ? ordersRepo.getRevenueByMonthByDate(from, to) : ordersRepo.getRevenueByMonth(currentYear);
         List<BigDecimal> monthlyRevenueData = new ArrayList<>(Collections.nCopies(12, BigDecimal.ZERO));
 
         for (Object[] row : revenueByMonth) {
@@ -112,7 +106,6 @@ public class StatsController {
 
         List<String> monthlyLabels = new ArrayList<>();
         for (int i = 1; i <= 12; i++) monthlyLabels.add("Tháng " + i);
-
         model.addAttribute("revenueMonthLabels", monthlyLabels);
         model.addAttribute("revenueMonthData", monthlyRevenueData);
 
@@ -124,42 +117,52 @@ public class StatsController {
         model.addAttribute("topSold", topSelling.isEmpty() ? null : topSelling.get(0));
 
         // ===== ORDERS PER MONTH =====
-        List<Object[]> ordersPerMonth = isFilterByDate
-                ? ordersRepo.countOrdersPerMonthByDate(from, to)
-                : ordersRepo.countOrdersPerMonthByYear(currentYear);
-
+        List<Object[]> ordersPerMonth = isFilterByDate ? ordersRepo.countOrdersPerMonthByDate(from, to) : ordersRepo.countOrdersPerMonthByYear(currentYear);
         List<Long> orderCounts = new ArrayList<>(Collections.nCopies(12, 0L));
 
         for (Object[] row : ordersPerMonth) {
             int m = ((Number) row[0]).intValue();
             orderCounts.set(m - 1, ((Number) row[1]).longValue());
         }
-
-        List<String> months = new ArrayList<>();
-        for (int i = 1; i <= 12; i++) months.add("Tháng " + i);
-
-        model.addAttribute("months", months);
+        model.addAttribute("months", monthlyLabels);
         model.addAttribute("orderCounts", orderCounts);
 
         int currentMonth = LocalDate.now().getMonthValue();
         model.addAttribute("monthOrders", orderCounts.get(currentMonth - 1));
         model.addAttribute("yearOrders", totalOrders);
 
-        // ===== MEMBERSHIP =====
-        model.addAttribute("memberships", membershipRepo.findAll());
+        // ===== MEMBERSHIP STATS & MANAGEMENT =====
+        List<Membership> memberships = membershipRepo.findAll(Sort.by(Sort.Direction.ASC, "pointRequired"));
+        model.addAttribute("memberships", memberships);
 
         List<Object[]> memStats = membershipRepo.countUsersByMembership();
-        List<String> memLabels = new ArrayList<>();
-        List<Long> memData = new ArrayList<>();
-
+        Map<String, Long> membershipUserCounts = new HashMap<>();
+        
         for (Object[] row : memStats) {
-            memLabels.add((String) row[0]);
-            memData.add(((Number) row[1]).longValue());
+            String memName = (String) row[0];
+            Long count = ((Number) row[1]).longValue();
+            membershipUserCounts.put(memName, count);
         }
-
-        model.addAttribute("memLabels", memLabels);
-        model.addAttribute("memData", memData);
+        model.addAttribute("membershipUserCounts", membershipUserCounts); // Chuyển map ra view để match tên
 
         return "admin/stats";
+    }
+
+    // ===== API ĐỂ CHỈNH SỬA QUYỀN LỢI HẠNG THÀNH VIÊN =====
+    @PostMapping("/admin/membership/update")
+    public String updateMembership(
+            @RequestParam("id") Integer id,
+            @RequestParam("pointRequired") Integer pointRequired,
+            @RequestParam("discount") Integer discount,
+            @RequestParam(value = "freeShipping", required = false) Boolean freeShipping) {
+        
+        Membership m = membershipRepo.findById(id).orElse(null);
+        if (m != null) {
+            m.setPointRequired(pointRequired);
+            m.setDiscount(discount);
+            m.setFreeShipping(freeShipping != null ? freeShipping : false);
+            membershipRepo.save(m);
+        }
+        return "redirect:/stats";
     }
 }

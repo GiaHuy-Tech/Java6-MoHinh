@@ -1,17 +1,26 @@
 package com.example.demo.service;
 
-import com.example.demo.config.VNPayConfig;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
-
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.springframework.stereotype.Service;
+
+import com.example.demo.config.VNPayConfig;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class VNPayService {
-    
+
 	public String createOrder(long amount, String orderInfor, String urlReturn){
 	    String vnp_Version = "2.1.0";
 	    String vnp_Command = "pay";
@@ -19,7 +28,7 @@ public class VNPayService {
 	    String vnp_IpAddr = "127.0.0.1";
 	    String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
 	    String orderType = "order-type";
-	    
+
 	    Map<String, String> vnp_Params = new HashMap<>();
 	    vnp_Params.put("vnp_Version", vnp_Version);
 	    vnp_Params.put("vnp_Command", vnp_Command);
@@ -105,10 +114,10 @@ public class VNPayService {
         if (fields.containsKey("vnp_SecureHash")) {
             fields.remove("vnp_SecureHash");
         }
-        
+
         // Gọi hàm hashAllFields đã thêm ở Bước 1
         String signValue = VNPayConfig.hashAllFields(fields);
-        
+
         if (signValue.equals(vnp_SecureHash)) {
             if ("00".equals(request.getParameter("vnp_ResponseCode"))) {
                 return 1; // Giao dịch thành công

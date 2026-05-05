@@ -62,7 +62,7 @@ public class UserRestController {
             // 3. Xử lý file ảnh
             if (file != null && !file.isEmpty()) {
                 String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                
+
                 // Đường dẫn lưu file (Cố định vào thư mục uploads để tránh mất ảnh khi rebuild)
                 String uploadDir = new File("uploads/images/").getAbsolutePath();
                 File dir = new File(uploadDir);
@@ -72,16 +72,16 @@ public class UserRestController {
 
                 Path filePath = Paths.get(uploadDir, fileName);
                 Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                
+
                 // ĐÃ SỬA: dùng setAvatar thay vì setPhoto
-                acc.setAvatar(fileName); 
+                acc.setAvatar(fileName);
             } else {
                 acc.setAvatar("user.png"); // ĐÃ SỬA: dùng setAvatar thay vì setPhoto
             }
 
             // 4. Lưu vào Database
             repo.save(acc);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(acc);
 
         } catch (Exception e) {

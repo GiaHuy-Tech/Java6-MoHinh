@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-
+//
     private final JwtService jwtService;
     private final AccountService accountService;
 
@@ -30,13 +30,18 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+
+        // Bỏ qua các đường dẫn không cần filter JWT
+        if (path.equals("/login") || path.startsWith("/oauth2/") || path.equals("/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String token = null;
-
-        // Lấy JWT từ cookie
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("JWT_TOKEN")) {
@@ -47,14 +52,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (token != null && jwtService.validateToken(token) &&
                 SecurityContextHolder.getContext().getAuthentication() == null) {
-
             String username = jwtService.getUsername(token);
             UserDetails userDetails = accountService.loadUserByUsername(username);
-
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 

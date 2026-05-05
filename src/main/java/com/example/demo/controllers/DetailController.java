@@ -5,12 +5,20 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.Account;
+import com.example.demo.model.CartDetail;
+import com.example.demo.model.ProductImage;
+import com.example.demo.model.Products;
+import com.example.demo.repository.CartDetailRepository;
+import com.example.demo.repository.CommentRepository;
+import com.example.demo.repository.ProductImageRepository;
+import com.example.demo.repository.ProductRepository;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -29,7 +37,9 @@ public class DetailController {
 
         // 🔥 FIX: dùng JOIN FETCH
         Products product = productRepo.findByIdWithImages(id);
-        if (product == null) return "redirect:/products";
+        if (product == null) {
+			return "redirect:/products";
+		}
 
         model.addAttribute("product", product);
 
@@ -51,10 +61,14 @@ public class DetailController {
                            RedirectAttributes redirectAttributes) {
 
         Account account = (Account) session.getAttribute("account");
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         Products product = productRepo.findById(productId).orElse(null);
-        if (product == null) return "redirect:/products";
+        if (product == null) {
+			return "redirect:/products";
+		}
 
         cartDetailRepo.findByAccountAndProduct(account, product).ifPresentOrElse(
             detail -> {

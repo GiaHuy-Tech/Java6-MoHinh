@@ -1,25 +1,31 @@
 package com.example.demo.config;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.util.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 public class VNPayConfig {
     // URL thanh toán môi trường TEST (Sandbox)
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    
+
     // URL trả về (Return URL) - Hãy đảm bảo Controller của bạn đang lắng nghe đúng đường dẫn này
-    public static String vnp_ReturnUrl = "http://localhost:8080/checkout/vnpay-return"; 
-    
+    public static String vnp_ReturnUrl = "http://localhost:8080/checkout/vnpay-return";
+
     // --- THÔNG TIN CẤU HÌNH TỪ EMAIL VNPAY ---
     // Terminal ID / Mã Website
-    public static String vnp_TmnCode = "JN6JH97K"; 
-    
+    public static String vnp_TmnCode = "JN6JH97K";
+
     // Secret Key / Chuỗi bí mật tạo checksum
-    public static String secretKey = "JDCJ2UHIFZ73D1K2Q5ADYPIXKPGCVSPG"; 
+    public static String secretKey = "JDCJ2UHIFZ73D1K2Q5ADYPIXKPGCVSPG";
     // -----------------------------------------
 
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
@@ -68,7 +74,7 @@ public class VNPayConfig {
         }
         return sb.toString();
     }
-    
+
     // Hàm hashAllFields
     public static String hashAllFields(Map fields) {
         List fieldNames = new ArrayList(fields.keySet());

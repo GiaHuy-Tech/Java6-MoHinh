@@ -4,41 +4,47 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.*;
+import org.hibernate.annotations.Nationalized; // THÊM DÒNG NÀY
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Entity
 @Table(name = "accounts")
 @Data
 public class Account {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private Boolean active = true;
-
     private LocalDate birthDay;
 
-    // bỏ columnDefinition nvarchar
-    @Column(unique = true, length = 255)
+    @Column(unique = true, columnDefinition = "nvarchar(255)")
     private String email;
 
-    // bỏ @Nationalized
-    @Column(length = 255)
+    @Nationalized
+    @Column(columnDefinition = "nvarchar(255)")
     private String fullName;
 
     private Boolean gender;
-
-    @Column(length = 255)
+//lưu ý: password của tài khoản Google sẽ có độ dài 36 ký tự, chúng ta sẽ dùng điều này để phân biệt tài khoản Google và tài khoản thường
+    @Column(columnDefinition = "nvarchar(255)")
     private String password;
 
-    // đây rất dễ là cột gây lỗi convert varchar -> nchar
-    @Column(length = 20)
+    @Column(columnDefinition = "nvarchar(20)")
     private String phone;
 
-    // bỏ @Nationalized
-    @Column(length = 1000)
+    @Nationalized
+    @Column(columnDefinition = "nvarchar(MAX)")
     private String avatar;
 
     private Boolean role = false;

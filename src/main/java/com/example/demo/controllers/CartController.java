@@ -8,7 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
@@ -17,7 +23,6 @@ import com.example.demo.repository.CartDetailRepository;
 import com.example.demo.repository.ProductRepository;
 
 import jakarta.servlet.http.HttpSession;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/cart")
@@ -33,7 +38,9 @@ public class CartController {
     @GetMapping
     public String viewCart(HttpSession session, Model model) {
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         List<CartDetail> cartList = cartRepo.findCartWithProduct(account.getId());
         BigDecimal total = BigDecimal.ZERO;
@@ -61,10 +68,14 @@ public class CartController {
             HttpSession session) {
 
         Account account = getAccount(session);
-        if (account == null) return "unauthorized";
+        if (account == null) {
+			return "unauthorized";
+		}
 
         Products product = productRepo.findById(productId).orElse(null);
-        if (product == null) return "error";
+        if (product == null) {
+			return "error";
+		}
 
         // Kiểm tra nếu sản phẩm không còn kinh doanh hoặc hết sạch hàng ngay từ đầu
         if (!product.isAvailable() || product.getQuantity() <= 0) {
@@ -104,7 +115,9 @@ public class CartController {
     @ResponseBody
     public ResponseEntity<List<CartDetail>> getMiniCartData(HttpSession session) {
         Account account = getAccount(session);
-        if (account == null) return ResponseEntity.status(401).build();
+        if (account == null) {
+			return ResponseEntity.status(401).build();
+		}
         List<CartDetail> cartList = cartRepo.findCartWithProduct(account.getId());
         return ResponseEntity.ok(cartList);
     }
@@ -113,7 +126,9 @@ public class CartController {
     @GetMapping("/plus/{id}")
     public String increase(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         CartDetail item = cartRepo.findById(id).orElse(null);
 
@@ -135,7 +150,9 @@ public class CartController {
     @GetMapping("/minus/{id}")
     public String decrease(@PathVariable Integer id, HttpSession session) {
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         CartDetail item = cartRepo.findById(id).orElse(null);
         if (item != null && item.getAccount().getId().equals(account.getId())) {
@@ -153,7 +170,9 @@ public class CartController {
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable Integer id, HttpSession session) {
         Account account = getAccount(session);
-        if (account == null) return "redirect:/login";
+        if (account == null) {
+			return "redirect:/login";
+		}
 
         CartDetail item = cartRepo.findById(id).orElse(null);
         if (item != null && item.getAccount().getId().equals(account.getId())) {

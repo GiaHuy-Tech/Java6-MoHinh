@@ -34,21 +34,15 @@ public class SecurityConfig {
     private final CustomSuccessHandler successHandler;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomOAuth2UserService oAuth2UserService;
-    
-    // BỔ SUNG: Tiêm Class xử lý thành công cho Google Login
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
-    // BỔ SUNG: Thêm OAuth2LoginSuccessHandler vào Constructor
+//
     public SecurityConfig(AccountService userService,
                           CustomSuccessHandler successHandler,
                           CustomAccessDeniedHandler accessDeniedHandler,
-                          CustomOAuth2UserService oAuth2UserService,
-                          OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+                          CustomOAuth2UserService oAuth2UserService) {
         this.userService = userService;
         this.successHandler = successHandler;
         this.accessDeniedHandler = accessDeniedHandler;
         this.oAuth2UserService = oAuth2UserService;
-        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
@@ -139,8 +133,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(oAuth2UserService)
                         )
-                        // BỔ SUNG QUAN TRỌNG: Gọi Handler xử lý lưu Session sau khi Google trả về thành công
-                        .successHandler(oAuth2LoginSuccessHandler)
+                        .defaultSuccessUrl("/", true) // redirect về trang chủ sau khi login GG
                 )
 
                 // Cấu hình Logout

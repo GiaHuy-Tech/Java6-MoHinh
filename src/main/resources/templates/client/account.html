@@ -1,146 +1,199 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hồ sơ cá nhân - MODEL WORLD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hồ sơ cá nhân - MODEL WORLD</title>
 
-<th:block th:if="${_csrf != null}">
-	<meta name="_csrf" th:content="${_csrf.token}" />
-	<meta name="_csrf_header" th:content="${_csrf.headerName}" />
-</th:block>
+    <th:block th:if="${_csrf != null}">
+        <meta name="_csrf" th:content="${_csrf.token}" />
+        <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    </th:block>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
 
-<style>
-:root {
-	--bg-body: #0b0c10; --bg-card: #151b22; --bg-nav: #0b0c10;
-	--text-main: #66fcf1; --text-light: #c5c6c7; --text-dim: #8892b0;
-	--accent-cyan: #45a29e; --border-color: #232d39; --shadow: rgba(0, 0, 0, 0.4);
-	--accent-red: #ff2e63; --input-bg: #0b0c10;
-}
-[data-theme="light"] {
-	--bg-body: #f0f2f5; --bg-card: #ffffff; --bg-nav: #ffffff;
-	--text-main: #00adb5; --text-light: #222831; --text-dim: #666666;
-	--border-color: #e1e4e8; --shadow: rgba(0, 0, 0, 0.08);
-	--input-bg: #f8f9fa;
-}
+    <style>
+        :root {
+            --bg-body: #0b0c10; --bg-card: #151b22; --bg-nav: #0b0c10;
+            --text-main: #66fcf1; --text-light: #c5c6c7; --text-dim: #8892b0;
+            --accent-cyan: #45a29e; --border-color: #232d39; --shadow: rgba(0, 0, 0, 0.4);
+            --accent-red: #ff2e63; --input-bg: #0b0c10;
+        }
+        [data-theme="light"] {
+            --bg-body: #f0f2f5; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #00adb5; --text-light: #222831; --text-dim: #666666;
+            --border-color: #e1e4e8; --shadow: rgba(0, 0, 0, 0.08);
+            --input-bg: #f8f9fa;
+        }
 
-body {
-	background-color: var(--bg-body); color: var(--text-light);
-	font-family: 'Be Vietnam Pro', sans-serif;
-	transition: background-color 0.3s, color 0.3s;
-	overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column;
-}
+        body {
+            background-color: var(--bg-body); color: var(--text-light);
+            font-family: 'Be Vietnam Pro', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column;
+        }
 
-/* NAVBAR */
-.top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 2000; padding: 10px 0; box-shadow: 0 4px 15px var(--shadow); }
-.nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.5rem; letter-spacing: 1px;}
-.nav-icon-link { color: var(--text-light); font-size: 1.2rem; transition: 0.3s; text-decoration: none; position: relative;}
-.nav-icon-link:hover { color: var(--text-main); transform: translateY(-2px);}
-.badge-count { position: absolute; top: -6px; right: -8px; background: var(--accent-red); color: #fff; font-size: 0.65rem; padding: 2px 5px; border-radius: 50%; font-weight: 900; border: 2px solid var(--bg-nav);}
+        /* NAVBAR ĐỒNG BỘ TỪ INDEX */
+        .top-navbar { background: var(--bg-nav); border-bottom: 1px solid var(--border-color); position: sticky; top:0; z-index: 2000; padding: 10px 0; box-shadow: 0 2px 10px var(--shadow); }
+        .nav-holder { position: relative; }
+        .nav-logo span { font-family: 'Montserrat'; font-weight: 900; color: var(--text-main); font-size: 1.7rem; }
+        .nav-icon-link { color: var(--text-light); font-size: 1.4rem; transition: 0.3s; position: relative; text-decoration: none; border:none; background:none; cursor: pointer; }
+        .nav-icon-link:hover { color: var(--text-main); }
 
-/* UI CARDS */
-.account-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 30px; box-shadow: 0 8px 30px var(--shadow); height: 100%; }
-.section-title { font-family: 'Montserrat'; font-weight: 800; color: var(--text-light); letter-spacing: 0.5px; border-left: 4px solid var(--text-main); padding-left: 12px; margin-bottom: 25px; font-size: 1.15rem; text-transform: uppercase;}
+        /* SEARCH BAR ĐỒNG BỘ */
+        .search-container { position: relative; max-width: 450px; }
+        #liveSearchInput { background-color: var(--bg-card) !important; color: var(--text-light) !important; border-color: var(--border-color); }
+        .search-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; margin-top: 8px; display: none; z-index: 3000; overflow: hidden; box-shadow: 0 10px 30px var(--shadow); width: 100%; }
+        .search-item { display: flex; align-items: center; gap: 10px; padding: 10px; text-decoration: none; color: var(--text-light); border-bottom: 1px solid var(--border-color); }
+        .search-item:hover { background: var(--text-main); color: #000; }
+        .search-item img { width: 40px; height: 40px; object-fit: contain; background: #fff; border-radius: 5px; }
 
-/* AVATAR */
-.avatar-section { position: relative; width: 130px; margin: 0 auto 20px; }
-.avatar-display { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 0 3px var(--text-main), 0 8px 15px var(--shadow); transition: 0.3s; cursor: pointer; }
-.avatar-display:hover { filter: brightness(0.7); }
-.camera-icon { position: absolute; bottom: 0; right: 0; background: var(--text-main); color: #000; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); font-size: 1.1rem; pointer-events: none;}
+        /* MEGA MENU ĐỒNG BỘ */
+        .mega-menu-content { position: absolute; top: calc(100% + 15px); left: 50%; transform: translateX(-50%); width: 92vw; max-width: 1300px; background: var(--bg-card); border: 1px solid var(--border-color); border-top: 4px solid var(--text-main); display: none; z-index: 1500; padding: 0; box-shadow: 0 30px 60px var(--shadow); border-radius: 0 0 15px 15px; }
+        .mega-menu-content.active { display: block; animation: slideIn 0.3s ease forwards; }
+        .mega-sidebar { background: rgba(0,0,0,0.03); padding: 25px; min-height: 400px; }
+        .mega-main-content { padding: 30px; }
+        .mega-cat-link { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: var(--text-light); text-decoration: none; border-radius: 8px; transition: 0.2s; cursor: pointer; }
+        .mega-cat-link:hover, .mega-cat-link.active { background: var(--text-main); color: #000 !important; font-weight: 700; }
 
-/* STATS WIDGETS */
-.stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; transition: 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;}
-.stat-box:hover { border-color: var(--text-main); transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow);}
-.stat-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-dim); margin-bottom: 5px;}
-.stat-value { font-size: 1.3rem; font-weight: 900; color: var(--text-light); font-family: 'Montserrat';}
+        /* MINI CART ĐỒNG BỘ */
+        .cart-dropdown-menu { background: var(--bg-card) !important; border: 1px solid var(--border-color) !important; color: var(--text-light) !important; width: 380px; padding: 0; }
+        .cart-dropdown-menu .border-bottom { border-color: var(--border-color) !important; }
+        .cart-dropdown-menu .text-light { color: var(--text-light) !important; }
+        .cart-dropdown-menu .bg-dark { background-color: var(--bg-body) !important; }
+        .badge-count { position: absolute; top: -5px; right: -8px; background: var(--accent-red); color: #fff; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; font-weight: 900; }
 
-/* RANK TAGS */
-.rank-tag { font-family: 'Montserrat', sans-serif; font-size: 0.8rem; font-weight: 800; padding: 6px 20px; border-radius: 50px; display: inline-block; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; }
-.rank-kim-cuong { background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); background-size: 200% auto; color: #fff !important; animation: shine_diamond 2s linear infinite; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3); }
-.rank-vang { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000 !important; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3); }
-.rank-bac { background: linear-gradient(45deg, #bdc3c7, #95a5a6); color: #000 !important; }
-.rank-dong { background: linear-gradient(45deg, #cd7f32, #a0522d); color: #fff !important; }
-@keyframes shine_diamond { to { background-position:200% center; } }
+        /* UI CARDS CỦA TRANG PROFILE GIỮ NGUYÊN */
+        .account-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 30px; box-shadow: 0 8px 30px var(--shadow); height: 100%; }
+        .section-title { font-family: 'Montserrat'; font-weight: 800; color: var(--text-light); letter-spacing: 0.5px; border-left: 4px solid var(--text-main); padding-left: 12px; margin-bottom: 25px; font-size: 1.15rem; text-transform: uppercase;}
 
-/* FORMS */
-.form-label { color: var(--text-dim); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; }
-.form-control, .form-select { background-color: var(--input-bg) !important; color: var(--text-light) !important; border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 12px 15px; transition: 0.3s; font-size: 0.95rem;}
-.form-control:focus, .form-select:focus { border-color: var(--text-main) !important; box-shadow: 0 0 0 3px rgba(102, 252, 241, 0.1); }
-.input-group .btn-update { border-radius: 0 10px 10px 0; border: 1px solid var(--text-main); margin-left: -1px; z-index: 5;}
-.input-group .form-control, .input-group .input-group-text { border-radius: 10px 0 0 10px; }
+        /* AVATAR */
+        .avatar-section { position: relative; width: 130px; margin: 0 auto 20px; }
+        .avatar-display { width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 0 3px var(--text-main), 0 8px 15px var(--shadow); transition: 0.3s; cursor: pointer; }
+        .avatar-display:hover { filter: brightness(0.7); }
+        .camera-icon { position: absolute; bottom: 0; right: 0; background: var(--text-main); color: #000; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--bg-card); font-size: 1.1rem; pointer-events: none;}
 
-/* BUTTONS */
-.btn-update { background: var(--text-main); color: #000; font-weight: 800; padding: 10px 25px; border-radius: 10px; transition: 0.3s; border: none; font-size: 0.95rem;}
-.btn-update:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 252, 241, 0.3); }
+        /* STATS WIDGETS */
+        .stat-box { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; transition: 0.3s; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 100%;}
+        .stat-box:hover { border-color: var(--text-main); transform: translateY(-3px); box-shadow: 0 5px 15px var(--shadow);}
+        .stat-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: var(--text-dim); margin-bottom: 5px;}
+        .stat-value { font-size: 1.3rem; font-weight: 900; color: var(--text-light); font-family: 'Montserrat';}
 
-/* ADDRESS CARDS */
-.address-card { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden;}
-.address-card:hover { border-color: var(--accent-cyan); box-shadow: 0 4px 15px var(--shadow);}
-.address-card.is-default { border-color: var(--text-main); background: rgba(102, 252, 241, 0.03);}
-.address-card.is-default::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--text-main);}
-.badge-default { background: rgba(102, 252, 241, 0.15); color: var(--text-main); border: 1px solid var(--text-main); font-size: 0.7rem; padding: 4px 10px; border-radius: 50px; font-weight: 800;}
+        /* RANK TAGS */
+        .rank-tag { font-family: 'Montserrat', sans-serif; font-size: 0.8rem; font-weight: 800; padding: 6px 20px; border-radius: 50px; display: inline-block; text-transform: uppercase; margin-bottom: 20px; letter-spacing: 1px; }
+        .rank-kim-cuong { background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); background-size: 200% auto; color: #fff !important; animation: shine_diamond 2s linear infinite; box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3); }
+        .rank-vang { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000 !important; box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3); }
+        .rank-bac { background: linear-gradient(45deg, #bdc3c7, #95a5a6); color: #000 !important; }
+        .rank-dong { background: linear-gradient(45deg, #cd7f32, #a0522d); color: #fff !important; }
+        @keyframes shine_diamond { to { background-position:200% center; } }
 
-.add-address-zone { background: transparent; border: 1px dashed var(--border-color); border-radius: 15px; padding: 25px; transition: 0.3s;}
-.add-address-zone:focus-within { border-color: var(--text-main); background: rgba(102, 252, 241, 0.02);}
+        /* FORMS */
+        .form-label { color: var(--text-dim); font-weight: 600; font-size: 0.85rem; margin-bottom: 8px; }
+        .form-control, .form-select { background-color: var(--input-bg) !important; color: var(--text-light) !important; border: 1px solid var(--border-color) !important; border-radius: 10px; padding: 12px 15px; transition: 0.3s; font-size: 0.95rem;}
+        .form-control:focus, .form-select:focus { border-color: var(--text-main) !important; box-shadow: 0 0 0 3px rgba(102, 252, 241, 0.1); }
+        .input-group .btn-update { border-radius: 0 10px 10px 0; border: 1px solid var(--text-main); margin-left: -1px; z-index: 5;}
+        .input-group .form-control, .input-group .input-group-text { border-radius: 10px 0 0 10px; }
 
-/* DANGER ZONE */
-.danger-zone { background: rgba(255, 46, 99, 0.03); border: 1px solid rgba(255, 46, 99, 0.2); border-radius: 15px; padding: 25px;}
-.danger-zone .btn { background: var(--accent-red); color: white; border: none; border-radius: 0 10px 10px 0;}
-.danger-zone .btn:hover { background: #e02454;}
-.danger-zone .form-control:focus { border-color: var(--accent-red) !important; box-shadow: 0 0 0 3px rgba(255, 46, 99, 0.1); }
+        /* BUTTONS */
+        .btn-update { background: var(--text-main); color: #000; font-weight: 800; padding: 10px 25px; border-radius: 10px; transition: 0.3s; border: none; font-size: 0.95rem;}
+        .btn-update:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 252, 241, 0.3); }
 
-footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); padding: 20px 0; margin-top: auto; }
-</style>
+        /* ADDRESS CARDS */
+        .address-card { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 20px; transition: 0.3s; position: relative; overflow: hidden;}
+        .address-card:hover { border-color: var(--accent-cyan); box-shadow: 0 4px 15px var(--shadow);}
+        .address-card.is-default { border-color: var(--text-main); background: rgba(102, 252, 241, 0.03);}
+        .address-card.is-default::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--text-main);}
+        .badge-default { background: rgba(102, 252, 241, 0.15); color: var(--text-main); border: 1px solid var(--text-main); font-size: 0.7rem; padding: 4px 10px; border-radius: 50px; font-weight: 800;}
+
+        .add-address-zone { background: transparent; border: 1px dashed var(--border-color); border-radius: 15px; padding: 25px; transition: 0.3s;}
+        .add-address-zone:focus-within { border-color: var(--text-main); background: rgba(102, 252, 241, 0.02);}
+
+        /* DANGER ZONE */
+        .danger-zone { background: rgba(255, 46, 99, 0.03); border: 1px solid rgba(255, 46, 99, 0.2); border-radius: 15px; padding: 25px;}
+        .danger-zone .btn { background: var(--accent-red); color: white; border: none; border-radius: 0 10px 10px 0;}
+        .danger-zone .btn:hover { background: #e02454;}
+        .danger-zone .form-control:focus { border-color: var(--accent-red) !important; box-shadow: 0 0 0 3px rgba(255, 46, 99, 0.1); }
+    </style>
 </head>
 <body>
 
-	<nav class="top-navbar">
-		<div class="container-fluid px-lg-5 nav-holder">
-			<div class="d-flex align-items-center justify-content-between">
-				<div class="d-flex align-items-center gap-4">
-					<a th:href="@{/}" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a> 
-					<a th:href="@{/products}" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 0.95rem; font-weight: 700;"> 
-						<i class="bi bi-box-seam"></i> SẢN PHẨM
-					</a>
-				</div>
+    <input type="hidden" id="isLoggedIn" th:value="${user != null or account != null ? 'true' : 'false'}">
 
-				<div class="d-flex align-items-center gap-4">
-					<div class="theme-toggle nav-icon-link" onclick="toggleTheme()"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
-					<a th:href="@{/wishlist}" class="nav-icon-link"><i class="bi bi-heart"></i></a> 
-					<a th:href="@{/cart}" class="nav-icon-link position-relative"> 
-						<i class="bi bi-cart3"></i> <span class="badge-count" th:text="${cartSize ?: 0}">0</span>
-					</a>
+    <!-- NAVBAR ĐỒNG BỘ INDEX CHUẨN XÁC 100% -->
+    <nav class="top-navbar">
+        <div class="container-fluid px-lg-5 nav-holder">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-4">
+                    <a href="/" class="text-decoration-none nav-logo"><span>MODEL WORLD</span></a>
+                    <div class="position-static">
+                        <button class="btn btn-info rounded-pill px-4 fw-bold" id="btnMegaMenu"><i class="bi bi-grid-3x3-gap-fill me-2"></i> DANH MỤC</button>
+                        <!-- Tạm ẩn nội dung MegaMenu do trang này không load list categories, click sẽ chuyển hướng tới Products -->
+                    </div>
+                    <a href="/products" class="nav-icon-link d-none d-lg-flex align-items-center gap-2" style="font-size: 1rem; font-weight: 600;"><i class="bi bi-box-seam"></i> SẢN PHẨM</a>
+                </div>
 
-					<div class="dropdown">
-						<div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown" style="cursor: pointer">
-							<img th:src="${account.avatar != null ? (account.avatar.startsWith('http') ? account.avatar : '/images/avatar/' + account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-secondary" width="35" height="35" style="object-fit: cover;">
-						</div>
-						<ul class="dropdown-menu dropdown-menu-end shadow border border-secondary mt-3" style="background: var(--bg-card); font-size: 0.9rem;">
-							<li><a class="dropdown-item py-2 fw-bold" style="color: var(--text-main);" th:href="@{/account}"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
-							<li><a class="dropdown-item py-2" style="color: var(--text-light);" th:href="@{/orders}"><i class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
-							<li><hr class="dropdown-divider border-secondary"></li>
-							<li><a class="dropdown-item py-2 text-danger fw-bold" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-	</nav>
+                <!-- LIVE SEARCH -->
+                <div class="search-container flex-grow-1 mx-5 d-none d-md-block">
+                    <div class="input-group">
+                        <input type="text" id="liveSearchInput" class="form-control rounded-start-pill px-4 py-2" placeholder="Tìm kiếm mô hình...">
+                        <button class="btn btn-outline-info rounded-end-pill border-secondary border-start-0 bg-dark px-3" id="btnMainSearch"><i class="bi bi-search"></i></button>
+                    </div>
+                    <div class="search-results shadow-lg" id="searchResultList"></div>
+                </div>
 
-	<div class="container py-5">
+                <div class="d-flex align-items-center gap-4">
+                    <div class="theme-toggle nav-icon-link" onclick="toggleTheme()" style="cursor:pointer;"><i class="bi bi-moon-stars-fill" id="themeIcon"></i></div>
+                    <a href="/wishlist" class="nav-icon-link" id="btnWishlistNav"><i class="bi bi-heart"></i></a>
+                    
+                    <!-- DROPDOWN MINI CART -->
+                    <div class="dropdown">
+                        <div class="nav-icon-link position-relative" id="cartIconNav" data-bs-toggle="dropdown">
+                            <i class="bi bi-cart3"></i>
+                            <span class="badge-count" id="cartBadgeNav" style="display:none;">0</span>
+                        </div>
+                        <div class="dropdown-menu dropdown-menu-end cart-dropdown-menu shadow-lg">
+                            <div class="p-3 border-bottom fw-bold d-flex justify-content-between align-items-center">
+                                <span>GIỎ HÀNG</span>
+                                <span class="badge bg-info text-dark" id="cartBadgeMenu">0 món</span>
+                            </div>
+                            
+                            <!-- KHU VỰC CẬP NHẬT AJAX -->
+                            <div id="miniCartContent" style="max-height: 300px; overflow-y: auto;">
+                                <div class="p-4 text-center opacity-50">Đang tải...</div>
+                            </div>
+
+                            <div class="p-3 bg-dark"><a href="/cart" class="btn btn-info btn-sm w-100 fw-bold rounded-pill">XEM CHI TIẾT</a></div>
+                        </div>
+                    </div>
+                    
+                    <!-- AVATAR -->
+                    <div class="dropdown" th:if="${account != null}">
+                        <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown">
+                            <img th:src="${account.avatar != null ? (account.avatar.startsWith('http') ? account.avatar : '/images/avatar/' + account.avatar) : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="rounded-circle border border-info" width="38" height="38" style="object-fit:cover;">
+                            <i class="bi bi-chevron-down small text-light"></i>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3">
+                            <li><a class="dropdown-item py-2" href="/account"><i class="bi bi-person me-2"></i> Hồ sơ</a></li>
+                            <li><a class="dropdown-item py-2" href="/orders"><i class="bi bi-bag-check me-2"></i> Đơn hàng</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
+                        </ul>
+                    </div>
+                    <a th:if="${account == null}" href="/login" class="btn btn-sm btn-outline-info rounded-pill px-4">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- NỘI DUNG CHÍNH (GIỮ NGUYÊN) -->
+	<div class="container py-5 flex-grow-1">
 		<div class="row g-4">
-			
-			<!-- ============================================== -->
-			<!-- CỘT TRÁI: WIDGET TÓM TẮT THÔNG TIN (GỌN GÀNG)  -->
-			<!-- ============================================== -->
+			<!-- CỘT TRÁI: WIDGET TÓM TẮT -->
 			<div class="col-xl-4 col-lg-4">
 				<div class="account-card">
 					<div class="text-center">
-						<!-- Avatar -->
 						<form id="avatarForm" th:action="@{/account/upload-avatar}" method="post" enctype="multipart/form-data">
 							<div class="avatar-section">
 								<label for="avatarInput" title="Thay đổi ảnh đại diện"> 
@@ -151,17 +204,13 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 							</div>
 						</form>
 
-						<!-- Thông tin cơ bản -->
 						<h5 class="fw-bold mb-1" style="color: var(--text-light);" th:text="${account.fullName ?: account.username}">Họ tên</h5>
 						<p class="mb-3 small fw-medium" style="color: var(--text-dim)" th:text="${account.email}">email@example.com</p>
-
-						<!-- Rank -->
 						<div class="rank-tag shadow" th:classappend="${membershipName == 'Kim Cương' ? 'rank-kim-cuong' : (membershipName == 'Vàng' ? 'rank-vang' : (membershipName == 'Bạc' ? 'rank-bac' : 'rank-dong'))}" th:text="${membershipName ?: 'Thành viên'}">Hạng</div>
 					</div>
 
 					<hr class="my-4" style="border-color: var(--border-color);">
 
-					<!-- Thống kê -->
 					<div class="row g-3">
 						<div class="col-6">
 							<div class="stat-box">
@@ -185,12 +234,8 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 				</div>
 			</div>
 
-			<!-- ============================================== -->
-			<!-- CỘT PHẢI: KHU VỰC CÁC FORM CHỈNH SỬA           -->
-			<!-- ============================================== -->
+			<!-- CỘT PHẢI: KHU VỰC CÁC FORM -->
 			<div class="col-xl-8 col-lg-8">
-				
-				<!-- Thông báo Hệ thống -->
 				<div th:if="${success}" class="alert alert-success border-success bg-success bg-opacity-10 text-success fw-bold rounded-3 mb-4 py-3">
 					<i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
 				</div>
@@ -199,8 +244,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 				</div>
 
 				<div class="account-card">
-                    
-					<!-- PHẦN 1: THÔNG TIN CÁ NHÂN -->
+					<!-- PHẦN 1 -->
 					<h6 class="section-title"><i class="bi bi-person-lines-fill me-2 text-main"></i> THÔNG TIN CÁ NHÂN</h6>
 					<div class="row g-4 mb-4">
 						<div class="col-md-6">
@@ -227,7 +271,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 
                     <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
 
-					<!-- PHẦN 2: SỔ ĐỊA CHỈ -->
+					<!-- PHẦN 2 -->
 					<div class="d-flex justify-content-between align-items-center mb-4">
 						<h6 class="section-title mb-0"><i class="bi bi-geo-alt-fill me-2 text-main"></i> SỔ ĐỊA CHỈ GIAO HÀNG</h6>
 						<button class="btn btn-sm btn-outline-info rounded-pill fw-bold px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAddAddress">
@@ -235,7 +279,6 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 						</button>
 					</div>
 
-					<!-- Danh sách địa chỉ đã lưu -->
                     <div th:if="${addresses != null and !addresses.isEmpty()}" class="row g-3 mb-4">
                         <div th:each="addr : ${addresses}" class="col-md-6">
 							<div class="address-card h-100 d-flex flex-column" th:classappend="${addr.isDefault} ? 'is-default' : ''">
@@ -260,11 +303,10 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
                         </div>
                     </div>
 
-					<!-- Form Thêm Địa Chỉ Mới (Ẩn/Hiện) -->
 					<div class="collapse" id="collapseAddAddress">
 						<div class="add-address-zone mt-2 shadow-sm">
 							<h6 class="fw-bold mb-3" style="color: var(--text-light);"><i class="bi bi-pencil-square me-2 text-main"></i> Thông tin người nhận mới</h6>
-<form th:action="@{/account/add-address}" method="post" accept-charset="UTF-8">								<div class="row g-3">
+                            <form th:action="@{/account/add-address}" method="post" accept-charset="UTF-8">								<div class="row g-3">
 									<div class="col-md-6">
 										<label class="form-label">Tên người nhận</label>
 										<input type="text" name="recipientName" class="form-control" placeholder="Ví dụ: Nguyễn Văn A" required>
@@ -306,7 +348,7 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 
                     <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
 
-					<!-- PHẦN 3: BẢO MẬT & ĐỔI MẬT KHẨU -->
+					<!-- PHẦN 3 -->
 					<div class="danger-zone">
 						<h6 class="section-title border-danger text-danger mb-4"><i class="bi bi-shield-lock-fill me-2"></i> BẢO MẬT TÀI KHOẢN</h6>
 						<form th:action="@{/account/update-password}" method="post">
@@ -319,20 +361,101 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
 						</form>
 					</div>
 
-				</div> <!-- End Card Tổng -->
+				</div>
 			</div>
 		</div>
 	</div>
 
-	<footer class="text-center">
-		<p class="text-dim small fw-medium mb-0">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p>
-	</footer>
+    <!-- FOOTER ĐỒNG BỘ INDEX -->
+	<footer class="py-5 bg-dark border-top border-secondary text-center">
+        <p class="text-white small mb-0">© 2026 MODEL WORLD - THE ULTIMATE HOBBY STORE</p>
+    </footer>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	
-	<!-- SCRIPT QUẢN LÝ THEME & ĐỊA CHỈ API -->
+	<!-- SCRIPT ĐỒNG BỘ MINI CART, TÌM KIẾM, THEME & API ĐỊA CHỈ -->
 	<script>
-        // 1. Quản lý Theme (Dark/Light Mode)
+        const isLoggedIn = document.getElementById('isLoggedIn').value === 'true';
+
+        // 1. AJAX CALL CHO TĂNG/GIẢM/XÓA MINI CART
+        function updateMiniCart() {
+            if (!isLoggedIn) return;
+            fetch('/cart/api/mini-cart', { headers: { 'Cache-Control': 'no-cache' } })
+                .then(res => res.json())
+                .then(data => {
+                    const badgeNav = document.getElementById('cartBadgeNav');
+                    const badgeMenu = document.getElementById('cartBadgeMenu');
+                    
+                    if (badgeNav) {
+                        badgeNav.innerText = data.length;
+                        badgeNav.style.display = data.length > 0 ? 'inline-block' : 'none';
+                    }
+                    if (badgeMenu) {
+                        badgeMenu.innerText = data.length + ' món';
+                    }
+
+                    const container = document.getElementById('miniCartContent');
+                    if (data.length === 0) {
+                        container.innerHTML = '<div class="p-4 text-center opacity-50">Giỏ hàng trống</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(item => {
+                        let priceStr = new Intl.NumberFormat('vi-VN').format(item.price) + '₫';
+                        let imgSrc = item.product.mainImage.startsWith('http') || item.product.mainImage.startsWith('/images/') ? item.product.mainImage : '/images/products/' + item.product.mainImage;
+                        
+                        html += `
+                        <div class="p-3 d-flex align-items-center gap-3 border-bottom hover-bg">
+                            <img src="${imgSrc}" width="40" height="40" style="background:#fff; object-fit:contain; border-radius:4px;">
+                            <div class="overflow-hidden flex-grow-1">
+                                <div class="small text-truncate fw-bold text-light">${item.product.name}</div>
+                                <div class="text-danger small fw-bold">${priceStr}</div>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" style="font-size: 0.7rem;" onclick="miniCartAction('/cart/minus/${item.id}')">-</button>
+                                    <span class="small fw-bold text-light">${item.quantity}</span>
+                                    <button class="btn btn-sm btn-outline-secondary py-0 px-2 text-light" style="font-size: 0.7rem;" onclick="miniCartAction('/cart/plus/${item.id}')">+</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm text-danger" onclick="miniCartAction('/cart/delete/${item.id}')"><i class="bi bi-trash"></i></button>
+                        </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                });
+        }
+
+        function miniCartAction(url) {
+            fetch(url, { headers: { 'Cache-Control': 'no-cache' } }).then(() => updateMiniCart());
+        }
+
+        // 2. TÌM KIẾM LIVE SEARCH
+        function executeSearch() { 
+            const q = document.getElementById('liveSearchInput').value.trim(); 
+            if (q) window.location.href = `/products?keyword=${encodeURIComponent(q)}`; 
+        }
+        
+        const searchInput = document.getElementById('liveSearchInput'); 
+        const searchResultList = document.getElementById('searchResultList');
+        if (searchInput) {
+            searchInput.oninput = function() {
+                const q = this.value.trim(); if (q.length < 2) { searchResultList.style.display = 'none'; return; }
+                fetch(`/cart/api/search?keyword=${encodeURIComponent(q)}`).then(res => res.json()).then(data => {
+                    if (data.length > 0) {
+                        searchResultList.innerHTML = data.map(p => {
+                            let imgSrc = p.mainImage.startsWith('http') || p.mainImage.startsWith('/images/') ? p.mainImage : '/images/products/' + p.mainImage;
+                            return `<a href="/product-detail/${p.id}" class="search-item"><img src="${imgSrc}"><div class="overflow-hidden"><div class="small fw-bold text-truncate">${p.name}</div><div class="text-danger small fw-bold">${new Intl.NumberFormat('vi-VN').format(p.price)}₫</div></div></a>`;
+                        }).join('');
+                        searchResultList.style.display = 'block';
+                    } else { searchResultList.style.display = 'none'; }
+                });
+            };
+            searchInput.onkeypress = (e) => { if(e.key === 'Enter') executeSearch(); };
+        }
+        document.getElementById('btnMainSearch').onclick = executeSearch;
+        document.addEventListener('click', (e) => { if (searchInput && !searchInput.contains(e.target)) searchResultList.style.display = 'none'; });
+
+        // 3. Quản lý Theme (Dark/Light Mode)
         function toggleTheme() {
             const h = document.documentElement;
             const icon = document.getElementById('themeIcon');
@@ -343,62 +466,79 @@ footer { background: var(--bg-nav); border-top: 1px solid var(--border-color); p
             localStorage.setItem('theme', newTheme);
         }
 
+        // MEGA MENU
+        const btnMega = document.getElementById('btnMegaMenu');
+        if (btnMega) {
+            btnMega.onclick = (e) => { 
+                e.stopPropagation(); 
+                const megaMenu = document.getElementById('megaMenu');
+                if(megaMenu) megaMenu.classList.toggle('active'); 
+                else window.location.href = '/products'; 
+            };
+        }
+
+        // 4. KHỞI CHẠY KHI LOAD TRANG
         document.addEventListener('DOMContentLoaded', () => {
+            // Load theme
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const icon = document.getElementById('themeIcon');
             if(icon) icon.className = savedTheme === 'dark' ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
             
-            // 2. Tích hợp API Tỉnh/Quận/Phường (Đã gộp và tối ưu)
+            // Load giỏ hàng
+            if (isLoggedIn) {
+                updateMiniCart();
+            }
+
+            // Tích hợp API Tỉnh/Quận/Phường
             const provinceSelect = document.getElementById("province");
             const districtSelect = document.getElementById("district");
             const wardSelect = document.getElementById("ward");
 
-            // Lấy danh sách Tỉnh/Thành
-            fetch("https://provinces.open-api.vn/api/?depth=1")
-                .then(res => res.json())
-                .then(data => {
-                    data.forEach(p => {
-                        provinceSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
-                    });
-                })
-                .catch(err => console.error("Lỗi lấy dữ liệu tỉnh:", err));
-
-            // Khi chọn Tỉnh -> Load Quận/Huyện
-            provinceSelect.addEventListener("change", () => {
-                const provinceName = provinceSelect.value;
-                districtSelect.innerHTML = `<option value="" selected disabled>-- Chọn Quận --</option>`;
-                wardSelect.innerHTML = `<option value="" selected disabled>-- Chọn Phường --</option>`;
-
-                fetch("https://provinces.open-api.vn/api/?depth=2")
+            if(provinceSelect) {
+                fetch("https://provinces.open-api.vn/api/?depth=1")
                     .then(res => res.json())
                     .then(data => {
-                        const province = data.find(p => p.name === provinceName);
-                        if (!province) return;
-                        province.districts.forEach(d => {
-                            districtSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                        data.forEach(p => {
+                            provinceSelect.innerHTML += `<option value="${p.name}">${p.name}</option>`;
                         });
-                    });
-            });
+                    })
+                    .catch(err => console.error("Lỗi lấy dữ liệu tỉnh:", err));
 
-            // Khi chọn Quận -> Load Phường/Xã
-            districtSelect.addEventListener("change", () => {
-                const provinceName = provinceSelect.value;
-                const districtName = districtSelect.value;
-                wardSelect.innerHTML = `<option value="" selected disabled>-- Chọn Phường --</option>`;
+                provinceSelect.addEventListener("change", () => {
+                    const provinceName = provinceSelect.value;
+                    districtSelect.innerHTML = `<option value="" selected disabled>-- Chọn Quận --</option>`;
+                    wardSelect.innerHTML = `<option value="" selected disabled>-- Chọn Phường --</option>`;
 
-                fetch("https://provinces.open-api.vn/api/?depth=3")
-                    .then(res => res.json())
-                    .then(data => {
-                        const province = data.find(p => p.name === provinceName);
-                        if (!province) return;
-                        const district = province.districts.find(d => d.name === districtName);
-                        if (!district) return;
-                        district.wards.forEach(w => {
-                            wardSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+                    fetch("https://provinces.open-api.vn/api/?depth=2")
+                        .then(res => res.json())
+                        .then(data => {
+                            const province = data.find(p => p.name === provinceName);
+                            if (!province) return;
+                            province.districts.forEach(d => {
+                                districtSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                            });
                         });
-                    });
-            });
+                });
+
+                districtSelect.addEventListener("change", () => {
+                    const provinceName = provinceSelect.value;
+                    const districtName = districtSelect.value;
+                    wardSelect.innerHTML = `<option value="" selected disabled>-- Chọn Phường --</option>`;
+
+                    fetch("https://provinces.open-api.vn/api/?depth=3")
+                        .then(res => res.json())
+                        .then(data => {
+                            const province = data.find(p => p.name === provinceName);
+                            if (!province) return;
+                            const district = province.districts.find(d => d.name === districtName);
+                            if (!district) return;
+                            district.wards.forEach(w => {
+                                wardSelect.innerHTML += `<option value="${w.name}">${w.name}</option>`;
+                            });
+                        });
+                });
+            }
         });
 	</script>
 

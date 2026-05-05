@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.demo.dto.CartStatsDTO;
 import com.example.demo.model.Account;
 import com.example.demo.model.CartDetail;
 import com.example.demo.model.Products;
-import com.example.demo.dto.CartStatsDTO;
 
 public interface CartDetailRepository extends JpaRepository<CartDetail, Integer> {
 

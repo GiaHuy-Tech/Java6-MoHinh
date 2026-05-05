@@ -236,14 +236,23 @@
                     <span class="opacity-75">Tạm tính:</span>
                     <span class="fw-bold" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
                 </div>
-                <div class="d-flex justify-content-between mb-3">
-                    <span class="opacity-75">Phí vận chuyển:</span>
-                    <span class="text-success fw-bold">Miễn phí</span>
+                
+                <!-- CHỖ NÀY ĐƯỢC THÊM VÀO ĐỂ BÁO PHÍ VẬN CHUYỂN -->
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    <span class="opacity-75 text-danger">Phí vận chuyển:</span>
+                    <span class="small fst-italic opacity-75 text-danger"><i class="bi bi-truck me-1"></i>Tính khi thanh toán</span>
                 </div>
+                
+               
+               
                 <hr class="border-secondary">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <span class="fw-bold">TỔNG CỘNG:</span>
                     <span class="fs-3 fw-bold" style="color: var(--text-main)" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT') + '₫'}">0₫</span>
+                </div>
+                  <!-- CHỖ NÀY ĐƯỢC THÊM VÀO ĐỂ BÁO PHÍ VẬN CHUYỂN -->
+                <div class="d-flex justify-content-between mb-3 align-items-center">
+                    <span class="opacity-75 text-info">Giá này chưa bao gồm voucher</span>
                 </div>
                 <a th:href="${#lists.isEmpty(cartDetails) ? '#' : '/checkout'}" 
                    class="btn-checkout-giant d-block text-center text-decoration-none shadow"

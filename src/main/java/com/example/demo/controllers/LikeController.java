@@ -1,14 +1,17 @@
 package com.example.demo.controllers;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.model.Account;
@@ -32,7 +35,9 @@ public class LikeController {
     // Hàm phụ để lấy Account từ session linh hoạt
     private Account getSessionUser(HttpSession session) {
         Account user = (Account) session.getAttribute("account");
-        if (user == null) user = (Account) session.getAttribute("user");
+        if (user == null) {
+			user = (Account) session.getAttribute("user");
+		}
         return user;
     }
 
@@ -40,11 +45,13 @@ public class LikeController {
     @GetMapping
     public String wishlist(Model model, HttpSession session) {
         Account currentUser = getSessionUser(session);
-        if (currentUser == null) return "redirect:/login";
+        if (currentUser == null) {
+			return "redirect:/login";
+		}
 
         // Gọi hàm findByAccountId vừa thêm vào Repository
         List<Like> likes = likeRepo.findByAccountId(currentUser.getId());
-        
+
         model.addAttribute("likes", likes);
         return "client/wishlist";
     }
@@ -54,7 +61,9 @@ public class LikeController {
     @ResponseBody
     public ResponseEntity<String> toggleWishlist(@PathVariable Integer productId, HttpSession session) {
         Account user = getSessionUser(session);
-        if (user == null) return ResponseEntity.ok("unauthorized");
+        if (user == null) {
+			return ResponseEntity.ok("unauthorized");
+		}
 
         Like existingLike = likeRepo.findByAccountIdAndProductId(user.getId(), productId);
 
@@ -63,7 +72,9 @@ public class LikeController {
             return ResponseEntity.ok("removed");
         } else {
             Products product = productRepo.findById(productId).orElse(null);
-            if (product == null) return ResponseEntity.badRequest().body("error");
+            if (product == null) {
+				return ResponseEntity.badRequest().body("error");
+			}
 
             Like like = new Like();
             like.setProduct(product);
@@ -79,7 +90,7 @@ public class LikeController {
     public String removeFromWishlist(@PathVariable Integer id, RedirectAttributes ra, HttpSession session) {
         Account user = getSessionUser(session);
         Like like = likeRepo.findById(id).orElse(null);
-        
+
         if (like != null && user != null && like.getAccount().getId().equals(user.getId())) {
             likeRepo.delete(like);
             ra.addFlashAttribute("message", "Đã xóa khỏi danh sách yêu thích!");
@@ -92,7 +103,9 @@ public class LikeController {
     @ResponseBody
     public ResponseEntity<List<Integer>> getMyLikedProductIds(HttpSession session) {
         Account user = getSessionUser(session);
-        if (user == null) return ResponseEntity.ok(Collections.emptyList());
+        if (user == null) {
+			return ResponseEntity.ok(Collections.emptyList());
+		}
 
         List<Integer> likedIds = likeRepo.findByAccountId(user.getId()).stream()
                 .filter(l -> l.getProduct() != null)

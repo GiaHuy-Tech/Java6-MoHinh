@@ -47,11 +47,17 @@ public class LocalShippingService {
         // ===== PHÍ THEO KHOẢNG CÁCH =====
         int baseFee;
 
-        if (km <= 5) baseFee = 20000;
-        else if (km <= 20) baseFee = 30000;
-        else if (km <= 50) baseFee = 40000;
-        else if (km <= 200) baseFee = 55000;
-        else baseFee = 70000;
+        if (km <= 5) {
+			baseFee = 20000;
+		} else if (km <= 20) {
+			baseFee = 30000;
+		} else if (km <= 50) {
+			baseFee = 40000;
+		} else if (km <= 200) {
+			baseFee = 55000;
+		} else {
+			baseFee = 70000;
+		}
 
         // ===== PHÍ THEO CÂN NẶNG =====
         int weightFee = 0;

@@ -1,12 +1,17 @@
 package com.example.demo.controllers;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.example.demo.model.Account;
 import com.example.demo.model.Orders;
 import com.example.demo.repository.OrdersRepository;
@@ -23,15 +28,15 @@ public class OrdersManaController {
     private MailService mailService;
 
     @GetMapping
-    public String list(Model model, 
+    public String list(Model model,
                        @RequestParam(name = "keywords", required = false) String keywords,
                        @RequestParam(name = "status", required = false) Integer status) {
-        
+
         List<Orders> list = ordersRepo.findAll();
 
         if (keywords != null && !keywords.trim().isEmpty()) {
             list = list.stream()
-                .filter(o -> (o.getAccount() != null && o.getAccount().getFullName().toLowerCase().contains(keywords.toLowerCase())) 
+                .filter(o -> (o.getAccount() != null && o.getAccount().getFullName().toLowerCase().contains(keywords.toLowerCase()))
                           || String.valueOf(o.getId()).contains(keywords))
                 .collect(Collectors.toList());
         }
@@ -48,20 +53,18 @@ public class OrdersManaController {
         model.addAttribute("ordersList", list);
         model.addAttribute("keywords", keywords);
         model.addAttribute("selectedStatus", status);
-        
+
         return "admin/orders-mana";
     }
 
     @PostMapping("/updateStatus")
     public String updateStatus(@RequestParam("id") Integer id, @RequestParam("status") int status) {
         Orders order = ordersRepo.findById(id).orElse(null);
-        if (order == null) return "redirect:/orders-mana";
+        
 
         // 1. Admin KHÔNG được phép chỉnh trạng thái sang 4 (Hoàn tất)
-        if (status == 4) return "redirect:/orders-mana";
-
         // 2. Nếu đơn đã Hoàn tất (4) hoặc Đã hủy (5), không cho phép đổi nữa
-        if (order.getStatus() == 4 || order.getStatus() == 5) {
+        if ((order == null) || (status == 4) || order.getStatus() == 4 || order.getStatus() == 5) {
             return "redirect:/orders-mana";
         }
 
@@ -84,7 +87,7 @@ public class OrdersManaController {
                 case 5 -> "Đã hủy";
                 default -> "Cập nhật";
             };
-            mailService.sendStatusMail(acc.getEmail(), "Cập nhật đơn hàng #" + order.getId(), 
+            mailService.sendStatusMail(acc.getEmail(), "Cập nhật đơn hàng #" + order.getId(),
                 "Đơn hàng của bạn đã chuyển sang trạng thái: " + statusText);
         }
 
@@ -94,7 +97,7 @@ public class OrdersManaController {
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Integer id, Model model) {
         Orders order = ordersRepo.findById(id).orElse(null);
-        
+
         if (order == null) {
             return "redirect:/orders-mana";
         }

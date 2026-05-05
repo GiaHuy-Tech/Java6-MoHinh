@@ -1,7 +1,17 @@
 package com.example.demo.model;
 
 import org.hibernate.annotations.Nationalized; // THÊM DÒNG NÀY
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -39,10 +49,10 @@ public class Address {
 
     @Nationalized
     @Column(columnDefinition = "nvarchar(255)")
-    private String ward; 
+    private String ward;
 
     @Column(name = "ward_code")
-    private String wardCode; 
+    private String wardCode;
 
     @Nationalized
     @Column(columnDefinition = "nvarchar(MAX)")
@@ -60,20 +70,40 @@ public class Address {
     @PrePersist
     @PreUpdate
     public void normalize() {
-        if (recipientName != null) recipientName = recipientName.trim();
-        if (recipientPhone != null) recipientPhone = recipientPhone.trim();
-        if (province != null) province = province.trim();
-        if (district != null) district = district.trim();
-        if (ward != null) ward = ward.trim();
-        if (detail != null) detail = detail.trim();
+        if (recipientName != null) {
+			recipientName = recipientName.trim();
+		}
+        if (recipientPhone != null) {
+			recipientPhone = recipientPhone.trim();
+		}
+        if (province != null) {
+			province = province.trim();
+		}
+        if (district != null) {
+			district = district.trim();
+		}
+        if (ward != null) {
+			ward = ward.trim();
+		}
+        if (detail != null) {
+			detail = detail.trim();
+		}
     }
 
     public String getFullAddress() {
         StringBuilder sb = new StringBuilder();
-        if (detail != null && !detail.isBlank()) sb.append(detail.trim());
-        if (ward != null && !ward.isBlank()) sb.append((sb.length() > 0 ? ", " : "") + ward.trim());
-        if (district != null && !district.isBlank()) sb.append((sb.length() > 0 ? ", " : "") + district.trim());
-        if (province != null && !province.isBlank()) sb.append((sb.length() > 0 ? ", " : "") + province.trim());
+        if (detail != null && !detail.isBlank()) {
+			sb.append(detail.trim());
+		}
+        if (ward != null && !ward.isBlank()) {
+			sb.append((sb.length() > 0 ? ", " : "") + ward.trim());
+		}
+        if (district != null && !district.isBlank()) {
+			sb.append((sb.length() > 0 ? ", " : "") + district.trim());
+		}
+        if (province != null && !province.isBlank()) {
+			sb.append((sb.length() > 0 ? ", " : "") + province.trim());
+		}
         return sb.length() > 0 ? sb.toString() : "Chưa có địa chỉ";
     }
 }

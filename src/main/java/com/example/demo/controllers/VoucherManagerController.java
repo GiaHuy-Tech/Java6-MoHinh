@@ -7,7 +7,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.model.Membership;
 import com.example.demo.model.Voucher;
@@ -32,7 +37,7 @@ public class VoucherManagerController {
             @RequestParam(name = "filterMembershipId", required = false) Integer filterMembershipId,
             @RequestParam(name = "status", required = false) String status,
             Model model) {
-        
+
         return loadPage(model, new Voucher(), keyword, discountType, filterMembershipId, status);
     }
 
@@ -101,14 +106,14 @@ public class VoucherManagerController {
         model.addAttribute("vouchers", list);
         model.addAttribute("memberships", memberships);
         model.addAttribute("voucher", voucher);
-        
+
         // Trả lại các tham số lọc về View để giữ trạng thái cho Form lọc
         model.addAttribute("keyword", keyword);
         model.addAttribute("discountType", discountType);
         model.addAttribute("filterMembershipId", filterMembershipId);
         model.addAttribute("status", status);
 
-        return "admin/voucher-list"; 
+        return "admin/voucher-list";
     }
 
     // 3. LƯU (THÊM HOẶC SỬA)
@@ -127,7 +132,7 @@ public class VoucherManagerController {
             Membership mem = membershipRepo.findById(membershipId).orElse(null);
             voucher.setMembership(mem);
         } else {
-            voucher.setMembership(null); 
+            voucher.setMembership(null);
         }
 
         // 3. XỬ LÝ TỰ ĐỘNG KÍCH HOẠT LẠI KHI GIA HẠN NGÀY
